@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GringoEstate – Real Estate sin corbata</title>
+  <!-- FAVICON: Ícono que aparece en la pestaña del navegador -->
+  <link rel="icon" type="image/png" href="isologo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
@@ -21,28 +23,31 @@
     header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}   
     .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem;}
     .hero img.isologo{ width: 100px; height: auto; margin: 0 auto 1.5rem auto; }
-    .hero h1{font-family:'Bebas Neue', sans-serif;letter-spacing:2px;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;color:#fff;margin-bottom:0.5rem;}
+    .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;color:#fff;margin-bottom:0.5rem;}
     .hero h1 span{color:var(--primary); letter-spacing: 2px;}
     .hero p{font-size:1.5rem;color:#e2e8f0;margin-bottom:2rem;line-height:1.4;font-family:'Bebas Neue', sans-serif; letter-spacing:1px;}
     .btn-primary{background:var(--primary);color:var(--dark);padding:.75rem 2rem;border-radius:50px;display:inline-block;transition:all .3s;font-weight:700;font-size:1.1rem;letter-spacing:1px;}
     .btn-primary:hover{background:#fff;color:var(--dark);transform:translateY(-3px);box-shadow:0 10px 20px rgba(0,0,0,0.2);}
-    nav{position:fixed;top:0;left:0;width:100%;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);z-index:100;border-bottom: 1px solid rgba(255,255,255,0.1);}
+    nav{position:fixed;top:0;left:0;width:100%;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);z-index:1000;border-bottom: 1px solid rgba(255,255,255,0.1);}
     nav a.logo{font-family:'Bebas Neue', sans-serif;font-weight:700;letter-spacing:1px;font-size:1.5rem;color:#fff;} 
     nav a.logo span {color: var(--primary);}
     nav ul{list-style:none;display:flex;gap:1.5rem;font-weight:700;}
     nav ul a{color:#fff;transition: color .2s;}
     nav ul a:hover{color:var(--primary);}
+    .nav-links {display: none;} /* Oculto por defecto en móvil */
+    .menu-button {display: block; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;}
     section{padding:4.5rem 1rem;max-width:1000px;margin:auto;}
     h2.section-title{font-family:'Bebas Neue', sans-serif;letter-spacing:1.5px;font-size:3rem;font-weight:700;margin-bottom:2rem;text-align:center;}
+    h2.section-title span {color: var(--primary); letter-spacing: 2px;}
     .about{display:flex; align-items:center; gap:3rem; flex-wrap:wrap;}
     .about-img{flex:1;min-width:250px;text-align:center;}
-    .about-img img{width:280px;height:280px;border-radius:50%;object-fit:cover;border:8px solid var(--primary);box-shadow: 0 10px 30px rgba(0,0,0,0.1);}
+    .about-img img{width:280px;height:280px;border-radius:50%;object-fit:cover;object-position: center top; border:8px solid var(--primary);box-shadow: 0 10px 30px rgba(0,0,0,0.1);}
     .about-text{flex:2;}
     .about-text p{color:var(--gray);line-height:1.8;margin-bottom:1rem;}
     #services, #ai-tools {background-color:var(--dark);color:#fff;}
     #services h2.section-title, #ai-tools h2.section-title {color:#fff;}
     .services-grid{display:grid;grid-template-columns: 1fr; gap:1.5rem;margin-top:2rem;}
-    .service-card{background:#111;padding:2rem;border-radius:10px;border:1px solid #333;transition:all .3s;}
+    .service-card{background:#111;padding:2rem;border-radius:10px;border:1px solid #333;transition:all .3s; display: block;}
     .service-card:hover{transform:translateY(-5px);border-color:var(--primary);} 
     .service-card h3{font-family:'Bebas Neue', sans-serif;font-size:1.75rem;margin-bottom:.75rem;color:var(--primary);} 
     .service-card p{color:#ccc;line-height:1.6;}
@@ -55,7 +60,6 @@
     .contact form{display:flex;flex-direction:column;gap:1rem;width:100%;max-width:600px;margin:2rem auto;}
     .contact input,.contact select,.contact textarea{padding:1rem;border:1px solid #ccc;border-radius:6px;font-size:1rem;width:100%;background-color: #fff; color: #000;}
     #property-details { display: none; flex-direction: column; gap: 1rem; }
-    /* Estilos para las Herramientas de IA */
     .ai-tool-card { background-color: #1a1a1a; padding: 2rem; border-radius: 10px; margin-top: 2rem; border: 1px solid #333;}
     .ai-tool-card textarea { background-color: #333; color: #fff; border-radius: 6px; padding: 1rem; width: 100%; min-height: 120px; }
     .ai-tool-card button { background-color: var(--primary); color: var(--dark); padding: .75rem 1.5rem; border-radius: 50px; transition: all .3s; font-weight: 700; border:0; cursor: pointer; }
@@ -63,25 +67,32 @@
     .ai-result { background-color: #111; border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: pre-wrap; line-height: 1.7; }
     .loader { width: 24px; height: 24px; border: 3px solid #FFF; border-bottom-color: transparent; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; margin-top: 1rem; display: none; }
     @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
+    .whatsapp-float { position: fixed; width: 60px; height: 60px; bottom: 20px; right: 20px; background-color: #25d366; color: #FFF; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 6px rgba(0,0,0,0.25); z-index: 1000; display: flex; align-items: center; justify-content: center; transition: transform 0.3s; }
+    .whatsapp-float:hover { transform: scale(1.1); }
     footer{background:var(--dark);color:#94a3b8;padding:3rem 1rem;text-align:center;font-size:1rem;}
     footer a:hover{text-decoration:underline;}
 
+    /* Media Queries para diseño responsivo */
     @media (min-width: 768px) {
       .services-grid, .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+      .menu-button { display: none; } /* Ocultar botón hamburguesa en pantallas grandes */
+      .nav-links { display: flex; } /* Mostrar menú normal en pantallas grandes */
     }
   </style>
 </head>
 <body>
   <nav>
     <a class="logo" href="#top">GRINGO<span>ESTATE</span></a>
-    <ul>
-      <li><a href="#about">Sobre Mí</a></li>
-      <li><a href="#services">Servicios</a></li>
-      <li><a href="#portfolio">Proyectos</a></li>
-      <li><a href="#ai-tools">Herramientas IA ✨</a></li>
-      <li><a href="#contact">Contacto</a></li>
-    </ul>
+    <div class="nav-links"> <!-- Contenedor para los links del menú -->
+      <ul>
+        <li><a href="#about">Sobre Mí</a></li>
+        <li><a href="#services">Servicios</a></li>
+        <li><a href="#portfolio">Proyectos</a></li>
+        <li><a href="#ai-tools">Herramientas IA ✨</a></li>
+        <li><a href="#contact">Contacto</a></li>
+      </ul>
+    </div>
+    <button class="menu-button" id="menu-toggle">☰</button>
   </nav>
 
   <header id="top">
@@ -105,68 +116,59 @@
   </section>
 
   <section id="services">
-    <h2 class="section-title">¿CÓMO PUEDO AYUDARTE?</h2>
+    <h2 class="section-title">SERVICIOS GRINGO<span>ESTATE</span></h2>
     <div class="services-grid">
-      <div class="service-card">
+      <a href="#contact" class="service-card">
         <h3>Venta de Propiedades</h3>
         <p>Estrategia 360° para vender tu propiedad al mejor precio de mercado. Marketing, negociación y cierre de operaciones.</p>
-      </div>
-      <div class="service-card">
+      </a>
+      <a href="https://ambbi.com.ar" target="_blank" class="service-card">
         <h3>Gestión de Renta Temporaria</h3>
         <p>Con la experiencia de Ambbi, maximizamos la rentabilidad de tu propiedad en Airbnb y otras plataformas. Nos encargamos de todo.</p>
-      </div>
-      <div class="service-card">
+      </a>
+      <a href="#contact" class="service-card">
         <h3>Inversión desde Pozo</h3>
         <p>Acceso a preventas exclusivas: +26 emprendimientos y +800 propiedades en cartera. Análisis de ROI para decisiones inteligentes.</p>
-      </div>
-      <div class="service-card">
+      </a>
+      <a href="#contact" class="service-card">
         <h3>Asesoría para Desarrolladores</h3>
         <p>Propuesta integral para maximizar el valor y la renta de tu proyecto, permitiéndote enfocarte en lo que mejor sabés: construir.</p>
-      </div>
+      </a>
     </div>
   </section>
   
-    <!-- =================================
-         NUEVA SECCIÓN: HERRAMIENTAS CON IA
-         ================================= -->
-    <section id="ai-tools">
-        <h2 class="section-title">HERRAMIENTAS CON IA ✨</h2>
-        <p style="text-align:center;max-width:600px;margin:-1rem auto 2rem;color:#ccc;line-height:1.6;">
-            Potenciá tus proyectos con estas herramientas exclusivas, diseñadas para darte una ventaja en el mercado.
+  <section id="ai-tools">
+    <h2 class="section-title">HERRAMIENTAS CON IA ✨</h2>
+    <p style="text-align:center;max-width:600px;margin:-1rem auto 2rem;color:#ccc;line-height:1.6;">
+        Potenciá tus proyectos con estas herramientas exclusivas, diseñadas para darte una ventaja en el mercado.
+    </p>
+    <div class="ai-tool-card">
+        <h3 style="color:var(--primary); font-size:1.75rem; margin-bottom: 1rem;">Generador de Descripciones de Propiedades</h3>
+        <p style="color:#ccc; margin-bottom:1rem;">Ingresá los datos clave de tu propiedad y creá una descripción profesional y atractiva en segundos.</p>
+        <textarea id="property-input" placeholder="Ej: 3 ambientes en Palermo, 75m2, balcón con vista abierta, muy luminoso, piso alto, cerca del subte D..."></textarea>
+        <div style="text-align:center; margin-top:1rem;">
+            <button id="generate-description-btn">Generar Descripción ✨</button>
+            <div id="loader-description" class="loader"></div>
+        </div>
+        <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div>
+    </div>
+    <div class="ai-tool-card">
+        <h3 style="color:var(--primary); font-size:1.75rem; margin-bottom: 1rem;">Análisis de Zonas y Valor M²</h3>
+        <p style="color:#ccc; margin-bottom:1rem;">¿Dudando entre dos barrios? ¿Querés saber el valor de referencia del m² en una zona? Pedí un análisis y obtené una respuesta clara.</p>
+        <textarea id="zones-input" placeholder="Ej: Comparar inversión en Recoleta vs. Colegiales O 'Valor del m² en Palermo'"></textarea>
+        <div style="text-align:center; margin-top:1rem;">
+            <button id="generate-analysis-btn">Generar Análisis ✨</button>
+            <div id="loader-analysis" class="loader"></div>
+        </div>
+        <div id="analysis-result" class="ai-result">El análisis generado aparecerá aquí...</div>
+    </div>
+    <div style="text-align:center; margin-top: 5rem; padding-top: 2rem;">
+        <h3 class="text-2xl font-bold mb-4" style="font-family:'Bebas Neue', sans-serif; color:var(--primary);">MÁS HERRAMIENTAS EN CONSTRUCCIÓN...</h3>
+        <p class="text-gray-400 max-w-2xl mx-auto">
+            El arsenal de GringoEstate seguirá creciendo. Pronto integraremos una <strong>Calculadora de Ajuste de Alquiler por IPC</strong>, un <strong>Asistente para Redactar Contratos</strong> y otras herramientas para darte una ventaja decisiva en el mercado.
         </p>
-
-        <!-- Herramienta 1: Generador de Descripciones -->
-        <div class="ai-tool-card">
-            <h3 style="color:var(--primary); font-size:1.75rem; margin-bottom: 1rem;">Generador de Descripciones de Propiedades</h3>
-            <p style="color:#ccc; margin-bottom:1rem;">Ingresá los datos clave de tu propiedad y creá una descripción profesional y atractiva en segundos.</p>
-            <textarea id="property-input" placeholder="Ej: 3 ambientes en Palermo, 75m2, balcón con vista abierta, muy luminoso, piso alto, cerca del subte D..."></textarea>
-            <div style="text-align:center; margin-top:1rem;">
-                <button id="generate-description-btn">Generar Descripción ✨</button>
-                <div id="loader-description" class="loader"></div>
-            </div>
-            <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div>
-        </div>
-
-        <!-- Herramienta 2: Analizador de Zonas y Valor M² -->
-        <div class="ai-tool-card">
-            <h3 style="color:var(--primary); font-size:1.75rem; margin-bottom: 1rem;">Análisis de Zonas y Valor M²</h3>
-            <p style="color:#ccc; margin-bottom:1rem;">¿Dudando entre dos barrios? ¿Querés saber el valor de referencia del m² en una zona? Pedí un análisis y obtené una respuesta clara.</p>
-            <textarea id="zones-input" placeholder="Ej: Comparar inversión en Recoleta vs. Colegiales O 'Valor del m² en Palermo'"></textarea>
-            <div style="text-align:center; margin-top:1rem;">
-                <button id="generate-analysis-btn">Generar Análisis ✨</button>
-                <div id="loader-analysis" class="loader"></div>
-            </div>
-            <div id="analysis-result" class="ai-result">El análisis generado aparecerá aquí...</div>
-        </div>
-        
-        <!-- Próximamente: Más Herramientas -->
-        <div style="text-align:center; margin-top: 5rem; padding-top: 2rem;"> <!-- Espaciado aumentado -->
-            <h3 class="text-2xl font-bold mb-4" style="font-family:'Bebas Neue', sans-serif; color:var(--primary);">OTRAS HERRAMIENTAS EN CONSTRUCCIÓN...</h3>
-            <p class="text-gray-400 max-w-2xl mx-auto">
-                El arsenal de GringoEstate seguirá creciendo. Pronto integraremos una <strong>Calculadora de Ajuste de Alquiler por IPC</strong>, un <strong>Asistente para Redactar Contratos</strong> y otras herramientas para darte una ventaja decisiva en el mercado.
-            </p>
-        </div>
-    </section>
+    </div>
+  </section>
 
   <section id="portfolio">
     <h2 class="section-title">Proyectos Destacados</h2>
@@ -193,12 +195,14 @@
   <section id="contact" class="contact">
     <h2 class="section-title">HABLEMOS</h2>
     <p style="color:var(--gray);max-width:600px;margin:-1rem auto 0;line-height:1.6;">Contame tu proyecto o propiedad y descubramos juntos cómo maximizar su potencial. Agendemos una llamada sin compromiso.</p>
-    <form id="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+    <!-- ¡IMPORTANTE! Reemplaza la URL de abajo con la tuya de Formspree para que el formulario funcione. -->
+    <form id="contact-form" action="https://formspree.io/f/mldnnkev" method="POST">
       <input type="text" name="name" placeholder="Tu Nombre" required>
       <input type="email" name="email" placeholder="Tu Email" required>
       <select name="interest" id="interest-select" required>
         <option value="">Estoy interesado/a en...</option>
         <option value="Vender mi propiedad">Vender mi propiedad</option>
+        <option value="Ayuda en la busqueda de mi proximo depto">Ayuda en la búsqueda de mi próximo depto</option>
         <option value="Potenciar mi Airbnb">Potenciar mi Airbnb</option>
         <option value="Invertir en proyectos">Invertir en proyectos</option>
         <option value="Asesoría para Desarrolladores">Asesoría para Desarrolladores</option>
@@ -224,6 +228,11 @@
     </p>
   </footer>
 
+  <!-- Botón Flotante de WhatsApp -->
+  <a href="https://wa.me/5491156106169" class="whatsapp-float" target="_blank">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width:28px; height:28px; fill:white;"><path d="M380.9 97.1C339.4 55.6 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.8 0-67.6-9.5-97.8-26.7l-7-4.1-72.5 19 19.3-71.1-4.5-7.4c-18.3-30.7-27.9-66.2-27.9-102.3 0-108.6 88.4-197 197-197s197 88.4 197 197-88.4 197-197 197zm83.7-118.2c-3.7-1.9-22.1-10.9-25.6-12.1-3.4-1.2-5.9-1.9-8.4 1.9-2.5 3.7-9.7 12.1-11.9 14.5-2.2 2.5-4.5 2.8-8.2 1-3.7-1.9-15.7-5.8-30-18.5-11.1-9.6-18.7-21.6-20.9-25.3-2.2-3.7-0.2-5.9 1.7-7.7 1.7-1.5 3.7-3.7 5.5-5.5 1.8-1.8 2.5-3.7 3.7-6.2 1.2-2.5 0.6-4.8-0.3-6.7-0.9-1.9-8.4-20.1-11.5-27.5-3.1-7.4-6.2-6.3-8.4-6.3-2.2 0-4.8 0-7.4 0-2.5 0-6.7 1.2-10.3 5.9-3.7 4.8-14.1 13.8-14.1 33.5 0 19.8 14.4 38.9 16.4 41.4 2 2.5 28.2 42.8 68.2 60.1 9.7 4.1 17.3 6.6 23.1 8.8 13.3 5.1 25.6 4.3 35.1 2.6 10.8-1.9 22.1-9 25.2-17.6 3.1-8.6 3.1-16 2.2-17.6-0.9-1.5-3.4-2.5-7.1-4.5z"/></svg>
+  </a>
+
   <script>
     // --- SCRIPT PARA FORMULARIO DINÁMICO ---
     const interestSelect = document.getElementById('interest-select');
@@ -236,35 +245,47 @@
       }
     });
 
+    // --- SCRIPT PARA MENU HAMBURGUESA ---
+    const menuToggle = document.getElementById('menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    menuToggle.addEventListener('click', () => {
+        if(navLinks.style.display === 'block') {
+            navLinks.style.display = 'none';
+        } else {
+            navLinks.style.display = 'block';
+            // Estilo para el menú desplegable
+            navLinks.style.position = 'absolute';
+            navLinks.style.top = '60px';
+            navLinks.style.right = '1rem';
+            navLinks.style.background = 'rgba(0,0,0,0.8)';
+            navLinks.style.borderRadius = '8px';
+            navLinks.style.padding = '1rem';
+        }
+    });
+     navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth < 768) {
+                navLinks.style.display = 'none';
+            }
+        });
+    });
+
+
     // --- SCRIPT PARA LAS HERRAMIENTAS CON GEMINI API ---
-    
-    // Función genérica para llamar a la API de Gemini
     async function callGemini(prompt, resultElement, loaderElement) {
         loaderElement.style.display = 'inline-block';
         resultElement.textContent = 'Generando...';
-        
         try {
-            const apiKey = ""; // La API Key se maneja por el entorno, no es necesaria aquí.
+            const apiKey = ""; 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-            
-            const payload = {
-                contents: [{
-                    parts: [{ text: prompt }]
-                }]
-            };
-
+            const payload = { contents: [{ parts: [{ text: prompt }] }] };
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-
-            if (!response.ok) {
-                throw new Error(`Error de red: ${response.statusText}`);
-            }
-
+            if (!response.ok) { throw new Error(`Error de red: ${response.statusText}`); }
             const result = await response.json();
-
             if (result.candidates && result.candidates[0].content.parts[0].text) {
                 resultElement.textContent = result.candidates[0].content.parts[0].text;
             } else {
@@ -272,18 +293,15 @@
             }
         } catch (error) {
             console.error('Error al llamar a la API de Gemini:', error);
-            resultElement.textContent = 'Ocurrió un error al generar el contenido. Por favor, revisa la consola para más detalles.';
+            resultElement.textContent = 'Ocurrió un error al generar el contenido.';
         } finally {
             loaderElement.style.display = 'none';
         }
     }
-
-    // Lógica para el Generador de Descripciones
     const generateDescBtn = document.getElementById('generate-description-btn');
     const propertyInput = document.getElementById('property-input');
     const descriptionResult = document.getElementById('description-result');
     const loaderDescription = document.getElementById('loader-description');
-
     generateDescBtn.addEventListener('click', () => {
         const userInput = propertyInput.value;
         if (!userInput.trim()) {
@@ -293,13 +311,10 @@
         const prompt = `Actúa como un experto en marketing inmobiliario en Buenos Aires, con un estilo "sin corbata", directo y profesional. Escribe una descripción atractiva y vendedora para una propiedad con los siguientes datos: "${userInput}". La descripción debe tener un título potente, un párrafo principal que destaque lo mejor y una lista final de 3 a 5 características clave.`;
         callGemini(prompt, descriptionResult, loaderDescription);
     });
-
-    // Lógica para el Analizador de Zonas y Valor M²
     const generateAnalysisBtn = document.getElementById('generate-analysis-btn');
     const zonesInput = document.getElementById('zones-input');
     const analysisResult = document.getElementById('analysis-result');
     const loaderAnalysis = document.getElementById('loader-analysis');
-
     generateAnalysisBtn.addEventListener('click', () => {
         const userInput = zonesInput.value;
         if (!userInput.trim()) {
@@ -310,6 +325,10 @@
         callGemini(prompt, analysisResult, loaderAnalysis);
     });
   </script>
+
+</body>
+</html>
+
 
 </body>
 </html>
