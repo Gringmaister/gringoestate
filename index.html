@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GringoEstate – Real Estate sin corbata</title>
   <!-- FAVICON: Ícono que aparece en la pestaña del navegador -->
-  <link rel="icon" type="image/png" href="isologo.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="isologo.png">
+  <link rel="apple-touch-icon" href="isologo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
@@ -43,10 +44,11 @@
     nav a.logo{font-family:'Bebas Neue', sans-serif;font-weight:700;letter-spacing:1px;font-size:1.5rem;color:#fff;} 
     nav a.logo span {color: var(--primary);}
     nav ul{list-style:none;font-weight:700;}
-    nav .nav-links ul { flex-direction: column; gap: 1rem; }
+    nav .nav-links-mobile { display: none; position: absolute; top: 70px; right: 1rem; background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); border-radius: 8px; padding: 1rem; }
+    nav .nav-links-mobile ul { flex-direction: column; gap: 1rem; }
     nav ul a{color:#fff;transition: color .2s;}
     nav ul a:hover{color:var(--primary);}
-    .nav-links {display: none;}
+    .nav-links-desktop {display: none;}
     .menu-button {display: block; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;}
     section{padding:4.5rem 1rem;max-width:1000px;margin:auto;}
     h2.section-title{font-family:'Bebas Neue', sans-serif;letter-spacing:1.5px;font-size:3rem;font-weight:700;margin-bottom:2rem;text-align:center;}
@@ -57,7 +59,7 @@
     .about-text{flex:2;}
     .about-text p{color:var(--gray);line-height:1.8;margin-bottom:1rem;}
     #services {
-      background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('local-gringoestate.png');
+      background-image: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('local-gringoestate.png');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -91,18 +93,27 @@
     footer{background:var(--dark);color:#94a3b8;padding:3rem 1rem;text-align:center;font-size:1rem;}
     footer a:hover{text-decoration:underline;}
 
-    @media (min-width: 768px) {
+    @media (min-width: 1024px) {
       .services-grid, .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
       .menu-button { display: none; }
-      .nav-links { display: block; }
-      nav .nav-links ul { flex-direction: row; gap: 1.5rem;}
+      .nav-links-desktop { display: block; }
+      .nav-links-desktop ul { display:flex; flex-direction: row; gap: 1.5rem;}
     }
   </style>
 </head>
 <body>
   <nav>
     <a class="logo" href="#top">GRINGO<span>ESTATE</span></a>
-    <div class="nav-links">
+    <div class="nav-links-desktop">
+      <ul>
+        <li><a href="#about">Sobre Mí</a></li>
+        <li><a href="#services">Servicios</a></li>
+        <li><a href="#portfolio">Proyectos</a></li>
+        <li><a href="#ai-tools">Herramientas IA ✨</a></li>
+        <li><a href="#contact">Contacto</a></li>
+      </ul>
+    </div>
+    <div class="nav-links-mobile" id="mobile-menu">
       <ul>
         <li><a href="#about">Sobre Mí</a></li>
         <li><a href="#services">Servicios</a></li>
@@ -264,24 +275,18 @@
 
     // --- SCRIPT PARA MENU HAMBURGUESA ---
     const menuToggle = document.getElementById('menu-toggle');
-    const navLinks = document.querySelector('.nav-links');
+    const mobileMenu = document.getElementById('mobile-menu');
     menuToggle.addEventListener('click', () => {
-        if(navLinks.style.display === 'block') {
-            navLinks.style.display = 'none';
+        if(mobileMenu.style.display === 'block') {
+            mobileMenu.style.display = 'none';
         } else {
-            navLinks.style.display = 'block';
-            navLinks.style.position = 'absolute';
-            navLinks.style.top = '60px';
-            navLinks.style.right = '1rem';
-            navLinks.style.background = 'rgba(0,0,0,0.8)';
-            navLinks.style.borderRadius = '8px';
-            navLinks.style.padding = '1rem';
+            mobileMenu.style.display = 'block';
         }
     });
-     navLinks.querySelectorAll('a').forEach(link => {
+     mobileMenu.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
-            if (window.innerWidth < 768) {
-                navLinks.style.display = 'none';
+            if (window.innerWidth < 1024) {
+                mobileMenu.style.display = 'none';
             }
         });
     });
