@@ -9,6 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <!-- Google Analytics - Reemplaza G-XXXXXXXXXX con tu ID de Medición -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
   <style>
     :root {
       --primary: #FFBF00; /* Gringo Yellow */
@@ -22,7 +30,7 @@
     header{height:100vh;background:url('hero-bg.jpg') center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;}
     header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}   
     .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem;}
-    .hero img.isologo{ width: 140px; height: auto; margin: 0 auto 1.5rem auto; } /* --- TAMAÑO DEL LOGO AUMENTADO --- */
+    .hero img.isologo{ width: 160px; height: auto; margin: 0 auto 0.5rem auto; } /* --- TAMAÑO Y ESPACIADO DEL LOGO AJUSTADO --- */
     .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;color:#fff;margin-bottom:0.5rem;}
     .hero h1 span{color:var(--primary); letter-spacing: 2px;}
     .hero p{font-size:1.5rem;color:#e2e8f0;margin-bottom:2rem;line-height:1.4;font-family:'Bebas Neue', sans-serif; letter-spacing:1px;}
@@ -44,10 +52,17 @@
     .about-img img{width:280px;height:280px;border-radius:50%;object-fit:cover;object-position: center top; border:8px solid var(--primary);box-shadow: 0 10px 30px rgba(0,0,0,0.1);}
     .about-text{flex:2;}
     .about-text p{color:var(--gray);line-height:1.8;margin-bottom:1rem;}
-    #services, #ai-tools {background-color:var(--dark);color:#fff;}
+    #services {
+      background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('local-gringoestate.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color:#fff;
+    }
+    #ai-tools {background-color:var(--dark);color:#fff;}
     #services h2.section-title, #ai-tools h2.section-title {color:#fff;}
     .services-grid{display:grid;grid-template-columns: 1fr; gap:1.5rem;margin-top:2rem;}
-    .service-card{background:#111;padding:2rem;border-radius:10px;border:1px solid #333;transition:all .3s; display: block;}
+    .service-card{background:rgba(17, 17, 17, 0.8); backdrop-filter: blur(5px); padding:2rem;border-radius:10px;border:1px solid #333;transition:all .3s; display: block;}
     .service-card:hover{transform:translateY(-5px);border-color:var(--primary);} 
     .service-card h3{font-family:'Bebas Neue', sans-serif;font-size:1.75rem;margin-bottom:.75rem;color:var(--primary);} 
     .service-card p{color:#ccc;line-height:1.6;}
@@ -72,18 +87,17 @@
     footer{background:var(--dark);color:#94a3b8;padding:3rem 1rem;text-align:center;font-size:1rem;}
     footer a:hover{text-decoration:underline;}
 
-    /* Media Queries para diseño responsivo */
     @media (min-width: 768px) {
       .services-grid, .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
-      .menu-button { display: none; } /* Ocultar botón hamburguesa en pantallas grandes */
-      .nav-links { display: flex; } /* Mostrar menú normal en pantallas grandes */
+      .menu-button { display: none; }
+      .nav-links { display: flex; }
     }
   </style>
 </head>
 <body>
   <nav>
     <a class="logo" href="#top">GRINGO<span>ESTATE</span></a>
-    <div class="nav-links"> <!-- Contenedor para los links del menú -->
+    <div class="nav-links">
       <ul>
         <li><a href="#about">Sobre Mí</a></li>
         <li><a href="#services">Servicios</a></li>
@@ -195,7 +209,6 @@
   <section id="contact" class="contact">
     <h2 class="section-title">HABLEMOS</h2>
     <p style="color:var(--gray);max-width:600px;margin:-1rem auto 0;line-height:1.6;">Contame tu proyecto o propiedad y descubramos juntos cómo maximizar su potencial. Agendemos una llamada sin compromiso.</p>
-    <!-- ¡IMPORTANTE! Reemplaza la URL de abajo con la tuya de Formspree para que el formulario funcione. -->
     <form id="contact-form" action="https://formspree.io/f/mldnnkev" method="POST">
       <input type="text" name="name" placeholder="Tu Nombre" required>
       <input type="email" name="email" placeholder="Tu Email" required>
@@ -225,10 +238,10 @@
       <a href="#" target="_blank">LinkedIn</a> &nbsp;&bull;&nbsp;
       <a href="https://twitter.com/Gringoestate" target="_blank">Twitter (X)</a> &nbsp;&bull;&nbsp;
       <a href="https://instagram.com/Gringoestate" target="_blank">Instagram</a>
+      <span id="visitor-counter" style="margin-left:1rem; color: #6c757d;"></span>
     </p>
   </footer>
 
-  <!-- Botón Flotante de WhatsApp -->
   <a href="https://wa.me/5491156106169" class="whatsapp-float" target="_blank">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width:28px; height:28px; fill:white;"><path d="M380.9 97.1C339.4 55.6 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.8 0-67.6-9.5-97.8-26.7l-7-4.1-72.5 19 19.3-71.1-4.5-7.4c-18.3-30.7-27.9-66.2-27.9-102.3 0-108.6 88.4-197 197-197s197 88.4 197 197-88.4 197-197 197zm83.7-118.2c-3.7-1.9-22.1-10.9-25.6-12.1-3.4-1.2-5.9-1.9-8.4 1.9-2.5 3.7-9.7 12.1-11.9 14.5-2.2 2.5-4.5 2.8-8.2 1-3.7-1.9-15.7-5.8-30-18.5-11.1-9.6-18.7-21.6-20.9-25.3-2.2-3.7-0.2-5.9 1.7-7.7 1.7-1.5 3.7-3.7 5.5-5.5 1.8-1.8 2.5-3.7 3.7-6.2 1.2-2.5 0.6-4.8-0.3-6.7-0.9-1.9-8.4-20.1-11.5-27.5-3.1-7.4-6.2-6.3-8.4-6.3-2.2 0-4.8 0-7.4 0-2.5 0-6.7 1.2-10.3 5.9-3.7 4.8-14.1 13.8-14.1 33.5 0 19.8 14.4 38.9 16.4 41.4 2 2.5 28.2 42.8 68.2 60.1 9.7 4.1 17.3 6.6 23.1 8.8 13.3 5.1 25.6 4.3 35.1 2.6 10.8-1.9 22.1-9 25.2-17.6 3.1-8.6 3.1-16 2.2-17.6-0.9-1.5-3.4-2.5-7.1-4.5z"/></svg>
   </a>
@@ -253,7 +266,6 @@
             navLinks.style.display = 'none';
         } else {
             navLinks.style.display = 'block';
-            // Estilo para el menú desplegable
             navLinks.style.position = 'absolute';
             navLinks.style.top = '60px';
             navLinks.style.right = '1rem';
@@ -270,6 +282,17 @@
         });
     });
 
+    // --- SCRIPT PARA CONTADOR DE VISITAS (VISUAL) ---
+    window.addEventListener('load', () => {
+        let count = localStorage.getItem('gringoestateVisitorCount');
+        count = count ? parseInt(count) : 0;
+        count++;
+        localStorage.setItem('gringoestateVisitorCount', count);
+        const counterElement = document.getElementById('visitor-counter');
+        if(counterElement){
+             counterElement.textContent = `Visita N°: ${count}`;
+        }
+    });
 
     // --- SCRIPT PARA LAS HERRAMIENTAS CON GEMINI API ---
     async function callGemini(prompt, resultElement, loaderElement) {
