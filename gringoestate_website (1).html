@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GringoEstate – Real Estate sin corbata</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #FFBF00;
+      --dark: #000000;
+      --light: #f8f9fa;
+      --gray: #495057;
+    }
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+      scroll-behavior: smooth;
+    }
+    body {
+      color: var(--dark);
+      background: var(--light);
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    header {
+      height: 100vh;
+      background: url('https://i.ibb.co/L8dZ8pG/Hola-Co-mo-esta-s-7-11-4-noches-Jeep-Renegade-1-1er-piso-playa-con-personal-Camioneta-25-000-total.jpg') center/cover no-repeat;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    header::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+    }
+    .hero {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      padding: 0 1rem;
+    }
+    .hero img.isologo {
+      width: 100px;
+      height: auto;
+      margin: 0 auto 1.5rem auto;
+    }
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.5rem,10vw,8rem);
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .hero h1 span {
+      color: var(--primary);
+      letter-spacing: 2px;
+    }
+    .hero p {
+      font-size: 1.5rem;
+      color: #e2e8f0;
+      margin-bottom: 2rem;
+      line-height: 1.4;
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 1px;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: var(--dark);
+      padding: .75rem 2rem;
+      border-radius: 50px;
+      display: inline-block;
+      transition: all .3s;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+    }
+    .btn-primary:hover {
+      background: #fff;
+      color: var(--dark);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,.5);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    nav a.logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-weight: 700;
+      letter-spacing: 1px;
+      font-size: 1.5rem;
+      color: #fff;
+    }
+    nav a.logo span {
+      color: var(--primary);
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+      font-weight: 700;
+    }
+    nav ul a {
+      color: #fff;
+      transition: color .2s;
+    }
+    nav ul a:hover {
+      color: var(--primary);
+    }
+    section {
+      padding: 4.5rem 1rem;
+      max-width: 1000px;
+      margin: auto;
+    }
+    h2.section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 1.5px;
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    footer {
+      background: var(--dark);
+      color: #94a3b8;
+      padding: 3rem 1rem;
+      text-align: center;
+      font-size: 1rem;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+    @media (min-width: 768px) {
+      .services-grid, .portfolio-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="logo" href="#top">GRINGO<span>ESTATE</span></a>
+    <ul>
+      <li><a href="#about">Sobre Mí</a></li>
+      <li><a href="#services">Servicios</a></li>
+      <li><a href="#portfolio">Proyectos</a></li>
+      <li><a href="#ai-tools">Herramientas IA ✨</a></li>
+      <li><a href="#contact">Contacto</a></li>
+    </ul>
+  </nav>
+
+  <header id="top">
+    <div class="hero">
+      <img src="images/isologo.jpg" alt="Isologo GringoEstate" class="isologo">
+      <h1>GRINGO<span>ESTATE</span></h1>
+      <p>LA POSTA INMOBILIARIA. SIN CORBATA.</p>
+      <a href="#contact" class="btn-primary">AGENDÁ UNA LLAMADA</a>
+    </div>
+  </header>
+</body>
+</html>
