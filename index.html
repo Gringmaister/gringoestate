@@ -45,7 +45,7 @@
     nav a.logo span {color: var(--primary);}
     nav ul{list-style:none;font-weight:700;}
     nav .nav-links-mobile { display: none; position: absolute; top: 70px; right: 1rem; background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); border-radius: 8px; padding: 1rem; }
-    nav .nav-links-mobile ul { flex-direction: column; gap: 1rem; }
+    nav .nav-links-mobile ul { flex-direction: column; gap: 1rem; align-items: flex-start;}
     nav ul a{color:#fff;transition: color .2s;}
     nav ul a:hover{color:var(--primary);}
     .nav-links-desktop {display: none;}
@@ -59,7 +59,7 @@
     .about-text{flex:2;}
     .about-text p{color:var(--gray);line-height:1.8;margin-bottom:1rem;}
     #services {
-      background-image: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('local-gringoestate.png');
+      background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('local-gringoestate.png');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -82,6 +82,7 @@
     .contact input,.contact select,.contact textarea{padding:1rem;border:1px solid #ccc;border-radius:6px;font-size:1rem;width:100%;background-color: #fff; color: #000;}
     #property-details { display: none; flex-direction: column; gap: 1rem; }
     .ai-tool-card { background-color: #1a1a1a; padding: 2rem; border-radius: 10px; margin-top: 2rem; border: 1px solid #333;}
+    .ai-tool-card h3 { text-align: center; }
     .ai-tool-card textarea { background-color: #333; color: #fff; border-radius: 6px; padding: 1rem; width: 100%; min-height: 120px; }
     .ai-tool-card button { background-color: var(--primary); color: var(--dark); padding: .75rem 1.5rem; border-radius: 50px; transition: all .3s; font-weight: 700; border:0; cursor: pointer; }
     .ai-tool-card button:hover { background-color: #fff; }
@@ -140,7 +141,7 @@
     </div>
     <div class="about-text">
         <h2 class="section-title" style="text-align:left;">SOY FRANCO GARBINI</h2>
-        <p>Deportista, entusiasta de la tecnología y apasionado del mundo inmobiliario. Hace 4 años renuncié a la seguridad del mundo corporativo (Banco Galicia) para subalquilar mi primer monoambiente. Una apuesta personal...</p>
+        <p>Deportista, entusiasta de la tecnología y apasionado del mundo inmobiliario. Hace 4 años renuncié a la seguridad del mundo corporativo (Banco Galicia) para subalquilar mi primer monoambiente. <br>Una apuesta personal...</p>
         <p>Hoy, esa apuesta se transformó en un sistema de negocios: socio en <strong>Baigun R&N</strong>, fundador de <strong>AMBBI</strong> (+500 reviews 5⭐️) y responsable de la comercialización de <strong>edificios completos</strong>. Combino datos, tecnología y un equipo ágil para entregar resultados reales, sin traje ni corbata.</p>
     </div>
   </section>
@@ -195,7 +196,7 @@
     <div style="text-align:center; margin-top: 5rem; padding-top: 2rem;">
         <h3 class="text-2xl font-bold mb-4" style="font-family:'Bebas Neue', sans-serif; color:var(--primary);">MÁS HERRAMIENTAS EN CONSTRUCCIÓN...</h3>
         <p class="text-gray-400 max-w-2xl mx-auto">
-            El arsenal de GringoEstate seguirá creciendo. Pronto integraremos una <strong>Calculadora de Ajuste de Alquiler por IPC</strong>, un <strong>Asistente para Redactar Contratos</strong> y otras herramientas para darte una ventaja decisiva en el mercado.
+            El arsenal de GringoEstate seguirá creciendo. Pronto integraremos una <strong>Calculadora de Ajuste de Alquiler por IPC</strong>, un <strong>Asistente para Redactar Contratos</strong> y otras herramientas para que tomes las mejores decisiones.
         </p>
     </div>
   </section>
@@ -228,6 +229,7 @@
     <form id="contact-form" action="https://formspree.io/f/mldnnkev" method="POST">
       <input type="text" name="name" placeholder="Tu Nombre" required>
       <input type="email" name="email" placeholder="Tu Email" required>
+      <input type="tel" name="phone" placeholder="Tu Celular" required>
       <select name="interest" id="interest-select" required>
         <option value="">Estoy interesado/a en...</option>
         <option value="Vender mi propiedad">Vender mi propiedad</option>
