@@ -501,25 +501,28 @@
       gsap.set(".hero-el", {y: 30});
       gsap.to(".hero-el", { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: "power3.out", delay: 0.2 });
 
-      const animateUp = (element, trigger) => {
-        gsap.from(element, {
-            opacity: 0,
-            y: 50,
-            duration: 0.8,
-            ease: 'power3.out',
-            stagger: 0.2,
-            scrollTrigger: {
-                trigger: trigger || element,
-                start: "top 85%",
-                toggleActions: "play none none none"
-            }
-        });
+      // --- CAMBIO: Nueva función de animación lateral ---
+      const animateFromSide = (element, trigger, direction = -1) => {
+          gsap.from(element, {
+              opacity: 0,
+              x: direction * 75, // Anima desde -75px o 75px
+              duration: 1,
+              ease: 'power3.out',
+              stagger: 0.2,
+              scrollTrigger: {
+                  trigger: trigger || element,
+                  start: "top 85%",
+                  toggleActions: "play none none none"
+              }
+          });
       };
       
-      animateUp(".about-text, .about-img");
-      animateUp(".portfolio-item", ".portfolio-grid");
-      animateUp(".ai-tool-card", "#ai-tools");
-      animateUp(".contact-wrapper > div", ".contact-wrapper");
+      animateFromSide(".about-text", ".about", 1);
+      animateFromSide(".about-img", ".about", -1);
+      animateFromSide(".portfolio-item", ".portfolio-grid");
+      animateFromSide(".ai-tool-card", "#ai-tools");
+      animateFromSide(".contact-info", ".contact-wrapper", -1);
+      animateFromSide(".contact-form-wrapper", ".contact-wrapper", 1);
 
       const nav = document.querySelector('nav');
       if(nav) {
@@ -583,7 +586,7 @@
         
         const scrollWidth = cardsContainer.offsetWidth - window.innerWidth;
         
-        gsap.set(horizontalSection, { height: scrollWidth + window.innerHeight + 'px' }); // Añadimos altura extra para la transición
+        gsap.set(horizontalSection, { height: scrollWidth + window.innerHeight + 'px' });
 
         horizontalScrollTween = gsap.to(cardsContainer, {
           x: -scrollWidth,
