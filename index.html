@@ -512,12 +512,10 @@
                             })
                             .catch(console.error);
                     } else {
-                        // Para Android u otros dispositivos sin este requisito
                         window.addEventListener('deviceorientation', handleOrientation);
                     }
                 };
                 
-                // Pedir permiso al primer toque
                 window.addEventListener('touchstart', requestGyroPermission, { once: true });
             }
         });
@@ -568,12 +566,17 @@
         const mobileMenu = document.getElementById('mobile-menu');
         const mobileLinks = mobileMenu.querySelectorAll('li');
         
-        gsap.set(mobileMenu, {autoAlpha: 0}); // Asegurar estado inicial para GSAP
+        gsap.set(mobileMenu, {autoAlpha: 0});
         
         const mobileMenuTimeline = gsap.timeline({ paused: true, reversed: true });
         mobileMenuTimeline
-            .to(mobileMenu, { autoAlpha: 1, pointerEvents: 'all', duration: 0.3, ease: 'power2.out' })
+            .to(mobileMenu, { autoAlpha: 1, duration: 0.3, ease: 'power2.out' })
+            .to(mobileMenu, { pointerEvents: 'all' }, '<')
             .from(mobileLinks, { x: -30, opacity: 0, stagger: 0.1, duration: 0.4, ease: 'power2.out' }, "-=0.2");
+
+        mobileMenuTimeline.eventCallback("onReverseComplete", () => {
+             gsap.set(mobileMenu, { pointerEvents: 'none' });
+        });
 
         menuToggle.addEventListener('click', () => {
             menuToggle.classList.toggle('open');
