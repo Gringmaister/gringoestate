@@ -36,49 +36,20 @@
       font-family: 'Roboto', sans-serif;
       scroll-behavior: smooth;
     }
-    body{color:var(--dark);background:var(--light); overflow-x: hidden;}
+    html, body {
+        overflow-x: hidden;
+    }
+    body{color:var(--dark);background:var(--light);}
     body.no-scroll { overflow: hidden; }
     a, button {cursor: pointer; text-decoration: none !important; border: none;}
 
-    /* --- ESTILOS DEL CURSOR --- */
-    .custom-cursor {
-        position: fixed;
-        left: 0;
-        top: 0;
-        pointer-events: none;
-        z-index: 9999;
-        opacity: 0; 
-        transition: opacity 0.3s, transform 0.3s;
-    }
-    .cursor-dot {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1);
-    }
-    #cursor-regular .cursor-dot {
-        border: 2px solid var(--primary);
-    }
-    #cursor-blend .cursor-dot {
-        background-color: white;
-        mix-blend-mode: difference;
-    }
-    @media (pointer: fine) {
-        .custom-cursor {
-            opacity: 1;
-        }
-    }
-    @media (pointer: coarse) {
-      .custom-cursor {
-        display: none;
-      }
-      .custom-cursor.touch-active {
-        display: block;
-        opacity: 1;
-      }
-    }
+    .custom-cursor { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 9999; opacity: 0; transition: opacity 0.3s, transform 0.3s; }
+    .cursor-dot { width: 32px; height: 32px; border-radius: 50%; transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
+    #cursor-regular .cursor-dot { border: 2px solid var(--primary); }
+    #cursor-blend .cursor-dot { background-color: white; mix-blend-mode: difference; }
+    @media (pointer: fine) { .custom-cursor { opacity: 1; } }
+    @media (pointer: coarse) { .custom-cursor { display: none; } .custom-cursor.touch-active { display: block; opacity: 1; } }
 
-    /* --- ESTILOS DE NAVEGACIÓN Y HERO --- */
     header{height:100vh;background:url('hero-bg.jpg') center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff; perspective: 1000px;}
     header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}  
     .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem; transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);}
@@ -114,8 +85,16 @@
     .menu-button.open .bar2 {opacity: 0;}
     .menu-button.open .bar3 {transform: rotate(-45deg) translate(5px, -6px);}
 
-    section{padding:4.5rem 1.5rem;max-width:1200px;margin:auto;}
-    h2.section-title{font-family:'Bebas Neue', sans-serif;letter-spacing:1.5px;font-size:3rem;font-weight:700;margin-bottom:2rem;text-align:center;}
+    section{padding:4.5rem 1.5rem;max-width:1200px;margin: 0 auto;}
+    
+    /* --- SECCIÓN FULL-WIDTH --- */
+    .section-full-width {
+        max-width: none;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    h2.section-title{font-family:'Bebas Neue', sans-serif;letter-spacing:1.5px;font-size:3rem;font-weight:700;margin-bottom:2rem;text-align:center; padding: 0 1.5rem;}
     h2.section-title span {color: var(--primary); letter-spacing: 2px;}
 
     .about{display:flex; align-items:center; gap:3rem; flex-wrap:wrap;}
@@ -128,10 +107,8 @@
     #ai-tools, #contact { background-color: var(--dark-bg); }
     #contact h2.section-title {color:var(--primary);}
 
-    /* --- SECCIÓN DE SERVICIOS (MODIFICADA) --- */
-    #services-stacked { background-color: var(--dark); color: #fff; overflow: hidden; padding: 4.5rem 0; position: relative; }
-    #services-stacked h2.section-title { color: #fff; margin-bottom: 1rem; }
-    #services-stacked p.subtitle { text-align: center; max-width: 700px; margin: 0 auto 2rem; padding: 0 1rem; color: #ccc; line-height: 1.6; z-index: 2; position: relative; }
+    #services-stacked { background-color: var(--dark); color: #fff; overflow: hidden; padding-top: 4.5rem; padding-bottom: 4.5rem; position: relative; }
+    #services-stacked p.subtitle { text-align: center; max-width: 700px; margin: -1rem auto 2rem; padding: 0 1rem; color: #ccc; line-height: 1.6; z-index: 2; position: relative; }
     .horizontal-scroll-wrapper { position: sticky; top: 0; display: flex; align-items: center; height: 100vh; width: 100%; overflow: hidden; justify-content: flex-start; }
     .cards-container { display: flex; gap: clamp(2rem, 5vw, 4rem); padding: 0 clamp(1rem, 10vw, 8rem); }
 
@@ -278,65 +255,287 @@
       </div>
     </section>
 
-    <section id="services-stacked">
+    <section id="services-stacked" class="section-full-width">
       <h2 class="section-title" data-cursor-text="true">NUESTROS <span>SERVICIOS</span></h2>
       <p class="subtitle" data-cursor-text="true">
         Descubrí cómo GringoEstate transforma el Real Estate con soluciones innovadoras y un enfoque directo.
       </p>
       <div class="horizontal-scroll-wrapper">
         <div class="cards-container">
-          <!-- Las 8 tarjetas de servicio van aquí. El contenido es idéntico al de la versión anterior -->
+          
+          <!-- Card 1 -->
+          <div class="service-card-stacked">
+            <img src="https://images.unsplash.com/photo-1588880331179-b0b53a31d7ad?q=80&w=2070&auto=format&fit=crop" alt="Tasación de propiedad" class="card-image">
+            <div class="card-content-initial">
+              <h3 data-cursor-text="true">QUIERO TASAR <span>MI PROPIEDAD</span></h3>
+              <p class="short-desc" data-cursor-text="true">Tasación profesional, gratuita y sin compromiso.</p>
+              <button class="btn-toggle-expand" data-cursor-text="true">Ver más</button>
+            </div>
+            <div class="card-full-details">
+              <h3>QUIERO TASAR MI PROPIEDAD</h3>
+              <div class="card-full-content-scroll">
+                <p>Tasación profesional, gratuita y sin compromiso.</p>
+                <ul>
+                  <li>✅ En 48hs te entregamos una carpeta formal con análisis de mercado.</li>
+                  <li>✅ Datos claros y documentación respaldatoria.</li>
+                </ul>
+                <p class="card-highlight">Conocé el verdadero valor de tu activo.</p>
+              </div>
+              <div class="card-footer-cta">
+                <a href="https://gringo.estate#contact" class="btn-card">Solicitar Tasación</a>
+                <button class="btn-toggle-collapse">Cerrar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="service-card-stacked">
+            <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1973&auto=format&fit=crop" alt="Venta de propiedad" class="card-image">
+            <div class="card-content-initial">
+              <h3 data-cursor-text="true">¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3>
+              <p class="short-desc" data-cursor-text="true">Nos comprometemos con la venta de tu propiedad en 90 días.</p>
+              <button class="btn-toggle-expand" data-cursor-text="true">Ver más</button>
+            </div>
+            <div class="card-full-details">
+              <h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3>
+              <div class="card-full-content-scroll">
+                <p>Trabajamos únicamente con exclusividad para darle a tu propiedad la atención que merece, con un objetivo claro: la vendemos en 90 días.</p>
+                <h4>Nuestra estrategia 360° incluye:</h4>
+                <ul>
+                  <li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li>
+                  <li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li>
+                  <li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li>
+                  <li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li>
+                </ul>
+                <p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p>
+              </div>
+              <div class="card-footer-cta">
+                <a href="https://gringo.estate#contact" class="btn-card">Quiero Vender</a>
+                <button class="btn-toggle-collapse">Cerrar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="service-card-stacked">
+            <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1974&auto=format&fit=crop" alt="Alquiler temporario" class="card-image">
+            <div class="card-content-initial">
+              <h3 data-cursor-text="true">POTENCIÁ TU <span>ALQUILER TEMPORARIO</span></h3>
+              <p class="short-desc" data-cursor-text="true">Transformamos tu propiedad en un negocio de alta rentabilidad.</p>
+              <button class="btn-toggle-expand" data-cursor-text="true">Ver más</button>
+            </div>
+            <div class="card-full-details">
+              <h3>POTENCIÁ TU ALQUILER TEMPORARIO</h3>
+              <div class="card-full-content-scroll">
+                <p>Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p>
+                <h4>Nuestro servicio "llave en mano" incluye:</h4>
+                <ul>
+                  <li>✅ Asesoría de home staging gratuita y puesta a punto.</li>
+                  <li>✅ Ejecución de amoblamiento a través de nuestro equipo de arquitectura y red de proveedores.</li>
+                  <li>✅ Publicación profesional en todas las plataformas para un máximo impacto.</li>
+                  <li>✅ Gestión integral (sistemas, anfitrión, limpieza) para maximizar tus ingresos y darte tranquilidad.</li>
+                </ul>
+                <p class="card-alert">⚠️ Únicamente tomamos propiedades modernas con opción de self check-in. Para otras unidades, ofrecemos nuestro servicio de alquiler flex o tradicional.</p>
+                <p class="card-highlight">Delegá la gestión, disfrutá los resultados.</p>
+              </div>
+              <div class="card-footer-cta">
+                <a href="https://ambbi.com.ar" target="_blank" rel="noopener noreferrer" class="btn-card">Conocer AMBBI</a>
+                <button class="btn-toggle-collapse">Cerrar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="service-card-stacked">
+            <img src="https://images.unsplash.com/photo-1582450874452-4a1649c63c32?q=80&w=1974&auto=format&fit=crop" alt="Gestión de alquiler" class="card-image">
+            <div class="card-content-initial">
+              <h3 data-cursor-text="true">GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3>
+              <p class="short-desc" data-cursor-text="true">Para propietarios que buscan una renta segura y sin complicaciones.</p>
+              <button class="btn-toggle-expand" data-cursor-text="true">Ver más</button>
+            </div>
+            <div class="card-full-details">
+              <h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3>
+              <div class="card-full-content-scroll">
+                <p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p>
+                <h4>Alquiler Flex (1 a 12 meses):</h4>
+                <ul>
+                  <li>✅ Ideal para propiedades amobladas.</li>
+                  <li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li>
+                  <li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li>
+                </ul>
+                <h4>Alquiler Tradicional (2 años):</h4>
+                <ul>
+                  <li>✅ La opción clásica para una renta estable y predecible.</li>
+                  <li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li>
+                  <li>✅ Administración integral de pagos y seguimiento del contrato.</li>
+                </ul>
+                <p class="card-highlight">Tu propiedad, en buenas manos.</p>
+              </div>
+              <div class="card-footer-cta">
+                <a href="https://gringo.estate#contact" class="btn-card">Consultar por Gestión</a>
+                <button class="btn-toggle-collapse">Cerrar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="service-card-stacked">
+            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070&auto=format&fit=crop" alt="Inversión desde pozo" class="card-image">
+            <div class="card-content-initial">
+              <h3 data-cursor-text="true">INVERTÍ <span>DESDE POZO</span></h3>
+              <p class="short-desc" data-cursor-text="true">Acceso a oportunidades de inversión únicas.</p>
+              <button class="btn-toggle-expand" data-cursor-text="true">Ver más</button>
+            </div>
+            <div class="card-full-details">
+              <h3>INVERTÍ DESDE POZO</h3>
+              <div class="card-full-content-scroll">
+                <p>Gracias a nuestra alianza estratégica con Baigun R&N, te ofrezco acceso a oportunidades de inversión únicas.</p>
+                <ul>
+                  <li>✅ +26 desarrollos en exclusiva que no encontrarás en otro lado.</li>
+                  <li>✅ Análisis de ROI y proyecciones claras para una decisión informada.</li>
+                  <li>✅ Acompañamiento en todo el proceso, desde la firma hasta la entrega.</li>
+                </ul>
+                <p class="card-highlight">Invertí de forma inteligente en los mejores proyectos de la ciudad.</p>
+              </div>
+              <div class="card-footer-cta">
+                <a href="https://gringo.estate#contact" class="btn-card">Ver Oportunidades</a>
+                <button class="btn-toggle-collapse">Cerrar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 6 -->
+          <div class="service-card-stacked">
+            <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop" alt="Desarrolladores inmobiliarios" class="card-image">
+            <div class="card-content-initial">
+              <h3 data-cursor-text="true">¿SOS <span>DESARROLLADOR?</span></h3>
+              <p class="short-desc" data-cursor-text="true">Una alianza estratégica, no una inmobiliaria más.</p>
+              <button class="btn-toggle-expand" data-cursor-text="true">Ver más</button>
+            </div>
+            <div class="card-full-details">
+              <h3>¿SOS DESARROLLADOR?</h3>
+              <div class="card-full-content-scroll">
+                <p>Una alianza estratégica, no una inmobiliaria más. Nos convertimos en tu brazo comercial para que vos te enfoques en construir.</p>
+                <ul>
+                  <li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li>
+                  <li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar la marca de tu proyecto.</li>
+                  <li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato, gestionando la renta temporaria para que tu proyecto se financie solo mientras se vende.</li>
+                </ul>
+                <p class="card-highlight">Dejanos la comercialización a nosotros.</p>
+              </div>
+              <div class="card-footer-cta">
+                <a href="https://gringo.estate#contact" class="btn-card">Hablemos de tu Proyecto</a>
+                <button class="btn-toggle-collapse">Cerrar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 7 -->
+          <div class="service-card-stacked">
+            <img src="https://images.unsplash.com/photo-1600585152220-90363fe7e115?q=80&w=2070&auto=format&fit=crop" alt="Personal shopper inmobiliario" class="card-image">
+            <div class="card-content-initial">
+              <h3 data-cursor-text="true">PERSONAL SHOPPER <span>INMOBILIARIO</span></h3>
+              <p class="short-desc" data-cursor-text="true">Un servicio exclusivo para compradores que valoran su tiempo.</p>
+              <button class="btn-toggle-expand" data-cursor-text="true">Ver más</button>
+            </div>
+            <div class="card-full-details">
+              <h3>PERSONAL SHOPPER INMOBILIARIO</h3>
+              <div class="card-full-content-scroll">
+                <p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p>
+                <ul>
+                  <li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li>
+                  <li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li>
+                  <li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li>
+                </ul>
+                <p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p>
+                <p class="card-highlight">Asesorate con profesionales. Delegá la búsqueda para que una de las decisiones más importantes de tu vida, sea la correcta.</p>
+              </div>
+              <div class="card-footer-cta">
+                <a href="https://gringo.estate#contact" class="btn-card">Solicitar Personal Shopper</a>
+                <button class="btn-toggle-collapse">Cerrar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 8 -->
+          <div class="service-card-stacked">
+            <img src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=2069&auto=format&fit=crop" alt="Locales comerciales y oficinas" class="card-image">
+            <div class="card-content-initial">
+              <h3 data-cursor-text="true">LOCALES COMERCIALES <span>Y OFICINAS</span></h3>
+              <p class="short-desc" data-cursor-text="true">Servicio especializado para marcas, franquicias e inversores.</p>
+              <button class="btn-toggle-expand" data-cursor-text="true">Ver más</button>
+            </div>
+            <div class="card-full-details">
+              <h3>LOCALES COMERCIALES Y OFICINAS</h3>
+              <div class="card-full-content-scroll">
+                <p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p>
+                <ul>
+                  <li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li>
+                  <li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li>
+                  <li>✅ Asesoramiento integral en contratos comerciales y negociación.</li>
+                </ul>
+                <p class="card-highlight">Llevá tu negocio al siguiente nivel.</p>
+              </div>
+              <div class="card-footer-cta">
+                <a href="https://gringo.estate#contact" class="btn-card">Encontrar mi Local</a>
+                <button class="btn-toggle-collapse">Cerrar</button>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
     
-    <section id="portfolio">
-        <h2 class="section-title" data-cursor-text="true">Proyectos Destacados</h2>
-        <div class="portfolio-grid">
-            <div class="portfolio-item"> <img src="proyecto-ambar.jpg" alt="Fachada del proyecto Ámbar en Recoleta" /> <div class="portfolio-content"> <span data-cursor-text="true">Ámbar · Recoleta (15 Unidades)</span> <div class="view-more">Ver más →</div> </div> </div>
-            <div class="portfolio-item"> <img src="proyecto-charlone.jpg" alt="Render de la Torre Charlone en Colegiales" /> <div class="portfolio-content"> <span data-cursor-text="true">Torre Charlone · Colegiales</span> <div class="view-more">Ver más →</div> </div> </div>
-            <div class="portfolio-item"> <img src="proyecto-nunez.jpg" alt="Exterior del proyecto Casona en Núñez" /> <div class="portfolio-content"> <span data-cursor-text="true">Casona · Núñez</span> <div class="view-more">Ver más →</div> </div> </div>
-            <div class="portfolio-item"> <img src="proyecto-palermo.jpg" alt="Render del proyecto Concepción Live en Palermo" /> <div class="portfolio-content"> <span data-cursor-text="true">Concepción Live · Palermo</span> <div class="view-more">Ver más →</div> </div> </div>
+    <section id="portfolio" class="section-full-width" style="background-color: var(--light); padding-top: 4.5rem; padding-bottom: 4.5rem;">
+        <h2 class="section-title" style="color: var(--dark);" data-cursor-text="true">Proyectos <span>Destacados</span></h2>
+        <div class="portfolio-grid" style="max-width: 1200px; margin: auto; padding: 0 1.5rem;">
+            <div class="portfolio-item"> <img src="https://images.unsplash.com/photo-1512916194211-3f2b7f5f7de3?q=80&w=2070&auto=format&fit=crop" alt="Fachada del proyecto Ámbar en Recoleta" /> <div class="portfolio-content"> <span data-cursor-text="true">Ámbar · Recoleta (15 Unidades)</span> <div class="view-more">Ver más →</div> </div> </div>
+            <div class="portfolio-item"> <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?q=80&w=1974&auto=format&fit=crop" alt="Render de la Torre Charlone en Colegiales" /> <div class="portfolio-content"> <span data-cursor-text="true">Torre Charlone · Colegiales</span> <div class="view-more">Ver más →</div> </div> </div>
+            <div class="portfolio-item"> <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=2070&auto=format&fit=crop" alt="Exterior del proyecto Casona en Núñez" /> <div class="portfolio-content"> <span data-cursor-text="true">Casona · Núñez</span> <div class="view-more">Ver más →</div> </div> </div>
+            <div class="portfolio-item"> <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=2070&auto=format&fit=crop" alt="Render del proyecto Concepción Live en Palermo" /> <div class="portfolio-content"> <span data-cursor-text="true">Concepción Live · Palermo</span> <div class="view-more">Ver más →</div> </div> </div>
         </div>
     </section>
     
-    <section id="ai-tools">
-        <h2 class="section-title" data-cursor-text="true">HERRAMIENTAS CON IA ✨</h2>
+    <section id="ai-tools" class="section-full-width">
+        <h2 class="section-title" data-cursor-text="true">HERRAMIENTAS CON <span>IA ✨</span></h2>
         <p style="text-align:center;max-width:600px;margin:-1rem auto 2rem;color:#ccc;line-height:1.6; padding: 0 1rem;" data-cursor-text="true">
             Potenciá tus proyectos con estas herramientas exclusivas, diseñadas para darte una ventaja en el mercado.
         </p>
-        <div class="ai-tool-card">
-            <h3 data-cursor-text="true">Generador de Descripciones de Propiedades</h3>
-            <p data-cursor-text="true">Ingresá los datos clave de tu propiedad y creá una descripción profesional y atractiva en segundos.</p>
-            <textarea id="property-input" placeholder="Ej: 3 ambientes en Palermo, 75m2, balcón con vista abierta, muy luminoso, piso alto, cerca del subte D..."></textarea>
-            <div style="text-align:center; margin-top:1rem;">
-                <button id="generate-description-btn" data-cursor-text="true">Generar Descripción ✨</button>
-                <div id="loader-description" class="loader"></div>
+        <div style="max-width: 1200px; margin: auto; padding: 0 1.5rem;">
+            <div class="ai-tool-card">
+                <h3 data-cursor-text="true">Generador de Descripciones de Propiedades</h3>
+                <p data-cursor-text="true">Ingresá los datos clave de tu propiedad y creá una descripción profesional y atractiva en segundos.</p>
+                <textarea id="property-input" placeholder="Ej: 3 ambientes en Palermo, 75m2, balcón con vista abierta, muy luminoso, piso alto, cerca del subte D..."></textarea>
+                <div style="text-align:center; margin-top:1rem;">
+                    <button id="generate-description-btn" data-cursor-text="true">Generar Descripción ✨</button>
+                    <div id="loader-description" class="loader"></div>
+                </div>
+                <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div>
             </div>
-            <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div>
-        </div>
-        <div class="ai-tool-card">
-            <h3 data-cursor-text="true">Análisis de Zonas y Valor M²</h3>
-            <p data-cursor-text="true">¿Dudando entre dos barrios? ¿Querés saber el valor de referencia del m² en una zona? Pedí un análisis y obtené una respuesta clara.</p>
-            <textarea id="zones-input" placeholder="Ej: Comparar inversión en Recoleta vs. Colegiales O 'Valor del m² en Palermo'"></textarea>
-            <div style="text-align:center; margin-top:1rem;">
-                <button id="generate-analysis-btn" data-cursor-text="true">Generar Análisis ✨</button>
-                <div id="loader-analysis" class="loader"></div>
+            <div class="ai-tool-card">
+                <h3 data-cursor-text="true">Análisis de Zonas y Valor M²</h3>
+                <p data-cursor-text="true">¿Dudando entre dos barrios? ¿Querés saber el valor de referencia del m² en una zona? Pedí un análisis y obtené una respuesta clara.</p>
+                <textarea id="zones-input" placeholder="Ej: Comparar inversión en Recoleta vs. Colegiales O 'Valor del m² en Palermo'"></textarea>
+                <div style="text-align:center; margin-top:1rem;">
+                    <button id="generate-analysis-btn" data-cursor-text="true">Generar Análisis ✨</button>
+                    <div id="loader-analysis" class="loader"></div>
+                </div>
+                <div id="analysis-result" class="ai-result">El análisis generado aparecerá aquí...</div>
             </div>
-            <div id="analysis-result" class="ai-result">El análisis generado aparecerá aquí...</div>
-        </div>
-        <div style="text-align:center; margin-top: 5rem; padding-top: 2rem;">
-            <h3 data-cursor-text="true" style="font-family:'Bebas Neue', sans-serif; color:var(--primary);">MÁS HERRAMIENTAS EN CONSTRUCCIÓN...</h3>
-            <p data-cursor-text="true" style="padding: 0 1rem; color: #aaa;">
-                El arsenal de GringoEstate seguirá creciendo. Pronto integraremos una <strong>Calculadora de Ajuste de Alquiler por IPC</strong>, un <strong>Asistente para Redactar Contratos</strong> y otras herramientas para que tomes las mejores decisiones.
-            </p>
+            <div style="text-align:center; margin-top: 5rem; padding-top: 2rem;">
+                <h3 data-cursor-text="true" style="font-family:'Bebas Neue', sans-serif; color:var(--primary);">MÁS HERRAMIENTAS EN CONSTRUCCIÓN...</h3>
+                <p data-cursor-text="true" style="padding: 0 1rem; color: #aaa;">
+                    El arsenal de GringoEstate seguirá creciendo. Pronto integraremos una <strong>Calculadora de Ajuste de Alquiler por IPC</strong>, un <strong>Asistente para Redactar Contratos</strong> y otras herramientas para que tomes las mejores decisiones.
+                </p>
+            </div>
         </div>
     </section>
 
-    <section id="contact" class="contact">
-        <div class="contact-wrapper">
+    <section id="contact" class="section-full-width">
+        <div class="contact-wrapper" style="max-width: 1200px; margin: auto; padding: 0 1.5rem;">
             <div class="contact-text">
-                <h2 class="section-title" data-cursor-text="true">HABLEMOS</h2>
+                <h2 class="section-title" data-cursor-text="true" style="text-align: left;">HABLEMOS</h2>
                 <p data-cursor-text="true">Contame tu proyecto o propiedad y descubramos juntos cómo maximizar su potencial. Agendemos una llamada sin compromiso.</p>
             </div>
             <form id="contact-form" action="https://formspree.io/f/mldnnkev" method="POST">
@@ -386,27 +585,18 @@
 
       gsap.registerPlugin(ScrollTrigger);
 
-      // --- LÓGICA DEL CURSOR CON INVERSIÓN ---
+      // --- CURSOR LOGIC ---
       const cursorRegular = document.getElementById('cursor-regular');
       const cursorBlend = document.getElementById('cursor-blend');
       const textElements = document.querySelectorAll('[data-cursor-text="true"]');
 
       const moveCursors = (e) => {
-          gsap.to([cursorRegular, cursorBlend], {
-              x: e.clientX,
-              y: e.clientY,
-              duration: 0.4,
-              ease: 'power2.out',
-              xPercent: -50,
-              yPercent: -50
-          });
+          gsap.to([cursorRegular, cursorBlend], { x: e.clientX, y: e.clientY, duration: 0.4, ease: 'power2.out', xPercent: -50, yPercent: -50 });
       };
-
       const handleTextEnter = () => {
           gsap.to(cursorRegular.querySelector('.cursor-dot'), { scale: 0, duration: 0.3 });
           gsap.to(cursorBlend.querySelector('.cursor-dot'), { scale: 1, duration: 0.3 });
       };
-
       const handleTextLeave = () => {
           gsap.to(cursorRegular.querySelector('.cursor-dot'), { scale: 1, duration: 0.3 });
           gsap.to(cursorBlend.querySelector('.cursor-dot'), { scale: 0, duration: 0.3 });
@@ -420,11 +610,9 @@
           });
           if(cursorBlend) gsap.set(cursorBlend.querySelector('.cursor-dot'), { scale: 0 });
       }
-
       if (window.matchMedia("(pointer: coarse)").matches) {
           const blendCursorMobile = document.getElementById('cursor-blend');
           let touchTimer;
-          
           window.addEventListener('touchstart', (e) => {
               touchTimer = setTimeout(() => {
                   const touch = e.touches[0];
@@ -434,7 +622,6 @@
                   gsap.fromTo(blendCursorMobile.querySelector('.cursor-dot'), {scale: 0}, {scale: 1, duration: 0.3});
               }, 100);
           });
-
           window.addEventListener('touchmove', (e) => {
               if (blendCursorMobile && blendCursorMobile.classList.contains('touch-active')) {
                   const touch = e.touches[0];
@@ -442,7 +629,6 @@
                   gsap.to(blendCursorMobile, { x: touch.clientX, y: touch.clientY, duration: 0.2, ease: 'power1.out' });
               }
           });
-
           const endTouch = () => {
               clearTimeout(touchTimer);
               if (blendCursorMobile) {
@@ -453,12 +639,11 @@
                 });
               }
           };
-
           window.addEventListener('touchend', endTouch);
           window.addEventListener('touchcancel', endTouch);
       }
 
-      // --- ANIMACIONES GENERALES ---
+      // --- GENERAL ANIMATIONS ---
       document.querySelectorAll('.about-text, .about-img, .ai-tool-card, .portfolio-item, .contact-wrapper').forEach((elem, index) => {
           gsap.from(elem, { opacity: 0, x: (index % 2 === 0) ? -75 : 75, duration: 1, ease: "power2.out", scrollTrigger: { trigger: elem, start: "top 90%", toggleActions: "play none none none" }});
       });
@@ -469,12 +654,11 @@
       gsap.set(".hero-el", {y: 30});
       gsap.to(".hero-el", { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: "power3.out", delay: 0.2 });
 
-      // --- NAVEGACIÓN ---
+      // --- NAVIGATION ---
       const nav = document.querySelector('nav');
       if(nav) {
           ScrollTrigger.create({ start: 'top -80', end: 99999, toggleClass: { className: 'nav-scrolled', targets: nav } });
       }
-
       const interestSelect = document.getElementById('interest-select');
       const propertyDetails = document.getElementById('property-details');
       if (interestSelect && propertyDetails) {
@@ -510,7 +694,7 @@
         });
       }
 
-      // --- LÓGICA DE SCROLL HORIZONTAL (MODIFICADA PARA SNAP) ---
+      // --- HORIZONTAL SCROLL LOGIC ---
       const servicesSection = document.getElementById('services-stacked');
       const horizontalWrapper = document.querySelector('.horizontal-scroll-wrapper');
       const cardsContainer = document.querySelector('.cards-container');
@@ -520,21 +704,38 @@
       let resizeTimeout;
 
       function initializeHorizontalScroll() {
-        if (mainScrollTriggerInstance) {
-            mainScrollTriggerInstance.kill();
-        }
+        if (mainScrollTriggerInstance) { mainScrollTriggerInstance.kill(); }
         gsap.set(cardsContainer, { clearProps: "all" });
-
         if (!serviceCards.length || !horizontalWrapper || !servicesSection) return;
 
         if (window.innerWidth < 768) { 
             servicesSection.style.height = 'auto';
-            if(cardsContainer) cardsContainer.style.transform = 'none';
+            if(cardsContainer) {
+                cardsContainer.style.display = 'flex';
+                cardsContainer.style.flexDirection = 'column';
+                cardsContainer.style.gap = '2rem';
+                cardsContainer.style.padding = '0 1.5rem';
+            }
+            if(horizontalWrapper) {
+                horizontalWrapper.style.position = 'static';
+                horizontalWrapper.style.height = 'auto';
+            }
             return;
-        };
+        } else {
+            if(cardsContainer) {
+                cardsContainer.style.display = 'flex';
+                cardsContainer.style.flexDirection = 'row';
+                cardsContainer.style.gap = 'clamp(2rem, 5vw, 4rem)';
+                cardsContainer.style.padding = '0 clamp(1rem, 10vw, 8rem)';
+            }
+             if(horizontalWrapper) {
+                horizontalWrapper.style.position = 'sticky';
+                horizontalWrapper.style.height = '100vh';
+            }
+        }
         
         const scrollWidth = cardsContainer.scrollWidth - window.innerWidth;
-        servicesSection.style.height = `${scrollWidth + (window.innerHeight * serviceCards.length * 0.5)}px`; // Ajustar altura para dar tiempo al snap
+        servicesSection.style.height = `${scrollWidth + window.innerHeight * 1.5}px`;
         
         mainScrollTriggerInstance = gsap.to(cardsContainer, {
           x: () => -(cardsContainer.scrollWidth - horizontalWrapper.clientWidth) + "px",
@@ -545,12 +746,7 @@
             scrub: 1,
             start: "top top",
             end: () => "+=" + (cardsContainer.scrollWidth - horizontalWrapper.clientWidth),
-            // SNAP A CADA TARJETA
-            snap: {
-                snapTo: 1 / (serviceCards.length - 1),
-                duration: { min: 0.2, max: 0.5 },
-                ease: "power2.inOut"
-            },
+            snap: { snapTo: 1 / (serviceCards.length - 1), duration: { min: 0.2, max: 0.5 }, ease: "power2.inOut" },
             invalidateOnRefresh: true,
           }
         });
@@ -569,33 +765,22 @@
             cardElement.classList.remove('is-expanded');
             document.body.classList.remove('no-scroll');
             const savedScrollY = cardElement.dataset.scrollY;
-            if (savedScrollY) {
-                window.scrollTo(0, parseFloat(savedScrollY));
-            }
-            if (mainScrollTriggerInstance) {
-                mainScrollTriggerInstance.enable();
-                ScrollTrigger.refresh();
-            }
+            if (savedScrollY) { window.scrollTo(0, parseFloat(savedScrollY)); }
+            if (mainScrollTriggerInstance) { mainScrollTriggerInstance.enable(); ScrollTrigger.refresh(); }
         }
       }
       
       serviceCards.forEach(card => {
           const expandButton = card.querySelector('.btn-toggle-expand');
           const closeButton = card.querySelector('.btn-toggle-collapse');
-          if (expandButton) {
-              expandButton.addEventListener('click', (e) => { e.stopPropagation(); toggleCardExpansion(card, true); });
-          }
-          if (closeButton) {
-              closeButton.addEventListener('click', (e) => { e.stopPropagation(); toggleCardExpansion(card, false); });
-          }
+          if (expandButton) { expandButton.addEventListener('click', (e) => { e.stopPropagation(); toggleCardExpansion(card, true); }); }
+          if (closeButton) { closeButton.addEventListener('click', (e) => { e.stopPropagation(); toggleCardExpansion(card, false); }); }
       });
       
       if(overlayBackdrop) {
           overlayBackdrop.addEventListener('click', () => {
               const expandedCard = document.querySelector('.service-card-stacked.is-expanded');
-              if (expandedCard) {
-                  toggleCardExpansion(expandedCard, false);
-              }
+              if (expandedCard) { toggleCardExpansion(expandedCard, false); }
           });
       }
 
