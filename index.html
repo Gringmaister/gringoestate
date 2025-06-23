@@ -110,9 +110,8 @@
     #services-stacked h2.section-title, #ai-tools h2.section-title {color:#fff;}
     #ai-tools, #contact { background-color: var(--dark-bg); }
     
-    /* --- SECCIÓN DE SERVICIOS CORREGIDA --- */
-    #services-stacked { background-color: var(--dark); color: #fff; padding-top: 4.5rem; padding-bottom: 4.5rem; /* Sin position relative ni overflow */ }
-    #services-stacked .scroll-container { position: relative; } /* Nuevo contenedor */
+    #services-stacked { background-color: var(--dark); color: #fff; padding-top: 4.5rem; padding-bottom: 4.5rem; }
+    #services-stacked .scroll-container { position: relative; }
     #services-stacked p.subtitle { text-align: center; max-width: 700px; margin: -1rem auto 2rem; padding: 0 1rem; color: #ccc; line-height: 1.6; z-index: 2; position: relative; }
     .horizontal-scroll-wrapper { 
         position: sticky; 
@@ -161,7 +160,8 @@
     .btn-card:hover { background: #fff; color: var(--dark); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
     .btn-toggle-collapse { background: transparent; border: 1px solid #555; color: #aaa; border-radius: 50px; padding: 0.5rem 1rem; font-size: 1rem; margin-top: 0.5rem; transition: all .3s ease; }
     .btn-toggle-collapse:hover { background: #555; color: #fff; }
-    #overlay-backdrop { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+    /* CAMBIO CLAVE: Se eliminó el backdrop-filter para evitar el efecto borroso */
+    #overlay-backdrop { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.8); z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
     #overlay-backdrop.visible { opacity: 1; pointer-events: all; }
 
     @media (max-width: 768px) {
@@ -328,7 +328,6 @@
         <p class="subtitle">
             Descubrí cómo GringoEstate transforma el Real Estate con soluciones innovadoras y un enfoque directo.
         </p>
-        <!-- Nuevo contenedor para la lógica de scroll -->
         <div class="scroll-container">
             <div class="horizontal-scroll-wrapper">
                 <div class="cards-container">
@@ -370,7 +369,8 @@
 
                     <!-- Card 6 -->
                     <div class="service-card-stacked">
-                        <img src="assets/img/local-gringoestate.png" alt="Locales comerciales y oficinas" class="card-image" loading="lazy" width="700" height="600">
+                        <!-- CAMBIO CLAVE: Ruta de imagen corregida -->
+                        <img src="local-gringoestate.png" alt="Locales comerciales y oficinas" class="card-image" loading="lazy" width="700" height="600">
                         <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Servicio especializado para marcas, franquicias e inversores.</p><button class="btn-toggle-expand">Ver más</button></div>
                         <div class="card-full-details"><h3>LOCALES COMERCIALES Y OFICINAS</h3><div class="card-full-content-scroll"><p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><ul><li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li><li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li><li>✅ Asesoramiento integral en contratos comerciales y negociación.</li></ul><p class="card-highlight">Llevá tu negocio al siguiente nivel.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
                     </div>
@@ -382,10 +382,11 @@
     <section id="portfolio" class="section-full-width" style="background-color: var(--dark); padding-top: 8rem; padding-bottom: 4.5rem;">
         <h2 class="section-title" style="color: #fff;">PROYECTOS <span>DESTACADOS</span></h2>
         <div class="portfolio-grid" style="max-width: 1200px; margin: auto; padding: 0 1.5rem;">
-            <div class="portfolio-item"> <img src="assets/img/proyecto-ambar.jpg" alt="Fachada del proyecto Ámbar en Recoleta" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Ámbar · Recoleta (15 Unidades)</span> <div class="view-more">Ver más →</div> </div> </div>
-            <div class="portfolio-item"> <img src="assets/img/proyecto-charlone.jpg" alt="Render de la Torre Charlone en Colegiales" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Torre Charlone · Colegiales</span> <div class="view-more">Ver más →</div> </div> </div>
-            <div class="portfolio-item"> <img src="assets/img/proyecto-nunez.jpg" alt="Exterior del proyecto Casona en Núñez" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Casona · Núñez</span> <div class="view-more">Ver más →</div> </div> </div>
-            <div class="portfolio-item"> <img src="assets/img/proyecto-palermo.jpg" alt="Render del proyecto Concepción Live en Palermo" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Concepción Live · Palermo</span> <div class="view-more">Ver más →</div> </div> </div>
+            <!-- CAMBIO CLAVE: Rutas de imágenes corregidas -->
+            <div class="portfolio-item"> <img src="proyecto-ambar.jpg" alt="Fachada del proyecto Ámbar en Recoleta" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Ámbar · Recoleta (15 Unidades)</span> <div class="view-more">Ver más →</div> </div> </div>
+            <div class="portfolio-item"> <img src="proyecto-charlone.jpg" alt="Render de la Torre Charlone en Colegiales" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Torre Charlone · Colegiales</span> <div class="view-more">Ver más →</div> </div> </div>
+            <div class="portfolio-item"> <img src="proyecto-nunez.jpg" alt="Exterior del proyecto Casona en Núñez" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Casona · Núñez</span> <div class="view-more">Ver más →</div> </div> </div>
+            <div class="portfolio-item"> <img src="proyecto-palermo.jpg" alt="Render del proyecto Concepción Live en Palermo" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Concepción Live · Palermo</span> <div class="view-more">Ver más →</div> </div> </div>
         </div>
     </section>
     
@@ -562,7 +563,6 @@
         }
 
         if (window.innerWidth < 768) {
-            // Lógica para desactivar en móvil (opcional, por si acaso)
             gsap.set(scrollContainer, { height: 'auto' });
             gsap.set(horizontalWrapper, { position: 'static', height: 'auto' });
             gsap.set(cardsContainer, { display: 'block', padding: '0 1.5rem' });
@@ -571,18 +571,17 @@
 
         const scrollWidth = cardsContainer.scrollWidth - window.innerWidth;
         
-        // Se le da la altura al contenedor '.scroll-container' para generar el espacio de scroll
         gsap.set(scrollContainer, { height: scrollWidth + 'px' });
 
         mainScrollTriggerInstance = gsap.to(cardsContainer, {
           x: -scrollWidth,
           ease: "none",
           scrollTrigger: {
-            trigger: scrollContainer, // El trigger ahora es el nuevo contenedor
+            trigger: scrollContainer,
             start: "top top",
             end: "bottom bottom",
-            pin: horizontalWrapper, // Pinea el wrapper que ocupa 100vh
-            scrub: 1, // Eliminado el snap para mayor fluidez
+            pin: horizontalWrapper,
+            scrub: 1,
             invalidateOnRefresh: true,
           }
         });
@@ -626,7 +625,6 @@
 
       initializeHorizontalScroll();
       window.addEventListener('resize', () => {
-        // Un debounce simple para no ejecutar la función en cada pixel de resize
         setTimeout(() => {
           initializeHorizontalScroll();
           ScrollTrigger.refresh(true);
