@@ -33,7 +33,7 @@
     }
     *{margin:0;padding:0;box-sizing:border-box;font-family:'Roboto',sans-serif;scroll-behavior:smooth;}
     body{color:var(--dark);background:var(--light); overflow-x: hidden;}
-    a, button {cursor: pointer;}
+    a, button {cursor: pointer; text-decoration: none !important;}
 
     /* === ESTILOS PARA CURSOR PERSONALIZADO (SEGUIDOR) === */
     .custom-cursor {
@@ -48,16 +48,14 @@
         transform: translate(-50%, -50%);
         transition: width 0.3s, height 0.3s, opacity 0.3s;
         z-index: 9999;
-        display: none; /* Se activa con JS */
+        display: none;
     }
-    .custom-cursor.hidden {
-        opacity: 0;
-    }
+    .custom-cursor.hidden { opacity: 0; }
 
     /* --- ESTILOS DE NAVEGACIÓN Y HERO --- */
-    header{height:100vh;background:url('hero-bg.jpg') center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;}
+    header{height:100vh;background:url('hero-bg.jpg') center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff; perspective: 1000px;}
     header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}   
-    .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem;}
+    .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem; transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);}
     .hero > * { opacity: 0; }
     .hero img.isologo{ width: 160px; height: auto; margin: 0 auto 0.5rem auto; }
     .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem;}
@@ -76,6 +74,23 @@
     nav ul a{color:#fff;transition: color .2s; position: relative; padding: 0.25rem 0;}
     nav ul a:hover{color:var(--primary);}
     .nav-links-desktop {display: none;}
+    
+    .nav-links-desktop a { padding-bottom: 5px; }
+    .nav-links-desktop a::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--primary);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .nav-links-desktop a:hover::after {
+        transform: scaleX(1);
+    }
     
     .menu-button {display: flex; flex-direction: column; justify-content: space-around; width: 24px; height: 24px; background: transparent; border: none; cursor: pointer; padding: 0; z-index: 10;}
     .menu-button .bar {display: block; width: 24px; height: 3px; background-color: white; border-radius: 10px; transition: all 0.3s ease-in-out;}
@@ -116,11 +131,17 @@
 
     .contact{text-align:center;}
     .contact form{display:flex;flex-direction:column;gap:1rem;width:100%;max-width:600px;margin:2rem auto;}
-    .contact input,.contact select,.contact textarea{padding:1rem;border:1px solid #ccc;border-radius:6px;font-size:1rem;width:100%;background-color: #fff; color: #000;}
+    .contact input,.contact select,.contact textarea{padding:1rem;border:1px solid #ccc;border-radius:6px;font-size:1rem;width:100%;background-color: #fff; color: #000; transition: border-color .3s, box-shadow .3s;}
+    .contact input:focus, .contact select:focus, .contact textarea:focus,
+    .ai-tool-card textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(255, 191, 0, 0.4);
+    }
     #property-details { display: none; flex-direction: column; gap: 1rem; }
     .ai-tool-card { background-color: #1a1a1a; padding: 2rem; border-radius: 10px; margin-top: 2rem; border: 1px solid #333;}
     .ai-tool-card h3 { text-align: center; }
-    .ai-tool-card textarea { background-color: #333; color: #fff; border-radius: 6px; padding: 1rem; width: 100%; min-height: 120px; }
+    .ai-tool-card textarea { background-color: #333; color: #fff; border-radius: 6px; padding: 1rem; width: 100%; min-height: 120px; transition: border-color .3s, box-shadow .3s; }
     .ai-tool-card button { background-color: var(--primary); color: var(--dark); padding: .75rem 1.5rem; border-radius: 50px; transition: all .3s; font-weight: 700; border:0; }
     .ai-tool-card button:hover { background-color: #fff; }
     .ai-result { background-color: #111; border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: pre-wrap; line-height: 1.7; }
@@ -132,8 +153,8 @@
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); } 70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); } }
 
     footer{background:var(--dark);color:#94a3b8;padding:3rem 1rem;text-align:center;font-size:1rem;}
-    /* === CAMBIO #2: SUBRAYADO DEL FOOTER ELIMINADO === */
-    footer a:hover{text-decoration:none; color: var(--primary);}
+    footer a{color: #94a3b8; transition: color .3s;}
+    footer a:hover{color: var(--primary);}
 
     @media (min-width: 1024px) {
       .services-grid, .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
@@ -145,7 +166,6 @@
   </style>
 </head>
 <body>
-  <!-- === ELEMENTO DEL CURSOR PERSONALIZADO === -->
   <div class="custom-cursor"></div>
 
   <nav>
@@ -333,11 +353,11 @@
 
         gsap.registerPlugin(ScrollTrigger);
 
-        // --- ANIMACIONES GENERALES DE ENTRADA ---
-        const animateOnScroll = (elem) => {
+        // --- ANIMACIONES GENERALES DE ENTRADA (LATERALES) ---
+        const animateOnScroll = (elem, index) => {
             gsap.from(elem, { 
-                opacity: 0, 
-                y: 50, 
+                opacity: 0,
+                x: (index % 2 === 0) ? -75 : 75, // Alterna la dirección X
                 duration: 1, 
                 ease: "power2.out",
                 scrollTrigger: {
@@ -347,13 +367,15 @@
                 }
             });
         };
-        document.querySelectorAll('h2.section-title, .about-text, .about-img, .service-card, .ai-tool-card, .portfolio-item, .contact form').forEach(animateOnScroll);
+        document.querySelectorAll('.about-text, .about-img, .service-card, .ai-tool-card, .portfolio-item, .contact form').forEach(animateOnScroll);
+        gsap.from("h2.section-title", { opacity: 0, y: 50, duration: 1, ease: "power2.out", scrollTrigger: { trigger: "h2.section-title", start: "top 90%", toggleActions: "play none none none" } });
+
 
         // --- ANIMACIÓN DE CARGA INICIAL (HERO) ---
         gsap.to(".hero-el", { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: "power3.out", delay: 0.2 });
         gsap.set(".hero-el", {y: 30});
 
-        // --- EFECTO PARALLAX (SOLO DESKTOP) ---
+        // --- EFECTO PARALLAX Y 3D (SOLO DESKTOP) ---
         ScrollTrigger.matchMedia({
             "(min-width: 1025px)": function() {
                 gsap.to(".about-img img", { yPercent: -20, ease: "none",
@@ -364,21 +386,25 @@
                         scrub: true
                     }
                 });
-            }
-        });
 
-        // --- BARRA DE NAVEGACIÓN DINÁMICA ---
-        const nav = document.querySelector('nav');
-        ScrollTrigger.create({
-            start: 'top -80',
-            end: 99999,
-            toggleClass: { className: 'nav-scrolled', targets: nav }
-        });
+                const hero = document.querySelector('.hero');
+                const header = document.querySelector('header');
+                header.addEventListener('mousemove', (e) => {
+                    const { clientX, clientY } = e;
+                    const x = (clientX / window.innerWidth - 0.5) * 2;
+                    const y = (clientY / window.innerHeight - 0.5) * 2;
+                    gsap.to(hero, {
+                        rotateY: x * 8, // Rango de rotación reducido para sutileza
+                        rotateX: -y * 8,
+                        duration: 1,
+                        ease: 'power2.out'
+                    });
+                });
+                header.addEventListener('mouseleave', () => {
+                     gsap.to(hero, { rotateY: 0, rotateX: 0, duration: 1, ease: 'power2.out'});
+                });
 
-        // --- EFECTO MAGNÉTICO (SOLO DESKTOP) ---
-        const magneticButton = document.querySelector('.hero .btn-primary');
-        ScrollTrigger.matchMedia({
-            "(min-width: 1025px)": function() {
+                const magneticButton = document.querySelector('.hero .btn-primary');
                 if (magneticButton) {
                     magneticButton.addEventListener('mousemove', function(e) {
                         const rect = magneticButton.getBoundingClientRect();
@@ -393,14 +419,21 @@
             }
         });
 
-        // --- CURSOR PERSONALIZADO (AHORA TAMBIÉN EN MÓVIL) ---
+        // --- BARRA DE NAVEGACIÓN DINÁMICA ---
+        const nav = document.querySelector('nav');
+        ScrollTrigger.create({
+            start: 'top -80',
+            end: 99999,
+            toggleClass: { className: 'nav-scrolled', targets: nav }
+        });
+
+        // --- CURSOR PERSONALIZADO (MÓVIL Y DESKTOP) ---
         const cursor = document.querySelector('.custom-cursor');
-        cursor.style.display = 'block'; // Mostrar en todos los dispositivos
+        cursor.style.display = 'block';
 
         const updateCursorPos = (e) => {
             let x, y;
             if (e.touches) {
-                // Si es un evento táctil, usamos el primer punto de contacto
                 x = e.touches[0].clientX;
                 y = e.touches[0].clientY;
             } else {
@@ -409,9 +442,12 @@
             }
             gsap.to(cursor, { x: x, y: y, duration: 0.2, ease: 'power2.out' });
         };
-
         window.addEventListener('mousemove', updateCursorPos);
-        window.addEventListener('touchmove', updateCursorPos, {passive: true}); // Añadido para móvil
+        window.addEventListener('touchmove', updateCursorPos, {passive: true});
+        document.addEventListener('mouseleave', () => cursor.classList.add('hidden'));
+        document.addEventListener('mouseenter', () => cursor.classList.remove('hidden'));
+        document.addEventListener('touchstart', () => cursor.classList.remove('hidden'), {passive: true});
+        document.addEventListener('touchend', () => cursor.classList.add('hidden'));
 
         // --- FORMULARIO DINÁMICO ---
         const interestSelect = document.getElementById('interest-select');
@@ -424,7 +460,7 @@
           }
         });
 
-        // --- MENÚ HAMBURGUESA ANIMADO (CON MEJORAS MÓVILES) ---
+        // --- MENÚ HAMBURGUESA ANIMADO ---
         const menuToggle = document.getElementById('menu-toggle');
         const mobileMenu = document.getElementById('mobile-menu');
         const mobileLinks = mobileMenu.querySelectorAll('li');
