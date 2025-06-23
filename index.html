@@ -73,7 +73,7 @@
     
     /* === ESTILOS PARA MENÚ MÓVIL SOFISTICADO === */
     nav .nav-links-mobile { 
-        visibility: hidden; /* Corregido: GSAP maneja la visibilidad con autoAlpha */
+        visibility: hidden; 
         position: fixed;
         top: 0;
         left: 0;
@@ -166,9 +166,8 @@
     
     #services {background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('local-gringoestate.png'); background-size: cover; background-position: center; background-attachment: fixed; color:#fff;}
     #ai-tools {background-color:var(--dark-bg);color:#fff;}
-    #services h2.section-title, #ai-tools h2.section-title {color:#fff;}
+    #services h2.section-title, #ai-tools h2.section-title, #contact h2.section-title {color:#fff;}
     
-    /* === CAMBIO: Título de "Hablemos" ahora es amarillo === */
     #contact h2.section-title {color:var(--primary);}
 
     .services-grid{display:grid;grid-template-columns: 1fr; gap:1.5rem;margin-top:2rem;}
@@ -449,7 +448,6 @@
         ScrollTrigger.matchMedia({
             // --- EFECTOS SOLO PARA DESKTOP ---
             "(min-width: 1025px)": function() {
-                // Parallax de la foto de perfil
                 gsap.to(".about-img img", { yPercent: -20, ease: "none",
                     scrollTrigger: {
                         trigger: ".about",
@@ -459,7 +457,6 @@
                     }
                 });
 
-                // Efecto 3D del texto del Hero (basado en mouse)
                 const header = document.querySelector('header');
                 header.addEventListener('mousemove', (e) => {
                     const { clientX, clientY } = e;
@@ -476,7 +473,6 @@
                      gsap.to(hero, { rotateY: 0, rotateX: 0, duration: 1, ease: 'power2.out'});
                 });
 
-                // Efecto magnético del botón
                 const magneticButton = document.querySelector('.hero .btn-primary');
                 if (magneticButton) {
                     magneticButton.addEventListener('mousemove', function(e) {
@@ -492,22 +488,37 @@
             },
             // --- EFECTOS SOLO PARA MÓVIL ---
             "(max-width: 1024px)": function() {
-                // Efecto 3D del texto del Hero (basado en giroscopio)
-                if (window.DeviceOrientationEvent) {
-                    window.addEventListener('deviceorientation', (event) => {
-                        const { beta, gamma } = event; 
-                        if (beta !== null && gamma !== null) {
-                            const y = (beta - 45) / 45; 
-                            const x = gamma / 45;      
-                            gsap.to(hero, {
-                                rotateY: x * 10,
-                                rotateX: y * 10,
-                                duration: 0.5,
-                                ease: 'power1.out'
-                            });
-                        }
-                    });
-                }
+                const handleOrientation = (event) => {
+                    const { beta, gamma } = event; 
+                    if (beta !== null && gamma !== null) {
+                        const y = (beta - 45) / 45; 
+                        const x = gamma / 45;      
+                        gsap.to(hero, {
+                            rotateY: x * 15,
+                            rotateX: y * 15,
+                            duration: 0.5,
+                            ease: 'power1.out'
+                        });
+                    }
+                };
+
+                const requestGyroPermission = () => {
+                    if (typeof(DeviceOrientationEvent) !== "undefined" && typeof(DeviceOrientationEvent.requestPermission) === "function") {
+                        DeviceOrientationEvent.requestPermission()
+                            .then(permissionState => {
+                                if (permissionState === 'granted') {
+                                    window.addEventListener('deviceorientation', handleOrientation);
+                                }
+                            })
+                            .catch(console.error);
+                    } else {
+                        // Para Android u otros dispositivos sin este requisito
+                        window.addEventListener('deviceorientation', handleOrientation);
+                    }
+                };
+                
+                // Pedir permiso al primer toque
+                window.addEventListener('touchstart', requestGyroPermission, { once: true });
             }
         });
 
@@ -556,6 +567,8 @@
         const menuToggle = document.getElementById('menu-toggle');
         const mobileMenu = document.getElementById('mobile-menu');
         const mobileLinks = mobileMenu.querySelectorAll('li');
+        
+        gsap.set(mobileMenu, {autoAlpha: 0}); // Asegurar estado inicial para GSAP
         
         const mobileMenuTimeline = gsap.timeline({ paused: true, reversed: true });
         mobileMenuTimeline
