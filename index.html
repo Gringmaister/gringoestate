@@ -4,17 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GringoEstate – Real Estate sin corbata</title>
-  
+    
   <!-- === FAVICON MEJORADO CON MÁS TAMAÑOS === -->
   <link rel="icon" type="image/png" sizes="32x32" href="isologo.png">
   <link rel="icon" type="image/png" sizes="16x16" href="isologo.png">
   <link rel="icon" type="image/png" sizes="192x192" href="isologo.png">
   <link rel="apple-touch-icon" href="isologo.png">
-  
+    
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-  
+    
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y1DWC69608"></script>
   <script>
@@ -23,7 +23,7 @@
     gtag('js', new Date());
     gtag('config', 'G-Y1DWC69608');
   </script>
-  
+    
   <style>
     :root {
       --primary: #FFBF00;
@@ -55,7 +55,7 @@
 
     /* --- ESTILOS DE NAVEGACIÓN Y HERO --- */
     header{height:100vh;background:url('hero-bg.jpg') center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff; perspective: 1000px;}
-    header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}   
+    header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}    
     .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem; transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);}
     .hero > * { opacity: 0; }
     .hero img.isologo{ width: 160px; height: auto; margin: 0 auto 0.5rem auto; }
@@ -87,6 +87,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        z-index: 999; /* Asegura que el menú esté sobre el resto del contenido */
     }
     nav .nav-links-mobile ul { 
         flex-direction: column; 
@@ -148,7 +149,7 @@
         transform: scaleX(1);
     }
     
-    .menu-button {display: flex; flex-direction: column; justify-content: space-around; width: 24px; height: 24px; background: transparent; border: none; cursor: pointer; padding: 0; z-index: 1001;}
+    .menu-button {display: flex; flex-direction: column; justify-content: space-around; width: 24px; height: 24px; background: transparent; border: none; cursor: pointer; padding: 0; z-index: 1001;} /* Aumentado z-index */
     .menu-button .bar {display: block; width: 24px; height: 3px; background-color: white; border-radius: 10px; transition: all 0.3s ease-in-out;}
     .menu-button.open .bar1 {transform: rotate(45deg) translate(5px, 6px);}
     .menu-button.open .bar2 {opacity: 0;}
@@ -164,17 +165,289 @@
     .about-text{flex:2;}
     .about-text p{color:var(--gray);line-height:1.8;margin-bottom:1rem;}
     
-    #services {background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('local-gringoestate.png'); background-size: cover; background-position: center; background-attachment: fixed; color:#fff;}
     #ai-tools {background-color:var(--dark-bg);color:#fff;}
-    #services h2.section-title, #ai-tools h2.section-title, #contact h2.section-title {color:#fff;}
+    #services-stacked h2.section-title, #ai-tools h2.section-title, #contact h2.section-title {color:#fff;}
     
     #contact h2.section-title {color:var(--primary);}
 
-    .services-grid{display:grid;grid-template-columns: 1fr; gap:1.5rem;margin-top:2rem;}
-    .service-card {background: radial-gradient(circle at 100% 0%, rgba(255, 191, 0, 0.15), transparent 40%), rgba(26, 26, 26, 0.8); backdrop-filter: blur(5px); padding:2rem;border-radius:10px;border:1px solid #444;transition:all .3s; display: block;}
-    .service-card:hover {transform:translateY(-5px);border-color:var(--primary);box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);} 
-    .service-card h3{font-family:'Bebas Neue', sans-serif;font-size:1.75rem;margin-bottom:.75rem;color:var(--primary);} 
-    .service-card p{color:#ccc;line-height:1.6;}
+    /* --- NUEVOS ESTILOS PARA LA SECCIÓN DE SERVICIOS APILADOS (INICIO) --- */
+    /* La altura de esta sección define cuánto scroll vertical se necesita para el efecto */
+    #services-stacked {
+        background-color: var(--dark-bg); 
+        color: #fff;
+        overflow: hidden; 
+        padding: 4.5rem 0; 
+        position: relative;
+        height: 350vh; /* Se ajustará dinámicamente con JS, pero esto da un valor inicial */
+        width: 100%; 
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    #services-stacked h2.section-title {
+        color: #fff;
+        margin-bottom: 2rem;
+    }
+    #services-stacked p.subtitle {
+        text-align: center;
+        max-width: 700px;
+        margin: -1rem auto 2rem;
+        color: #ccc;
+        line-height: 1.6;
+        z-index: 2;
+        position: relative;
+    }
+
+    .horizontal-scroll-wrapper {
+        position: sticky; 
+        top: 0; 
+        display: flex;
+        align-items: center;
+        height: 100vh; 
+        width: 100%;
+        overflow: hidden; 
+        will-change: transform; 
+        justify-content: center; 
+    }
+
+    .cards-container {
+        display: flex;
+        gap: 3rem; 
+        padding: 0 5vw; 
+        will-change: transform; 
+    }
+
+    .service-card-stacked {
+        flex-shrink: 0; 
+        width: clamp(300px, 70vw, 750px); 
+        max-width: 90vw; 
+        height: clamp(500px, 80vh, 650px); 
+        background: radial-gradient(circle at 100% 0%, rgba(255, 191, 0, 0.1), transparent 40%), rgba(26, 26, 26, 0.95); /* Fondo más opaco */
+        backdrop-filter: blur(12px); /* Más blur */
+        border-radius: 20px; /* Bordes más redondeados para "carta" */
+        border: 2px solid rgba(255, 191, 0, 0.4); /* Borde más pronunciado */
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 191, 0, 0.3); /* Sombra más profunda */
+        padding: 0; /* padding interno se maneja en card-content */
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; /* Oculta desbordamiento de la imagen/contenido */
+        position: relative;
+        transform-style: preserve-3d; /* Para efectos 3D de la propia tarjeta */
+    }
+
+    /* Contenedor de la imagen y el título superpuesto */
+    .card-media {
+        position: relative;
+        width: 100%;
+        height: clamp(180px, 30vh, 250px);
+        overflow: hidden;
+        border-radius: 18px 18px 0 0; /* Redondea solo la parte superior */
+    }
+
+    .card-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .card-title-overlay {
+        position: absolute;
+        top: 1.5rem; /* Posición superior */
+        left: 0;
+        width: 100%;
+        padding: 1rem 1.5rem;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0)); /* Degradado desde arriba */
+        color: var(--primary); /* Color amarillo */
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: clamp(2rem, 3.5vw, 2.8rem); /* Título más grande */
+        text-align: center;
+        line-height: 1.2;
+        letter-spacing: 1px;
+        text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
+        z-index: 10; /* Asegura que esté por encima de la imagen */
+    }
+
+    /* Contenido de la tarjeta (descripción, listas, botón) */
+    .card-content {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1; /* Permite que el contenido ocupe el espacio restante */
+        overflow-y: hidden; /* Oculta el overflow hasta que se expande */
+        position: relative;
+    }
+
+    .card-short-desc {
+        max-height: 250px; /* Altura inicial para el snippet */
+        overflow: hidden;
+        transition: max-height 0.7s ease-in-out, opacity 0.7s ease-in-out;
+        opacity: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card-short-desc p, .card-short-desc ul {
+        margin-bottom: 0.5rem; /* Menos margen al final del snippet */
+    }
+
+    .card-full-desc {
+        max-height: 0;
+        opacity: 0;
+        pointer-events: none; /* Deshabilita interacciones cuando está oculto */
+        transition: max-height 0.7s ease-in-out, opacity 0.7s ease-in-out;
+        position: absolute; /* Para que no ocupe espacio cuando está oculto */
+        width: 100%;
+        top: 0;
+        left: 0;
+        overflow-y: auto; /* Permite scroll cuando está expandido */
+        box-sizing: border-box;
+        padding: 1.5rem; /* Restaura el padding si es absolute */
+    }
+    .card-full-desc::-webkit-scrollbar { /* Scrollbar para el contenido expandido */
+        width: 8px;
+    }
+    .card-full-desc::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .card-full-desc::-webkit-scrollbar-thumb {
+        background-color: var(--primary);
+        border-radius: 10px;
+        border: 2px solid rgba(0,0,0,0.5);
+    }
+
+    .service-card-stacked.expanded .card-short-desc {
+        max-height: 0;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .service-card-stacked.expanded .card-full-desc {
+        max-height: 800px; /* Suficientemente grande para todo el contenido */
+        opacity: 1;
+        pointer-events: all;
+        position: relative; /* Vuelve a tomar espacio cuando está expandido */
+        overflow-y: auto;
+    }
+
+    .service-card-stacked p {
+        color: #e0e0e0;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .service-card-stacked ul {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 1rem;
+    }
+
+    .service-card-stacked ul li {
+        color: #e0e0e0;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .card-highlight {
+        font-weight: 700;
+        color: var(--primary);
+        text-align: center;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .card-alert {
+        color: #ffda6a; 
+        font-size: 0.9rem;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        border-left: 3px solid #ffda6a;
+        padding-left: 0.75rem;
+    }
+
+    .btn-card {
+        background: var(--primary);
+        color: var(--dark);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        display: inline-block;
+        font-weight: 700;
+        font-size: 1rem;
+        letter-spacing: 0.5px;
+        text-align: center;
+        align-self: center; 
+        transition: background-color .3s, color .3s, transform .3s;
+        margin-top: auto; 
+    }
+
+    .btn-card:hover {
+        background: #fff;
+        color: var(--dark);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-card-toggle {
+        background: none;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        display: inline-flex; /* Use flex to center icon/text */
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        letter-spacing: 0.5px;
+        transition: all .3s ease;
+        margin-top: 1rem;
+        width: 80%; /* Ajusta el ancho */
+        max-width: 200px;
+        align-self: center;
+    }
+
+    .btn-card-toggle:hover {
+        background: var(--primary);
+        color: var(--dark);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(255, 191, 0, 0.3);
+    }
+
+
+    /* Responsive adjustments for service cards */
+    @media (max-width: 768px) {
+        .service-card-stacked {
+            padding: 0;
+            height: auto; 
+            max-height: 90vh; 
+            border-radius: 15px; /* Ligeramente menos redondeado en móvil */
+        }
+        .card-media {
+            height: clamp(150px, 25vh, 200px);
+            border-radius: 13px 13px 0 0;
+        }
+        .card-title-overlay {
+            font-size: 2rem;
+            padding: 0.75rem 1rem;
+        }
+        .card-content {
+            padding: 1rem;
+        }
+        .btn-card {
+            width: 100%;
+            padding: 0.75rem 1rem;
+        }
+        .btn-card-toggle {
+            width: 100%;
+        }
+    }
+    /* --- NUEVOS ESTILOS PARA LA SECCIÓN DE SERVICIOS APILADOS (FIN) --- */
     
     .portfolio-grid{margin-top:2rem;display:grid;grid-template-columns: 1fr; gap:1.5rem;}
     .portfolio-item{position:relative;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.1);}
@@ -237,7 +510,7 @@
     <div class="nav-links-desktop">
       <ul>
         <li><a href="#about">Sobre Mí</a></li>
-        <li><a href="#services">Servicios</a></li>
+        <li><a href="#services-stacked">Servicios</a></li>
         <li><a href="#portfolio">Proyectos</a></li>
         <li><a href="#ai-tools">Herramientas IA ✨</a></li>
         <li><a href="#contact">Contacto</a></li>
@@ -246,7 +519,7 @@
     <div class="nav-links-mobile" id="mobile-menu">
       <ul>
         <li><a href="#about"><span class="menu-item-number">01</span>Sobre Mí</a></li>
-        <li><a href="#services"><span class="menu-item-number">02</span>Servicios</a></li>
+        <li><a href="#services-stacked"><span class="menu-item-number">02</span>Servicios</a></li>
         <li><a href="#portfolio"><span class="menu-item-number">03</span>Proyectos</a></li>
         <li><a href="#ai-tools"><span class="menu-item-number">04</span>Herramientas IA ✨</a></li>
         <li><a href="#contact"><span class="menu-item-number">05</span>Contacto</a></li>
@@ -279,28 +552,233 @@
     </div>
   </section>
 
-  <section id="services">
-    <h2 class="section-title">SERVICIOS GRINGO<span>ESTATE</span></h2>
-    <div class="services-grid">
-      <a href="#contact" class="service-card">
-        <h3>Venta de Propiedades</h3>
-        <p>Estrategia 360° para vender tu propiedad al mejor precio de mercado. Marketing, negociación y cierre de operaciones.</p>
-      </a>
-      <a href="https://ambbi.com.ar" target="_blank" class="service-card">
-        <h3>Gestión de Renta Temporaria</h3>
-        <p>Con la experiencia de Ambbi, maximizamos la rentabilidad de tu propiedad en Airbnb y otras plataformas. Nos encargamos de todo.</p>
-      </a>
-      <a href="#contact" class="service-card">
-        <h3>Inversión desde Pozo</h3>
-        <p>Acceso a preventas exclusivas: +26 emprendimientos y +800 propiedades en cartera. Análisis de ROI para decisiones inteligentes.</p>
-      </a>
-      <a href="#contact" class="service-card">
-        <h3>Asesoría para Desarrolladores</h3>
-        <p>Propuesta integral para maximizar el valor y la renta de tu proyecto, permitiéndote enfocarte en lo que mejor sabés: construir.</p>
-      </a>
+  <!-- === NUEVA SECCIÓN DE SERVICIOS CON SCROLL HORIZONTAL Y APILAMIENTO === -->
+  <section id="services-stacked">
+    <h2 class="section-title">NUESTROS <span>SERVICIOS</span></h2>
+    <p class="subtitle">
+      Descubre cómo GringoEstate transforma el Real Estate con soluciones innovadoras y un enfoque directo.
+    </p>
+
+    <div class="horizontal-scroll-wrapper">
+      <div class="cards-container">
+
+        <!-- Artículo del Catálogo 1: QUIERO TASAR MI PROPIEDAD -->
+        <div class="service-card-stacked">
+          <div class="card-media">
+            <img src="https://images.unsplash.com/photo-1542302302-60193108c4b1?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="[Image of Persona analizando documentos o planos sobre un escritorio de madera.]" class="card-image">
+            <h3 class="card-title-overlay">QUIERO TASAR MI PROPIEDAD</h3>
+          </div>
+          <div class="card-content">
+            <div class="card-short-desc">
+                <p>Tasación profesional, gratuita y sin compromiso.</p>
+                <button class="btn-card-toggle">Más Info</button>
+            </div>
+            <div class="card-full-desc">
+                <p>Tasación profesional, gratuita y sin compromiso.</p>
+                <ul>
+                  <li>✅ En 48hs te entregamos una carpeta formal con análisis de mercado.</li>
+                  <li>✅ Datos claros y documentación respaldatoria.</li>
+                </ul>
+                <p class="card-highlight">Conocé el verdadero valor de tu activo.</p>
+                <a href="https://gringo.estate#contact" class="btn-card">Agendar tasación</a>
+                <button class="btn-card-toggle">Menos Info</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Artículo del Catálogo 2: ¿POR QUÉ VENDER CON GRINGOESTATE? -->
+        <div class="service-card-stacked">
+          <div class="card-media">
+            <img src="https://images.unsplash.com/photo-1626248386629-67d71221f753?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="[Image of Un collage o una imagen estilizada que muestre un plano, una cámara de fotos profesional y un render de un amoblamiento virtual.]" class="card-image">
+            <h3 class="card-title-overlay">¿POR QUÉ VENDER CON GRINGOESTATE?</h3>
+          </div>
+          <div class="card-content">
+            <div class="card-short-desc">
+                <p>Trabajamos únicamente con exclusividad para darle a tu propiedad la atención que merece, con un objetivo claro: la vendemos en 90 días.</p>
+                <button class="btn-card-toggle">Más Info</button>
+            </div>
+            <div class="card-full-desc">
+                <p>Trabajamos únicamente con exclusividad para darle a tu propiedad la atención que merece, con un objetivo claro: la vendemos en 90 días.</p>
+                <p>Nuestra estrategia 360° incluye:</p>
+                <ul>
+                  <li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li>
+                  <li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li>
+                  <li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li>
+                  <li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li>
+                </ul>
+                <p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p>
+                <a href="https://gringo.estate#contact" class="btn-card">Quiero vender</a>
+                <button class="btn-card-toggle">Menos Info</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Artículo del Catálogo 3: POTENCIÁ TU ALQUILER TEMPORARIO -->
+        <div class="service-card-stacked">
+          <div class="card-media">
+            <img src="https://images.unsplash.com/photo-1626071477123-5e921d3f3f50?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="[Image of Imagen de un rincón perfectamente decorado de un departamento de alquiler temporario, con luz natural.]" class="card-image">
+            <h3 class="card-title-overlay">POTENCIÁ TU ALQUILER TEMPORARIO</h3>
+          </div>
+          <div class="card-content">
+            <div class="card-short-desc">
+                <p>Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p>
+                <button class="btn-card-toggle">Más Info</button>
+            </div>
+            <div class="card-full-desc">
+                <p>Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p>
+                <p>Nuestro servicio "llave en mano" incluye:</p>
+                <ul>
+                  <li>✅ Asesoría de home staging gratuita y puesta a punto.</li>
+                  <li>✅ Ejecución de amoblamiento a través de nuestro equipo de arquitectura y red de proveedores.</li>
+                  <li>✅ Publicación profesional en todas las plataformas para un máximo impacto.</li>
+                  <li>✅ Gestión integral (sistemas, anfitrión, limpieza) para maximizar tus ingresos y darte tranquilidad.</li>
+                </ul>
+                <p class="card-alert">⚠️ Únicamente tomamos propiedades modernas con opción de self check-in. Para otras unidades, ofrecemos nuestro servicio de alquiler flex o tradicional.</p>
+                <p class="card-highlight">Delegá la gestión, disfrutá los resultados.</p>
+                <a href="https://ambbi.com.ar" class="btn-card" target="_blank">Optimizar mi alquiler</a>
+                <button class="btn-card-toggle">Menos Info</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Artículo del Catálogo 4: GESTIÓN DE ALQUILER FLEX Y TRADICIONAL -->
+        <div class="service-card-stacked">
+          <div class="card-media">
+            <img src="https://images.unsplash.com/photo-1549442999-ed32f22c608f?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="[Image of Un llavero con llaves en la cerradura de la puerta de un departamento, listo para un nuevo inquilino.]" class="card-image">
+            <h3 class="card-title-overlay">GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3>
+          </div>
+          <div class="card-content">
+            <div class="card-short-desc">
+                <p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p>
+                <button class="btn-card-toggle">Más Info</button>
+            </div>
+            <div class="card-full-desc">
+                <p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p>
+                <h4>Alquiler Flex (1 a 12 meses):</h4>
+                <ul>
+                  <li>✅ Ideal para propiedades amobladas.</li>
+                  <li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li>
+                  <li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li>
+                </ul>
+                <h4>Alquiler Tradicional (2 años):</h4>
+                <ul>
+                  <li>✅ La opción clásica para una renta estable y predecible.</li>
+                  <li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li>
+                  <li>✅ Administración integral de pagos y seguimiento del contrato.</li>
+                </ul>
+                <p class="card-highlight">Tu propiedad, en buenas manos.</p>
+                <a href="https://gringo.estate#contact" class="btn-card">Quiero alquilar</a>
+                <button class="btn-card-toggle">Menos Info</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Artículo del Catálogo 5: INVERTÍ DESDE POZO -->
+        <div class="service-card-stacked">
+          <div class="card-media">
+            <img src="https://images.unsplash.com/photo-1510255845579-24707f1604a3?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="[Image of Una maqueta de un edificio moderno o un render 3D de un proyecto.]" class="card-image">
+            <h3 class="card-title-overlay">INVERTÍ DESDE POZO</h3>
+          </div>
+          <div class="card-content">
+            <div class="card-short-desc">
+                <p>Gracias a nuestra alianza estratégica con Baigun R&N, te ofrezco acceso a oportunidades de inversión únicas.</p>
+                <button class="btn-card-toggle">Más Info</button>
+            </div>
+            <div class="card-full-desc">
+                <p>Gracias a nuestra alianza estratégica con Baigun R&N, te ofrezco acceso a oportunidades de inversión únicas.</p>
+                <ul>
+                  <li>✅ +26 desarrollos en exclusiva que no encontrarás en otro lado.</li>
+                  <li>✅ Análisis de ROI y proyecciones claras para una decisión informada.</li>
+                  <li>✅ Acompañamiento en todo el proceso, desde la firma hasta la entrega.</li>
+                </ul>
+                <p class="card-highlight">Invertí de forma inteligente en los mejores proyectos de la ciudad.</p>
+                <a href="https://gringo.estate#contact" class="btn-card">Invertir ahora</a>
+                <button class="btn-card-toggle">Menos Info</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Artículo del Catálogo 6: ¿SOS DESARROLLADOR? -->
+        <div class="service-card-stacked">
+          <div class="card-media">
+            <img src="https://images.unsplash.com/photo-1581092476906-e7e800d9e802?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="[Image of Un plano de construcción sobre una mesa con un casco y una tablet al lado, con un tono muy profesional.]" class="card-image">
+            <h3 class="card-title-overlay">¿SOS DESARROLLADOR?</h3>
+          </div>
+          <div class="card-content">
+            <div class="card-short-desc">
+                <p>Una alianza estratégica, no una inmobiliaria más. Nos convertimos en tu brazo comercial para que vos te enfoques en construir.</p>
+                <button class="btn-card-toggle">Más Info</button>
+            </div>
+            <div class="card-full-desc">
+                <p>Una alianza estratégica, no una inmobiliaria más. Nos convertimos en tu brazo comercial para que vos te enfoques en construir.</p>
+                <ul>
+                  <li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li>
+                  <li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar la marca de tu proyecto.</li>
+                  <li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato, gestionando la renta temporaria para que tu proyecto se financie solo mientras se vende.</li>
+                </ul>
+                <p class="card-highlight">Dejanos la comercialización a nosotros.</p>
+                <a href="https://gringo.estate#contact" class="btn-card">Colaborar</a>
+                <button class="btn-card-toggle">Menos Info</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Artículo del Catálogo 7: PERSONAL SHOPPER INMOBILIARIO -->
+        <div class="service-card-stacked">
+          <div class="card-media">
+            <img src="https://images.unsplash.com/photo-1549442999-ed32f22c608f?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="[Image of Una persona sonriendo mientras recibe las llaves de un departamento.]" class="card-image">
+            <h3 class="card-title-overlay">PERSONAL SHOPPER INMOBILIARIO</h3>
+          </div>
+          <div class="card-content">
+            <div class="card-short-desc">
+                <p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p>
+                <button class="btn-card-toggle">Más Info</button>
+            </div>
+            <div class="card-full-desc">
+                <p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p>
+                <ul>
+                  <li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li>
+                  <li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li>
+                  <li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li>
+                </ul>
+                <p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p>
+                <p class="card-highlight">Asesorate con profesionales. Delegá la búsqueda para que una de las decisiones más importantes de tu vida, sea la correcta.</p>
+                <a href="https://gringo.estate#contact" class="btn-card">Solicitar Personal Shopper</a>
+                <button class="btn-card-toggle">Menos Info</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Artículo del Catálogo 8: LOCALES COMERCIALES Y OFICINAS -->
+        <div class="service-card-stacked">
+          <div class="card-media">
+            <img src="https://images.unsplash.com/photo-1558980394-ea46788b7705?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="[Image of Una imagen moderna y profesional de tu local local-gringoestate.png.]" class="card-image">
+            <h3 class="card-title-overlay">LOCALES COMERCIALES Y OFICINAS</h3>
+          </div>
+          <div class="card-content">
+            <div class="card-short-desc">
+                <p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p>
+                <button class="btn-card-toggle">Más Info</button>
+            </div>
+            <div class="card-full-desc">
+                <p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p>
+                <ul>
+                  <li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li>
+                  <li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li>
+                  <li>✅ Asesoramiento integral en contratos comerciales y negociación.</li>
+                </ul>
+                <p class="card-highlight">Llevá tu negocio al siguiente nivel.</p>
+                <a href="https://gringo.estate#contact" class="btn-card">Consultar por locales</a>
+                <button class="btn-card-toggle">Menos Info</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </section>
-  
+  <!-- === FIN NUEVA SECCIÓN DE SERVICIOS === -->
+    
   <section id="ai-tools">
     <h2 class="section-title">HERRAMIENTAS CON IA ✨</h2>
     <p style="text-align:center;max-width:600px;margin:-1rem auto 2rem;color:#ccc;line-height:1.6;">
@@ -435,7 +913,8 @@
                 }
             });
         };
-        document.querySelectorAll('.about-text, .about-img, .service-card, .ai-tool-card, .portfolio-item, .contact-wrapper').forEach(animateOnScroll);
+        // Se ha removido '.service-card' de aquí, ya que la nueva sección de servicios tiene su propia animación
+        document.querySelectorAll('.about-text, .about-img, .ai-tool-card, .portfolio-item, .contact-wrapper').forEach(animateOnScroll);
         gsap.from("h2.section-title", { opacity: 0, y: 50, duration: 1, ease: "power2.out", scrollTrigger: { trigger: "h2.section-title", start: "top 90%", toggleActions: "play none none none" } });
 
 
@@ -443,7 +922,7 @@
         gsap.to(".hero-el", { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: "power3.out", delay: 0.2 });
         gsap.set(".hero-el", {y: 30});
 
-        // --- EFECTO PARALLAX Y 3D ---
+        // --- EFECTO PARALLAX Y 3D EN HERO ---
         const hero = document.querySelector('.hero');
         ScrollTrigger.matchMedia({
             // --- EFECTOS SOLO PARA DESKTOP ---
@@ -489,13 +968,27 @@
             // --- EFECTOS SOLO PARA MÓVIL ---
             "(max-width: 1024px)": function() {
                 const handleOrientation = (event) => {
-                    const { beta, gamma } = event; 
+                    const { beta, gamma } = event; // beta (rotación X), gamma (rotación Y)
                     if (beta !== null && gamma !== null) {
-                        const y = (beta - 45) / 45; 
-                        const x = gamma / 45;      
+                        // Normaliza los valores para un rango de -1 a 1, o similar
+                        const y = (beta - 45) / 45; // Asume que el centro es 45 grados de inclinación
+                        const x = gamma / 45;      // Asume que el centro es 0 grados de rotación
+
+                        // Animación para el contenedor general del hero
                         gsap.to(hero, {
                             rotateY: x * 15,
                             rotateX: y * 15,
+                            duration: 0.5,
+                            ease: 'power1.out'
+                        });
+
+                        // NUEVA ANIMACIÓN 3D PARA EL TÍTULO h1 EN MÓVILES
+                        gsap.to(".hero h1", {
+                            x: x * 10, // Pequeño movimiento horizontal
+                            y: y * 10, // Pequeño movimiento vertical
+                            rotateY: x * 5, // Rotación 3D sutil
+                            rotateX: -y * 5, // Rotación 3D sutil
+                            scale: 1.02, // Ligeramente más grande
                             duration: 0.5,
                             ease: 'power1.out'
                         });
@@ -530,25 +1023,22 @@
 
         // --- CURSOR PERSONALIZADO ---
         const cursor = document.querySelector('.custom-cursor');
-        cursor.style.display = 'block';
+        // Asegúrate de que el cursor personalizado solo se muestre en desktop o dispositivos con mouse
+        if (window.matchMedia("(pointer: fine)").matches) {
+            cursor.style.display = 'block';
+            const updateCursorPos = (e) => {
+                gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.2, ease: 'power2.out' });
+            };
+            window.addEventListener('mousemove', updateCursorPos);
+            document.addEventListener('mouseleave', () => cursor.classList.add('hidden'));
+            document.addEventListener('mouseenter', () => cursor.classList.remove('hidden'));
+        } else {
+            // Ocultar el cursor personalizado en dispositivos táctiles
+            cursor.style.display = 'none';
+        }
+        // Para dispositivos táctiles, solo aseguramos que el cursor no aparezca
+        window.addEventListener('touchstart', () => cursor.style.display = 'none', { passive: true });
 
-        const updateCursorPos = (e) => {
-            let x, y;
-            if (e.touches) {
-                x = e.touches[0].clientX;
-                y = e.touches[0].clientY;
-            } else {
-                x = e.clientX;
-                y = e.clientY;
-            }
-            gsap.to(cursor, { x: x, y: y, duration: 0.2, ease: 'power2.out' });
-        };
-        window.addEventListener('mousemove', updateCursorPos);
-        window.addEventListener('touchmove', updateCursorPos, {passive: true});
-        document.addEventListener('mouseleave', () => cursor.classList.add('hidden'));
-        document.addEventListener('mouseenter', () => cursor.classList.remove('hidden'));
-        document.addEventListener('touchstart', () => cursor.classList.remove('hidden'), {passive: true});
-        document.addEventListener('touchend', () => cursor.classList.add('hidden'));
 
         // --- FORMULARIO DINÁMICO ---
         const interestSelect = document.getElementById('interest-select');
@@ -561,7 +1051,7 @@
           }
         });
 
-        // --- MENÚ HAMBURGUESA ANIMADO ---
+        // --- MENÚ HAMBURGUESA ANIMADO (CORREGIDO) ---
         const menuToggle = document.getElementById('menu-toggle');
         const mobileMenu = document.getElementById('mobile-menu');
         const mobileLinks = mobileMenu.querySelectorAll('li');
@@ -571,11 +1061,11 @@
         const mobileMenuTimeline = gsap.timeline({ paused: true, reversed: true });
         mobileMenuTimeline
             .to(mobileMenu, { autoAlpha: 1, duration: 0.3, ease: 'power2.out' })
-            .to(mobileMenu, { pointerEvents: 'all' }, '<')
+            .to(mobileMenu, { pointerEvents: 'all' }, '<') // Habilitar eventos de puntero cuando el menú está visible
             .from(mobileLinks, { x: -30, opacity: 0, stagger: 0.1, duration: 0.4, ease: 'power2.out' }, "-=0.2");
 
         mobileMenuTimeline.eventCallback("onReverseComplete", () => {
-             gsap.set(mobileMenu, { pointerEvents: 'none' });
+            gsap.set(mobileMenu, { pointerEvents: 'none' }); // Deshabilitar eventos de puntero cuando el menú está oculto
         });
 
         menuToggle.addEventListener('click', () => {
@@ -589,6 +1079,129 @@
                 mobileMenuTimeline.reverse();
             });
         });
+
+        // --- SECCIÓN DE SERVICIOS CON SCROLL HORIZONTAL Y APILAMIENTO (INICIO) ---
+        const horizontalWrapper = document.querySelector('.horizontal-scroll-wrapper');
+        const cardsContainer = document.querySelector('.cards-container');
+        const serviceCards = gsap.utils.toArray('.service-card-stacked'); // Todas las tarjetas
+        const numCards = serviceCards.length;
+
+        if (serviceCards.length > 0) {
+            // Calculamos el ancho total del contenedor de tarjetas más el gap
+            let totalCardsWidth = 0;
+            const cardGap = parseFloat(getComputedStyle(cardsContainer).gap) || 0;
+
+            serviceCards.forEach(card => {
+                totalCardsWidth += card.offsetWidth + cardGap;
+            });
+            totalCardsWidth -= cardGap; // Remover el último gap
+
+            const cardWidth = serviceCards[0].offsetWidth; // Asumimos que todas tienen el mismo ancho
+            const availableViewportWidth = window.innerWidth;
+            
+            // Calculamos el punto de inicio para que la primera tarjeta no sea visible al principio
+            // La posición X inicial del contenedor para que la primera tarjeta esté fuera de la pantalla a la derecha
+            // Queremos que el borde izquierdo de la primera tarjeta esté en el borde derecho del viewport
+            const xStart = availableViewportWidth - parseFloat(getComputedStyle(cardsContainer).paddingLeft);
+
+            // Calculamos el punto final para que la última tarjeta salga del viewport a la izquierda
+            // Queremos que el borde derecho de la última tarjeta esté en el borde izquierdo del viewport
+            const xEnd = -(totalCardsWidth + parseFloat(getComputedStyle(cardsContainer).paddingRight));
+
+            // La distancia total que el contenedor de tarjetas necesita moverse horizontalmente
+            const distanceToMoveHorizontal = Math.abs(xEnd - xStart);
+
+            // Factor para determinar cuánto scroll vertical se necesita para mover una unidad horizontal
+            const scrollFactor = 1.8; // Ajustado para un scroll más fluido y natural
+
+            // La altura de la sección principal para habilitar el scroll vertical necesario
+            // Se añade un offset para asegurar que el ScrollTrigger tenga un rango de scroll
+            document.getElementById('services-stacked').style.height = `${distanceToMoveHorizontal * scrollFactor + window.innerHeight}px`;
+
+
+            // Crear un ScrollTrigger que ancla el contenedor horizontal
+            ScrollTrigger.create({
+                trigger: horizontalWrapper,
+                pin: true, 
+                start: "top top", // Comienza cuando el contenedor se pega en la parte superior
+                end: `+=${distanceToMoveHorizontal * scrollFactor}px`, // El final del scroll vertical que mapea el horizontal
+                scrub: 1, // Suavidad de la sincronización con el scroll
+                // markers: true, // Descomentar para depurar el ScrollTrigger
+                onUpdate: (self) => {
+                    const progress = self.progress; 
+                    // Calcula la posición horizontal del contenedor de tarjetas
+                    const xTranslation = xStart + (xEnd - xStart) * progress;
+
+                    gsap.to(cardsContainer, {
+                        x: xTranslation,
+                        ease: "none",
+                        duration: 1, 
+                        overwrite: "auto"
+                    });
+
+                    // Efecto de apilamiento y retracción
+                    serviceCards.forEach((card, index) => {
+                        const cardRect = card.getBoundingClientRect();
+                        const viewportCenter = window.innerWidth / 2;
+                        const cardCenter = cardRect.left + cardRect.width / 2;
+                        
+                        // Normaliza la distancia al centro
+                        const distance = cardCenter - viewportCenter;
+                        const normalizedDistance = Math.abs(distance) / (window.innerWidth / 2); // Distancia del 0 a ~1 (o más)
+
+                        let scale = 1;
+                        let opacity = 1;
+                        let rotationY = 0;
+                        let translateX = 0; // Para el efecto de "apilado"
+
+                        if (distance > (cardWidth / 2) * 0.5) { // Tarjeta a la derecha del centro (próxima a aparecer)
+                            scale = 1 - Math.min(0.2, (distance - cardWidth/2 * 0.5) / (window.innerWidth)); /* Se encoge un poco */
+                            opacity = 1; 
+                            rotationY = -Math.min(15, (distance / window.innerWidth) * 20); 
+                            translateX = -Math.min(100, (distance / window.innerWidth) * 150); 
+                        } else if (distance < -(cardWidth / 2) * 0.5) { // Tarjeta a la izquierda del centro (ya pasó)
+                            scale = 1 - Math.min(0.3, (Math.abs(distance) - cardWidth/2 * 0.5) / (window.innerWidth)); /* Se encoge más */
+                            opacity = 1 - Math.min(0.9, (Math.abs(distance) / window.innerWidth) * 1.5); /* Se desvanece */
+                            rotationY = Math.min(15, (Math.abs(distance) / window.innerWidth) * 20); 
+                            translateX = Math.min(100, (Math.abs(distance) / window.innerWidth) * 150); 
+                        }
+
+                        gsap.to(card, {
+                            scale: Math.max(0, scale), // Mínimo de escala para que pueda desaparecer
+                            opacity: Math.max(0, opacity), // Mínimo de opacidad
+                            rotationY: rotationY,
+                            x: translateX, 
+                            z: Math.abs(rotationY) * 2, 
+                            ease: "power2.out",
+                            duration: 0.8,
+                            overwrite: "auto",
+                        });
+                    });
+                }
+            });
+
+            // Ajuste adicional para ScrollTrigger en caso de redimensionamiento
+            ScrollTrigger.addEventListener("refreshInit", () => {
+                totalCardsWidth = 0;
+                const currentCardGap = parseFloat(getComputedStyle(cardsContainer).gap) || 0;
+                serviceCards.forEach(card => {
+                    totalCardsWidth += card.offsetWidth + currentCardGap;
+                });
+                totalCardsWidth -= currentCardGap;
+
+                const newCardWidth = serviceCards[0].offsetWidth;
+                const newAvailableViewportWidth = window.innerWidth;
+                const newStartX = newAvailableViewportWidth - parseFloat(getComputedStyle(cardsContainer).paddingLeft);
+                const newEndX = -(totalCardsWidth + parseFloat(getComputedStyle(cardsContainer).paddingRight));
+                const newDistanceToMoveHorizontal = Math.abs(newEndX - newStartX);
+
+                document.getElementById('services-stacked').style.height = `${newDistanceToMoveHorizontal * scrollFactor + window.innerHeight}px`;
+            });
+        } else {
+            console.warn('No se encontraron tarjetas de servicio para el efecto de scroll horizontal.');
+        }
+        // --- SECCIÓN DE SERVICIOS CON SCROLL HORIZONTAL Y APILAMIENTO (FIN) ---
+
 
         // --- SCRIPT PARA LAS HERRAMIENTAS CON GEMINI API ---
         async function callGemini(prompt, resultElement, loaderElement) {
@@ -642,6 +1255,31 @@
             }
             const prompt = `Actúa como un analista de Real Estate experto en Buenos Aires, con un estilo directo y "sin corbata". Responde a la siguiente consulta sobre el mercado inmobiliario porteño: "${userInput}". Si se pide una comparación de zonas, proporciona un análisis conciso con una breve descripción de cada barrio y una lista de pros y contras para invertir. Si se pregunta por el valor del metro cuadrado (m²), proporciona un rango de precios estimado para la zona o barrio mencionado, aclarando que es un valor de referencia y puede variar.`;
             callGemini(prompt, analysisResult, loaderAnalysis);
+        });
+
+        // --- Lógica para el botón Más Info / Menos Info ---
+        document.querySelectorAll('.service-card-stacked').forEach(card => {
+            const toggleButtons = card.querySelectorAll('.btn-card-toggle');
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const isExpanded = card.classList.toggle('expanded');
+                    
+                    // Actualiza el texto de todos los botones de toggle en esta tarjeta
+                    toggleButtons.forEach(btn => {
+                        if (isExpanded) {
+                            btn.textContent = 'Menos Info';
+                        } else {
+                            btn.textContent = 'Más Info';
+                        }
+                    });
+
+                    // Si se expande, asegura que el scroll de la página no se vea afectado negativamente
+                    // Esto es opcional, pero puede mejorar la UX si la tarjeta se hace muy grande
+                    if (isExpanded) {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                });
+            });
         });
     });
   </script>
