@@ -110,12 +110,10 @@
     #services-stacked h2.section-title, #ai-tools h2.section-title {color:#fff;}
     #ai-tools, #contact { background-color: var(--dark-bg); }
     
-    /* --- ESTRUCTURA SCROLL HORIZONTAL CORREGIDA --- */
     #services-stacked { background-color: var(--dark); color: #fff; padding-top: 4.5rem; padding-bottom: 4.5rem; }
     #services-stacked p.subtitle { text-align: center; max-width: 700px; margin: -1rem auto 2rem; padding: 0 1rem; color: #ccc; z-index: 2; position: relative; }
     
-    .horizontal-scroll-section { position: relative; /* El trigger para GSAP */ }
-    
+    .horizontal-scroll-section { position: relative; }
     .horizontal-scroll-wrapper { 
         position: sticky; 
         top: 0; 
@@ -125,13 +123,12 @@
         width: 100%; 
         overflow: hidden;
     }
-    
     .cards-container { 
         display: flex; 
         gap: clamp(2rem, 5vw, 4rem); 
         padding: 0 calc(50vw - clamp(150px, 30vw, 350px));
         position: relative;
-        left: 0; /* GSAP lo moverá */
+        left: 0;
     }
 
     .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; transform-style: preserve-3d; will-change: transform; transition: transform 0.4s ease, box-shadow 0.4s ease; }
@@ -151,7 +148,10 @@
     .card-full-details { display: none; flex-direction: column; width: 100%; height: 100%; padding: 2rem; opacity: 0; transition: opacity 0.4s 0.2s ease; }
     .service-card-stacked.is-expanded .card-full-details { display: flex; opacity: 1; }
     .card-full-details h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; }
-    .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; color: #e0e0e0; line-height: 1.7; }
+    .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; line-height: 1.7; }
+    /* CAMBIO CLAVE: Regla específica para arreglar el texto negro */
+    .card-full-content-scroll p, .card-full-content-scroll li, .card-full-content-scroll h4 { color: #e0e0e0 !important; }
+
     .card-full-content-scroll::-webkit-scrollbar { width: 8px; }
     .card-full-content-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
     .card-full-content-scroll::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 10px; }
@@ -167,6 +167,13 @@
     .btn-toggle-collapse:hover { background: #555; color: #fff; }
     #overlay-backdrop { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.8); z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
     #overlay-backdrop.visible { opacity: 1; pointer-events: all; }
+
+    /* CAMBIO CLAVE: Contenedor para arreglar el solapamiento de secciones */
+    .content-after-sticky {
+      position: relative;
+      z-index: 10;
+      background-color: var(--dark-bg); /* Asegura que tenga fondo y no sea transparente */
+    }
 
     @media (max-width: 768px) {
         .service-card-stacked { width: 80vw; }
@@ -382,84 +389,86 @@
         </div>
     </section>
     
-    <section id="portfolio" class="section-full-width" style="background-color: var(--dark); padding-top: 8rem; padding-bottom: 4.5rem;">
-        <h2 class="section-title" style="color: #fff;">PROYECTOS <span>DESTACADOS</span></h2>
-        <div class="portfolio-grid" style="max-width: 1200px; margin: auto; padding: 0 1.5rem;">
-            <div class="portfolio-item"> <img src="proyecto-ambar.jpg" alt="Fachada del proyecto Ámbar en Recoleta" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Ámbar · Recoleta (15 Unidades)</span> <div class="view-more">Ver más →</div> </div> </div>
-            <div class="portfolio-item"> <img src="proyecto-charlone.jpg" alt="Render de la Torre Charlone en Colegiales" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Torre Charlone · Colegiales</span> <div class="view-more">Ver más →</div> </div> </div>
-            <div class="portfolio-item"> <img src="proyecto-nunez.jpg" alt="Exterior del proyecto Casona en Núñez" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Casona · Núñez</span> <div class="view-more">Ver más →</div> </div> </div>
-            <div class="portfolio-item"> <img src="proyecto-palermo.jpg" alt="Render del proyecto Concepción Live en Palermo" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Concepción Live · Palermo</span> <div class="view-more">Ver más →</div> </div> </div>
-        </div>
-    </section>
-    
-    <section id="ai-tools" class="section-full-width">
-        <h2 class="section-title">HERRAMIENTAS CON <span>IA ✨</span></h2>
-        <p style="text-align:center;max-width:600px;margin:-1rem auto 2rem;color:#ccc;line-height:1.6; padding: 0 1rem;">
-            Potenciá tus proyectos con estas herramientas exclusivas, diseñadas para darte una ventaja en el mercado.
-        </p>
-        <div style="max-width: 1200px; margin: auto; padding: 0 1.5rem;">
-            <div class="ai-tool-card">
-                <h3>Generador de Descripciones de Propiedades</h3>
-                <p>Ingresá los datos clave de tu propiedad y creá una descripción profesional y atractiva en segundos.</p>
-                <textarea id="property-input" placeholder="Ej: 3 ambientes en Palermo, 75m2, balcón con vista abierta, muy luminoso, piso alto, cerca del subte D..."></textarea>
-                <div style="text-align:center; margin-top:1rem;">
-                    <button id="generate-description-btn">Generar Descripción ✨</button>
-                    <div id="loader-description" class="loader"></div>
-                </div>
-                <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div>
+    <div class="content-after-sticky">
+        <section id="portfolio" class="section-full-width" style="background-color: var(--dark); padding-top: 8rem; padding-bottom: 4.5rem;">
+            <h2 class="section-title" style="color: #fff;">PROYECTOS <span>DESTACADOS</span></h2>
+            <div class="portfolio-grid" style="max-width: 1200px; margin: auto; padding: 0 1.5rem;">
+                <div class="portfolio-item"> <img src="proyecto-ambar.jpg" alt="Fachada del proyecto Ámbar en Recoleta" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Ámbar · Recoleta (15 Unidades)</span> <div class="view-more">Ver más →</div> </div> </div>
+                <div class="portfolio-item"> <img src="proyecto-charlone.jpg" alt="Render de la Torre Charlone en Colegiales" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Torre Charlone · Colegiales</span> <div class="view-more">Ver más →</div> </div> </div>
+                <div class="portfolio-item"> <img src="proyecto-nunez.jpg" alt="Exterior del proyecto Casona en Núñez" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Casona · Núñez</span> <div class="view-more">Ver más →</div> </div> </div>
+                <div class="portfolio-item"> <img src="proyecto-palermo.jpg" alt="Render del proyecto Concepción Live en Palermo" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Concepción Live · Palermo</span> <div class="view-more">Ver más →</div> </div> </div>
             </div>
-            <div class="ai-tool-card">
-                <h3>Análisis de Zonas y Valor M²</h3>
-                <p>¿Dudando entre dos barrios? ¿Querés saber el valor de referencia del m² en una zona? Pedí un análisis y obtené una respuesta clara.</p>
-                <textarea id="zones-input" placeholder="Ej: Comparar inversión en Recoleta vs. Colegiales O 'Valor del m² en Palermo'"></textarea>
-                <div style="text-align:center; margin-top:1rem;">
-                    <button id="generate-analysis-btn">Generar Análisis ✨</button>
-                    <div id="loader-analysis" class="loader"></div>
-                </div>
-                <div id="analysis-result" class="ai-result">El análisis generado aparecerá aquí...</div>
-            </div>
-            <div style="text-align:center; margin-top: 5rem; padding-top: 2rem;">
-                <h3 style="font-family:'Bebas Neue', sans-serif; color:var(--primary);">MÁS HERRAMIENTAS EN CONSTRUCCIÓN...</h3>
-                <p style="padding: 0 1rem; color: #aaa;">
-                    El arsenal de GringoEstate seguirá creciendo. Pronto integraremos una <strong>Calculadora de Ajuste de Alquiler por IPC</strong>, un <strong>Asistente para Redactar Contratos</strong> y otras herramientas para que tomes las mejores decisiones.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section id="contact" class="section-full-width">
-        <div class="contact-wrapper" style="max-width: 1100px; margin: auto; padding: 0 1.5rem;">
-            <div class="contact-info">
-                <h2 class="section-title" style="text-align: left; color: var(--primary);">HABLEMOS</h2>
-                <p>Contame tu proyecto o propiedad y descubramos juntos cómo maximizar su potencial. Agendemos una llamada sin compromiso.</p>
-                <div class="circulo-decorativo"></div>
-            </div>
-            <div class="contact-form-wrapper">
-                <form id="contact-form" action="https://formspree.io/f/mldnnkev" method="POST">
-                    <input type="text" name="name" placeholder="Tu Nombre" required>
-                    <input type="email" name="email" placeholder="Tu Email" required>
-                    <input type="tel" name="phone" placeholder="Tu Celular" required>
-                    <select name="interest" id="interest-select" required>
-                        <option value="" disabled selected>Estoy interesado/a en...</option>
-                        <option value="Vender mi propiedad">Vender mi propiedad</option>
-                        <option value="Ayuda en la busqueda de mi proximo depto">Ayuda en la búsqueda de mi próximo depto</option>
-                        <option value="Potenciar mi Airbnb">Potenciar mi Airbnb</option>
-                        <option value="Invertir en proyectos">Invertir en proyectos</option>
-                        <option value="Asesoría para Desarrolladores">Asesoría para Desarrolladores</option>
-                        <option value="Otro">Otro</option>
-                    </select>
-                    <div id="property-details">
-                        <input type="text" name="property_address" placeholder="Dirección de la propiedad">
-                        <input type="text" name="property_zone" placeholder="Zona / Barrio">
-                        <input type="text" name="property_rooms" placeholder="Ambientes">
-                        <input type="text" name="property_size" placeholder="Superficie (m²)">
+        </section>
+        
+        <section id="ai-tools" class="section-full-width">
+            <h2 class="section-title">HERRAMIENTAS CON <span>IA ✨</span></h2>
+            <p style="text-align:center;max-width:600px;margin:-1rem auto 2rem;color:#ccc;line-height:1.6; padding: 0 1rem;">
+                Potenciá tus proyectos con estas herramientas exclusivas, diseñadas para darte una ventaja en el mercado.
+            </p>
+            <div style="max-width: 1200px; margin: auto; padding: 0 1.5rem;">
+                <div class="ai-tool-card">
+                    <h3>Generador de Descripciones de Propiedades</h3>
+                    <p>Ingresá los datos clave de tu propiedad y creá una descripción profesional y atractiva en segundos.</p>
+                    <textarea id="property-input" placeholder="Ej: 3 ambientes en Palermo, 75m2, balcón con vista abierta, muy luminoso, piso alto, cerca del subte D..."></textarea>
+                    <div style="text-align:center; margin-top:1rem;">
+                        <button id="generate-description-btn">Generar Descripción ✨</button>
+                        <div id="loader-description" class="loader"></div>
                     </div>
-                    <textarea name="message" rows="4" placeholder="Contame un poco sobre tu proyecto..." required></textarea>
-                    <button type="submit" class="btn-enviar-mensaje">Enviar Mensaje</button>
-                </form>
+                    <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div>
+                </div>
+                <div class="ai-tool-card">
+                    <h3>Análisis de Zonas y Valor M²</h3>
+                    <p>¿Dudando entre dos barrios? ¿Querés saber el valor de referencia del m² en una zona? Pedí un análisis y obtené una respuesta clara.</p>
+                    <textarea id="zones-input" placeholder="Ej: Comparar inversión en Recoleta vs. Colegiales O 'Valor del m² en Palermo'"></textarea>
+                    <div style="text-align:center; margin-top:1rem;">
+                        <button id="generate-analysis-btn">Generar Análisis ✨</button>
+                        <div id="loader-analysis" class="loader"></div>
+                    </div>
+                    <div id="analysis-result" class="ai-result">El análisis generado aparecerá aquí...</div>
+                </div>
+                <div style="text-align:center; margin-top: 5rem; padding-top: 2rem;">
+                    <h3 style="font-family:'Bebas Neue', sans-serif; color:var(--primary);">MÁS HERRAMIENTAS EN CONSTRUCCIÓN...</h3>
+                    <p style="padding: 0 1rem; color: #aaa;">
+                        El arsenal de GringoEstate seguirá creciendo. Pronto integraremos una <strong>Calculadora de Ajuste de Alquiler por IPC</strong>, un <strong>Asistente para Redactar Contratos</strong> y otras herramientas para que tomes las mejores decisiones.
+                    </p>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+
+        <section id="contact" class="section-full-width">
+            <div class="contact-wrapper" style="max-width: 1100px; margin: auto; padding: 0 1.5rem;">
+                <div class="contact-info">
+                    <h2 class="section-title" style="text-align: left; color: var(--primary);">HABLEMOS</h2>
+                    <p>Contame tu proyecto o propiedad y descubramos juntos cómo maximizar su potencial. Agendemos una llamada sin compromiso.</p>
+                    <div class="circulo-decorativo"></div>
+                </div>
+                <div class="contact-form-wrapper">
+                    <form id="contact-form" action="https://formspree.io/f/mldnnkev" method="POST">
+                        <input type="text" name="name" placeholder="Tu Nombre" required>
+                        <input type="email" name="email" placeholder="Tu Email" required>
+                        <input type="tel" name="phone" placeholder="Tu Celular" required>
+                        <select name="interest" id="interest-select" required>
+                            <option value="" disabled selected>Estoy interesado/a en...</option>
+                            <option value="Vender mi propiedad">Vender mi propiedad</option>
+                            <option value="Ayuda en la busqueda de mi proximo depto">Ayuda en la búsqueda de mi próximo depto</option>
+                            <option value="Potenciar mi Airbnb">Potenciar mi Airbnb</option>
+                            <option value="Invertir en proyectos">Invertir en proyectos</option>
+                            <option value="Asesoría para Desarrolladores">Asesoría para Desarrolladores</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                        <div id="property-details">
+                            <input type="text" name="property_address" placeholder="Dirección de la propiedad">
+                            <input type="text" name="property_zone" placeholder="Zona / Barrio">
+                            <input type="text" name="property_rooms" placeholder="Ambientes">
+                            <input type="text" name="property_size" placeholder="Superficie (m²)">
+                        </div>
+                        <textarea name="message" rows="4" placeholder="Contame un poco sobre tu proyecto..." required></textarea>
+                        <button type="submit" class="btn-enviar-mensaje">Enviar Mensaje</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
   </main>
   
   <footer>
@@ -564,30 +573,28 @@
         }
 
         if (window.innerWidth < 768) {
-          // Si estamos en móvil, reseteamos cualquier estilo de la animación
           gsap.set(horizontalSection, { height: 'auto' });
-          gsap.set(cardsContainer, { x: 0, display: 'block', padding: '0 1.5rem' });
+          gsap.set(cardsContainer, { x: 0, display: 'block' });
+          gsap.set('.horizontal-scroll-wrapper', { position: 'static', height: 'auto' });
           return;
         }
 
-        // En desktop, restauramos los estilos flex
+        gsap.set('.horizontal-scroll-wrapper', { position: 'sticky', height: '100vh'});
         gsap.set(cardsContainer, { display: 'flex' });
-
-        // Calculamos el ancho total que las tarjetas ocupan al scrollear
+        
         const scrollWidth = cardsContainer.offsetWidth - window.innerWidth;
         
-        // La altura de la sección será igual al recorrido horizontal para mapear el scroll
         gsap.set(horizontalSection, { height: scrollWidth + 'px' });
 
         horizontalScrollTween = gsap.to(cardsContainer, {
           x: -scrollWidth,
-          ease: "none", // El movimiento debe ser lineal con el scroll
+          ease: "none",
           scrollTrigger: {
             trigger: horizontalSection,
             start: "top top",
-            end: () => `+=${scrollWidth}`, // El final es la altura que le dimos
+            end: () => `+=${scrollWidth}`,
             pin: ".horizontal-scroll-wrapper",
-            scrub: 1, // Suaviza el movimiento
+            scrub: 0.5, // Scrub más reactivo para mayor fluidez
             invalidateOnRefresh: true
           }
         });
@@ -596,9 +603,11 @@
       const overlayBackdrop = document.getElementById('overlay-backdrop');
       function toggleCardExpansion(cardElement, expand) {
         if (!cardElement || !overlayBackdrop) return;
+        const st = ScrollTrigger.getByScroller(window); // Get all scrolltrigers
+
         if (expand) {
             cardElement.dataset.scrollY = window.scrollY;
-            if (ScrollTrigger.getById("horizontal")) ScrollTrigger.getById("horizontal").disable();
+            st.forEach(t => t.disable()); // Disable all scrolltriggers
             overlayBackdrop.classList.add('visible');
             cardElement.classList.add('is-expanded');
             document.body.classList.add('no-scroll');
@@ -608,10 +617,7 @@
             document.body.classList.remove('no-scroll');
             const savedScrollY = cardElement.dataset.scrollY;
             if (savedScrollY) { window.scrollTo(0, parseFloat(savedScrollY)); }
-            if (ScrollTrigger.getById("horizontal")) { 
-              ScrollTrigger.getById("horizontal").enable(); 
-              ScrollTrigger.refresh();
-            }
+            st.forEach(t => t.enable());
         }
       }
       
@@ -629,10 +635,8 @@
           });
       }
 
-      // Ejecutar al cargar y al redimensionar
       setupHorizontalScroll();
       window.addEventListener('resize', () => {
-        // Un debounce simple para no ejecutar la función en cada pixel de resize
         setTimeout(() => {
           setupHorizontalScroll();
           ScrollTrigger.refresh(true);
