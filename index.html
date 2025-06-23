@@ -69,10 +69,63 @@
     nav a.logo{font-family:'Bebas Neue', sans-serif;font-weight:700;letter-spacing:1px;font-size:1.5rem;color:#fff;} 
     nav a.logo span {color: var(--primary);}
     nav ul{list-style:none;font-weight:700;}
-    nav .nav-links-mobile { display: none; position: absolute; top: 100%; right: 1rem; background: rgba(0,0,0,0.95); backdrop-filter: blur(5px); border-radius: 8px; padding: 1.5rem 1rem; opacity: 0; pointer-events: none;}
-    nav .nav-links-mobile ul { flex-direction: column; gap: 1.5rem; align-items: flex-start;}
-    nav ul a{color:#fff;transition: color .2s; position: relative; padding: 0.25rem 0;}
-    nav ul a:hover{color:var(--primary);}
+    
+    /* === NUEVOS ESTILOS PARA MENÚ MÓVIL SOFISTICADO === */
+    nav .nav-links-mobile { 
+        visibility: hidden; 
+        position: fixed; /* Ocupa toda la pantalla */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: rgba(10, 10, 10, 0.9); 
+        backdrop-filter: blur(10px);
+        padding: 6rem 1.5rem 2rem;
+        opacity: 0; 
+        pointer-events: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    nav .nav-links-mobile ul { 
+        flex-direction: column; 
+        gap: 0; /* Sin espacio, el padding del 'a' lo maneja */
+        align-items: center;
+        width: 100%;
+        text-align: center;
+    }
+    nav .nav-links-mobile li {
+        width: 100%;
+        opacity: 0; /* Para animación individual */
+    }
+    nav .nav-links-mobile a {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        padding: 1.5rem 1rem;
+        font-size: 1.5rem;
+        font-family: 'Bebas Neue', sans-serif;
+        letter-spacing: 1.5px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        transition: color .3s, background-color .3s;
+    }
+    nav .nav-links-mobile li:first-child a {
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    nav .nav-links-mobile a:hover {
+        background-color: rgba(255, 191, 0, 0.1);
+        color: var(--primary);
+    }
+    .menu-item-number {
+        font-size: 0.8rem;
+        color: var(--primary);
+        opacity: 0.7;
+        margin-right: 1rem;
+        font-family: 'Roboto', sans-serif;
+        font-weight: 400;
+    }
+
     .nav-links-desktop {display: none;}
     
     .nav-links-desktop a { padding-bottom: 5px; }
@@ -92,7 +145,7 @@
         transform: scaleX(1);
     }
     
-    .menu-button {display: flex; flex-direction: column; justify-content: space-around; width: 24px; height: 24px; background: transparent; border: none; cursor: pointer; padding: 0; z-index: 10;}
+    .menu-button {display: flex; flex-direction: column; justify-content: space-around; width: 24px; height: 24px; background: transparent; border: none; cursor: pointer; padding: 0; z-index: 1001; /* Debe estar por encima del menú */}
     .menu-button .bar {display: block; width: 24px; height: 3px; background-color: white; border-radius: 10px; transition: all 0.3s ease-in-out;}
     .menu-button.open .bar1 {transform: rotate(45deg) translate(5px, 6px);}
     .menu-button.open .bar2 {opacity: 0;}
@@ -153,8 +206,8 @@
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); } 70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); } }
 
     footer{background:var(--dark);color:#94a3b8;padding:3rem 1rem;text-align:center;font-size:1rem;}
-    footer a{color: #94a3b8; transition: color .3s;}
-    footer a:hover{color: var(--primary);}
+    footer a{color: var(--primary); opacity: 0.8; transition: opacity .3s;}
+    footer a:hover{opacity: 1;}
 
     @media (min-width: 1024px) {
       .services-grid, .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
@@ -181,11 +234,11 @@
     </div>
     <div class="nav-links-mobile" id="mobile-menu">
       <ul>
-        <li><a href="#about">Sobre Mí</a></li>
-        <li><a href="#services">Servicios</a></li>
-        <li><a href="#portfolio">Proyectos</a></li>
-        <li><a href="#ai-tools">Herramientas IA ✨</a></li>
-        <li><a href="#contact">Contacto</a></li>
+        <li><a href="#about"><span class="menu-item-number">01</span>Sobre Mí</a></li>
+        <li><a href="#services"><span class="menu-item-number">02</span>Servicios</a></li>
+        <li><a href="#portfolio"><span class="menu-item-number">03</span>Proyectos</a></li>
+        <li><a href="#ai-tools"><span class="menu-item-number">04</span>Herramientas IA ✨</a></li>
+        <li><a href="#contact"><span class="menu-item-number">05</span>Contacto</a></li>
       </ul>
     </div>
     <button class="menu-button" id="menu-toggle">
@@ -357,7 +410,7 @@
         const animateOnScroll = (elem, index) => {
             gsap.from(elem, { 
                 opacity: 0,
-                x: (index % 2 === 0) ? -75 : 75, // Alterna la dirección X
+                x: (index % 2 === 0) ? -75 : 75,
                 duration: 1, 
                 ease: "power2.out",
                 scrollTrigger: {
@@ -375,9 +428,12 @@
         gsap.to(".hero-el", { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: "power3.out", delay: 0.2 });
         gsap.set(".hero-el", {y: 30});
 
-        // --- EFECTO PARALLAX Y 3D (SOLO DESKTOP) ---
+        // --- EFECTO PARALLAX Y 3D ---
+        const hero = document.querySelector('.hero');
         ScrollTrigger.matchMedia({
+            // --- EFECTOS SOLO PARA DESKTOP ---
             "(min-width: 1025px)": function() {
+                // Parallax de la foto de perfil
                 gsap.to(".about-img img", { yPercent: -20, ease: "none",
                     scrollTrigger: {
                         trigger: ".about",
@@ -387,14 +443,14 @@
                     }
                 });
 
-                const hero = document.querySelector('.hero');
+                // Efecto 3D del texto del Hero (basado en mouse)
                 const header = document.querySelector('header');
                 header.addEventListener('mousemove', (e) => {
                     const { clientX, clientY } = e;
                     const x = (clientX / window.innerWidth - 0.5) * 2;
                     const y = (clientY / window.innerHeight - 0.5) * 2;
                     gsap.to(hero, {
-                        rotateY: x * 8, // Rango de rotación reducido para sutileza
+                        rotateY: x * 8,
                         rotateX: -y * 8,
                         duration: 1,
                         ease: 'power2.out'
@@ -404,6 +460,7 @@
                      gsap.to(hero, { rotateY: 0, rotateX: 0, duration: 1, ease: 'power2.out'});
                 });
 
+                // Efecto magnético del botón
                 const magneticButton = document.querySelector('.hero .btn-primary');
                 if (magneticButton) {
                     magneticButton.addEventListener('mousemove', function(e) {
@@ -414,6 +471,25 @@
                     });
                     magneticButton.addEventListener('mouseleave', function() {
                         gsap.to(magneticButton, { x: 0, y: 0, duration: 0.7, ease: "elastic.out(1, 0.5)" });
+                    });
+                }
+            },
+            // --- EFECTOS SOLO PARA MÓVIL ---
+            "(max-width: 1024px)": function() {
+                // Efecto 3D del texto del Hero (basado en giroscopio)
+                if (window.DeviceOrientationEvent) {
+                    window.addEventListener('deviceorientation', (event) => {
+                        const { beta, gamma } = event;
+                        if (beta !== null && gamma !== null) {
+                            const y = (beta - 45) / 45; 
+                            const x = gamma / 45;      
+                            gsap.to(hero, {
+                                rotateY: x * 10,
+                                rotateX: y * 10,
+                                duration: 0.5,
+                                ease: 'power1.out'
+                            });
+                        }
                     });
                 }
             }
@@ -467,8 +543,8 @@
         
         const mobileMenuTimeline = gsap.timeline({ paused: true, reversed: true });
         mobileMenuTimeline
-            .to(mobileMenu, { autoAlpha: 1, pointerEvents: 'all', duration: 0.2, ease: 'power2.out' })
-            .from(mobileLinks, { y: 20, opacity: 0, stagger: 0.08, duration: 0.4, ease: 'power2.out' }, "-=0.1");
+            .to(mobileMenu, { autoAlpha: 1, pointerEvents: 'all', duration: 0.3, ease: 'power2.out' })
+            .from(mobileLinks, { x: -30, opacity: 0, stagger: 0.1, duration: 0.4, ease: 'power2.out' }, "-=0.2");
 
         menuToggle.addEventListener('click', () => {
             menuToggle.classList.toggle('open');
