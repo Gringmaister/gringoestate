@@ -11,15 +11,15 @@
   <meta name="author" content="GringoEstate">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" sizes="32x32" href="isologo.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="isologo.png">
-  <link rel="apple-touch-icon" href="isologo.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://placehold.co/32x32/FFBF00/000000?text=G">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://placehold.co/16x16/FFBF00/000000?text=G">
+  <link rel="apple-touch-icon" href="https://placehold.co/180x180/FFBF00/000000?text=G">
 
   <!-- Open Graph (para redes sociales como Facebook, LinkedIn) -->
   <meta property="og:title" content="GringoEstate – Real Estate sin corbata">
   <meta property="og:description" content="Transformamos el Real Estate con soluciones innovadoras. Venta en 90 días, gestión de alquiler temporario, personal shopper inmobiliario y más.">
-  <meta property="og:image" content="https://www.gringo.estate/og-image.jpg"> <!-- Cambiar por la URL absoluta de una imagen para compartir -->
-  <meta property="og:url" content="https://www.gringo.estate"> <!-- Cambiar por la URL final del sitio -->
+  <meta property="og:image" content="https://placehold.co/1200x630/111111/FFBF00?text=GringoEstate">
+  <meta property="og:url" content="https://www.gringo.estate">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_AR">
 
@@ -27,7 +27,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="GringoEstate – Real Estate sin corbata">
   <meta name="twitter:description" content="Transformamos el Real Estate con soluciones innovadoras. Venta en 90 días, gestión de alquiler temporario y más.">
-  <meta name="twitter:image" content="https://www.gringo.estate/og-image.jpg"> <!-- Cambiar por la URL absoluta de una imagen para compartir -->
+  <meta name="twitter:image" content="https://placehold.co/1200x630/111111/FFBF00?text=GringoEstate">
   
   <!-- Preconnect a Google Fonts para carga más rápida -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -71,9 +71,10 @@
     @media (pointer: fine) { .custom-cursor { opacity: 1; } }
     @media (pointer: coarse) { .custom-cursor { display: none; } body {cursor: auto;} a, button {cursor: pointer;} }
 
-    header{height:100vh;background:url('hero-bg.jpg') center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff; perspective: 1000px;}
+    /* CORRECCIÓN: Se eliminó la propiedad 'perspective' que podía causar renderizado borroso del texto. */
+    header{height:100vh;background:url('https://placehold.co/1920x1080/000000/FFFFFF?text=Hero+BG') center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;}
     header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}  
-    .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem; transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);}
+    .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem;}
     .hero > * { opacity: 0; }
     .hero img.isologo{ width: 160px; height: auto; margin: 0 auto 0.5rem auto; }
     .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem;}
@@ -154,12 +155,10 @@
         display: flex;  
         overflow: hidden;  
         position: relative;  
-        background: var(--card-bg); /* Fondo sólido */
-        padding: 2px; /* Espacio para el borde */
-        will-change: transform;  
-        transition: transform 0.4s ease, box-shadow 0.4s ease;  
-        cursor: pointer; /* Añadido para indicar interactividad */
-        transform: translateZ(0); /* Forzar aceleración de hardware */
+        background: var(--card-bg);
+        padding: 2px;
+        will-change: transform, opacity;
+        transition: transform 0.4s ease, box-shadow 0.4s ease, opacity 0.4s ease;
     }
     .service-card-stacked::before {
         content: '';
@@ -179,13 +178,13 @@
         background: var(--card-bg);
         width: 100%;
         height: 100%;
-        border-radius: 18px; /* Ligeramente menor al padre para que se vea el borde */
+        border-radius: 18px;
         position: relative;
         z-index: 3;
         overflow: hidden;
     }
 
-    .service-card-stacked:hover { transform: translateY(-10px) scale(1.02) translateZ(0); box-shadow: 0 25px 55px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 191, 0, 0.2); }
+    .service-card-stacked:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 25px 55px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 191, 0, 0.2); }
     .card-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform 0.5s ease; filter: brightness(0.7); }
     .service-card-stacked:hover .card-image { transform: scale(1.05); }
     .card-content-initial { position: relative; z-index: 3; padding: 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%); }
@@ -196,6 +195,7 @@
     .btn-toggle-expand:hover { color: #fff; transform: translateX(5px); }
     .btn-toggle-expand::after { content: '→'; margin-left: 0.5rem; display: inline-block; transition: transform 0.3s ease; }
 
+    /* CORRECCIÓN: Se ajustó la transición para que sea más fluida y controlada por CSS. Se eliminó el !important de transform. */
     .service-card-stacked.is-expanded { 
         position: fixed; 
         top: 50%; 
@@ -204,9 +204,9 @@
         height: 90vh; 
         max-width: 1000px; 
         z-index: 1002; 
-        transform: translate(-50%, -50%) !important; 
-        opacity: 1 !important; 
-        scale: 1 !important; 
+        transform: translate(-50%, -50%); 
+        opacity: 1; 
+        scale: 1; 
         background-color: var(--card-bg); 
         pointer-events: all; 
         transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
@@ -216,22 +216,19 @@
     .service-card-stacked.is-expanded::before { display: none; }
     .service-card-stacked.is-expanded .card-inner-content { border-radius: 20px; }
     .card-full-details { 
-        display: flex; /* Siempre flex, controlaremos visibilidad con opacity/pointer-events */
+        display: none; 
         flex-direction: column; 
         width: 100%; 
         height: 100%; 
         padding: 2rem; 
         opacity: 0; 
         transform: translateY(20px);
-        transition: none; /* GSAP manejará la transición */
-        pointer-events: none; /* Inicialmente no interactuable */
-        position: absolute; /* Para superponerse al contenido inicial */
-        top: 0; left: 0;
-        background-color: var(--card-bg); /* Asegurar un fondo sólido */
-        border-radius: 18px;
+        transition: opacity 0.4s 0.2s ease, transform 0.4s 0.2s ease; 
     }
     .service-card-stacked.is-expanded .card-full-details { 
-        /* Estas propiedades serán manejadas por GSAP durante la expansión */
+        display: flex; 
+        opacity: 1; 
+        transform: translateY(0);
     }
     .card-full-details h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; }
     .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; line-height: 1.7; }
@@ -258,7 +255,7 @@
         z-index: 1001; 
         opacity: 0; 
         pointer-events: none; 
-        transition: opacity 0.3s ease; 
+        transition: opacity 0.4s ease; 
         backdrop-filter: blur(5px);
     }
     #overlay-backdrop.visible { 
@@ -276,8 +273,10 @@
     }
 
     @media (max-width: 768px) {
-        .service-card-stacked { width: 80vw; margin: 1rem 0; }
-        .cards-container { align-items: stretch; flex-direction: column; padding: 0 1rem; }
+        .horizontal-scroll-section { height: auto !important; } /* CORRECCIÓN: Asegura que la altura sea automática en móvil */
+        .horizontal-scroll-wrapper { position: static; height: auto; overflow: visible; }
+        .cards-container { align-items: center; flex-direction: column; padding: 0 1rem; transform: none !important; /* CORRECCIÓN: Resetea la transformación de GSAP */ }
+        .service-card-stacked { width: 85vw; margin: 1rem 0; }
         .card-full-details { padding: 1.5rem; }
         .card-full-details h3 { font-size: 2rem; }
         .btn-card { width: 100%; }
@@ -417,10 +416,7 @@
 
   <header id="top">
     <div class="hero">
-        <picture>
-            <source srcset="isologo.webp" type="image/webp">
-            <img src="isologo.png" alt="Isologo de GringoEstate" class="isologo hero-el" width="160" height="160">
-        </picture>
+        <img src="https://placehold.co/160x160/FFBF00/000000?text=G" alt="Isologo de GringoEstate" class="isologo hero-el" width="160" height="160">
         <h1 class="hero-el">GRINGO<span>ESTATE</span></h1>
         <p class="hero-el">LA POSTA INMOBILIARIA. SIN CORBATA.</p>
         <a href="#contact" class="btn-primary hero-el">AGENDÁ UNA LLAMADA</a>
@@ -430,10 +426,7 @@
   <main>
     <section id="about" class="about">
       <div class="about-img">
-        <picture>
-            <source srcset="franco-perfil.webp" type="image/webp">
-            <img src="franco-perfil.JPG" alt="Retrato de Franco Garbini, fundador de GringoEstate" loading="lazy" width="280" height="280">
-        </picture>
+        <img src="https://placehold.co/280x280/111111/FFBF00?text=Franco" alt="Retrato de Franco Garbini, fundador de GringoEstate" loading="lazy" width="280" height="280">
       </div>
       <div class="about-text">
           <h2 class="section-title" style="text-align:left;">SOY FRANCO GARBINI</h2>
@@ -454,10 +447,7 @@
                     <!-- Card 1 -->
                     <article class="service-card-stacked">
                       <div class="card-inner-content">
-                        <picture>
-                            <source srcset="tasacion-profesional-propiedades-gringoestate.webp" type="image/webp">
-                            <img src="tasacion-profesional-propiedades-gringoestate.jpg" alt="Tasación profesional de una propiedad con documentos y gráficos" class="card-image" loading="lazy" width="700" height="600">
-                        </picture>
+                        <img src="https://placehold.co/700x600/333/FFBF00?text=Tasación" alt="Tasación profesional de una propiedad" class="card-image" loading="lazy" width="700" height="600">
                         <div class="card-content-initial"><h3>QUIERO TASAR <span>MI PROPIEDAD</span></h3><p class="short-desc">Tasación profesional, gratuita y sin compromiso.</p><button class="btn-toggle-expand">Ver más</button></div>
                         <div class="card-full-details"><h3>QUIERO TASAR MI PROPIEDAD</h3><div class="card-full-content-scroll"><p>Tasación profesional, gratuita y sin compromiso.</p><ul><li>✅ En 48hs te entregamos una carpeta formal con análisis de mercado.</li><li>✅ Datos claros y documentación respaldatoria.</li></ul><p class="card-highlight">Conocé el verdadero valor de tu activo.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Solicitar Tasación</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
                       </div>
@@ -466,10 +456,7 @@
                     <!-- Card 2 -->
                     <article class="service-card-stacked">
                       <div class="card-inner-content">
-                        <picture>
-                            <source srcset="venta-propiedades-90-dias-gringoestate.webp" type="image/webp">
-                            <img src="venta-propiedades-90-dias-gringoestate.jpg" alt="Contrato de venta de una propiedad siendo firmado" class="card-image" loading="lazy" width="700" height="600">
-                        </picture>
+                        <img src="https://placehold.co/700x600/444/FFBF00?text=Venta+90+Días" alt="Contrato de venta de una propiedad" class="card-image" loading="lazy" width="700" height="600">
                         <div class="card-content-initial"><h3>¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3><p class="short-desc">Nos comprometemos con la venta de tu propiedad en 90 días.</p><button class="btn-toggle-expand">Ver más</button></div>
                         <div class="card-full-details"><h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3><div class="card-full-content-scroll"><p>Trabajamos únicamente con exclusividad para darle a tu propiedad la atención que merece, con un objetivo claro: la vendemos en 90 días.</p><h4>Nuestra estrategia 360° incluye:</h4><ul><li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li><li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li><li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li><li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li></ul><p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Quiero Vender</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
                       </div>
@@ -478,10 +465,7 @@
                     <!-- Card 3 -->
                     <article class="service-card-stacked">
                       <div class="card-inner-content">
-                        <picture>
-                            <source srcset="gestion-alquiler-temporario-ambbi.webp" type="image/webp">
-                            <img src="gestion-alquiler-temporario-ambbi.jpg" alt="Interior moderno y bien decorado de un apartamento de alquiler temporario" class="card-image" loading="lazy" width="700" height="600">
-                        </picture>
+                        <img src="https://placehold.co/700x600/555/FFBF00?text=Alquiler+Temporario" alt="Interior de un apartamento de alquiler temporario" class="card-image" loading="lazy" width="700" height="600">
                         <div class="card-content-initial"><h3>POTENCIÁ TU <span>ALQUILER TEMPORARIO</span></h3><p class="short-desc">Transformamos tu propiedad en un negocio de alta rentabilidad.</p><button class="btn-toggle-expand">Ver más</button></div>
                         <div class="card-full-details"><h3>POTENCIÁ TU ALQUILER TEMPORARIO</h3><div class="card-full-content-scroll"><p>Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><h4>Nuestro servicio "llave en mano" incluye:</h4><ul><li>✅ Asesoría de home staging gratuita y puesta a punto.</li><li>✅ Ejecución de amoblamiento a través de nuestro equipo de arquitectura y red de proveedores.</li><li>✅ Publicación profesional en todas las plataformas para un máximo impacto.</li><li>✅ Gestión integral (sistemas, anfitrión, limpieza) para maximizar tus ingresos y darte tranquilidad.</li></ul><p class="card-alert">⚠️ Únicamente tomamos propiedades modernas con opción de self check-in. Para otras unidades, ofrecemos nuestro servicio de alquiler flex o tradicional.</p><p class="card-highlight">Delegá la gestión, disfrutá los resultados.</p></div><div class="card-footer-cta"><a href="https://ambbi.com.ar" target="_blank" rel="noopener noreferrer" class="btn-card">Conocer AMBBI</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
                       </div>
@@ -490,10 +474,7 @@
                     <!-- Card 4 -->
                     <article class="service-card-stacked">
                       <div class="card-inner-content">
-                          <picture>
-                              <source srcset="gestion-alquiler-flex-tradicional-gringoestate.webp" type="image/webp">
-                              <img src="gestion-alquiler-flex-tradicional-gringoestate.jpg" alt="Llaves de una propiedad siendo entregadas a un inquilino" class="card-image" loading="lazy" width="700" height="600">
-                          </picture>
+                          <img src="https://placehold.co/700x600/666/FFBF00?text=Alquiler+Flex" alt="Llaves de una propiedad" class="card-image" loading="lazy" width="700" height="600">
                           <div class="card-content-initial"><h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3><p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones.</p><button class="btn-toggle-expand">Ver más</button></div>
                           <div class="card-full-details"><h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3><div class="card-full-content-scroll"><p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><h4>Alquiler Flex (1 a 12 meses):</h4><ul><li>✅ Ideal para propiedades amobladas.</li><li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li><li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li></ul><h4>Alquiler Tradicional (2 años):</h4><ul><li>✅ La opción clásica para una renta estable y predecible.</li><li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li><li>✅ Administración integral de pagos y seguimiento del contrato.</li></ul><p class="card-highlight">Tu propiedad, en buenas manos.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Consultar por Gestión</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
                       </div>
@@ -502,10 +483,7 @@
                     <!-- Card 5 -->
                     <article class="service-card-stacked">
                       <div class="card-inner-content">
-                        <picture>
-                          <source srcset="inversion-desarrollos-desde-pozo-gringoestate.webp" type="image/webp">
-                          <img src="inversion-desarrollos-desde-pozo-gringoestate.jpg" alt="Render de un edificio en construcción visto desde abajo" class="card-image" loading="lazy" width="700" height="600">
-                        </picture>
+                        <img src="https://placehold.co/700x600/777/FFBF00?text=Invertí+desde+Pozo" alt="Render de un edificio en construcción" class="card-image" loading="lazy" width="700" height="600">
                         <div class="card-content-initial"><h3>INVERTÍ <span>DESDE POZO</span></h3><p class="short-desc">Acceso a oportunidades de inversión únicas.</p><button class="btn-toggle-expand">Ver más</button></div>
                         <div class="card-full-details"><h3>INVERTÍ DESDE POZO</h3><div class="card-full-content-scroll"><p>Gracias a nuestra alianza estratégica con Baigun R&N, te ofrezco acceso a oportunidades de inversión únicas.</p><ul><li>✅ +26 desarrollos en exclusiva que no encontrarás en otro lado.</li><li>✅ Análisis de ROI y proyecciones claras para una decisión informada.</li><li>✅ Acompañamiento en todo el proceso, desde la firma hasta la entrega.</li></ul><p class="card-highlight">Invertí de forma inteligente en los mejores proyectos de la ciudad.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Ver Oportunidades</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
                       </div>
@@ -514,10 +492,7 @@
                     <!-- Card 6 -->
                     <article class="service-card-stacked">
                         <div class="card-inner-content">
-                            <picture>
-                                <source srcset="locales-comerciales-oficinas-gringoestate.webp" type="image/webp">
-                                <img src="locales-comerciales-oficinas-gringoestate.png" alt="Interior de una oficina moderna y luminosa" class="card-image" loading="lazy" width="700" height="600">
-                            </picture>
+                            <img src="https://placehold.co/700x600/888/FFBF00?text=Locales+y+Oficinas" alt="Interior de una oficina moderna" class="card-image" loading="lazy" width="700" height="600">
                             <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Servicio especializado para marcas, franquicias e inversores.</p><button class="btn-toggle-expand">Ver más</button></div>
                             <div class="card-full-details"><h3>LOCALES COMERCIALES Y OFICINAS</h3><div class="card-full-content-scroll"><p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><ul><li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li><li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li><li>✅ Asesoramiento integral en contratos comerciales y negociación.</li></ul><p class="card-highlight">Llevá tu negocio al siguiente nivel.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
                         </div>
@@ -526,10 +501,7 @@
                     <!-- Card 7 (NUEVA) -->
                     <article class="service-card-stacked">
                         <div class="card-inner-content">
-                            <picture>
-                                <source srcset="servicio-desarrollador.webp" type="image/webp">
-                                <img src="servicio-desarrollador.jpg" alt="Un desarrollador revisando planos en una obra en construcción" class="card-image" loading="lazy" width="700" height="600">
-                            </picture>
+                            <img src="https://placehold.co/700x600/999/FFBF00?text=¿Sos+Desarrollador?" alt="Un desarrollador revisando planos en obra" class="card-image" loading="lazy" width="700" height="600">
                             <div class="card-content-initial"><h3>¿SOS <span>DESARROLLADOR?</span></h3><p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p><button class="btn-toggle-expand">Ver más</button></div>
                             <div class="card-full-details"><h3>¿SOS DESARROLLADOR?</h3><div class="card-full-content-scroll"><p>Una alianza estratégica, no una inmobiliaria más.</p><ul><li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li><li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li><li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li></ul><p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
                         </div>
@@ -538,10 +510,7 @@
                     <!-- Card 8 (NUEVA) -->
                     <article class="service-card-stacked">
                         <div class="card-inner-content">
-                            <picture>
-                                <source srcset="servicio-shopper.webp" type="image/webp">
-                                <img src="servicio-shopper.jpg" alt="Una persona analizando distintas propiedades en una tablet" class="card-image" loading="lazy" width="700" height="600">
-                            </picture>
+                            <img src="https://placehold.co/700x600/AAA/FFBF00?text=Personal+Shopper" alt="Una persona analizando propiedades en una tablet" class="card-image" loading="lazy" width="700" height="600">
                             <div class="card-content-initial"><h3>PERSONAL SHOPPER <span>INMOBILIARIO</span></h3><p class="short-desc">Un servicio exclusivo para compradores que valoran su tiempo.</p><button class="btn-toggle-expand">Ver más</button></div>
                             <div class="card-full-details"><h3>PERSONAL SHOPPER INMOBILIARIO</h3><div class="card-full-content-scroll"><p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><ul><li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li><li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li><li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li></ul><p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p><p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Quiero este Servicio</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
                         </div>
@@ -556,10 +525,10 @@
         <section id="portfolio" class="section-full-width" style="background-color: var(--dark); padding-top: 8rem; padding-bottom: 4.5rem;">
             <h2 class="section-title" style="color: #fff;">PROYECTOS <span>DESTACADOS</span></h2>
             <div class="portfolio-grid" style="max-width: 1200px; margin: auto; padding: 0 1.5rem;">
-                <div class="portfolio-item"> <picture><source srcset="proyecto-ambar.webp" type="image/webp"><img src="proyecto-ambar.jpg" alt="Fachada del proyecto Ámbar en Recoleta" loading="lazy" width="600" height="400"/></picture> <div class="portfolio-content"> <span>Ámbar · Recoleta (15 Unidades)</span> <div class="view-more">Ver más →</div> </div> </div>
-                <div class="portfolio-item"> <picture><source srcset="proyecto-charlone.webp" type="image/webp"><img src="proyecto-charlone.jpg" alt="Render de la Torre Charlone en Colegiales" loading="lazy" width="600" height="400"/></picture> <div class="portfolio-content"> <span>Torre Charlone · Colegiales</span> <div class="view-more">Ver más →</div> </div> </div>
-                <div class="portfolio-item"> <picture><source srcset="proyecto-nunez.webp" type="image/webp"><img src="proyecto-nunez.jpg" alt="Exterior del proyecto Casona en Núñez" loading="lazy" width="600" height="400"/></picture> <div class="portfolio-content"> <span>Casona · Núñez</span> <div class="view-more">Ver más →</div> </div> </div>
-                <div class="portfolio-item"> <picture><source srcset="proyecto-palermo.webp" type="image/webp"><img src="proyecto-palermo.jpg" alt="Render del proyecto Concepción Live en Palermo" loading="lazy" width="600" height="400"/></picture> <div class="portfolio-content"> <span>Concepción Live · Palermo</span> <div class="view-more">Ver más →</div> </div> </div>
+                <div class="portfolio-item"> <img src="https://placehold.co/600x400/222/FFBF00?text=Ámbar" alt="Fachada del proyecto Ámbar en Recoleta" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Ámbar · Recoleta (15 Unidades)</span> <div class="view-more">Ver más →</div> </div> </div>
+                <div class="portfolio-item"> <img src="https://placehold.co/600x400/333/FFBF00?text=Charlone" alt="Render de la Torre Charlone en Colegiales" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Torre Charlone · Colegiales</span> <div class="view-more">Ver más →</div> </div> </div>
+                <div class="portfolio-item"> <img src="https://placehold.co/600x400/444/FFBF00?text=Casona" alt="Exterior del proyecto Casona en Núñez" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Casona · Núñez</span> <div class="view-more">Ver más →</div> </div> </div>
+                <div class="portfolio-item"> <img src="https://placehold.co/600x400/555/FFBF00?text=Concepción" alt="Render del proyecto Concepción Live en Palermo" loading="lazy" width="600" height="400"/> <div class="portfolio-content"> <span>Concepción Live · Palermo</span> <div class="view-more">Ver más →</div> </div> </div>
             </div>
         </section>
         
@@ -647,7 +616,6 @@
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width:28px; height:28px; fill:white;"><path d="M380.9 97.1C339.4 55.6 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.8 0-67.6-9.5-97.8-26.7l-7-4.1-72.5 19 19.3-71.1-4.5-7.4c-18.3-30.7-27.9-66.2-27.9-102.3 0-108.6 88.4-197 197-197s197 88.4 197 197-88.4 197-197 197zm83.7-118.2c-3.7-1.9-22.1-10.9-25.6-12.1-3.4-1.2-5.9-1.9-8.4 1.9-2.5 3.7-9.7 12.1-11.9 14.5-2.2 2.5-4.5 2.8-8.2 1-3.7-1.9-15.7-5.8-30-18.5-11.1-9.6-18.7-21.6-20.9-25.3-2.2-3.7-0.2-5.9 1.7-7.7 1.7-1.5 3.7-3.7 5.5-5.5 1.8-1.8 2.5-3.7 3.7-6.2 1.2-2.5 0.6-4.8-0.3-6.7-0.9-1.9-8.4-20.1-11.5-27.5-3.1-7.4-6.2-6.3-8.4-6.3-2.2 0-4.8 0-7.4 0-2.5 0-6.7 1.2-10.3 5.9-3.7 4.8-14.1 13.8-14.1 33.5 0 19.8 14.4 38.9 16.4 41.4 2 2.5 28.2 42.8 68.2 60.1 9.7 4.1 17.3 6.6 23.1 8.8 13.3 5.1 25.6 4.3 35.1 2.6 10.8-1.9 22.1-9 25.2-17.6 3.1-8.6 3.1-16 2.2-17.6-0.9-1.5-3.4-2.5-7.1-4.5z"/></svg>
   </a>
 
-  <!-- MEJORA: Scripts con 'defer' para no bloquear el renderizado -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
 
@@ -659,7 +627,6 @@
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // --- FUNCIÓN DEBOUNCE PARA PERFORMANCE ---
-    // MEJORA: Función reutilizable para limitar la frecuencia de ejecución en eventos como resize.
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -675,7 +642,6 @@
     // --- ANIMACIONES (RESPETANDO ACCESIBILIDAD) ---
     if (!prefersReducedMotion) {
       
-        // Animación del cursor personalizado
         const cursorRegular = document.getElementById('cursor-regular');
         if (window.matchMedia("(pointer: fine)").matches && cursorRegular) {
             window.addEventListener('mousemove', (e) => {
@@ -683,11 +649,9 @@
             });
         }
 
-        // Animación de entrada del Hero
         gsap.set(".hero-el", {y: 30});
         gsap.to(".hero-el", { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: "power3.out", delay: 0.2 });
 
-        // Función genérica para animar secciones al hacer scroll
         const animateFromSide = (element, trigger, direction = -1) => {
             gsap.from(element, {
                 opacity: 0,
@@ -727,7 +691,7 @@
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
     if(menuToggle && mobileMenu) {
-        gsap.set(mobileMenu, { autoAlpha: 0 }); // Ocultar inicialmente con GSAP
+        gsap.set(mobileMenu, { autoAlpha: 0 });
         const mobileMenuTimeline = gsap.timeline({ paused: true, reversed: true })
             .to(mobileMenu, { autoAlpha: 1, duration: 0.3, ease: 'power2.out' })
             .fromTo(mobileMenu.querySelectorAll('li'), { x: -30, opacity: 0 }, { x: 0, opacity: 1, stagger: 0.08, duration: 0.4, ease: 'power2.out' }, "-=0.2");
@@ -757,27 +721,25 @@
     let horizontalScrollTween;
 
     function setupHorizontalScroll() {
-        // Si ya existe un tween, lo eliminamos para recrearlo
         if (horizontalScrollTween) {
             horizontalScrollTween.kill();
+            horizontalScrollTween = null;
+        }
+        
+        let st = ScrollTrigger.getById("horizontalScroll");
+        if (st) {
+            st.kill();
         }
 
-        // En mobile, desactivamos el scroll horizontal y dejamos que fluya verticalmente
         if (window.innerWidth < 768) {
-            if (ScrollTrigger.getById("horizontalScroll")) {
-                ScrollTrigger.getById("horizontalScroll").kill();
-            }
-            gsap.set(horizontalSection, { height: 'auto' });
-            gsap.set('.horizontal-scroll-wrapper', { position: 'static', height: 'auto', overflow: 'visible' });
-            gsap.set(cardsContainer, { x: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }); // Modificado para apilar
+            // En móvil, nos aseguramos que todos los estilos de GSAP se reseteen
+            gsap.set(cardsContainer, {clearProps: "all"});
             return;
         }
-
-        // En desktop, configuramos el scroll horizontal
-        gsap.set('.horizontal-scroll-wrapper', { position: 'sticky', height: '100vh', overflow: 'hidden'});
-        gsap.set(cardsContainer, { display: 'flex', flexDirection: 'row' }); // Restaurar flex-direction
         
-        const scrollWidth = cardsContainer.offsetWidth - window.innerWidth;
+        const scrollWidth = cardsContainer.scrollWidth - window.innerWidth;
+        if (scrollWidth <= 0) return; // No hacer nada si no hay overflow
+
         gsap.set(horizontalSection, { height: scrollWidth + window.innerHeight + 'px' });
 
         horizontalScrollTween = gsap.to(cardsContainer, {
@@ -789,121 +751,56 @@
                 start: "top top",
                 end: () => `+=${scrollWidth}`,
                 pin: ".horizontal-scroll-wrapper",
-                scrub: 0.1, // Reducido para menos "borrosidad"
-                snap: {
-                    snapTo: 1 / (serviceCards.length - 1),
-                    duration: { min: 0.2, max: 0.5 },
-                    ease: "power2.inOut"
-                },
+                scrub: 0.5,
                 invalidateOnRefresh: true
             }
         });
     }
     
-    // Lógica para expandir/colapsar tarjetas con animaciones suaves
+    // CORRECCIÓN: Lógica de expansión de tarjetas simplificada para evitar conflictos.
+    // Ahora solo se añaden/quitan clases y CSS se encarga de la animación.
     function toggleCardExpansion(cardElement, expand) {
         if (!cardElement || !overlayBackdrop) return;
         
         const st = ScrollTrigger.getById("horizontalScroll");
-        const cardImage = cardElement.querySelector('.card-image');
-        const cardContentInitial = cardElement.querySelector('.card-content-initial');
-        const cardFullDetails = cardElement.querySelector('.card-full-details');
-
+        
         if (expand) {
-            // Guardar la posición de scroll actual
-            cardElement.dataset.scrollY = window.scrollY;
+            if (st) st.disable(); // Desactivar scroll horizontal
             
-            // Desactivar el scroll horizontal temporalmente
-            if (st) st.disable();
-            
-            // Animación de expansión
-            const expandTimeline = gsap.timeline({
-                onStart: () => {
-                    overlayBackdrop.classList.add('visible');
-                    cardElement.classList.add('is-expanded');
-                    document.body.classList.add('no-scroll');
-                    // Asegurarse de que el contenido completo esté visible para GSAP
-                    gsap.set(cardFullDetails, { display: 'flex', opacity: 0, translateY: 20, pointerEvents: 'none' });
-                }
-            });
-
-            expandTimeline
-                .to(overlayBackdrop, { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0)
-                .to(cardElement, {
-                    scale: 1,
-                    opacity: 1,
-                    x: '0%', // Asegurar que no haya traslación horizontal residual
-                    y: '0%', // Asegurar que no haya traslación vertical residual
-                    left: '50%', // Posicionar al centro
-                    top: '50%', // Posicionar al centro
-                    transform: 'translate(-50%, -50%)', // Centrar
-                    duration: 0.4,
-                    ease: 'power2.out'
-                }, 0)
-                .to([cardImage, cardContentInitial], { opacity: 0, duration: 0.3, ease: 'power2.out', pointerEvents: 'none' }, 0.1) // Ocultar contenido inicial
-                .to(cardFullDetails, { opacity: 1, translateY: 0, duration: 0.4, ease: 'power2.out', pointerEvents: 'all' }, 0.2); // Mostrar contenido completo
-            
+            overlayBackdrop.classList.add('visible');
+            cardElement.classList.add('is-expanded');
+            document.body.classList.add('no-scroll');
         } else {
-            // Animación de colapso
-            const collapseTimeline = gsap.timeline({
-                onComplete: () => {
-                    cardElement.classList.remove('is-expanded');
-                    document.body.classList.remove('no-scroll');
-                    overlayBackdrop.classList.remove('visible');
-                    gsap.set(cardFullDetails, { display: 'none' }); // Ocultar completamente después de la animación
-                    
-                    // Restaurar posición de scroll con animación suave
-                    const savedScrollY = cardElement.dataset.scrollY;
-                    if (savedScrollY) {
-                        window.scrollTo({
-                            top: parseFloat(savedScrollY),
-                            behavior: 'smooth'
-                        });
-                    }
-                    
-                    // Reactivar scroll horizontal
-                    if (st) {
-                        st.enable();
-                        ScrollTrigger.refresh();
-                    }
+            overlayBackdrop.classList.remove('visible');
+            cardElement.classList.remove('is-expanded');
+            document.body.classList.remove('no-scroll');
+            
+            // Reactivar scroll después de que la animación de cierre termine
+            setTimeout(() => {
+                if (st) {
+                    st.enable();
+                    ScrollTrigger.refresh();
                 }
-            });
-
-            collapseTimeline
-                .to(cardFullDetails, { opacity: 0, translateY: 20, duration: 0.3, ease: 'power2.in', pointerEvents: 'none' }, 0) // Ocultar contenido completo
-                .to([cardImage, cardContentInitial], { opacity: 1, duration: 0.3, ease: 'power2.in', pointerEvents: 'all' }, 0.1) // Mostrar contenido inicial
-                .to(cardElement, {
-                    scale: 0.95,
-                    opacity: 0.8,
-                    x: 0, // Volver a la posición original en el scroll horizontal
-                    y: 0,
-                    left: 'auto', // Restaurar posicionamiento original
-                    top: 'auto',
-                    transform: 'none', // Quitar transformaciones fijas
-                    duration: 0.3,
-                    ease: 'power2.in'
-                }, 0.1)
-                .to(overlayBackdrop, { opacity: 0, duration: 0.3, ease: 'power2.in' }, 0.2);
+            }, 400); // Duración de la transición en CSS
         }
     }
     
     serviceCards.forEach(card => {
         const expandButton = card.querySelector('.btn-toggle-expand');
         const closeButton = card.querySelector('.btn-toggle-collapse');
-        
-        // Listener para la tarjeta completa (para expandir al hacer click en cualquier parte)
-        card.addEventListener('click', (e) => {
-            // Evitar que el click en los botones internos también expanda/colapse dos veces
-            if (e.target.closest('.btn-toggle-expand') || e.target.closest('.btn-toggle-collapse') || e.target.closest('.btn-card')) {
-                return;
-            }
-            if (!card.classList.contains('is-expanded')) {
-                toggleCardExpansion(card, true);
-            }
-        });
+        const ctaButton = card.querySelector('.btn-card');
 
         if (expandButton) { expandButton.addEventListener('click', (e) => { e.stopPropagation(); toggleCardExpansion(card, true); }); }
         if (closeButton) { closeButton.addEventListener('click', (e) => { e.stopPropagation(); toggleCardExpansion(card, false); }); }
+        
+        // Si se hace click en el CTA dentro de la tarjeta expandida, también la cierra
+        if (ctaButton) {
+            ctaButton.addEventListener('click', (e) => {
+                if (card.classList.contains('is-expanded')) {
+                    toggleCardExpansion(card, false);
+                }
+            });
+        }
     });
     
     if(overlayBackdrop) {
@@ -933,8 +830,7 @@
         ScrollTrigger.refresh(true);
     }, 250));
 
-    // --- Placeholder para la lógica de la API de IA ---
-    // (Asegúrate de tener una clave de API válida para que esto funcione)
+    // --- Lógica de la API de IA (Simulada) ---
     const setupAITool = (btnId, inputId, resultId, loaderId, promptTemplate) => {
         const generateBtn = document.getElementById(btnId);
         const inputEl = document.getElementById(inputId);
@@ -954,12 +850,9 @@
             generateBtn.style.display = 'none';
             resultEl.textContent = 'Generando...';
 
-            // AQUÍ IRÍA LA LÓGICA DE LA API
-            // Simulamos una llamada a la API con un setTimeout
             setTimeout(() => {
                 const prompt = promptTemplate(userInput);
-                // Simulamos una respuesta
-                const apiResponse = `Respuesta simulada para: "${prompt}"\n\nEsta es una demostración. La funcionalidad real requiere una conexión a la API de IA.`;
+                const apiResponse = `Respuesta simulada para: "${prompt}"\n\nEsta es una demostración. La funcionalidad real requiere una conexión a la API de IA. Aquí se mostraría un texto de venta profesional y atractivo, destacando las características clave como la ubicación, luminosidad y amenities.`;
                 resultEl.textContent = apiResponse;
                 
                 loaderEl.style.display = 'none';
