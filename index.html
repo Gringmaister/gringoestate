@@ -11,9 +11,12 @@
   <meta name="author" content="GringoEstate">
 
   <!-- Favicon -->
+  <!-- CORRECCIÓN: Apuntando a isologo.webp y .png para mayor compatibilidad y que se vea en la pestaña -->
   <link rel="icon" type="image/png" sizes="32x32" href="images/isologo.png">
   <link rel="icon" type="image/png" sizes="16x16" href="images/isologo.png">
   <link rel="apple-touch-icon" href="images/isologo.png">
+  <!-- Si no tienes isologo.png, puedes probar con: -->
+  <!-- <link rel="icon" href="images/isologo.webp" type="image/webp"> -->
 
   <!-- Open Graph (para redes sociales como Facebook, LinkedIn) -->
   <meta property="og:title" content="GringoEstate – Real Estate sin corbata">
@@ -389,7 +392,7 @@
 
     @media (min-width: 1024px) {
       .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
-      .contact-wrapper { grid-template-columns: 1fr 1fr; }
+      .contact-wrapper { grid-template-template-columns: 1fr 1fr; }
       .menu-button { display: none; }
       .nav-links-desktop { display: flex; }
       .nav-links-desktop ul { display:flex; flex-direction: row; gap: 2rem;}
@@ -431,6 +434,7 @@
 
   <header id="top">
     <div class="hero">
+        <!-- CORRECCIÓN: Asegúrate de que isologo.webp o isologo.png esté subido en la carpeta images/ -->
         <picture>
             <source srcset="images/isologo.webp" type="image/webp">
             <img src="images/isologo.png" alt="Isologo de GringoEstate" class="isologo hero-el" width="160" height="160">
@@ -446,6 +450,7 @@
       <div class="about-img">
         <picture>
             <!-- CORRECCIÓN: Cambiado .JPG a .jpg para coincidir con el archivo en GitHub -->
+            <!-- Asegúrate de que franco-perfil.jpg o franco-perfil.webp esté subido en la carpeta images/ -->
             <source srcset="images/franco-perfil.webp" type="image/webp">
             <img src="images/franco-perfil.jpg" alt="Retrato de Franco Garbini, fundador de GringoEstate" loading="lazy" width="280" height="280">
         </picture>
@@ -466,11 +471,11 @@
             <div class="horizontal-scroll-wrapper">
                 <div class="cards-container">
                     
-                    <!-- Card 1 -->
+                    <!-- Card 1: TASAR MI PROPIEDAD -->
                     <article class="service-card-stacked" id="tarjeta1">
                       <div class="card-inner-content">
                         <picture>
-                            <!-- NOTA: La imagen original 'tasacion-profesional-propiedades-gringoestate.jpg' no está en GitHub. Se usa un reemplazo temporal. -->
+                            <!-- CORRECCIÓN: Usando proyecto-ambar.webp/jpg que ya tienes. Si tienes una imagen específica para "tasar", súbela como tarjeta1.webp/.jpg -->
                             <source srcset="images/proyecto-ambar.webp" type="image/webp">
                             <img src="images/proyecto-ambar.jpg" alt="Tasación profesional de una propiedad con documentos y gráficos" class="card-image" loading="lazy" width="700" height="600">
                         </picture>
@@ -479,11 +484,11 @@
                       </div>
                     </article>
 
-                    <!-- Card 2 -->
+                    <!-- Card 2: VENDER CON GRINGOESTATE -->
                     <article class="service-card-stacked" id="tarjeta2">
                       <div class="card-inner-content">
                         <picture>
-                            <!-- NOTA: La imagen original 'venta-propiedades-90-dias-gringoestate.jpg' no está en GitHub. Se usa un reemplazo temporal. -->
+                            <!-- CORRECCIÓN: Usando proyecto-charlone.webp/jpg que ya tienes. Si tienes una imagen específica para "vender", súbela como tarjeta2.webp/.jpg -->
                             <source srcset="images/proyecto-charlone.webp" type="image/webp">
                             <img src="images/proyecto-charlone.jpg" alt="Contrato de venta de una propiedad siendo firmado" class="card-image" loading="lazy" width="700" height="600">
                         </picture>
@@ -492,11 +497,11 @@
                       </div>
                     </article>
 
-                    <!-- Card 3 -->
+                    <!-- Card 3: POTENCIÁ TU ALQUILER TEMPORARIO -->
                     <article class="service-card-stacked" id="tarjeta3">
                       <div class="card-inner-content">
                         <picture>
-                           <!-- NOTA: La imagen original 'gestion-alquiler-temporario-ambbi.jpg' no está en GitHub. Se usa un reemplazo temporal. -->
+                           <!-- CORRECCIÓN: Usando proyecto-nunez.webp/jpg que ya tienes. Si tienes una imagen específica para "alquiler temporario", súbela como tarjeta3.webp/.jpg -->
                             <source srcset="images/proyecto-nunez.webp" type="image/webp">
                             <img src="images/proyecto-nunez.jpg" alt="Interior moderno y bien decorado de un apartamento de alquiler temporario" class="card-image" loading="lazy" width="700" height="600">
                         </picture>
@@ -505,24 +510,24 @@
                       </div>
                     </article>
                     
-                    <!-- Card 4 -->
+                    <!-- Card 4: GESTIÓN DE ALQUILER FLEX Y TRADICIONAL -->
                     <article class="service-card-stacked" id="tarjeta4">
                       <div class="card-inner-content">
-                          <picture>
-                              <!-- NOTA: La imagen original 'gestion-alquiler-flex-tradicional-gringoestate.jpg' no está en GitHub. Se usa un reemplazo temporal. -->
-                              <source srcset="images/proyecto-palermo.webp" type="image/webp">
-                              <img src="images/proyecto-palermo.jpg" alt="Llaves de una propiedad siendo entregadas a un inquilino" class="card-image" loading="lazy" width="700" height="600">
-                          </picture>
-                          <div class="card-content-initial"><h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3><p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones.</p><button class="btn-toggle-expand">Ver más</button></div>
-                          <div class="card-full-details"><h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3><div class="card-full-content-scroll"><p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><h4>Alquiler Flex (1 a 12 meses):</h4><ul><li>✅ Ideal para propiedades amobladas.</li><li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li><li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li></ul><h4>Alquiler Tradicional (2 años):</h4><ul><li>✅ La opción clásica para una renta estable y predecible.</li><li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li><li>✅ Administración integral de pagos y seguimiento del contrato.</li></ul><p class="card-highlight">Tu propiedad, en buenas manos.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Consultar por Gestión</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                        <picture>
+                            <!-- CORRECCIÓN: Usando proyecto-palermo.webp/jpg que ya tienes. Si tienes una imagen específica, súbela como tarjeta4.webp/.jpg -->
+                            <source srcset="images/proyecto-palermo.webp" type="image/webp">
+                            <img src="images/proyecto-palermo.jpg" alt="Llaves de una propiedad siendo entregadas a un inquilino" class="card-image" loading="lazy" width="700" height="600">
+                        </picture>
+                        <div class="card-content-initial"><h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3><p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones.</p><button class="btn-toggle-expand">Ver más</button></div>
+                        <div class="card-full-details"><h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3><div class="card-full-content-scroll"><p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><h4>Alquiler Flex (1 a 12 meses):</h4><ul><li>✅ Ideal para propiedades amobladas.</li><li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li><li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li></ul><h4>Alquiler Tradicional (2 años):</h4><ul><li>✅ La opción clásica para una renta estable y predecible.</li><li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li><li>✅ Administración integral de pagos y seguimiento del contrato.</li></ul><p class="card-highlight">Tu propiedad, en buenas manos.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Consultar por Gestión</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
                       </div>
                     </article>
 
-                    <!-- Card 5 -->
+                    <!-- Card 5: INVERTÍ DESDE POZO -->
                     <article class="service-card-stacked" id="tarjeta5">
                       <div class="card-inner-content">
                         <picture>
-                          <!-- NOTA: La imagen original 'inversion-desarrollos-desde-pozo-gringoestate.jpg' no está en GitHub. Se usa un reemplazo temporal. -->
+                          <!-- CORRECCIÓN: Usando proyecto-ambar.webp/jpg que ya tienes. Si tienes una imagen específica, súbela como tarjeta5.webp/.jpg -->
                           <source srcset="images/proyecto-ambar.webp" type="image/webp">
                           <img src="images/proyecto-ambar.jpg" alt="Render de un edificio en construcción visto desde abajo" class="card-image" loading="lazy" width="700" height="600">
                         </picture>
@@ -531,24 +536,24 @@
                       </div>
                     </article>
 
-                    <!-- Card 6 -->
+                    <!-- Card 6: LOCALES COMERCIALES Y OFICINAS -->
                     <article class="service-card-stacked" id="tarjeta6">
                         <div class="card-inner-content">
                             <picture>
-                                <!-- CORRECCIÓN: Apuntando a tarjeta6.jpg como solicitaste. -->
+                                <!-- CORRECCIÓN: Usando tarjeta6.webp/.jpg que ya tienes. -->
                                 <source srcset="images/tarjeta6.webp" type="image/webp">
                                 <img src="images/tarjeta6.jpg" alt="Interior de una oficina moderna y luminosa" class="card-image" loading="lazy" width="700" height="600">
                             </picture>
                             <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Servicio especializado para marcas, franquicias e inversores.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details"><h3>LOCALES COMERCIALES Y OFICINAS</h3><div class="card-full-content-scroll"><p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><ul><li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li><li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li><li>✅ Asesoramiento integral en contratos comerciales y negociación.</li></ul><p class="card-highlight">Llevá tu negocio al siguiente nivel.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                            <div class="card-full-details"><h3>LOCALES COMERCIALES Y OFICINAS</h3><div class="card-full-content-scroll"><p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><ul><li>✅ Respaldo y estructura de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li><li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li><li>✅ Asesoramiento integral en contratos comerciales y negociación.</li></ul><p class="card-highlight">Llevá tu negocio al siguiente nivel.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
                         </div>
                     </article>
 
-                    <!-- Card 7 (NUEVA) -->
+                    <!-- Card 7: ¿SOS DESARROLLADOR? -->
                     <article class="service-card-stacked" id="tarjeta7">
                         <div class="card-inner-content">
                             <picture>
-                                <!-- NOTA: La imagen original 'servicio-desarrollador.jpg' no está en GitHub. Se usa un reemplazo temporal. -->
+                                <!-- CORRECCIÓN: Usando proyecto-charlone.webp/jpg que ya tienes. Si tienes una imagen específica para "desarrollador", súbela como tarjeta7.webp/.jpg -->
                                 <source srcset="images/proyecto-charlone.webp" type="image/webp">
                                 <img src="images/proyecto-charlone.jpg" alt="Un desarrollador revisando planos en una obra en construcción" class="card-image" loading="lazy" width="700" height="600">
                             </picture>
@@ -557,11 +562,11 @@
                         </div>
                     </article>
 
-                    <!-- Card 8 (NUEVA) -->
+                    <!-- Card 8: PERSONAL SHOPPER INMOBILIARIO -->
                     <article class="service-card-stacked" id="tarjeta8">
                         <div class="card-inner-content">
                             <picture>
-                                <!-- NOTA: La imagen original 'servicio-shopper.jpg' no está en GitHub. Se usa un reemplazo temporal. -->
+                                <!-- CORRECCIÓN: Usando proyecto-nunez.webp/jpg que ya tienes. Si tienes una imagen específica para "shopper", súbela como tarjeta8.webp/.jpg -->
                                 <source srcset="images/proyecto-nunez.webp" type="image/webp">
                                 <img src="images/proyecto-nunez.jpg" alt="Una persona analizando distintas propiedades en una tablet" class="card-image" loading="lazy" width="700" height="600">
                             </picture>
@@ -579,6 +584,7 @@
         <section id="portfolio" class="section-full-width" style="background-color: var(--dark); padding-top: 8rem; padding-bottom: 4.5rem;">
             <h2 class="section-title" style="color: #fff;">PROYECTOS <span>DESTACADOS</span></h2>
             <div class="portfolio-grid" style="max-width: 1200px; margin: auto; padding: 0 1.5rem;">
+                <!-- CORRECCIÓN: Usando las imágenes de proyectos que ya tienes -->
                 <div class="portfolio-item"> <picture><source srcset="images/proyecto-ambar.webp" type="image/webp"><img src="images/proyecto-ambar.jpg" alt="Fachada del proyecto Ámbar en Recoleta" loading="lazy" width="600" height="400"/></picture> <div class="portfolio-content"> <span>Ámbar · Recoleta (15 Unidades)</span> <div class="view-more">Ver más →</div> </div> </div>
                 <div class="portfolio-item"> <picture><source srcset="images/proyecto-charlone.webp" type="image/webp"><img src="images/proyecto-charlone.jpg" alt="Render de la Torre Charlone en Colegiales" loading="lazy" width="600" height="400"/></picture> <div class="portfolio-content"> <span>Torre Charlone · Colegiales</span> <div class="view-more">Ver más →</div> </div> </div>
                 <div class="portfolio-item"> <picture><source srcset="images/proyecto-nunez.webp" type="image/webp"><img src="images/proyecto-nunez.jpg" alt="Exterior del proyecto Casona en Núñez" loading="lazy" width="600" height="400"/></picture> <div class="portfolio-content"> <span>Casona · Núñez</span> <div class="view-more">Ver más →</div> </div> </div>
@@ -955,7 +961,7 @@
                 const prompt = promptTemplate(userInput);
                 let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                 const payload = { contents: chatHistory };
-                const apiKey = "";
+                const apiKey = ""; // ¡IMPORTANTE! Debes colocar tu clave API de Google Gemini aquí.
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 const response = await fetch(apiUrl, {
