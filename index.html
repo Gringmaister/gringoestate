@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
+
   <!-- SEO & Metadata Optimizados -->
   <title>GringoEstate – Real Estate sin corbata</title>
   <meta name="description" content="Transformamos el Real Estate con soluciones innovadoras. Venta en 90 días, gestión de alquiler temporario, personal shopper inmobiliario y asesoría para desarrolladores.">
@@ -18,8 +18,8 @@
   <!-- Open Graph (para redes sociales como Facebook, LinkedIn) -->
   <meta property="og:title" content="GringoEstate – Real Estate sin corbata">
   <meta property="og:description" content="Transformamos el Real Estate con soluciones innovadoras. Venta en 90 días, gestión de alquiler temporario, personal shopper inmobiliario y más.">
-  <meta property="og:image" content="https://www.gringo.estate/og-image.jpg"> <!-- Cambiar por la URL absoluta de una imagen para compartir -->
-  <meta property="og:url" content="https://www.gringo.estate"> <!-- Cambiar por la URL final del sitio -->
+  <meta property="og:image" content="https://www.gringo.estate/og-image.jpg">
+  <meta property="og:url" content="https://www.gringo.estate">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_AR">
 
@@ -27,13 +27,13 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="GringoEstate – Real Estate sin corbata">
   <meta name="twitter:description" content="Transformamos el Real Estate con soluciones innovadoras. Venta en 90 días, gestión de alquiler temporario y más.">
-  <meta name="twitter:image" content="https://www.gringo.estate/og-image.jpg"> <!-- Cambiar por la URL absoluta de una imagen para compartir -->
-  
+  <meta name="twitter:image" content="https://www.gringo.estate/og-image.jpg">
+
   <!-- Preconnect a Google Fonts para carga más rápida -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-  
+
   <!-- Google Tag Manager -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y1DWC69608"></script>
   <script>
@@ -42,229 +42,709 @@
     gtag('js', new Date());
     gtag('config', 'G-Y1DWC69608');
   </script>
-  
+
   <style>
+    /* --- VARIABLES GLOBALES Y RESET --- */
     :root {
-      --primary: #FFBF00;
+      --primary: #FFBF00; /* Amarillo GringoEstate */
       --dark: #000000;
       --light: #f8f9fa;
       --gray: #495057;
       --dark-bg: #111111;
       --card-bg: #1A1A1A;
     }
-    * {
+
+    *,
+    *::before,
+    *::after {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+    }
+
+    html {
       font-family: 'Roboto', sans-serif;
       scroll-behavior: smooth;
     }
-    html, body {
-      overflow-x: hidden;
+
+    body {
+      color: var(--dark);
+      background: var(--light);
+      overflow-x: hidden; /* Evitar scroll horizontal no deseado */
+      font-size: 16px; /* Base font size */
     }
-    body{color:var(--dark);background:var(--light); cursor: none;}
-    body.no-scroll { overflow: hidden; }
-    a, button {cursor: none; text-decoration: none !important; border: none;}
 
-    .custom-cursor { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 9999; opacity: 0; transition: opacity 0.3s; }
-    .cursor-dot { width: 24px; height: 24px; background-color: transparent; border: 2px solid var(--primary); border-radius: 50%; transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
-    @media (pointer: fine) { .custom-cursor { opacity: 1; } }
-    @media (pointer: coarse) { .custom-cursor { display: none; } body {cursor: auto;} a, button {cursor: pointer;} }
+    body.no-scroll {
+      overflow: hidden; /* Para menú móvil */
+    }
 
-    header{height:100vh;background:url('images/hero-bg.jpg') center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff; perspective: 1000px;}
-    header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}  
-    .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem; transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);}
-    .hero > * { opacity: 0; }
-    .hero img.isologo{ width: 160px; height: auto; margin: 0 auto 1rem auto; display: block; }
-    .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem;}
-    .hero h1 span{color:var(--primary); letter-spacing: 2px;}
-    .hero p{font-size:1.5rem;color:#e2e8f0;margin-bottom:2rem;line-height:1.4;font-family:'Bebas Neue', sans-serif; letter-spacing:1px;}
-    .btn-primary{background:var(--primary);color:var(--dark);padding:.75rem 2rem;border-radius:50px;display:inline-block;transition: background-color .3s, color .3s, box-shadow .3s;font-weight:700;font-size:1.1rem;letter-spacing:1px;}
-    .btn-primary:hover{background:#fff;color:var(--dark);transform:translateY(0) !important;box-shadow:0 10px 20px rgba(0,0,0,0.2);}
-    
-    nav{position:fixed;top:0;left:0;width:100%;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;z-index:1000;transition: background-color .4s, padding .4s, backdrop-filter .4s; border-bottom: 1px solid rgba(255,255,255,0.1);}
-    nav.nav-scrolled { background:rgba(0,0,0,.8); backdrop-filter:blur(8px); padding: 0.75rem 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);}
-    nav a.logo{font-family:'Bebas Neue', sans-serif;font-weight:700;letter-spacing:1px;font-size:1.5rem;color:#fff;}  
-    nav a.logo span {color: var(--primary);}
-    nav ul{list-style:none;font-weight:700; padding-left: 0;}
-    
-    nav .nav-links-mobile { visibility: hidden; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 10, 0.9); backdrop-filter: blur(10px); padding: 6rem 1.5rem 2rem; opacity: 0; display: flex; justify-content: center; align-items: center; z-index: 999; }
-    nav .nav-links-mobile ul { display: flex; flex-direction: column; gap: 0; align-items: center; width: 100%; text-align: center; }
-    nav .nav-links-mobile li { width: 100%; opacity: 0; }
-    nav .nav-links-mobile a { display: flex; justify-content: center; align-items: center; width: 100%; padding: 1.5rem 1rem; font-size: 1.5rem; color: #fff; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1.5px; border-bottom: 1px solid rgba(255,255,255,0.1); transition: color .3s, background-color .3s; }
-    nav .nav-links-mobile li:first-child a { border-top: 1px solid rgba(255,255,255,0.1); }
-    nav .nav-links-mobile a:hover { background-color: rgba(255, 191, 0, 0.1); color: var(--primary); }
-    .menu-item-number { font-size: 0.8rem; color: var(--primary); opacity: 0.7; margin-right: 1rem; font-family: 'Roboto', sans-serif; font-weight: 400; }
-    .nav-links-desktop {display: none;}
-    .nav-links-desktop a { padding-bottom: 5px; position: relative; color: #fff;}
-    .nav-links-desktop a:hover { color: var(--primary); }
-    .nav-links-desktop a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--primary); transform: scaleX(0); transform-origin: left; transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1); }
-    .nav-links-desktop a:hover::after { transform: scaleX(1); }
-    .menu-button {display: flex; flex-direction: column; justify-content: space-around; width: 24px; height: 24px; background: transparent; padding: 0; z-index: 1001;}
-    .menu-button .bar {display: block; width: 24px; height: 3px; background-color: white; border-radius: 10px; transition: all 0.3s ease-in-out;}
-    .menu-button.open .bar1 {transform: rotate(45deg) translate(5px, 6px);}
-    .menu-button.open .bar2 {opacity: 0;}
-    .menu-button.open .bar3 {transform: rotate(-45deg) translate(5px, -6px);}
+    /* --- CURSOR PERSONALIZADO --- */
+    #cursor-regular {
+      position: fixed;
+      left: 0;
+      top: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+    }
 
+    #cursor-regular.visible {
+      opacity: 1;
+    }
+
+    .cursor-dot {
+      width: 24px;
+      height: 24px;
+      background-color: transparent;
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+      transform: translate(-50%, -50%); /* Centra el cursor */
+    }
+
+    /* Ocultar cursor personalizado en dispositivos táctiles o si se prefiere poco movimiento */
+    @media (pointer: coarse) {
+      .custom-cursor {
+        display: none !important;
+      }
+      body {
+        cursor: auto; /* Cursor nativo */
+      }
+      a, button {
+        cursor: pointer; /* Cursor nativo de puntero */
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .custom-cursor {
+        display: none !important;
+      }
+      body {
+        cursor: auto; /* Cursor nativo */
+      }
+      a, button {
+        cursor: pointer; /* Cursor nativo de puntero */
+      }
+    }
+
+    /* --- BOTONES Y LINKS ESTILIZADOS --- */
+    a, button {
+      text-decoration: none;
+      border: none;
+      cursor: pointer; /* Cursor de puntero para todos los interactivos */
+      font-family: 'Roboto', sans-serif; /* Mantener consistencia */
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--dark);
+      padding: .75rem 2rem;
+      border-radius: 50px;
+      display: inline-block;
+      transition: background-color .3s, color .3s, box-shadow .3s, transform .2s ease;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+    .btn-primary:hover {
+      background: #fff;
+      color: var(--dark);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      transform: translateY(-2px);
+    }
+
+    /* --- NAVEGACIÓN --- */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      transition: background-color .4s, padding .4s, backdrop-filter .4s;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      background-color: rgba(0, 0, 0, 0.4); /* Fondo inicial semitransparente */
+      backdrop-filter: blur(5px);
+    }
+
+    nav.nav-scrolled {
+      background: rgba(0,0,0,.8);
+      padding: 0.75rem 1.5rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      backdrop-filter: blur(8px);
+    }
+
+    nav a.logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-weight: 700;
+      letter-spacing: 1px;
+      font-size: 1.7rem;
+      color: #fff;
+    }
+    nav a.logo span {
+      color: var(--primary);
+    }
+
+    .nav-links-desktop ul,
+    .nav-links-mobile ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .nav-links-desktop {
+      display: none; /* Oculto en pantallas pequeñas */
+    }
+
+    .nav-links-desktop a {
+      padding: 0.5rem 0;
+      position: relative;
+      color: #fff;
+      transition: color 0.3s ease;
+    }
+    .nav-links-desktop a:hover {
+      color: var(--primary);
+    }
+    .nav-links-desktop a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--primary);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .nav-links-desktop a:hover::after {
+      transform: scaleX(1);
+    }
+
+    /* Estilos para el menú móvil */
+    .nav-links-mobile {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh; /* Ocupa toda la altura */
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(15px);
+      padding: 6rem 1.5rem 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden; /* Oculto por defecto */
+      transform: translateX(-100%); /* Movido fuera de pantalla */
+      transition: opacity 0.4s ease, visibility 0.4s ease, transform 0.4s ease;
+    }
+
+    .nav-links-mobile.is-open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    .nav-links-mobile ul {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      align-items: center;
+      width: 100%;
+      text-align: center;
+    }
+    .nav-links-mobile li {
+      width: 100%;
+      opacity: 0; /* Animación de aparición */
+    }
+    .nav-links-mobile a {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      padding: 1.5rem 1rem;
+      font-size: 1.6rem;
+      color: #fff;
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 1.5px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      transition: color .3s, background-color .3s;
+    }
+    .nav-links-mobile li:first-child a {
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .nav-links-mobile a:hover {
+      background-color: rgba(255, 191, 0, 0.1);
+      color: var(--primary);
+    }
+    .menu-item-number {
+      font-size: 0.8rem;
+      color: var(--primary);
+      opacity: 0.7;
+      margin-right: 1rem;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
+    }
+
+    .menu-button {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      width: 24px;
+      height: 24px;
+      background: transparent;
+      padding: 0;
+      z-index: 1001;
+      cursor: pointer;
+    }
+    .menu-button .bar {
+      display: block;
+      width: 24px;
+      height: 3px;
+      background-color: white;
+      border-radius: 10px;
+      transition: all 0.3s ease-in-out;
+    }
+    .menu-button.open .bar1 { transform: rotate(45deg) translate(5px, 6px); }
+    .menu-button.open .bar2 { opacity: 0; }
+    .menu-button.open .bar3 { transform: rotate(-45deg) translate(5px, -6px); }
+
+    /* --- SECCIONES GENERALES --- */
     main { display: block; }
-    section{padding:4.5rem 1.5rem;max-width:1200px;margin: 0 auto;}
-    
+    section {
+      padding: 4.5rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
     .section-full-width {
-        max-width: none;
-        padding-left: 0;
-        padding-right: 0;
+      max-width: none;
+      padding-left: 0;
+      padding-right: 0;
     }
 
-    h2.section-title{font-family:'Bebas Neue', sans-serif;letter-spacing:1.5px;font-size:3rem;font-weight:700;margin-bottom:2rem;text-align:center; padding: 0 1.5rem;}
-    h2.section-title span {color: var(--primary); letter-spacing: 2px;}
+    h2.section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 1.5px;
+      font-size: clamp(2.5rem, 6vw, 3rem); /* Responsive */
+      font-weight: 700;
+      margin-bottom: 2rem;
+      text-align: center;
+      padding: 0 1.5rem;
+      color: var(--dark); /* Default color */
+    }
+    h2.section-title span {
+      color: var(--primary);
+      letter-spacing: 2px;
+    }
 
-    .about{display:flex; align-items:center; gap:3rem; flex-wrap:wrap;}
-    .about-img{flex:1;min-width:250px;text-align:center;}
-    .about-img img{width:280px;height:280px;border-radius:50%;object-fit:cover;object-position: center top; border:8px solid var(--primary);box-shadow: 0 10px 30px rgba(0,0,0,0.1);}
-    .about-text{flex:2;}
-    .about-text p{color:var(--gray);line-height:1.8;margin-bottom:1rem;}
-    
-    #services-stacked { background-color: var(--dark); color: #fff; padding-top: 4.5rem; padding-bottom: 4.5rem; }
-    #services-stacked p.subtitle { text-align: center; max-width: 700px; margin: -1rem auto 2rem; padding: 0 1rem; color: #ccc; z-index: 2; position: relative; }
-    
-    .horizontal-scroll-section { position: relative; }
-    .horizontal-scroll-wrapper {  
-        position: sticky;  
-        top: 0;  
-        display: flex;  
-        align-items: center;
-        height: 100vh;  
-        width: 100%;  
-        overflow: hidden;
+    /* --- SECCIÓN HERO --- */
+    header {
+      height: 100vh;
+      background: url('images/hero-bg.jpg') center/cover no-repeat;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #fff;
+      perspective: 1000px;
     }
-    .cards-container {  
-        display: flex;  
-        gap: clamp(2rem, 5vw, 4rem);  
-        padding: 0 calc(50vw - clamp(150px, 30vw, 350px));
-        position: relative;
-        left: 0;
+    header::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
     }
-    
-    .service-card-stacked {  
-        flex-shrink: 0;  
-        width: clamp(300px, 60vw, 700px);  
-        height: clamp(450px, 70vh, 600px);  
-        border-radius: 20px;  
-        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);  
-        display: flex;  
-        overflow: hidden;  
-        position: relative;  
-        background: var(--card-bg); /* Fondo sólido */
-        padding: 2px; /* Espacio para el borde */
-        will-change: transform;  
-        transition: transform 0.4s ease, box-shadow 0.4s ease;  
-        cursor: pointer; /* Añadido para indicar interactividad */
-        transform: translateZ(0); /* Forzar aceleración de hardware */
+    .hero {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      padding: 0 1rem;
+    }
+    .hero > * {
+      opacity: 0; /* Para animar entrada */
+      transform: translateY(30px);
+    }
+    .hero img.isologo {
+      width: 160px;
+      height: auto;
+      margin: 0 auto 1rem auto;
+      display: block;
+    }
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.5rem, 10vw, 8rem);
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      line-height: 1.1;
+    }
+    .hero h1 span {
+      color: var(--primary);
+      letter-spacing: 2px;
+    }
+    .hero p {
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      color: #e2e8f0;
+      margin-bottom: 2rem;
+      line-height: 1.4;
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 1px;
+    }
+
+    /* --- SECCIÓN ABOUT --- */
+    .about {
+      display: flex;
+      align-items: center;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+    .about-img {
+      flex: 1;
+      min-width: 250px;
+      text-align: center;
+      opacity: 0; /* Animación */
+      transform: translateX(-75px); /* Animación */
+    }
+    .about-img img {
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center top;
+      border: 8px solid var(--primary);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .about-text {
+      flex: 2;
+      opacity: 0; /* Animación */
+      transform: translateX(75px); /* Animación */
+    }
+    .about-text p {
+      color: var(--gray);
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+
+    /* --- SECCIÓN SERVICIOS (SCROLL HORIZONTAL) --- */
+    #services-stacked {
+      background-color: var(--dark);
+      color: #fff;
+      padding-top: 4.5rem;
+      padding-bottom: 4.5rem;
+    }
+    #services-stacked p.subtitle {
+      text-align: center;
+      max-width: 700px;
+      margin: -1rem auto 2rem;
+      padding: 0 1rem;
+      color: #ccc;
+      position: relative;
+      z-index: 2;
+    }
+
+    .horizontal-scroll-section {
+      position: relative;
+      /* La altura se gestionará con JS */
+    }
+    .horizontal-scroll-wrapper {
+      position: sticky;
+      top: 0;
+      display: flex;
+      align-items: center;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+    }
+    .cards-container {
+      display: flex;
+      gap: clamp(2rem, 5vw, 4rem);
+      padding: 0 calc(50vw - clamp(150px, 30vw, 350px));
+      position: relative;
+      left: 0; /* Se animará con GSAP */
+    }
+
+    .service-card-stacked {
+      flex-shrink: 0;
+      width: clamp(300px, 60vw, 700px);
+      height: clamp(450px, 70vh, 600px);
+      border-radius: 20px;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);
+      display: flex;
+      overflow: hidden;
+      position: relative;
+      background: var(--card-bg);
+      padding: 2px;
+      will-change: transform, box-shadow;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      cursor: pointer;
+      transform: translateZ(0); /* Ayuda a la aceleración de hardware */
     }
     .service-card-stacked::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        z-index: 2;
-        border-radius: inherit;
-        background: conic-gradient(from 180deg at 50% 50%, rgba(255, 191, 0, 0.6) 0deg, rgba(255, 191, 0, 0.2) 115deg, rgba(255, 191, 0, 0) 360deg);
-        opacity: 0.5;
-        transition: opacity 0.4s ease;
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      border-radius: inherit;
+      background: conic-gradient(from 180deg at 50% 50%, rgba(255, 191, 0, 0.6) 0deg, rgba(255, 191, 0, 0.2) 115deg, rgba(255, 191, 0, 0) 360deg);
+      opacity: 0.5;
+      transition: opacity 0.4s ease;
     }
     .service-card-stacked:hover::before {
-        opacity: 1;
+      opacity: 1;
     }
-    
+
     .card-inner-content {
-        background: var(--card-bg);
-        width: 100%;
-        height: 100%;
-        border-radius: 18px; /* Ligeramente menor al padre para que se vea el borde */
-        position: relative;
-        z-index: 3;
-        overflow: hidden;
+      background: var(--card-bg);
+      width: 100%;
+      height: 100%;
+      border-radius: 18px;
+      position: relative;
+      z-index: 3;
+      overflow: hidden;
     }
 
-    .service-card-stacked:hover { transform: translateY(-10px) scale(1.02) translateZ(0); box-shadow: 0 25px 55px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 191, 0, 0.2); }
-    .card-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform 0.5s ease; filter: brightness(0.7); }
-    .service-card-stacked:hover .card-image { transform: scale(1.05); }
-    .card-content-initial { position: relative; z-index: 3; padding: 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%); }
-    .card-content-initial h3 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 3.5vw, 2.8rem); line-height: 1.1; letter-spacing: 1px; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); color: white; margin-bottom: 0.75rem; }
-    .card-content-initial h3 span { color: var(--primary); }
-    .card-content-initial .short-desc { color: #e0e0e0; line-height: 1.5; margin-bottom: 1.5rem; min-height: 60px; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); }
-    .btn-toggle-expand { background: none; color: var(--primary); font-weight: 700; font-size: 1rem; align-self: flex-start; transition: all .3s ease; padding: 0.5rem 0; }
-    .btn-toggle-expand:hover { color: #fff; transform: translateX(5px); }
-    .btn-toggle-expand::after { content: '→'; margin-left: 0.5rem; display: inline-block; transition: transform 0.3s ease; }
+    .service-card-stacked:hover {
+      transform: translateY(-10px) scale(1.02) translateZ(0);
+      box-shadow: 0 25px 55px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 191, 0, 0.2);
+    }
+    .card-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+      transition: transform 0.5s ease;
+      filter: brightness(0.7);
+    }
+    .service-card-stacked:hover .card-image {
+      transform: scale(1.05);
+    }
+    .card-content-initial {
+      position: relative;
+      z-index: 3;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      height: 100%;
+      color: #fff;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%);
+      transition: opacity 0.3s ease, transform 0.3s ease; /* Transiciones suaves */
+    }
+    .card-content-initial h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      line-height: 1.1;
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.9);
+      color: white;
+      margin-bottom: 0.75rem;
+    }
+    .card-content-initial h3 span {
+      color: var(--primary);
+    }
+    .card-content-initial .short-desc {
+      color: #e0e0e0;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+      min-height: 60px; /* Para mantener consistencia visual */
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+    }
+    .btn-toggle-expand {
+      background: none;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1rem;
+      align-self: flex-start;
+      transition: all .3s ease;
+      padding: 0.5rem 0;
+    }
+    .btn-toggle-expand:hover {
+      color: #fff;
+      transform: translateX(5px);
+    }
+    .btn-toggle-expand::after {
+      content: '→';
+      margin-left: 0.5rem;
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+    .btn-toggle-expand:hover::after {
+      transform: translateX(5px);
+    }
 
-    .service-card-stacked.is-expanded { 
-        position: fixed; 
-        top: 50%; 
-        left: 50%; 
-        width: 90vw; 
-        height: 90vh; 
-        max-width: 1000px; 
-        z-index: 1002; 
-        transform: translate(-50%, -50%) !important; 
-        opacity: 1 !important; 
-        scale: 1 !important; 
-        background-color: var(--card-bg); 
-        pointer-events: all; 
-        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-        padding: 0; 
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+    /* Estilos para la tarjeta expandida */
+    .service-card-stacked.is-expanded {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 90vw;
+      height: 90vh;
+      max-width: 1000px;
+      z-index: 1002;
+      transform: translate(-50%, -50%) !important; /* GSAP aplica la transformación */
+      opacity: 1 !important;
+      scale: 1 !important;
+      background-color: var(--card-bg);
+      pointer-events: all;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      padding: 0;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
     }
-    .service-card-stacked.is-expanded::before { display: none; }
-    .service-card-stacked.is-expanded .card-inner-content { border-radius: 20px; }
-    .card-full-details { 
-        display: flex; /* Siempre flex, controlaremos visibilidad con opacity/pointer-events */
-        flex-direction: column; 
-        width: 100%; 
-        height: 100%; 
-        padding: 2rem; 
-        opacity: 0; 
-        transform: translateY(20px);
-        transition: none; /* GSAP manejará la transición */
-        pointer-events: none; /* Inicialmente no interactuable */
-        position: absolute; /* Para superponerse al contenido inicial */
-        top: 0; left: 0;
-        background-color: var(--card-bg); /* Asegurar un fondo sólido */
-        border-radius: 18px;
-        z-index: 4; /* Asegura que esté por encima del contenido inicial */
+    .service-card-stacked.is-expanded::before {
+      display: none; /* Ocultar degradado radial */
     }
-    .service-card-stacked.is-expanded .card-full-details { 
-        /* Estas propiedades serán manejadas por GSAP durante la expansión */
+    .service-card-stacked.is-expanded .card-inner-content {
+      border-radius: 20px; /* Igual que el padre */
     }
-    .card-full-details h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; }
-    .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; line-height: 1.7; }
-    .service-card-stacked.is-expanded .card-full-content-scroll p, 
-    .service-card-stacked.is-expanded .card-full-content-scroll li { color: #e0e0e0 !important; }
-    .service-card-stacked.is-expanded .card-full-content-scroll h4 { color: var(--primary) !important; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+
+    .card-full-details {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      padding: 2rem;
+      opacity: 0; /* Oculto al inicio */
+      transform: translateY(20px); /* Animación */
+      pointer-events: none; /* No interactuable hasta que se anime */
+      position: absolute;
+      top: 0;
+      left: 0;
+      background-color: var(--card-bg);
+      border-radius: 18px; /* Coincide con card-inner-content */
+      z-index: 4;
+      overflow: hidden; /* Asegurar que el contenido no se desborde */
+    }
+    /* Estas propiedades serán manejadas por GSAP durante la expansión */
+
+    .card-full-details h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      color: var(--primary);
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+    .card-full-content-scroll {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding-right: 15px; /* Espacio para la scrollbar */
+      line-height: 1.7;
+    }
+    .service-card-stacked.is-expanded .card-full-content-scroll p,
+    .service-card-stacked.is-expanded .card-full-content-scroll li {
+      color: #e0e0e0 !important;
+    }
+    .service-card-stacked.is-expanded .card-full-content-scroll h4 {
+      color: var(--primary) !important;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 1.4rem;
+    }
 
     .card-full-content-scroll::-webkit-scrollbar { width: 8px; }
-    .card-full-content-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+    .card-full-content-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
     .card-full-content-scroll::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 10px; }
-    .card-full-content-scroll ul { list-style: none; padding-left: 0; margin: 1rem 0; }
-    .card-full-content-scroll ul li { margin-bottom: 0.75rem; display: flex; align-items: flex-start; gap: 0.75rem; }
-    .card-highlight { font-weight: 700; color: #fff; background-color: rgba(255, 191, 0, 0.1); padding: 0.75rem; border-left: 3px solid var(--primary); margin: 1.5rem 0; font-style: italic; }
-    .card-alert { color: #ffda6a; font-size: 0.9rem; margin-top: 1rem; border-left: 3px solid #ffda6a; padding: 0.5rem 0.75rem; background-color: rgba(255, 218, 106, 0.05); }
-    .card-footer-cta { display: flex; flex-direction: column; gap: 1rem; margin-top: auto; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); align-items: center; }
-    .btn-card { background: var(--primary); color: var(--dark); padding: 0.75rem 1.5rem; border-radius: 50px; display: inline-block; font-weight: 700; font-size: 1rem; text-align: center; transition: all .3s; width: 80%; max-width: 280px; }
-    .btn-card:hover { background: #fff; color: var(--dark); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
-    .btn-toggle-collapse { background: transparent; border: 1px solid #555; color: #aaa; border-radius: 50px; padding: 0.5rem 1rem; font-size: 1rem; margin-top: 0.5rem; transition: all .3s ease; }
-    .btn-toggle-collapse:hover { background: #555; color: #fff; }
-    #overlay-backdrop { 
-        position: fixed; 
-        inset: 0; 
-        background-color: rgba(0, 0, 0, 0.8); 
-        z-index: 1001; 
-        opacity: 0; 
-        pointer-events: none; 
-        transition: opacity 0.3s ease; 
-        backdrop-filter: blur(5px);
+    .card-full-content-scroll ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 1rem 0;
     }
-    #overlay-backdrop.visible { 
-        opacity: 1; 
-        pointer-events: all; 
+    .card-full-content-scroll ul li {
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .card-full-content-scroll ul li::before {
+        content: '✅'; /* Icono de check */
+        color: var(--primary);
+        font-weight: bold;
+        flex-shrink: 0;
+        margin-top: 2px; /* Alineación vertical */
+    }
+    .card-highlight {
+      font-weight: 700;
+      color: #fff;
+      background-color: rgba(255, 191, 0, 0.1);
+      padding: 0.75rem;
+      border-left: 3px solid var(--primary);
+      margin: 1.5rem 0;
+      font-style: italic;
+    }
+    .card-alert {
+      color: #ffda6a;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      border-left: 3px solid #ffda6a;
+      padding: 0.5rem 0.75rem;
+      background-color: rgba(255, 218, 106, 0.05);
+      border-radius: 0 4px 4px 0; /* Bordes redondeados sutiles */
+    }
+    .card-footer-cta {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: auto; /* Empuja el contenido hacia abajo */
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      align-items: center;
+    }
+    .btn-card {
+      background: var(--primary);
+      color: var(--dark);
+      padding: 0.75rem 1.5rem;
+      border-radius: 50px;
+      display: inline-block;
+      font-weight: 700;
+      font-size: 1rem;
+      text-align: center;
+      transition: all .3s ease;
+      width: 80%;
+      max-width: 280px;
+    }
+    .btn-card:hover {
+      background: #fff;
+      color: var(--dark);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    .btn-toggle-collapse {
+      background: transparent;
+      border: 1px solid #555;
+      color: #aaa;
+      border-radius: 50px;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      transition: all .3s ease;
+    }
+    .btn-toggle-collapse:hover {
+      background: #555;
+      color: #fff;
+    }
+
+    #overlay-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 1001;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+    #overlay-backdrop.visible {
+      opacity: 1;
+      pointer-events: all;
     }
 
     .content-after-sticky {
@@ -273,41 +753,95 @@
       background-color: var(--dark);
     }
     #ai-tools, #contact {
-        background-color: var(--dark);
+      background-color: var(--dark);
     }
 
-    @media (max-width: 768px) {
-        .service-card-stacked { width: 80vw; margin: 1rem 0; }
-        .cards-container { align-items: stretch; flex-direction: column; padding: 0 1rem; }
-        .card-full-details { padding: 1.5rem; }
-        .card-full-details h3 { font-size: 2rem; }
-        .btn-card { width: 100%; }
-        h2.section-title { font-size: 2.5rem; }
+    /* --- SECCIÓN PORTAFOLIO --- */
+    .portfolio-grid {
+      margin-top: 2rem;
+      display: grid;
+      grid-template-columns: 1fr; /* Una columna por defecto */
+      gap: 1.5rem;
+      opacity: 0; /* Animación */
+      transform: translateY(50px); /* Animación */
     }
-    
-    .portfolio-grid{margin-top:2rem;display:grid;grid-template-columns: 1fr; gap:1.5rem;}
-    .portfolio-item{position:relative;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.1);}
-    .portfolio-item::after {content:''; position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background .4s;}
-    .portfolio-item:hover::after {background: rgba(0,0,0,0.5);}
-    .portfolio-item img{width:100%;height:250px;object-fit:cover;display:block;transition:transform .4s cubic-bezier(0.2, 1, 0.2, 1);}
-    .portfolio-item:hover img{transform:scale(1.05);}
-    .portfolio-item .portfolio-content {position:absolute;bottom:0;left:0;width:100%;padding:1rem; z-index: 2; transform: translateY(calc(100% - 48px)); transition: transform .4s cubic-bezier(0.2, 1, 0.2, 1);}
-    .portfolio-item:hover .portfolio-content {transform: translateY(0);}
-    .portfolio-item .portfolio-content span{display:block;color:#fff;font-size:1.25rem;font-family:'Bebas Neue', sans-serif;letter-spacing:1px;}
-    .portfolio-item .portfolio-content .view-more {color: var(--primary); opacity: 0; transition: opacity .4s; font-weight: 700; margin-top: 0.25rem;}
-    .portfolio-item:hover .portfolio-content .view-more {opacity: 1;}
+    .portfolio-item {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,.1);
+      transition: transform 0.4s cubic-bezier(0.2, 1, 0.2, 1);
+    }
+    .portfolio-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0);
+      transition: background 0.4s ease;
+      z-index: 1;
+    }
+    .portfolio-item:hover::after {
+      background: rgba(0,0,0,0.5);
+    }
+    .portfolio-item img {
+      width: 100%;
+      height: 250px; /* Altura fija para consistencia */
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s cubic-bezier(0.2, 1, 0.2, 1);
+    }
+    .portfolio-item:hover img {
+      transform: scale(1.05);
+    }
+    .portfolio-item .portfolio-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 1rem;
+      z-index: 2;
+      transform: translateY(calc(100% - 48px)); /* Mostrar solo el título inicialmente */
+      transition: transform 0.4s cubic-bezier(0.2, 1, 0.2, 1);
+      background: linear-gradient(to top, rgba(0,0,0,0.7), transparent 70%); /* Sutil gradiente */
+    }
+    .portfolio-item:hover .portfolio-content {
+      transform: translateY(0); /* Mostrar todo el contenido */
+    }
+    .portfolio-item .portfolio-content span {
+      display: block;
+      color: #fff;
+      font-size: 1.25rem;
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+    }
+    .portfolio-item .portfolio-content .view-more {
+      color: var(--primary);
+      font-weight: 700;
+      margin-top: 0.25rem;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .portfolio-item:hover .portfolio-content .view-more {
+      opacity: 1;
+    }
 
-    .contact-wrapper {  
-        display: grid;  
-        grid-template-columns: 1fr;  
-        gap: 3rem;  
-        align-items: center;  
+    /* --- SECCIÓN CONTACTO --- */
+    .contact-wrapper {
+      display: grid;
+      grid-template-columns: 1fr; /* Una columna por defecto */
+      gap: 3rem;
+      align-items: center;
     }
-    .contact-info p {  
-        color: #ccc;  
-        line-height: 1.7;  
-        max-width: 450px;  
-        margin-bottom: 2rem;
+    .contact-info h2.section-title {
+      text-align: left; /* Alineación a la izquierda para el título */
+      color: var(--primary);
+    }
+    .contact-info p {
+      color: #ccc;
+      line-height: 1.7;
+      max-width: 450px;
+      margin-bottom: 2rem;
     }
     .circulo-decorativo {
       width: 50px;
@@ -318,79 +852,237 @@
     }
 
     .contact-form-wrapper form {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
-    .contact-form-wrapper input, .contact-form-wrapper select, .contact-form-wrapper textarea {
-        padding: 1rem;
-        border:1px solid #333;
-        border-radius:8px;
-        font-size:1rem;
-        width:100%;
-        background-color: #1a1a1a;  
-        color: #fff;  
-        transition: border-color .3s, box-shadow .3s;
+    .contact-form-wrapper input,
+    .contact-form-wrapper select,
+    .contact-form-wrapper textarea {
+      padding: 1rem;
+      border: 1px solid #333;
+      border-radius: 8px;
+      font-size: 1rem;
+      width: 100%;
+      background-color: #1a1a1a;
+      color: #fff;
+      transition: border-color .3s, box-shadow .3s;
     }
-    .contact-form-wrapper input:focus, .contact-form-wrapper select:focus, .contact-form-wrapper textarea:focus {  
-        outline: none;  
-        border-color: var(--primary);  
-        box-shadow: 0 0 0 3px rgba(255, 191, 0, 0.4);  
+    .contact-form-wrapper input:focus,
+    .contact-form-wrapper select:focus,
+    .contact-form-wrapper textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(255, 191, 0, 0.4);
     }
     .btn-enviar-mensaje {
-        background:var(--primary);
-        color:var(--dark);
-        padding:.9rem 2rem;
-        border-radius:50px;
-        display:inline-block;
-        transition: background-color .3s, box-shadow .3s;
-        font-weight:700;
-        font-size:1.1rem;
-        letter-spacing:1px;
-        width:100%;
-        text-align: center;
+      background: var(--primary);
+      color: var(--dark);
+      padding: .9rem 2rem;
+      border-radius: 50px;
+      display: inline-block;
+      transition: background-color .3s, box-shadow .3s, transform .2s ease;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      width: 100%;
+      text-align: center;
     }
     .btn-enviar-mensaje:hover {
-        background-color: #fff;
-        box-shadow:0 10px 20px rgba(0,0,0,0.2);
+      background-color: #fff;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      transform: translateY(-2px);
     }
 
-    #property-details { display: none; flex-direction: column; gap: 1rem; }
-    
-    .ai-tool-card { background-color: #1a1a1a; padding: 2rem; border-radius: 10px; margin-top: 2rem; border: 1px solid #333;}
-    .ai-tool-card h3 { color: var(--primary); font-size: 1.75rem; margin-bottom: 1rem; text-align: center; font-family: 'Bebas Neue', sans-serif; }
-    .ai-tool-card p { color: #ccc; margin-bottom: 1rem; text-align: center; }
-    .ai-tool-card textarea { background-color: #222; color: #fff; border-radius: 6px; padding: 1rem; width: 100%; min-height: 120px; transition: border-color .3s, box-shadow .3s; border: 1px solid #333; }
-    .ai-tool-card button { background-color: var(--primary); color: var(--dark); padding: .75rem 1.5rem; border-radius: 50px; transition: all .3s; font-weight: 700; }
-    .ai-tool-card button:hover { background-color: #fff; }
-    .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: pre-wrap; line-height: 1.7; color: #e0e0e0; }
-    .loader { width: 24px; height: 24px; border: 3px solid #FFF; border-bottom-color: transparent; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; margin-top: 1rem; display: none; }
-    @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    
-    .whatsapp-float { position: fixed; width: 60px; height: 60px; bottom: 20px; right: 20px; background-color: #25d366; color: #FFF; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 6px rgba(0,0,0,0.25); z-index: 1000; display: flex; align-items: center; justify-content: center; transition: transform 0.3s; animation: pulse 2.5s infinite 2s; }
-    .whatsapp-float:hover { transform: scale(1.1); animation: none; }
-    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); } 70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); } }
+    #property-details {
+      display: none; /* Oculto por defecto, se muestra con JS */
+      flex-direction: column;
+      gap: 1rem;
+      overflow: hidden; /* Para la animación de altura */
+      transition: height 0.4s ease, opacity 0.4s ease;
+    }
 
-    footer{background:var(--dark-bg);color:#94a3b8;padding:3rem 1.5rem;text-align:center;font-size:1rem;}
-    footer a{color: var(--primary); opacity: 0.8; transition: opacity .3s;}
-    footer a:hover{opacity: 1;}
+    /* --- SECCIÓN HERRAMIENTAS IA --- */
+    .ai-tool-card {
+      background-color: #1a1a1a;
+      padding: 2rem;
+      border-radius: 10px;
+      margin-top: 2rem;
+      border: 1px solid #333;
+      opacity: 0; /* Animación */
+      transform: translateY(50px); /* Animación */
+    }
+    .ai-tool-card h3 {
+      color: var(--primary);
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-family: 'Bebas Neue', sans-serif;
+    }
+    .ai-tool-card p {
+      color: #ccc;
+      margin-bottom: 1rem;
+      text-align: center;
+      line-height: 1.6;
+    }
+    .ai-tool-card textarea {
+      background-color: #222;
+      color: #fff;
+      border-radius: 6px;
+      padding: 1rem;
+      width: 100%;
+      min-height: 120px;
+      transition: border-color .3s, box-shadow .3s;
+      border: 1px solid #333;
+      font-size: 1rem;
+      font-family: inherit; /* Heredar fuente */
+    }
+    .ai-tool-card textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(255, 191, 0, 0.4);
+    }
+    .ai-tool-card button {
+      background-color: var(--primary);
+      color: var(--dark);
+      padding: .75rem 1.5rem;
+      border-radius: 50px;
+      transition: all .3s ease;
+      font-weight: 700;
+    }
+    .ai-tool-card button:hover {
+      background-color: #fff;
+    }
+    .ai-result {
+      background-color: var(--dark);
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      min-height: 100px;
+      white-space: pre-wrap; /* Para mantener saltos de línea */
+      line-height: 1.7;
+      color: #e0e0e0;
+      font-size: 0.95rem;
+    }
+    .loader {
+      width: 24px;
+      height: 24px;
+      border: 3px solid #FFF;
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+      margin-top: 1rem;
+      display: none; /* Oculto por defecto */
+    }
+    @keyframes rotation {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .hidden { display: none; } /* Clase utilitaria para ocultar elementos */
+
+    /* --- FLOATING WHATSAPP --- */
+    .whatsapp-float {
+      position: fixed;
+      width: 60px;
+      height: 60px;
+      bottom: 20px;
+      right: 20px;
+      background-color: #25d366;
+      color: #FFF;
+      border-radius: 50%; /* Círculo perfecto */
+      text-align: center;
+      font-size: 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+      animation: pulse 2.5s infinite 2s; /* Retraso inicial y animación */
+    }
+    .whatsapp-float:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      animation: none; /* Detener animación al hacer hover */
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+      70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+    }
+
+    /* --- FOOTER --- */
+    footer {
+      background: var(--dark-bg);
+      color: #94a3b8;
+      padding: 3rem 1.5rem;
+      text-align: center;
+      font-size: 1rem;
+    }
+    footer a {
+      color: var(--primary);
+      opacity: 0.8;
+      transition: opacity .3s;
+    }
+    footer a:hover {
+      opacity: 1;
+    }
+
+    /* --- MEDIA QUERIES --- */
+    @media (min-width: 768px) { /* Pantallas medianas y grandes */
+      nav {
+        padding: 1rem 2rem; /* Más padding en nav desktop */
+      }
+      nav a.logo { font-size: 1.9rem; }
+
+      .nav-links-desktop {
+        display: flex; /* Mostrar enlaces de escritorio */
+      }
+      .menu-button {
+        display: none; /* Ocultar botón de menú móvil */
+      }
+
+      .about { flex-wrap: nowrap; } /* Evitar wrap en desktop */
+      .about-text { padding-left: 2rem; } /* Espacio adicional a la izquierda */
+
+      .horizontal-scroll-wrapper {
+        /* La altura y posicionamiento se configuran con JS */
+      }
+
+      .portfolio-grid {
+        grid-template-columns: repeat(2, 1fr); /* Dos columnas en portafolio */
+      }
+
+      .contact-wrapper {
+        grid-template-columns: 1fr 1fr; /* Dos columnas en contacto */
+      }
+    }
 
     @media (min-width: 1024px) {
-      .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
-      .contact-wrapper { grid-template-columns: 1fr 1fr; }
-      .menu-button { display: none; }
-      .nav-links-desktop { display: flex; }
-      .nav-links-desktop ul { display:flex; flex-direction: row; gap: 2rem;}
+      /* Ajustes adicionales para pantallas más grandes si es necesario */
+      section { padding: 6rem 1.5rem; }
+      h2.section-title { font-size: 3.5rem; }
+      .about-img img { width: 320px; height: 320px; } /* Imágenes más grandes */
     }
   </style>
 </head>
 <body>
-  <div id="cursor-regular" class="custom-cursor"><div class="cursor-dot"></div></div>
+  <!-- CURSOR PERSONALIZADO -->
+  <div id="cursor-regular" class="custom-cursor">
+    <div class="cursor-dot"></div>
+  </div>
 
+  <!-- OVERLAY PARA MODALES/EXPANSIÓN DE TARJETAS -->
   <div id="overlay-backdrop"></div>
-  
+
+  <!-- NAVEGACIÓN -->
   <nav>
-    <a class="logo" href="#top">GRINGO<span>ESTATE</span></a>
+    <a class="logo" href="#top" aria-label="Ir al inicio de GringoEstate">GRINGO<span>ESTATE</span></a>
+
+    <!-- Enlaces Desktop -->
     <div class="nav-links-desktop">
       <ul>
         <li><a href="#about">Sobre Mí</a></li>
@@ -400,7 +1092,16 @@
         <li><a href="#contact">Contacto</a></li>
       </ul>
     </div>
-    <div class="nav-links-mobile" id="mobile-menu">
+
+    <!-- Botón Menú Móvil -->
+    <button class="menu-button" id="menu-toggle" aria-label="Abrir o cerrar menú de navegación" aria-expanded="false">
+        <span class="bar bar1"></span>
+        <span class="bar bar2"></span>
+        <span class="bar bar3"></span>
+    </button>
+
+    <!-- Menú Móvil -->
+    <div class="nav-links-mobile" id="mobile-menu" role="dialog" aria-modal="true" aria-labelledby="menu-toggle" hidden>
       <ul>
         <li><a href="#about"><span class="menu-item-number">01</span>Sobre Mí</a></li>
         <li><a href="#services-stacked"><span class="menu-item-number">02</span>Servicios</a></li>
@@ -409,26 +1110,24 @@
         <li><a href="#contact"><span class="menu-item-number">05</span>Contacto</a></li>
       </ul>
     </div>
-    <button class="menu-button" id="menu-toggle" aria-label="Abrir o cerrar menú de navegación">
-        <span class="bar bar1"></span>
-        <span class="bar bar2"></span>
-        <span class="bar bar3"></span>
-    </button>
   </nav>
 
+  <!-- SECCIÓN HERO -->
   <header id="top">
     <div class="hero">
         <picture>
             <source srcset="images/isologo.webp" type="image/webp">
-            <img src="images/isologo.png" alt="Isologo de GringoEstate" class="isologo hero-el" width="160" height="160">
+            <img src="images/isologo.png" alt="Isologo de GringoEstate" class="isologo" width="160" height="160">
         </picture>
-        <h1 class="hero-el">GRINGO<span>ESTATE</span></h1>
-        <p class="hero-el">LA POSTA INMOBILIARIA. SIN CORBATA.</p>
-        <a href="#contact" class="btn-primary hero-el">AGENDÁ UNA LLAMADA</a>
+        <h1>GRINGO<span>ESTATE</span></h1>
+        <p>LA POSTA INMOBILIARIA. SIN CORBATA.</p>
+        <a href="#contact" class="btn-primary">AGENDÁ UNA LLAMADA</a>
     </div>
   </header>
 
+  <!-- SECCIÓN PRINCIPAL -->
   <main>
+    <!-- SECCIÓN SOBRE MÍ -->
     <section id="about" class="about">
       <div class="about-img">
         <picture>
@@ -443,6 +1142,7 @@
       </div>
     </section>
 
+    <!-- SECCIÓN SERVICIOS (SCROLL HORIZONTAL) -->
     <section id="services-stacked" class="section-full-width">
         <h2 class="section-title">NUESTROS <span>SERVICIOS</span></h2>
         <p class="subtitle">
@@ -451,100 +1151,264 @@
         <div class="horizontal-scroll-section">
             <div class="horizontal-scroll-wrapper">
                 <div class="cards-container">
-                    
-                    <!-- Card 1 -->
-                    <article class="service-card-stacked">
+
+                    <!-- Card 1: TASAR PROPIEDAD -->
+                    <article class="service-card-stacked" data-card-id="1">
                       <div class="card-inner-content">
                         <picture>
-                            <source srcset="images/tasacion-profesional-propiedades-gringoestate.webp" type="image/webp">
-                            <img src="images/tasacion-profesional-propiedades-gringoestate.jpg" alt="Tasación profesional de una propiedad con documentos y gráficos" class="card-image" loading="lazy" width="700" height="600">
+                            <source srcset="images/foto-tarjeta-1.webp" type="image/webp">
+                            <img src="images/foto-tarjeta-1.jpg" alt="Tasación profesional de una propiedad con documentos y gráficos" class="card-image" loading="lazy" width="700" height="600">
                         </picture>
-                        <div class="card-content-initial"><h3>QUIERO TASAR <span>MI PROPIEDAD</span></h3><p class="short-desc">Tasación profesional, gratuita y sin compromiso.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><h3>QUIERO TASAR MI PROPIEDAD</h3><div class="card-full-content-scroll"><p>Tasación profesional, gratuita y sin compromiso.</p><ul><li>✅ En 48hs te entregamos una carpeta formal con análisis de mercado.</li><li>✅ Datos claros y documentación respaldatoria.</li></ul><p class="card-highlight">Conocé el verdadero valor de tu activo.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Solicitar Tasación</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                        <div class="card-content-initial">
+                          <h3>QUIERO TASAR <span>MI PROPIEDAD</span></h3>
+                          <p class="short-desc">Tasación profesional, gratuita y sin compromiso.</p>
+                          <button class="btn-toggle-expand" aria-label="Expandir detalles de tasar propiedad">Ver más</button>
+                        </div>
+                        <div class="card-full-details" aria-hidden="true">
+                          <h3>QUIERO TASAR MI PROPIEDAD</h3>
+                          <div class="card-full-content-scroll">
+                            <p>Tasación profesional, gratuita y sin compromiso.</p>
+                            <ul>
+                              <li>En 48hs te entregamos una carpeta formal con análisis de mercado.</li>
+                              <li>Datos claros y documentación respaldatoria.</li>
+                            </ul>
+                            <p class="card-highlight">Conocé el verdadero valor de tu activo.</p>
+                          </div>
+                          <div class="card-footer-cta">
+                            <a href="#contact" class="btn-card">Solicitar Tasación</a>
+                            <button class="btn-toggle-collapse" aria-label="Colapsar detalles">Cerrar</button>
+                          </div>
+                        </div>
                       </div>
                     </article>
 
-                    <!-- Card 2 -->
-                    <article class="service-card-stacked">
+                    <!-- Card 2: VENDER CON GRINGOESTATE -->
+                    <article class="service-card-stacked" data-card-id="2">
                       <div class="card-inner-content">
                         <picture>
-                            <source srcset="images/venta-propiedades-90-dias-gringoestate.webp" type="image/webp">
-                            <img src="images/venta-propiedades-90-dias-gringoestate.jpg" alt="Contrato de venta de una propiedad siendo firmado" class="card-image" loading="lazy" width="700" height="600">
+                            <source srcset="images/foto-tarjeta-2.webp" type="image/webp">
+                            <img src="images/foto-tarjeta-2.jpg" alt="Contrato de venta de una propiedad siendo firmado" class="card-image" loading="lazy" width="700" height="600">
                         </picture>
-                        <div class="card-content-initial"><h3>¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3><p class="short-desc">Nos comprometemos con la venta de tu propiedad en 90 días.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3><div class="card-full-content-scroll"><p>Trabajamos únicamente con exclusividad para darle a tu propiedad la atención que merece, con un objetivo claro: la vendemos en 90 días.</p><h4>Nuestra estrategia 360° incluye:</h4><ul><li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li><li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li><li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li><li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li></ul><p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Quiero Vender</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                        <div class="card-content-initial">
+                          <h3>¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3>
+                          <p class="short-desc">Nos comprometemos con la venta de tu propiedad en 90 días.</p>
+                          <button class="btn-toggle-expand" aria-label="Expandir detalles de vender con GringoEstate">Ver más</button>
+                        </div>
+                        <div class="card-full-details" aria-hidden="true">
+                          <h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3>
+                          <div class="card-full-content-scroll">
+                            <p>Trabajamos únicamente con exclusividad para darle a tu propiedad la atención que merece, con un objetivo claro: la vendemos en 90 días.</p>
+                            <h4>Nuestra estrategia 360° incluye:</h4>
+                            <ul>
+                              <li>Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li>
+                              <li>Anuncios Súper Destacados en todas las plataformas líderes.</li>
+                              <li>Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li>
+                              <li>Experiencia probada en negociación para defender el valor de tu activo.</li>
+                            </ul>
+                            <p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p>
+                          </div>
+                          <div class="card-footer-cta">
+                            <a href="#contact" class="btn-card">Quiero Vender</a>
+                            <button class="btn-toggle-collapse" aria-label="Colapsar detalles">Cerrar</button>
+                          </div>
+                        </div>
                       </div>
                     </article>
 
-                    <!-- Card 3 -->
-                    <article class="service-card-stacked">
+                    <!-- Card 3: POTENCIÁ ALQUILER TEMPORARIO (AMBBI) -->
+                    <article class="service-card-stacked" data-card-id="3">
                       <div class="card-inner-content">
                         <picture>
-                            <source srcset="images/gestion-alquiler-temporario-ambbi.webp" type="image/webp">
-                            <img src="images/gestion-alquiler-temporario-ambbi.jpg" alt="Interior moderno y bien decorado de un apartamento de alquiler temporario" class="card-image" loading="lazy" width="700" height="600">
+                            <source srcset="images/foto-tarjeta-3.webp" type="image/webp">
+                            <img src="images/foto-tarjeta-3.jpg" alt="Interior moderno y bien decorado de un apartamento de alquiler temporario" class="card-image" loading="lazy" width="700" height="600">
                         </picture>
-                        <div class="card-content-initial"><h3>POTENCIÁ TU <span>ALQUILER TEMPORARIO</span></h3><p class="short-desc">Transformamos tu propiedad en un negocio de alta rentabilidad.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><h3>POTENCIÁ TU ALQUILER TEMPORARIO</h3><div class="card-full-content-scroll"><p>Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><h4>Nuestro servicio "llave en mano" incluye:</h4><ul><li>✅ Asesoría de home staging gratuita y puesta a punto.</li><li>✅ Ejecución de amoblamiento a través de nuestro equipo de arquitectura y red de proveedores.</li><li>✅ Publicación profesional en todas las plataformas para un máximo impacto.</li><li>✅ Gestión integral (sistemas, anfitrión, limpieza) para maximizar tus ingresos y darte tranquilidad.</li></ul><p class="card-alert">⚠️ Únicamente tomamos propiedades modernas con opción de self check-in. Para otras unidades, ofrecemos nuestro servicio de alquiler flex o tradicional.</p><p class="card-highlight">Delegá la gestión, disfrutá los resultados.</p></div><div class="card-footer-cta"><a href="https://ambbi.com.ar" target="_blank" rel="noopener noreferrer" class="btn-card">Conocer AMBBI</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                        <div class="card-content-initial">
+                          <h3>POTENCIÁ TU <span>ALQUILER TEMPORARIO</span></h3>
+                          <p class="short-desc">Transformamos tu propiedad en un negocio de alta rentabilidad.</p>
+                          <button class="btn-toggle-expand" aria-label="Expandir detalles de alquiler temporario">Ver más</button>
+                        </div>
+                        <div class="card-full-details" aria-hidden="true">
+                          <h3>POTENCIÁ TU ALQUILER TEMPORARIO</h3>
+                          <div class="card-full-content-scroll">
+                            <p>Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p>
+                            <h4>Nuestro servicio "llave en mano" incluye:</h4>
+                            <ul>
+                              <li>Asesoría de home staging gratuita y puesta a punto.</li>
+                              <li>Ejecución de amoblamiento a través de nuestro equipo de arquitectura y red de proveedores.</li>
+                              <li>Publicación profesional en todas las plataformas para un máximo impacto.</li>
+                              <li>Gestión integral (sistemas, anfitrión, limpieza) para maximizar tus ingresos y darte tranquilidad.</li>
+                            </ul>
+                            <p class="card-alert">⚠️ Únicamente tomamos propiedades modernas con opción de self check-in. Para otras unidades, ofrecemos nuestro servicio de alquiler flex o tradicional.</p>
+                            <p class="card-highlight">Delegá la gestión, disfrutá los resultados.</p>
+                          </div>
+                          <div class="card-footer-cta">
+                            <a href="https://ambbi.com.ar" target="_blank" rel="noopener noreferrer" class="btn-card">Conocer AMBBI</a>
+                            <button class="btn-toggle-collapse" aria-label="Colapsar detalles">Cerrar</button>
+                          </div>
+                        </div>
                       </div>
                     </article>
-                    
-                    <!-- Card 4 -->
-                    <article class="service-card-stacked">
+
+                    <!-- Card 4: GESTIÓN ALQUILER FLEX / TRADICIONAL -->
+                    <article class="service-card-stacked" data-card-id="4">
                       <div class="card-inner-content">
                           <picture>
-                              <source srcset="images/gestion-alquiler-flex-tradicional-gringoestate.webp" type="image/webp">
-                              <img src="images/gestion-alquiler-flex-tradicional-gringoestate.jpg" alt="Llaves de una propiedad siendo entregadas a un inquilino" class="card-image" loading="lazy" width="700" height="600">
+                              <source srcset="images/foto-tarjeta-4.webp" type="image/webp">
+                              <img src="images/foto-tarjeta-4.jpg" alt="Llaves de una propiedad siendo entregadas a un inquilino" class="card-image" loading="lazy" width="700" height="600">
                           </picture>
-                          <div class="card-content-initial"><h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3><p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones.</p><button class="btn-toggle-expand">Ver más</button></div>
-                          <div class="card-full-details"><h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3><div class="card-full-content-scroll"><p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><h4>Alquiler Flex (1 a 12 meses):</h4><ul><li>✅ Ideal para propiedades amobladas.</li><li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li><li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li></ul><h4>Alquiler Tradicional (2 años):</h4><ul><li>✅ La opción clásica para una renta estable y predecible.</li><li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li><li>✅ Administración integral de pagos y seguimiento del contrato.</li></ul><p class="card-highlight">Tu propiedad, en buenas manos.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Consultar por Gestión</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                          <div class="card-content-initial">
+                            <h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3>
+                            <p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones.</p>
+                            <button class="btn-toggle-expand" aria-label="Expandir detalles de gestión de alquiler">Ver más</button>
+                          </div>
+                          <div class="card-full-details" aria-hidden="true">
+                            <h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3>
+                            <div class="card-full-content-scroll">
+                              <p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p>
+                              <h4>Alquiler Flex (1 a 12 meses):</h4>
+                              <ul>
+                                <li>Ideal para propiedades amobladas.</li>
+                                <li>Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li>
+                                <li>Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li>
+                              </ul>
+                              <h4>Alquiler Tradicional (2 años):</h4>
+                              <ul>
+                                <li>La opción clásica para una renta estable y predecible.</li>
+                                <li>Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li>
+                                <li>Administración integral de pagos y seguimiento del contrato.</li>
+                              </ul>
+                              <p class="card-highlight">Tu propiedad, en buenas manos.</p>
+                            </div>
+                            <div class="card-footer-cta">
+                              <a href="#contact" class="btn-card">Consultar por Gestión</a>
+                              <button class="btn-toggle-collapse" aria-label="Colapsar detalles">Cerrar</button>
+                            </div>
+                          </div>
                       </div>
                     </article>
 
-                    <!-- Card 5 -->
-                    <article class="service-card-stacked">
+                    <!-- Card 5: INVERTÍ DESDE POZO -->
+                    <article class="service-card-stacked" data-card-id="5">
                       <div class="card-inner-content">
                         <picture>
-                          <source srcset="images/inversion-desarrollos-desde-pozo-gringoestate.webp" type="image/webp">
-                          <img src="images/inversion-desarrollos-desde-pozo-gringoestate.jpg" alt="Render de un edificio en construcción visto desde abajo" class="card-image" loading="lazy" width="700" height="600">
+                          <source srcset="images/foto-tarjeta-5.webp" type="image/webp">
+                          <img src="images/foto-tarjeta-5.jpg" alt="Render de un edificio en construcción visto desde abajo" class="card-image" loading="lazy" width="700" height="600">
                         </picture>
-                        <div class="card-content-initial"><h3>INVERTÍ <span>DESDE POZO</span></h3><p class="short-desc">Acceso a oportunidades de inversión únicas.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><h3>INVERTÍ DESDE POZO</h3><div class="card-full-content-scroll"><p>Gracias a nuestra alianza estratégica con Baigun R&N, te ofrezco acceso a oportunidades de inversión únicas.</p><ul><li>✅ +26 desarrollos en exclusiva que no encontrarás en otro lado.</li><li>✅ Análisis de ROI y proyecciones claras para una decisión informada.</li><li>✅ Acompañamiento en todo el proceso, desde la firma hasta la entrega.</li></ul><p class="card-highlight">Invertí de forma inteligente en los mejores proyectos de la ciudad.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Ver Oportunidades</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                        <div class="card-content-initial">
+                          <h3>INVERTÍ <span>DESDE POZO</span></h3>
+                          <p class="short-desc">Acceso a oportunidades de inversión únicas.</p>
+                          <button class="btn-toggle-expand" aria-label="Expandir detalles de inversión desde pozo">Ver más</button>
+                        </div>
+                        <div class="card-full-details" aria-hidden="true">
+                          <h3>INVERTÍ DESDE POZO</h3>
+                          <div class="card-full-content-scroll">
+                            <p>Gracias a nuestra alianza estratégica con Baigun R&N, te ofrezco acceso a oportunidades de inversión únicas.</p>
+                            <ul>
+                              <li>+26 desarrollos en exclusiva que no encontrarás en otro lado.</li>
+                              <li>Análisis de ROI y proyecciones claras para una decisión informada.</li>
+                              <li>Acompañamiento en todo el proceso, desde la firma hasta la entrega.</li>
+                            </ul>
+                            <p class="card-highlight">Invertí de forma inteligente en los mejores proyectos de la ciudad.</p>
+                          </div>
+                          <div class="card-footer-cta">
+                            <a href="#contact" class="btn-card">Ver Oportunidades</a>
+                            <button class="btn-toggle-collapse" aria-label="Colapsar detalles">Cerrar</button>
+                          </div>
+                        </div>
                       </div>
                     </article>
 
-                    <!-- Card 6 -->
-                    <article class="service-card-stacked">
+                    <!-- Card 6: LOCALES COMERCIALES Y OFICINAS -->
+                    <article class="service-card-stacked" data-card-id="6">
                         <div class="card-inner-content">
                             <picture>
-                                <source srcset="images/locales-comerciales-oficinas-gringoestate.webp" type="image/webp">
-                                <img src="images/locales-comerciales-oficinas-gringoestate.png" alt="Interior de una oficina moderna y luminosa" class="card-image" loading="lazy" width="700" height="600">
+                                <source srcset="images/foto-tarjeta-6.webp" type="image/webp">
+                                <img src="images/foto-tarjeta-6.jpg" alt="Interior de una oficina moderna y luminosa" class="card-image" loading="lazy" width="700" height="600">
                             </picture>
-                            <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Servicio especializado para marcas, franquicias e inversores.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details"><h3>LOCALES COMERCIALES Y OFICINAS</h3><div class="card-full-content-scroll"><p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><ul><li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li><li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li><li>✅ Asesoramiento integral en contratos comerciales y negociación.</li></ul><p class="card-highlight">Llevá tu negocio al siguiente nivel.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                            <div class="card-content-initial">
+                              <h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3>
+                              <p class="short-desc">Servicio especializado para marcas, franquicias e inversores.</p>
+                              <button class="btn-toggle-expand" aria-label="Expandir detalles de locales y oficinas">Ver más</button>
+                            </div>
+                            <div class="card-full-details" aria-hidden="true">
+                              <h3>LOCALES COMERCIALES Y OFICINAS</h3>
+                              <div class="card-full-content-scroll">
+                                <p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p>
+                                <ul>
+                                  <li>Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li>
+                                  <li>Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li>
+                                  <li>Asesoramiento integral en contratos comerciales y negociación.</li>
+                                </ul>
+                                <p class="card-highlight">Llevá tu negocio al siguiente nivel.</p>
+                              </div>
+                              <div class="card-footer-cta">
+                                <a href="#contact" class="btn-card">Encontrar mi Local</a>
+                                <button class="btn-toggle-collapse" aria-label="Colapsar detalles">Cerrar</button>
+                              </div>
+                            </div>
                         </div>
                     </article>
 
-                    <!-- Card 7 (NUEVA) -->
-                    <article class="service-card-stacked">
+                    <!-- Card 7: ¿SOS DESARROLLADOR? -->
+                    <article class="service-card-stacked" data-card-id="7">
                         <div class="card-inner-content">
                             <picture>
-                                <source srcset="images/servicio-desarrollador.webp" type="image/webp">
-                                <img src="images/servicio-desarrollador.jpg" alt="Un desarrollador revisando planos en una obra en construcción" class="card-image" loading="lazy" width="700" height="600">
+                                <source srcset="images/foto-tarjeta-7.webp" type="image/webp">
+                                <img src="images/foto-tarjeta-7.jpg" alt="Un desarrollador revisando planos en una obra en construcción" class="card-image" loading="lazy" width="700" height="600">
                             </picture>
-                            <div class="card-content-initial"><h3>¿SOS <span>DESARROLLADOR?</span></h3><p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details"><h3>¿SOS DESARROLLADOR?</h3><div class="card-full-content-scroll"><p>Una alianza estratégica, no una inmobiliaria más.</p><ul><li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li><li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li><li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li></ul><p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                            <div class="card-content-initial">
+                              <h3>¿SOS <span>DESARROLLADOR?</span></h3>
+                              <p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p>
+                              <button class="btn-toggle-expand" aria-label="Expandir detalles para desarrolladores">Ver más</button>
+                            </div>
+                            <div class="card-full-details" aria-hidden="true">
+                              <h3>¿SOS DESARROLLADOR?</h3>
+                              <div class="card-full-content-scroll">
+                                <p>Una alianza estratégica, no una inmobiliaria más.</p>
+                                <ul>
+                                  <li>Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li>
+                                  <li>Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li>
+                                  <li>Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li>
+                                </ul>
+                                <p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p>
+                              </div>
+                              <div class="card-footer-cta">
+                                <a href="#contact" class="btn-card">Hablemos de tu Proyecto</a>
+                                <button class="btn-toggle-collapse" aria-label="Colapsar detalles">Cerrar</button>
+                              </div>
+                            </div>
                         </div>
                     </article>
 
-                    <!-- Card 8 (NUEVA) -->
-                    <article class="service-card-stacked">
+                    <!-- Card 8: PERSONAL SHOPPER INMOBILIARIO -->
+                    <article class="service-card-stacked" data-card-id="8">
                         <div class="card-inner-content">
                             <picture>
-                                <source srcset="images/servicio-shopper.webp" type="image/webp">
-                                <img src="images/servicio-shopper.jpg" alt="Una persona analizando distintas propiedades en una tablet" class="card-image" loading="lazy" width="700" height="600">
+                                <source srcset="images/foto-tarjeta-8.webp" type="image/webp">
+                                <img src="images/foto-tarjeta-8.jpg" alt="Una persona analizando distintas propiedades en una tablet" class="card-image" loading="lazy" width="700" height="600">
                             </picture>
-                            <div class="card-content-initial"><h3>PERSONAL SHOPPER <span>INMOBILIARIO</span></h3><p class="short-desc">Un servicio exclusivo para compradores que valoran su tiempo.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details"><h3>PERSONAL SHOPPER INMOBILIARIO</h3><div class="card-full-content-scroll"><p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><ul><li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li><li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li><li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li></ul><p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p><p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card">Quiero este Servicio</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                            <div class="card-content-initial">
+                              <h3>PERSONAL SHOPPER <span>INMOBILIARIO</span></h3>
+                              <p class="short-desc">Un servicio exclusivo para compradores que valoran su tiempo.</p>
+                              <button class="btn-toggle-expand" aria-label="Expandir detalles de personal shopper">Ver más</button>
+                            </div>
+                            <div class="card-full-details" aria-hidden="true">
+                              <h3>PERSONAL SHOPPER INMOBILIARIO</h3>
+                              <div class="card-full-content-scroll">
+                                <p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p>
+                                <ul>
+                                  <li>Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li>
+                                  <li>Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li>
+                                  <li>Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li>
+                                </ul>
+                                <p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p>
+                                <p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta.</p>
+                              </div>
+                              <div class="card-footer-cta">
+                                <a href="#contact" class="btn-card">Quiero este Servicio</a>
+                                <button class="btn-toggle-collapse" aria-label="Colapsar detalles">Cerrar</button>
+                              </div>
+                            </div>
                         </div>
                     </article>
 
@@ -552,30 +1416,68 @@
             </div>
         </div>
     </section>
-    
+
+    <!-- SECCIÓN PORTAFOLIO -->
     <div class="content-after-sticky">
         <section id="portfolio" class="section-full-width" style="background-color: var(--dark); padding-top: 8rem; padding-bottom: 4.5rem;">
             <h2 class="section-title" style="color: #fff;">PROYECTOS <span>DESTACADOS</span></h2>
-            <div class="portfolio-grid" style="max-width: 1200px; margin: auto; padding: 0 1.5rem;">
-                <div class="portfolio-item"> <picture><source srcset="images/proyecto-ambar.webp" type="image/webp"><img src="images/proyecto-ambar.jpg" alt="Fachada del proyecto Ámbar en Recoleta" loading="lazy" width="600" height="400"/></picture> <div class="portfolio-content"> <span>Ámbar · Recoleta (15 Unidades)</span> <div class="view-more">Ver más →</div> </div> </div>
-                <div class="portfolio-item"> <picture><source srcset="images/proyecto-charlone.webp" type="image/webp"><img src="images/proyecto-charlone.jpg" alt="Render de la Torre Charlone en Colegiales" loading="lazy" width="600" height="400"/></picture> <div class="portfolio-content"> <span>Torre Charlone · Colegiales</span> <div class="view-more">Ver más →</div> </div> </div>
-                <div class="portfolio-item"> <picture><source srcset="images/proyecto-nunez.webp" type="image/webp"><img src="images/proyecto-nunez.jpg" alt="Exterior del proyecto Casona en Núñez" loading="lazy" width="600" height="400"/></picture> <div class="portfolio-content"> <span>Casona · Núñez</span> <div class="view-more">Ver más →</div> </div> </div>
-                <div class="portfolio-item"> <picture><source srcset="images/proyecto-palermo.webp" type="image/webp"><img src="images/proyecto-palermo.jpg" alt="Render del proyecto Concepción Live en Palermo" loading="lazy" width="600" height="400"/></picture> <div class="portfolio-content"> <span>Concepción Live · Palermo</span> <div class="view-more">Ver más →</div> </div> </div>
+            <div class="portfolio-grid">
+                <div class="portfolio-item">
+                    <picture>
+                        <source srcset="images/proyecto-ambar.webp" type="image/webp">
+                        <img src="images/proyecto-ambar.jpg" alt="Fachada del proyecto Ámbar en Recoleta" loading="lazy" width="600" height="400"/>
+                    </picture>
+                    <div class="portfolio-content">
+                        <span>Ámbar · Recoleta (15 Unidades)</span>
+                        <div class="view-more">Ver más →</div>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <picture>
+                        <source srcset="images/proyecto-charlone.webp" type="image/webp">
+                        <img src="images/proyecto-charlone.jpg" alt="Render de la Torre Charlone en Colegiales" loading="lazy" width="600" height="400"/>
+                    </picture>
+                    <div class="portfolio-content">
+                        <span>Torre Charlone · Colegiales</span>
+                        <div class="view-more">Ver más →</div>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <picture>
+                        <source srcset="images/proyecto-nunez.webp" type="image/webp">
+                        <img src="images/proyecto-nunez.jpg" alt="Exterior del proyecto Casona en Núñez" loading="lazy" width="600" height="400"/>
+                    </picture>
+                    <div class="portfolio-content">
+                        <span>Casona · Núñez</span>
+                        <div class="view-more">Ver más →</div>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <picture>
+                        <source srcset="images/proyecto-palermo.webp" type="image/webp">
+                        <img src="images/proyecto-palermo.jpg" alt="Render del proyecto Concepción Live en Palermo" loading="lazy" width="600" height="400"/>
+                    </picture>
+                    <div class="portfolio-content">
+                        <span>Concepción Live · Palermo</span>
+                        <div class="view-more">Ver más →</div>
+                    </div>
+                </div>
             </div>
         </section>
-        
+
+        <!-- SECCIÓN HERRAMIENTAS IA -->
         <section id="ai-tools" class="section-full-width">
             <h2 class="section-title" style="color:#fff;">HERRAMIENTAS CON <span>IA ✨</span></h2>
             <p style="text-align:center;max-width:600px;margin:-1rem auto 2rem;color:#ccc;line-height:1.6; padding: 0 1rem;">
                 Potenciá tus proyectos con estas herramientas exclusivas, diseñadas para darte una ventaja en el mercado.
             </p>
-            <div style="max-width: 1200px; margin: auto; padding: 0 1.5rem;">
+            <div class="container-1200"> <!-- Wrapper para centrar contenido -->
                 <div class="ai-tool-card">
                     <h3>Generador de Descripciones de Propiedades</h3>
                     <p>Ingresá los datos clave de tu propiedad y creá una descripción profesional y atractiva en segundos.</p>
                     <textarea id="property-input" placeholder="Ej: 3 ambientes en Palermo, 75m2, balcón con vista abierta, muy luminoso, piso alto, cerca del subte D..."></textarea>
                     <div style="text-align:center; margin-top:1rem;">
-                        <button id="generate-description-btn">Generar Descripción ✨</button>
+                        <button id="generate-description-btn" class="btn-primary">Generar Descripción ✨</button>
                         <div id="loader-description" class="loader"></div>
                     </div>
                     <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div>
@@ -585,7 +1487,7 @@
                     <p>¿Dudando entre dos barrios? ¿Querés saber el valor de referencia del m² en una zona? Pedí un análisis y obtené una respuesta clara.</p>
                     <textarea id="zones-input" placeholder="Ej: Comparar inversión en Recoleta vs. Colegiales O 'Valor del m² en Palermo'"></textarea>
                     <div style="text-align:center; margin-top:1rem;">
-                        <button id="generate-analysis-btn">Generar Análisis ✨</button>
+                        <button id="generate-analysis-btn" class="btn-primary">Generar Análisis ✨</button>
                         <div id="loader-analysis" class="loader"></div>
                     </div>
                     <div id="analysis-result" class="ai-result">El análisis generado aparecerá aquí...</div>
@@ -599,18 +1501,19 @@
             </div>
         </section>
 
+        <!-- SECCIÓN CONTACTO -->
         <section id="contact" class="section-full-width">
-            <div class="contact-wrapper" style="max-width: 1100px; margin: auto; padding: 0 1.5rem;">
+            <div class="contact-wrapper">
                 <div class="contact-info">
-                    <h2 class="section-title" style="text-align: left; color: var(--primary);">HABLEMOS</h2>
+                    <h2 class="section-title">HABLEMOS</h2>
                     <p>Contame tu proyecto o propiedad y descubramos juntos cómo maximizar su potencial. Agendemos una llamada sin compromiso.</p>
                     <div class="circulo-decorativo"></div>
                 </div>
                 <div class="contact-form-wrapper">
                     <form id="contact-form" action="https://formspree.io/f/mldnnkev" method="POST">
-                        <input type="text" name="name" placeholder="Tu Nombre" required>
-                        <input type="email" name="email" placeholder="Tu Email" required>
-                        <input type="tel" name="phone" placeholder="Tu Celular" required>
+                        <input type="text" name="name" id="contact-name" placeholder="Tu Nombre" required>
+                        <input type="email" name="email" id="contact-email" placeholder="Tu Email" required>
+                        <input type="tel" name="phone" id="contact-phone" placeholder="Tu Celular" required>
                         <select name="interest" id="interest-select" required>
                             <option value="" disabled selected>Estoy interesado/a en...</option>
                             <option value="Vender mi propiedad">Vender mi propiedad</option>
@@ -626,7 +1529,7 @@
                             <input type="text" name="property_rooms" placeholder="Ambientes">
                             <input type="text" name="property_size" placeholder="Superficie (m²)">
                         </div>
-                        <textarea name="message" rows="4" placeholder="Contame un poco sobre tu proyecto..." required></textarea>
+                        <textarea name="message" id="contact-message" rows="4" placeholder="Contame un poco sobre tu proyecto..." required></textarea>
                         <button type="submit" class="btn-enviar-mensaje">Enviar Mensaje</button>
                     </form>
                 </div>
@@ -634,20 +1537,23 @@
         </section>
     </div>
   </main>
-  
+
+  <!-- FOOTER -->
   <footer>
-    <p>&copy; 2025 Franco Garbini · GringoEstate · Todos los derechos reservados.</p>
+    <p>© 2025 Franco Garbini · GringoEstate · Todos los derechos reservados.</p>
     <p style="margin-top:1rem;">
-      <a href="https://www.linkedin.com/company/gringoestate/" target="_blank" rel="noopener noreferrer">LinkedIn</a> &nbsp;&bull;&nbsp;
-      <a href="https://twitter.com/Gringoestate" target="_blank" rel="noopener noreferrer">Twitter (X)</a> &nbsp;&bull;&nbsp;
+      <a href="https://www.linkedin.com/company/gringoestate/" target="_blank" rel="noopener noreferrer">LinkedIn</a>  • 
+      <a href="https://twitter.com/Gringoestate" target="_blank" rel="noopener noreferrer">Twitter (X)</a>  • 
       <a href="https://instagram.com/Gringoestate" target="_blank" rel="noopener noreferrer">Instagram</a>
     </p>
   </footer>
 
+  <!-- BOTÓN FLOTANTE WHATSAPP -->
   <a href="https://wa.me/5491156106169" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width:28px; height:28px; fill:white;"><path d="M380.9 97.1C339.4 55.6 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.8 0-67.6-9.5-97.8-26.7l-7-4.1-72.5 19 19.3-71.1-4.5-7.4c-18.3-30.7-27.9-66.2-27.9-102.3 0-108.6 88.4-197 197-197s197 88.4 197 197-88.4 197-197 197zm83.7-118.2c-3.7-1.9-22.1-10.9-25.6-12.1-3.4-1.2-5.9-1.9-8.4 1.9-2.5 3.7-9.7 12.1-11.9 14.5-2.2 2.5-4.5 2.8-8.2 1-3.7-1.9-15.7-5.8-30-18.5-11.1-9.6-18.7-21.6-20.9-25.3-2.2-3.7-0.2-5.9 1.7-7.7 1.7-1.5 3.7-3.7 5.5-5.5 1.8-1.8 2.5-3.7 3.7-6.2 1.2-2.5 0.6-4.8-0.3-6.7-0.9-1.9-8.4-20.1-11.5-27.5-3.1-7.4-6.2-6.3-8.4-6.3-2.2 0-4.8 0-7.4 0-2.5 0-6.7 1.2-10.3 5.9-3.7 4.8-14.1 13.8-14.1 33.5 0 19.8 14.4 38.9 16.4 41.4 2 2.5 28.2 42.8 68.2 60.1 9.7 4.1 17.3 6.6 23.1 8.8 13.3 5.1 25.6 4.3 35.1 2.6 10.8-1.9 22.1-9 25.2-17.6 3.1-8.6 3.1-16 2.2-17.6-0.9-1.5-3.4-2.5-7.1-4.5z"/></svg>
   </a>
 
+  <!-- SCRIPTS -->
   <!-- MEJORA: Scripts con 'defer' para no bloquear el renderizado -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
@@ -655,12 +1561,12 @@
   <script>
   document.addEventListener('DOMContentLoaded', () => {
 
-    // --- SETUP INICIAL ---
+    // --- CONFIGURACIÓN INICIAL Y DETECCIÓN DE PREFERENCIAS ---
     gsap.registerPlugin(ScrollTrigger);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // --- FUNCIÓN DEBOUNCE PARA PERFORMANCE ---
-    // MEJORA: Función reutilizable para limitar la frecuencia de ejecución en eventos como resize.
+    // --- UTILIDADES ---
+    // Función debounce para limitar la frecuencia de ejecución de callbacks
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -673,269 +1579,349 @@
         };
     }
 
-    // --- ANIMACIONES (RESPETANDO ACCESIBILIDAD) ---
-    if (!prefersReducedMotion) {
-      
-        // Animación del cursor personalizado
-        const cursorRegular = document.getElementById('cursor-regular');
-        if (window.matchMedia("(pointer: fine)").matches && cursorRegular) {
-            window.addEventListener('mousemove', (e) => {
-                gsap.to(cursorRegular, { x: e.clientX, y: e.clientY, duration: 0.2, ease: 'power2.out', xPercent: -50, yPercent: -50 });
-            });
-        }
+    // --- CURSOR PERSONALIZADO ---
+    const cursorRegular = document.getElementById('cursor-regular');
+    if (cursorRegular && !prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
+        cursorRegular.classList.add('visible');
+        const cursorDot = cursorRegular.querySelector('.cursor-dot');
 
-        // Animación de entrada del Hero
-        gsap.set(".hero-el", {y: 30});
-        gsap.to(".hero-el", { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: "power3.out", delay: 0.2 });
+        window.addEventListener('mousemove', (e) => {
+            // GSAP es más eficiente para seguir el cursor
+            gsap.to(cursorDot, { x: e.clientX, y: e.clientY, duration: 0.2, ease: 'power2.out' });
+        });
+    }
 
-        // Función genérica para animar secciones al hacer scroll
-        const animateFromSide = (element, trigger, direction = -1) => {
+    // --- ANIMACIONES DE SECCIONES (SI NO HAY PREFERENCIA DE REDUCIR MOVIMIENTO) ---
+    const animateOnScroll = (selector, direction = 1, triggerSelector = null) => {
+        const elements = gsap.utils.toArray(selector);
+        if (!elements.length || prefersReducedMotion) return;
+
+        elements.forEach(element => {
             gsap.from(element, {
                 opacity: 0,
                 x: direction * 75,
                 duration: 1,
                 ease: 'power3.out',
-                stagger: 0.2,
                 scrollTrigger: {
-                    trigger: trigger || element,
-                    start: "top 85%",
-                    toggleActions: "play none none none"
+                    trigger: triggerSelector || element,
+                    start: "top 85%", // Empieza a animar cuando el elemento llega al 85% del viewport
+                    toggleActions: "play none none none" // Solo reproduce la animación una vez
                 }
             });
-        };
-        
-        animateFromSide(".about-text", ".about", 1);
-        animateFromSide(".about-img", ".about", -1);
-        animateFromSide(".portfolio-item", ".portfolio-grid", -1);
-        animateFromSide(".ai-tool-card", "#ai-tools", 1);
-        
-        const contactInfo = document.querySelector(".contact-info");
-        const contactForm = document.querySelector(".contact-form-wrapper");
-        if(contactInfo) animateFromSide(contactInfo.children, contactInfo, -1);
-        if(contactForm) animateFromSide(contactForm, contactForm, 1);
-    }
+        });
+    };
+
+    animateOnScroll('.hero > *', 1); // Animación de entrada del Hero
+    animateOnScroll('.about-img', -1); // Imagen "Sobre Mí" entra desde la izquierda
+    animateOnScroll('.about-text', 1);  // Texto "Sobre Mí" entra desde la derecha
+    animateOnScroll('.portfolio-item', 1, '.portfolio-grid'); // Elementos del portafolio
+    animateOnScroll('.ai-tool-card', 1, '#ai-tools'); // Tarjetas de IA
+    
+    const contactInfo = document.querySelector(".contact-info");
+    const contactForm = document.querySelector(".contact-form-wrapper");
+    if(contactInfo) animateOnScroll('.contact-info > *', -1, contactInfo); // Contenido de la sección de contacto
+    if(contactForm) animateOnScroll('.contact-form-wrapper > *', 1, contactForm);
 
     // --- LÓGICA DE NAVEGACIÓN ---
     const nav = document.querySelector('nav');
-    if(nav) {
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    // Efecto de scroll en la navegación
+    if (nav) {
         ScrollTrigger.create({
-            start: 'top -80',
-            end: 99999,
+            trigger: "body", // Puede ser cualquier elemento que esté al inicio
+            start: 'top -80', // Cuando el scroll pasa los primeros 80px
+            end: 99999, // Hasta el final de la página
             toggleClass: { className: 'nav-scrolled', targets: nav }
         });
     }
 
-    const menuToggle = document.getElementById('menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
-    if(menuToggle && mobileMenu) {
-        gsap.set(mobileMenu, { autoAlpha: 0 }); // Ocultar inicialmente con GSAP
+    // Animación y control del menú móvil
+    if (menuToggle && mobileMenu) {
+        // Configuración inicial para GSAP
+        gsap.set(mobileMenu, { x: '-100%', opacity: 0, visibility: 'hidden' });
+
         const mobileMenuTimeline = gsap.timeline({ paused: true, reversed: true })
-            .to(mobileMenu, { autoAlpha: 1, duration: 0.3, ease: 'power2.out' })
+            .to(mobileMenu, { x: '0%', opacity: 1, visibility: 'visible', duration: 0.4, ease: 'power2.out' })
             .fromTo(mobileMenu.querySelectorAll('li'), { x: -30, opacity: 0 }, { x: 0, opacity: 1, stagger: 0.08, duration: 0.4, ease: 'power2.out' }, "-=0.2");
 
         menuToggle.addEventListener('click', () => {
+            const isOpen = menuToggle.getAttribute('aria-expanded') === 'true';
+            menuToggle.setAttribute('aria-expanded', !isOpen);
             menuToggle.classList.toggle('open');
             document.body.classList.toggle('no-scroll');
-            mobileMenuTimeline.reversed() ? mobileMenuTimeline.play() : mobileMenuTimeline.reverse();
+            mobileMenu.hidden = isOpen; // Ocultar/mostrar para accesibilidad
+            
+            if (mobileMenuTimeline.reversed()) {
+                mobileMenuTimeline.play();
+            } else {
+                mobileMenuTimeline.reverse();
+            }
         });
 
+        // Cerrar menú al hacer clic en un enlace
         mobileMenu.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 if (menuToggle.classList.contains('open')) {
-                    menuToggle.classList.remove('open');
-                    document.body.classList.remove('no-scroll');
-                    mobileMenuTimeline.reverse();
+                    menuToggle.click(); // Simula un clic en el botón para cerrar todo
                 }
             });
         });
     }
 
-    // --- LÓGICA DE SCROLL HORIZONTAL Y TARJETAS ---
+    // --- LÓGICA DE SCROLL HORIZONTAL Y EXPANSIÓN DE TARJETAS ---
     const horizontalSection = document.querySelector('.horizontal-scroll-section');
     const cardsContainer = document.querySelector('.cards-container');
     const serviceCards = gsap.utils.toArray('.service-card-stacked');
     const overlayBackdrop = document.getElementById('overlay-backdrop');
-    let horizontalScrollTween;
+    let horizontalScrollTween; // Variable para guardar el tween de ScrollTrigger
 
     function setupHorizontalScroll() {
-        // Si ya existe un tween, lo eliminamos para recrearlo
-        if (horizontalScrollTween) {
-            horizontalScrollTween.kill();
-        }
-
-        // En mobile, desactivamos el scroll horizontal y dejamos que fluya verticalmente
+        // Desactivar scroll horizontal si estamos en móvil (< 768px)
         if (window.innerWidth < 768) {
+            // Si ya estaba configurado, lo destruimos
             if (ScrollTrigger.getById("horizontalScroll")) {
                 ScrollTrigger.getById("horizontalScroll").kill();
             }
-            gsap.set(horizontalSection, { height: 'auto' });
-            gsap.set('.horizontal-scroll-wrapper', { position: 'static', height: 'auto', overflow: 'visible' });
-            gsap.set(cardsContainer, { x: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }); // Modificado para apilar
-            return;
+            gsap.set(horizontalSection, { height: 'auto' }); // Altura automática
+            gsap.set('.horizontal-scroll-wrapper', { position: 'static', height: 'auto', overflow: 'visible' }); // Posición estática
+            gsap.set(cardsContainer, { x: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }); // Apilar tarjetas
+            return; // Salir de la función
         }
 
-        // En desktop, configuramos el scroll horizontal
-        gsap.set('.horizontal-scroll-wrapper', { position: 'sticky', height: '100vh', overflow: 'hidden'});
-        gsap.set(cardsContainer, { display: 'flex', flexDirection: 'row' }); // Restaurar flex-direction
+        // Si estamos en desktop, configurar scroll horizontal
+        gsap.set('.horizontal-scroll-wrapper', { position: 'sticky', height: '100vh', overflow: 'hidden'}); // Sticky
+        gsap.set(cardsContainer, { x: 0, display: 'flex', flexDirection: 'row', gap: 'clamp(2rem, 5vw, 4rem)' }); // Revertir estilos móviles
         
-        const scrollWidth = cardsContainer.offsetWidth - window.innerWidth;
-        gsap.set(horizontalSection, { height: scrollWidth + window.innerHeight + 'px' });
+        // Calcular el ancho total que deben moverse las tarjetas
+        const scrollWidth = cardsContainer.scrollWidth - window.innerWidth; // Ancho total del contenido menos el ancho visible
+        gsap.set(horizontalSection, { height: scrollWidth + window.innerHeight + 'px' }); // Altura de la sección completa
 
+        // Crear o actualizar el tween de GSAP para el scroll horizontal
+        if (horizontalScrollTween) horizontalScrollTween.kill(); // Matar el anterior si existe
         horizontalScrollTween = gsap.to(cardsContainer, {
-            x: -scrollWidth,
+            x: -scrollWidth, // Mover hacia la izquierda
             ease: "none",
             scrollTrigger: {
                 id: "horizontalScroll",
                 trigger: horizontalSection,
-                start: "top top",
-                end: () => `+=${scrollWidth}`,
-                pin: ".horizontal-scroll-wrapper",
-                scrub: 0.1, // Reducido para menos "borrosidad"
-                snap: {
+                start: "top top", // Empieza cuando la sección llega al top
+                end: () => `+=${scrollWidth}`, // Termina después de que las tarjetas se hayan movido completamente
+                pin: ".horizontal-scroll-wrapper", // Fija el contenedor mientras dura la animación
+                scrub: 0.1, // Suaviza la conexión entre scroll y animación
+                snap: { // Opcional: para que las tarjetas se detengan en puntos específicos
                     snapTo: 1 / (serviceCards.length - 1),
                     duration: { min: 0.2, max: 0.5 },
                     ease: "power2.inOut"
                 },
-                invalidateOnRefresh: true
+                invalidateOnRefresh: true // Refresca los valores en caso de redimensionamiento
             }
         });
     }
     
-    // Lógica para expandir/colapsar tarjetas con animaciones suaves
+    // Función para expandir/colapsar tarjetas
     function toggleCardExpansion(cardElement, expand) {
         if (!cardElement || !overlayBackdrop) return;
         
-        const st = ScrollTrigger.getById("horizontalScroll");
+        const st = ScrollTrigger.getById("horizontalScroll"); // Obtener referencia al ScrollTrigger
         const cardImage = cardElement.querySelector('.card-image');
         const cardContentInitial = cardElement.querySelector('.card-content-initial');
         const cardFullDetails = cardElement.querySelector('.card-full-details');
+        const allCards = gsap.utils.toArray('.service-card-stacked');
 
         if (expand) {
-            // Guardar la posición de scroll actual
+            // Guardar la posición actual de scroll para volver
             cardElement.dataset.scrollY = window.scrollY;
             
-            // Desactivar el scroll horizontal temporalmente
+            // Desactivar temporalmente el ScrollTrigger principal
             if (st) st.disable();
+            document.body.classList.add('no-scroll'); // Evitar scroll del body
+            overlayBackdrop.classList.add('visible'); // Mostrar el overlay
             
-            // Animación de expansión
+            // Ocultar todas las otras tarjetas (excepto la expandida)
+            allCards.forEach(otherCard => {
+                if (otherCard !== cardElement) {
+                    gsap.to(otherCard, { opacity: 0, scale: 0.95, duration: 0.3, ease: 'power2.inOut' });
+                }
+            });
+
+            // Animación de expansión de la tarjeta seleccionada
             const expandTimeline = gsap.timeline({
-                onStart: () => {
-                    overlayBackdrop.classList.add('visible');
+                onStart: () => { // Al inicio de la animación
                     cardElement.classList.add('is-expanded');
-                    document.body.classList.add('no-scroll');
-                    // Asegurarse de que el contenido completo esté visible para GSAP
+                    // Asegurarse de que el contenido completo esté accesible para GSAP
                     gsap.set(cardFullDetails, { autoAlpha: 0, translateY: 20, pointerEvents: 'none' });
+                },
+                onComplete: () => { // Al finalizar la animación
+                    gsap.set(cardFullDetails, { pointerEvents: 'all', ariaHidden: 'false' }); // Permitir interacciones
                 }
             });
 
             expandTimeline
-                .to(overlayBackdrop, { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0)
-                .to(cardElement, {
-                    scale: 1,
-                    opacity: 1,
-                    x: '0%', // Asegurar que no haya traslación horizontal residual
-                    y: '0%', // Asegurar que no haya traslación vertical residual
-                    left: '50%', // Posicionar al centro
-                    top: '50%', // Posicionar al centro
-                    transform: 'translate(-50%, -50%)', // Centrar
-                    duration: 0.4,
-                    ease: 'power2.out'
+                .to(overlayBackdrop, { opacity: 1, duration: 0.3, ease: 'power2.out' }) // Fade del overlay
+                .to(cardElement, { // Animación de la tarjeta principal
+                    scale: 1, opacity: 1, x: '0%', y: '0%', left: '50%', top: '50%', // Centrar
+                    transform: 'translate(-50%, -50%)', /* Asegura el centrado perfecto */
+                    duration: 0.4, ease: 'power2.out'
                 }, 0)
                 .to([cardImage, cardContentInitial], { autoAlpha: 0, duration: 0.3, ease: 'power2.out', pointerEvents: 'none' }, 0.1) // Ocultar contenido inicial
-                .to(cardFullDetails, { autoAlpha: 1, translateY: 0, duration: 0.4, ease: 'power2.out', pointerEvents: 'all' }, 0.2); // Mostrar contenido completo
-            
-        } else {
+                .to(cardFullDetails, { autoAlpha: 1, translateY: 0, duration: 0.4, ease: 'power2.out' }, 0.2); // Mostrar contenido detallado
+
+        } else { // Colapsar tarjeta
             // Animación de colapso
             const collapseTimeline = gsap.timeline({
-                onComplete: () => {
+                onStart: () => { // Al iniciar el colapso
+                    gsap.set(cardFullDetails, { pointerEvents: 'none', ariaHidden: 'true' });
+                },
+                onComplete: () => { // Al completar el colapso
                     cardElement.classList.remove('is-expanded');
                     document.body.classList.remove('no-scroll');
                     overlayBackdrop.classList.remove('visible');
-                    gsap.set(cardFullDetails, { display: 'none' }); // Ocultar completamente después de la animación
-                    
-                    // Restaurar posición de scroll con animación suave
+                    gsap.set(cardFullDetails, { display: 'none' }); // Ocultar completamente
+
+                    // Restaurar posición de scroll guardada
                     const savedScrollY = cardElement.dataset.scrollY;
                     if (savedScrollY) {
                         window.scrollTo({
                             top: parseFloat(savedScrollY),
-                            behavior: 'smooth'
+                            behavior: 'smooth' // Scroll suave de vuelta
                         });
                     }
                     
-                    // Reactivar scroll horizontal
+                    // Reactivar ScrollTrigger principal y refrescar
                     if (st) {
                         st.enable();
                         ScrollTrigger.refresh();
                     }
+                    // Volver a mostrar las otras tarjetas
+                    allCards.forEach(otherCard => {
+                        if (otherCard !== cardElement) {
+                            gsap.to(otherCard, { opacity: 1, scale: 1, duration: 0.3, ease: 'power2.out' });
+                        }
+                    });
                 }
             });
 
             collapseTimeline
-                .to(cardFullDetails, { autoAlpha: 0, translateY: 20, duration: 0.3, ease: 'power2.in', pointerEvents: 'none' }, 0) // Ocultar contenido completo
+                .to(cardFullDetails, { autoAlpha: 0, translateY: 20, duration: 0.3, ease: 'power2.in' }, 0) // Ocultar contenido detallado
                 .to([cardImage, cardContentInitial], { autoAlpha: 1, duration: 0.3, ease: 'power2.in', pointerEvents: 'all' }, 0.1) // Mostrar contenido inicial
-                .to(cardElement, {
-                    scale: 0.95,
-                    opacity: 0.8,
-                    x: 0, // Volver a la posición original en el scroll horizontal
-                    y: 0,
-                    left: 'auto', // Restaurar posicionamiento original
-                    top: 'auto',
-                    transform: 'none', // Quitar transformaciones fijas
-                    duration: 0.3,
-                    ease: 'power2.in'
+                .to(cardElement, { // Animación de vuelta a la posición original
+                    x: 0, y: 0, /* Asegura que vuelva a su posición en el scroll */
+                    scale: 0.95, opacity: 0.8, /* Efecto sutil al cerrar */
+                    duration: 0.3, ease: 'power2.in'
                 }, 0.1)
                 .to(overlayBackdrop, { opacity: 0, duration: 0.3, ease: 'power2.in' }, 0.2);
         }
     }
     
+    // Añadir listeners a los botones de expandir/colapsar
     serviceCards.forEach(card => {
         const expandButton = card.querySelector('.btn-toggle-expand');
         const closeButton = card.querySelector('.btn-toggle-collapse');
         
-        // Listener para la tarjeta completa (para expandir al hacer click en cualquier parte)
+        // Expandir al hacer clic en la tarjeta (excepto en los botones internos)
         card.addEventListener('click', (e) => {
-            // Evitar que el click en los botones internos también expanda/colapse dos veces
-            if (e.target.closest('.btn-toggle-expand') || e.target.closest('.btn-toggle-collapse') || e.target.closest('.btn-card')) {
-                return;
-            }
-            if (!card.classList.contains('is-expanded')) {
-                toggleCardExpansion(card, true);
+            if (!e.target.closest('.btn-toggle-expand') && !e.target.closest('.btn-toggle-collapse') && !e.target.closest('.btn-card')) {
+                if (!card.classList.contains('is-expanded')) {
+                    toggleCardExpansion(card, true);
+                }
             }
         });
 
-        if (expandButton) { expandButton.addEventListener('click', (e) => { e.stopPropagation(); toggleCardExpansion(card, true); }); }
-        if (closeButton) { closeButton.addEventListener('click', (e) => { e.stopPropagation(); toggleCardExpansion(card, false); }); }
+        if (expandButton) {
+            expandButton.addEventListener('click', (e) => {
+                e.stopPropagation(); // Evita que el click se propague al listener de la tarjeta
+                toggleCardExpansion(card, true);
+            });
+        }
+        if (closeButton) {
+            closeButton.addEventListener('click', (e) => {
+                e.stopPropagation(); // Evita que el click se propague al listener de la tarjeta
+                toggleCardExpansion(card, false);
+            });
+        }
     });
     
+    // Cerrar tarjeta expandida al hacer clic en el overlay
     if(overlayBackdrop) {
         overlayBackdrop.addEventListener('click', () => {
             const expandedCard = document.querySelector('.service-card-stacked.is-expanded');
-            if (expandedCard) { toggleCardExpansion(expandedCard, false); }
+            if (expandedCard) {
+                toggleCardExpansion(expandedCard, false);
+            }
         });
     }
 
     // --- LÓGICA DEL FORMULARIO DE CONTACTO ---
     const interestSelect = document.getElementById('interest-select');
-    const propertyDetails = document.getElementById('property-details');
-    if (interestSelect && propertyDetails) {
+    const propertyDetailsDiv = document.getElementById('property-details');
+    const contactForm = document.getElementById('contact-form');
+
+    // Mostrar/Ocultar campos de detalles de propiedad según la selección
+    if (interestSelect && propertyDetailsDiv) {
         interestSelect.addEventListener('change', function() {
             if (this.value === 'Vender mi propiedad') {
-                gsap.fromTo(propertyDetails, {height: 0, opacity: 0, display: 'none'}, {height: 'auto', opacity: 1, display: 'flex', duration: 0.4, ease: 'power2.out'});
+                // Animación para mostrar los campos
+                gsap.to(propertyDetailsDiv, {
+                    height: 'auto',
+                    opacity: 1,
+                    display: 'flex',
+                    duration: 0.4,
+                    ease: 'power2.out'
+                });
             } else {
-                gsap.to(propertyDetails, {height: 0, opacity: 0, duration: 0.4, ease: 'power2.in', onComplete: () => propertyDetails.style.display = 'none'});
+                // Animación para ocultar los campos
+                gsap.to(propertyDetailsDiv, {
+                    height: 0,
+                    opacity: 0,
+                    duration: 0.4,
+                    ease: 'power2.in',
+                    onComplete: () => propertyDetailsDiv.style.display = 'none' // Ocultar completamente después de la animación
+                });
             }
         });
     }
 
-    // --- INICIALIZACIÓN Y MANEJO DE RESIZE ---
-    setupHorizontalScroll();
-    window.addEventListener('resize', debounce(() => {
-        setupHorizontalScroll();
-        ScrollTrigger.refresh(true);
-    }, 250));
+    // Validación de formulario con JavaScript
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(event) {
+            const nameInput = document.getElementById('contact-name');
+            const emailInput = document.getElementById('contact-email');
+            const phoneInput = document.getElementById('contact-phone');
+            const messageInput = document.getElementById('contact-message');
+            const interestSelect = document.getElementById('interest-select');
 
-    // --- Placeholder para la lógica de la API de IA ---
-    // (Asegúrate de tener una clave de API válida para que esto funcione)
+            let isValid = true;
+            // Limpiar mensajes de error previos
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+
+            const setError = (inputElement, message) => {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.style.color = 'var(--primary)';
+                errorDiv.style.fontSize = '0.85rem';
+                errorDiv.style.marginTop = '0.5rem';
+                errorDiv.textContent = message;
+                inputElement.parentNode.insertBefore(errorDiv, inputElement.nextSibling);
+                isValid = false;
+            };
+
+            // Validaciones
+            if (!nameInput.value.trim()) { setError(nameInput, 'El nombre es obligatorio.'); }
+            if (!emailInput.value.trim() || !emailInput.value.includes('@')) { setError(emailInput, 'Por favor, ingresa un email válido.'); }
+            if (!phoneInput.value.trim()) { setError(phoneInput, 'El teléfono es obligatorio.'); }
+            if (interestSelect.value === null || interestSelect.value === '') { setError(interestSelect, 'Debes seleccionar un interés.'); }
+            if (!messageInput.value.trim()) { setError(messageInput, 'El mensaje es obligatorio.'); }
+
+            if (!isValid) {
+                event.preventDefault(); // Detener el envío si hay errores
+            }
+            // Si es válido, el formulario se enviará a Formspree
+        });
+    }
+
+    // --- LÓGICA DE LAS HERRAMIENTAS IA ---
     const setupAITool = (btnId, inputId, resultId, loaderId, promptTemplate) => {
         const generateBtn = document.getElementById(btnId);
         const inputEl = document.getElementById(inputId);
@@ -951,30 +1937,60 @@
                 return;
             }
 
+            // Mostrar loader y ocultar botón
             loaderEl.style.display = 'inline-block';
             generateBtn.style.display = 'none';
             resultEl.textContent = 'Generando...';
 
-            // AQUÍ IRÍA LA LÓGICA DE LA API
-            // Simulamos una llamada a la API con un setTimeout
-            setTimeout(() => {
+            // --- LÓGICA DE LLAMADA A LA API (SIMULADA) ---
+            // Aquí iría tu llamada real a la API de IA (ej: fetch a OpenAI, Gemini, etc.)
+            try {
                 const prompt = promptTemplate(userInput);
-                // Simulamos una respuesta
-                const apiResponse = `Respuesta simulada para: "${prompt}"\n\nEsta es una demostración. La funcionalidad real requiere una conexión a la API de IA.`;
-                resultEl.textContent = apiResponse;
                 
+                // Ejemplo de fetch (reemplaza con tu endpoint y configuración):
+                /*
+                const response = await fetch('TU_API_ENDPOINT', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer TU_API_KEY' // ¡Nunca expongas la clave en el frontend!
+                    },
+                    body: JSON.stringify({ prompt: prompt, max_tokens: 150 }) // Ajusta parámetros
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error API: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const apiResponse = data.choices ? data.choices[0].text.trim() : data.generated_text; // Ajusta según la respuesta de tu API
+                resultEl.textContent = apiResponse || 'No se pudo obtener una respuesta.';
+                */
+
+                // SIMULACIÓN DE RESPUESTA DE API
+                await new Promise(resolve => setTimeout(resolve, 2500)); // Simula 2.5 segundos de espera
+                const simulatedResponse = `¡Hola! Basado en tu entrada: "${userInput}", aquí tienes una simulación de la respuesta.\n\nEsta es una versión de demostración. Para la funcionalidad real, necesitarías integrar una API de IA.\n\n${prompt}`;
+                resultEl.textContent = simulatedResponse;
+                // Fin simulación
+
+            } catch (error) {
+                console.error('Error al generar contenido:', error);
+                resultEl.textContent = `Ocurrió un error al generar el contenido. Por favor, intenta de nuevo. (${error.message})`;
+            } finally {
+                // Ocultar loader y volver a mostrar el botón
                 loaderEl.style.display = 'none';
                 generateBtn.style.display = 'inline-block';
-            }, 2000);
+            }
         });
     };
 
+    // Configurar herramientas de IA
     setupAITool(
         'generate-description-btn',
         'property-input',
         'description-result',
         'loader-description',
-        (input) => `Creá una descripción de venta profesional y atractiva para una propiedad con estas características: ${input}.`
+        (input) => `Generá una descripción de venta profesional y atractiva para una propiedad con estas características: ${input}. Enfócate en los beneficios clave.`
     );
 
     setupAITool(
@@ -982,9 +1998,15 @@
         'zones-input',
         'analysis-result',
         'loader-analysis',
-        (input) => `Generá un análisis comparativo de la siguiente consulta sobre zonas inmobiliarias: ${input}.`
+        (input) => `Realizá un análisis comparativo o de valor de m² para la siguiente consulta inmobiliaria: ${input}. Incluí factores relevantes del mercado actual.`
     );
 
+    // --- INICIALIZACIÓN Y MANEJO DE REDIMENSIONAMIENTO ---
+    setupHorizontalScroll(); // Configurar scroll horizontal al cargar la página
+    window.addEventListener('resize', debounce(() => {
+        setupHorizontalScroll(); // Reconfigurar si cambia el tamaño de la ventana
+        ScrollTrigger.refresh(true); // Refrescar ScrollTrigger para que detecte los cambios
+    }, 250)); // Debounce para evitar sobrecarga
   });
   </script>
 
