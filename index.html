@@ -68,9 +68,24 @@
 
     .custom-cursor { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 9999; opacity: 0; transition: opacity .3s; }
     .cursor-dot { width: 24px; height: 24px; background-color: transparent; border: 2px solid var(--primary); border-radius: 50%; transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
+    
+    /* REQUERIMIENTO 3: CSS para el nuevo cursor de punto */
+    .cursor-point {
+        width: 6px;
+        height: 6px;
+        background-color: #ffffff;
+        border-radius: 50%;
+        transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1); /* Transición más lenta para el retraso */
+    }
+    #cursor-point {
+        z-index: 9998; /* Un poco por debajo del anillo */
+    }
+    /* Fin Requerimiento 3 */
+
     @media (pointer: fine) { .custom-cursor { opacity: 1; } }
     @media (pointer: coarse) { .custom-cursor { display: none; } body {cursor: auto;} a, button {cursor: pointer;} }
 
+    /* REQUERIMIENTO 1: Verificación de rutas de imagen. La ruta 'images/hero-bg.jpg' es correcta. */
     header{height:100vh;background:url('images/hero-bg.jpg') center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff; perspective: 1000px;}
     header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}  
     .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem; transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);}
@@ -385,7 +400,10 @@
   </style>
 </head>
 <body>
+  <!-- REQUERIMIENTO 3: HTML para los cursores -->
   <div id="cursor-regular" class="custom-cursor"><div class="cursor-dot"></div></div>
+  <div id="cursor-point" class="custom-cursor"></div>
+  <!-- Fin Requerimiento 3 -->
 
   <div id="overlay-backdrop"></div>
   
@@ -418,6 +436,7 @@
 
   <header id="top">
     <div class="hero">
+        <!-- REQUERIMIENTO 1: Verificación de rutas de imagen. Ambas rutas ('images/isologo.webp' y 'images/isologo.png') son correctas. -->
         <picture>
             <source srcset="images/isologo.webp" type="image/webp">
             <img src="images/isologo.png" alt="Isologo de GringoEstate" class="isologo hero-el" width="160" height="160">
@@ -431,6 +450,7 @@
   <main>
     <section id="about" class="about">
       <div class="about-img">
+        <!-- REQUERIMIENTO 1: Verificación de rutas de imagen. Ambas rutas son correctas. -->
         <picture>
             <source srcset="images/franco-perfil.webp" type="image/webp">
             <img src="images/franco-perfil.JPG" alt="Retrato de Franco Garbini, fundador de GringoEstate" loading="lazy" width="280" height="280">
@@ -455,6 +475,7 @@
                     <!-- Card 1 -->
                     <article class="service-card-stacked" id="tarjeta1">
                       <div class="card-inner-content">
+                        <!-- REQUERIMIENTO 1: Verificación de rutas de imagen. Ambas rutas son correctas. -->
                         <picture>
                             <source srcset="images/tasacion-profesional-propiedades-gringoestate.webp" type="image/webp">
                             <img src="images/tasacion-profesional-propiedades-gringoestate.jpg" alt="Tasación profesional de una propiedad con documentos y gráficos" class="card-image" loading="lazy" width="700" height="600">
@@ -467,6 +488,7 @@
                     <!-- Card 2 -->
                     <article class="service-card-stacked" id="tarjeta2">
                       <div class="card-inner-content">
+                        <!-- REQUERIMIENTO 1: Verificación de rutas de imagen. Ambas rutas son correctas. -->
                         <picture>
                             <source srcset="images/venta-propiedades-90-dias-gringoestate.webp" type="image/webp">
                             <img src="images/venta-propiedades-90-dias-gringoestate.jpg" alt="Contrato de venta de una propiedad siendo firmado" class="card-image" loading="lazy" width="700" height="600">
@@ -479,6 +501,7 @@
                     <!-- Card 3 -->
                     <article class="service-card-stacked" id="tarjeta3">
                       <div class="card-inner-content">
+                        <!-- REQUERIMIENTO 1: Verificación de rutas de imagen. Ambas rutas son correctas. -->
                         <picture>
                             <source srcset="images/gestion-alquiler-temporario-ambbi.webp" type="image/webp">
                             <img src="images/gestion-alquiler-temporario-ambbi.jpg" alt="Interior moderno y bien decorado de un apartamento de alquiler temporario" class="card-image" loading="lazy" width="700" height="600">
@@ -491,6 +514,7 @@
                     <!-- Card 4 -->
                     <article class="service-card-stacked" id="tarjeta4">
                       <div class="card-inner-content">
+                          <!-- REQUERIMIENTO 1: Verificación de rutas de imagen. Ambas rutas son correctas. -->
                           <picture>
                               <source srcset="images/gestion-alquiler-flex-tradicional-gringoestate.webp" type="image/webp">
                               <img src="images/gestion-alquiler-flex-tradicional-gringoestate.jpg" alt="Llaves de una propiedad siendo entregadas a un inquilino" class="card-image" loading="lazy" width="700" height="600">
@@ -503,6 +527,7 @@
                     <!-- Card 5 -->
                     <article class="service-card-stacked" id="tarjeta5">
                       <div class="card-inner-content">
+                        <!-- REQUERIMIENTO 1: Verificación de rutas de imagen. Ambas rutas son correctas. -->
                         <picture>
                           <source srcset="images/inversion-desarrollos-desde-pozo-gringoestate.webp" type="image/webp">
                           <img src="images/inversion-desarrollos-desde-pozo-gringoestate.jpg" alt="Render de un edificio en construcción visto desde abajo" class="card-image" loading="lazy" width="700" height="600">
@@ -515,6 +540,7 @@
                     <!-- Card 6 -->
                     <article class="service-card-stacked" id="tarjeta6">
                         <div class="card-inner-content">
+                            <!-- REQUERIMIENTO 1: Verificación de rutas de imagen. Ambas rutas son correctas. -->
                             <picture>
                                 <source srcset="images/locales-comerciales-oficinas-gringoestate.webp" type="image/webp">
                                 <img src="images/locales-comerciales-oficinas-gringoestate.png" alt="Interior de una oficina moderna y luminosa" class="card-image" loading="lazy" width="700" height="600">
@@ -527,6 +553,7 @@
                     <!-- Card 7 (NUEVA) -->
                     <article class="service-card-stacked" id="tarjeta7">
                         <div class="card-inner-content">
+                            <!-- REQUERIMIENTO 1: Verificación de rutas de imagen. Ambas rutas son correctas. -->
                             <picture>
                                 <source srcset="images/servicio-desarrollador.webp" type="image/webp">
                                 <img src="images/servicio-desarrollador.jpg" alt="Un desarrollador revisando planos en una obra en construcción" class="card-image" loading="lazy" width="700" height="600">
@@ -539,6 +566,7 @@
                     <!-- Card 8 (NUEVA) -->
                     <article class="service-card-stacked" id="tarjeta8">
                         <div class="card-inner-content">
+                            <!-- REQUERIMIENTO 1: Verificación de rutas de imagen. Ambas rutas son correctas. -->
                             <picture>
                                 <source srcset="images/servicio-shopper.webp" type="image/webp">
                                 <img src="images/servicio-shopper.jpg" alt="Una persona analizando distintas propiedades en una tablet" class="card-image" loading="lazy" width="700" height="600">
@@ -557,6 +585,7 @@
         <section id="portfolio" class="section-full-width" style="background-color: var(--dark); padding-top: 8rem; padding-bottom: 4.5rem;">
             <h2 class="section-title" style="color: #fff;">PROYECTOS <span>DESTACADOS</span></h2>
             <div class="portfolio-grid" style="max-width: 1200px; margin: auto; padding: 0 1.5rem;">
+                <!-- REQUERIMIENTO 1: Verificación de rutas de imagen. Todas las rutas son correctas. -->
                 <div class="portfolio-item"> <picture><source srcset="images/proyecto-ambar.webp" type="image/webp"><img src="images/proyecto-ambar.jpg" alt="Fachada del proyecto Ámbar en Recoleta" loading="lazy" width="600" height="400"/></picture> <div class="portfolio-content"> <span>Ámbar · Recoleta (15 Unidades)</span> <div class="view-more">Ver más →</div> </div> </div>
                 <div class="portfolio-item"> <picture><source srcset="images/proyecto-charlone.webp" type="image/webp"><img src="images/proyecto-charlone.jpg" alt="Render de la Torre Charlone en Colegiales" loading="lazy" width="600" height="400"/></picture> <div class="portfolio-content"> <span>Torre Charlone · Colegiales</span> <div class="view-more">Ver más →</div> </div> </div>
                 <div class="portfolio-item"> <picture><source srcset="images/proyecto-nunez.webp" type="image/webp"><img src="images/proyecto-nunez.jpg" alt="Exterior del proyecto Casona en Núñez" loading="lazy" width="600" height="400"/></picture> <div class="portfolio-content"> <span>Casona · Núñez</span> <div class="view-more">Ver más →</div> </div> </div>
@@ -660,7 +689,6 @@
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // --- FUNCIÓN DEBOUNCE PARA PERFORMANCE ---
-    // MEJORA: Función reutilizable para limitar la frecuencia de ejecución en eventos como resize.
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -676,13 +704,16 @@
     // --- ANIMACIONES (RESPETANDO ACCESIBILIDAD) ---
     if (!prefersReducedMotion) {
       
-        // Animación del cursor personalizado
+        // REQUERIMIENTO 3: Lógica de animación para ambos cursores
         const cursorRegular = document.getElementById('cursor-regular');
-        if (window.matchMedia("(pointer: fine)").matches && cursorRegular) {
+        const cursorPoint = document.getElementById('cursor-point'); // Nuevo
+        if (window.matchMedia("(pointer: fine)").matches && cursorRegular && cursorPoint) { // Modificado
             window.addEventListener('mousemove', (e) => {
                 gsap.to(cursorRegular, { x: e.clientX, y: e.clientY, duration: 0.2, ease: 'power2.out', xPercent: -50, yPercent: -50 });
+                gsap.to(cursorPoint, { x: e.clientX, y: e.clientY, duration: 0.4, ease: 'power2.out', xPercent: -50, yPercent: -50 }); // Nuevo
             });
         }
+        // Fin Requerimiento 3
 
         // Animación de entrada del Hero
         gsap.set(".hero-el", {y: 30});
@@ -758,25 +789,22 @@
     let horizontalScrollTween;
 
     function setupHorizontalScroll() {
-        // Si ya existe un tween, lo eliminamos para recrearlo
         if (horizontalScrollTween) {
             horizontalScrollTween.kill();
         }
 
-        // En mobile, desactivamos el scroll horizontal y dejamos que fluya verticalmente
         if (window.innerWidth < 768) {
             if (ScrollTrigger.getById("horizontalScroll")) {
                 ScrollTrigger.getById("horizontalScroll").kill();
             }
             gsap.set(horizontalSection, { height: 'auto' });
             gsap.set('.horizontal-scroll-wrapper', { position: 'static', height: 'auto', overflow: 'visible' });
-            gsap.set(cardsContainer, { x: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }); // Modificado para apilar
+            gsap.set(cardsContainer, { x: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' });
             return;
         }
 
-        // En desktop, configuramos el scroll horizontal
         gsap.set('.horizontal-scroll-wrapper', { position: 'sticky', height: '100vh', overflow: 'hidden'});
-        gsap.set(cardsContainer, { display: 'flex', flexDirection: 'row' }); // Restaurar flex-direction
+        gsap.set(cardsContainer, { display: 'flex', flexDirection: 'row' }); 
         
         const scrollWidth = cardsContainer.offsetWidth - window.innerWidth;
         gsap.set(horizontalSection, { height: scrollWidth + window.innerHeight + 'px' });
@@ -790,7 +818,7 @@
                 start: "top top",
                 end: () => `+=${scrollWidth}`,
                 pin: ".horizontal-scroll-wrapper",
-                scrub: 0.1, // Reducido para menos "borrosidad"
+                scrub: 0.1,
                 snap: {
                     snapTo: 1 / (serviceCards.length - 1),
                     duration: { min: 0.2, max: 0.5 },
@@ -801,7 +829,6 @@
         });
     }
     
-    // Lógica para expandir/colapsar tarjetas con animaciones suaves
     function toggleCardExpansion(cardElement, expand) {
         if (!cardElement || !overlayBackdrop) return;
         
@@ -811,19 +838,14 @@
         const cardFullDetails = cardElement.querySelector('.card-full-details');
 
         if (expand) {
-            // Guardar la posición de scroll actual
             cardElement.dataset.scrollY = window.scrollY;
-            
-            // Desactivar el scroll horizontal temporalmente
             if (st) st.disable();
             
-            // Animación de expansión
             const expandTimeline = gsap.timeline({
                 onStart: () => {
                     overlayBackdrop.classList.add('visible');
                     cardElement.classList.add('is-expanded');
                     document.body.classList.add('no-scroll');
-                    // Asegurarse de que el contenido completo esté visible para GSAP
                     gsap.set(cardFullDetails, { autoAlpha: 0, translateY: 20, pointerEvents: 'none' });
                 }
             });
@@ -833,27 +855,25 @@
                 .to(cardElement, {
                     scale: 1,
                     opacity: 1,
-                    x: '0%', // Asegurar que no haya traslación horizontal residual
-                    y: '0%', // Asegurar que no haya traslación vertical residual
-                    left: '50%', // Posicionar al centro
-                    top: '50%', // Posicionar al centro
-                    transform: 'translate(-50%, -50%)', // Centrar
+                    x: '0%', 
+                    y: '0%', 
+                    left: '50%',
+                    top: '50%',
+                    transform: 'translate(-50%, -50%)',
                     duration: 0.4,
                     ease: 'power2.out'
                 }, 0)
-                .to([cardImage, cardContentInitial], { autoAlpha: 0, duration: 0.3, ease: 'power2.out', pointerEvents: 'none' }, 0.1) // Ocultar contenido inicial
-                .to(cardFullDetails, { autoAlpha: 1, translateY: 0, duration: 0.4, ease: 'power2.out', pointerEvents: 'all' }, 0.2); // Mostrar contenido completo
+                .to([cardImage, cardContentInitial], { autoAlpha: 0, duration: 0.3, ease: 'power2.out', pointerEvents: 'none' }, 0.1)
+                .to(cardFullDetails, { autoAlpha: 1, translateY: 0, duration: 0.4, ease: 'power2.out', pointerEvents: 'all' }, 0.2);
             
         } else {
-            // Animación de colapso
             const collapseTimeline = gsap.timeline({
                 onComplete: () => {
                     cardElement.classList.remove('is-expanded');
                     document.body.classList.remove('no-scroll');
                     overlayBackdrop.classList.remove('visible');
-                    gsap.set(cardFullDetails, { display: 'none' }); // Ocultar completamente después de la animación
+                    gsap.set(cardFullDetails, { display: 'none' });
                     
-                    // Restaurar posición de scroll con animación suave
                     const savedScrollY = cardElement.dataset.scrollY;
                     if (savedScrollY) {
                         window.scrollTo({
@@ -862,7 +882,6 @@
                         });
                     }
                     
-                    // Reactivar scroll horizontal
                     if (st) {
                         st.enable();
                         ScrollTrigger.refresh();
@@ -871,16 +890,16 @@
             });
 
             collapseTimeline
-                .to(cardFullDetails, { autoAlpha: 0, translateY: 20, duration: 0.3, ease: 'power2.in', pointerEvents: 'none' }, 0) // Ocultar contenido completo
-                .to([cardImage, cardContentInitial], { autoAlpha: 1, duration: 0.3, ease: 'power2.in', pointerEvents: 'all' }, 0.1) // Mostrar contenido inicial
+                .to(cardFullDetails, { autoAlpha: 0, translateY: 20, duration: 0.3, ease: 'power2.in', pointerEvents: 'none' }, 0)
+                .to([cardImage, cardContentInitial], { autoAlpha: 1, duration: 0.3, ease: 'power2.in', pointerEvents: 'all' }, 0.1)
                 .to(cardElement, {
                     scale: 0.95,
                     opacity: 0.8,
-                    x: 0, // Volver a la posición original en el scroll horizontal
+                    x: 0,
                     y: 0,
-                    left: 'auto', // Restaurar posicionamiento original
+                    left: 'auto',
                     top: 'auto',
-                    transform: 'none', // Quitar transformaciones fijas
+                    transform: 'none',
                     duration: 0.3,
                     ease: 'power2.in'
                 }, 0.1)
@@ -892,9 +911,7 @@
         const expandButton = card.querySelector('.btn-toggle-expand');
         const closeButton = card.querySelector('.btn-toggle-collapse');
         
-        // Listener para la tarjeta completa (para expandir al hacer click en cualquier parte)
         card.addEventListener('click', (e) => {
-            // Evitar que el click en los botones internos también expanda/colapse dos veces
             if (e.target.closest('.btn-toggle-expand') || e.target.closest('.btn-toggle-collapse') || e.target.closest('.btn-card')) {
                 return;
             }
@@ -934,8 +951,7 @@
         ScrollTrigger.refresh(true);
     }, 250));
 
-    // --- Placeholder para la lógica de la API de IA ---
-    // (Asegúrate de tener una clave de API válida para que esto funcione)
+    // --- Lógica de la API de IA ---
     const setupAITool = (btnId, inputId, resultId, loaderId, promptTemplate) => {
         const generateBtn = document.getElementById(btnId);
         const inputEl = document.getElementById(inputId);
@@ -955,17 +971,44 @@
             generateBtn.style.display = 'none';
             resultEl.textContent = 'Generando...';
 
-            // AQUÍ IRÍA LA LÓGICA DE LA API
-            // Simulamos una llamada a la API con un setTimeout
-            setTimeout(() => {
+            // REQUERIMIENTO 2: Implementación de la API de Gemini
+            try {
                 const prompt = promptTemplate(userInput);
-                // Simulamos una respuesta
-                const apiResponse = `Respuesta simulada para: "${prompt}"\n\nEsta es una demostración. La funcionalidad real requiere una conexión a la API de IA.`;
-                resultEl.textContent = apiResponse;
+                let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // Dejar vacío
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error en la API: ${response.statusText}`);
+                }
+
+                const result = await response.json();
                 
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    resultEl.textContent = text;
+                } else {
+                    resultEl.textContent = 'No se recibió una respuesta válida de la IA. Inténtalo de nuevo.';
+                    console.error('Respuesta inesperada de la API:', result);
+                }
+
+            } catch (error) {
+                console.error('Error al contactar la API de Gemini:', error);
+                resultEl.textContent = `Hubo un error al generar la respuesta. Por favor, revisa la consola para más detalles.`;
+            } finally {
                 loaderEl.style.display = 'none';
                 generateBtn.style.display = 'inline-block';
-            }, 2000);
+            }
+            // Fin Requerimiento 2
         });
     };
 
