@@ -229,6 +229,7 @@
         top: 0; left: 0;
         background-color: var(--card-bg); /* Asegurar un fondo sólido */
         border-radius: 18px;
+        z-index: 4; /* Asegura que esté por encima del contenido inicial */
     }
     .service-card-stacked.is-expanded .card-full-details { 
         /* Estas propiedades serán manejadas por GSAP durante la expansión */
@@ -823,7 +824,7 @@
                     cardElement.classList.add('is-expanded');
                     document.body.classList.add('no-scroll');
                     // Asegurarse de que el contenido completo esté visible para GSAP
-                    gsap.set(cardFullDetails, { display: 'flex', opacity: 0, translateY: 20, pointerEvents: 'none' });
+                    gsap.set(cardFullDetails, { autoAlpha: 0, translateY: 20, pointerEvents: 'none' });
                 }
             });
 
@@ -840,8 +841,8 @@
                     duration: 0.4,
                     ease: 'power2.out'
                 }, 0)
-                .to([cardImage, cardContentInitial], { opacity: 0, duration: 0.3, ease: 'power2.out', pointerEvents: 'none' }, 0.1) // Ocultar contenido inicial
-                .to(cardFullDetails, { opacity: 1, translateY: 0, duration: 0.4, ease: 'power2.out', pointerEvents: 'all' }, 0.2); // Mostrar contenido completo
+                .to([cardImage, cardContentInitial], { autoAlpha: 0, duration: 0.3, ease: 'power2.out', pointerEvents: 'none' }, 0.1) // Ocultar contenido inicial
+                .to(cardFullDetails, { autoAlpha: 1, translateY: 0, duration: 0.4, ease: 'power2.out', pointerEvents: 'all' }, 0.2); // Mostrar contenido completo
             
         } else {
             // Animación de colapso
@@ -870,8 +871,8 @@
             });
 
             collapseTimeline
-                .to(cardFullDetails, { opacity: 0, translateY: 20, duration: 0.3, ease: 'power2.in', pointerEvents: 'none' }, 0) // Ocultar contenido completo
-                .to([cardImage, cardContentInitial], { opacity: 1, duration: 0.3, ease: 'power2.in', pointerEvents: 'all' }, 0.1) // Mostrar contenido inicial
+                .to(cardFullDetails, { autoAlpha: 0, translateY: 20, duration: 0.3, ease: 'power2.in', pointerEvents: 'none' }, 0) // Ocultar contenido completo
+                .to([cardImage, cardContentInitial], { autoAlpha: 1, duration: 0.3, ease: 'power2.in', pointerEvents: 'all' }, 0.1) // Mostrar contenido inicial
                 .to(cardElement, {
                     scale: 0.95,
                     opacity: 0.8,
