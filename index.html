@@ -203,7 +203,7 @@
         content: ''; 
         position: absolute; 
         inset: -20px; 
-        background-image: var(--bg-image); 
+        /* Eliminado background-image para que no haya imagen de fondo */
         background-size: cover; 
         background-position: center; 
         /* Eliminado el filtro de brillo y blur para que la imagen se vea nítida */
@@ -241,12 +241,12 @@
     #overlay-backdrop { 
         position: fixed; 
         inset: 0; 
-        background-color: rgba(0, 0, 0, 0.6); /* Opacidad ajustada */
+        background-color: rgba(0, 0, 0, 0.7); /* Opacidad ajustada */
         z-index: 1001; 
         opacity: 0; 
         pointer-events: none; 
         transition: opacity 0.4s ease; 
-        backdrop-filter: blur(3px); /* Blur ajustado */
+        /* Eliminado backdrop-filter */
     }
     #overlay-backdrop.visible { opacity: 1; pointer-events: all; }
 
@@ -496,12 +496,12 @@
                                         <li>✅ Ideal para propiedades amobladas.</li>
                                         <li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li>
                                         <li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li>
+                                        <li>✅ Administración integral de pagos y seguimiento del contrato.</li>
                                     </ul>
                                     <h4>Alquiler Tradicional (2 años):</h4>
                                     <ul>
                                         <li>✅ La opción clásica para una renta estable y predecible.</li>
                                         <li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li>
-                                        <li>✅ Administración integral de pagos y seguimiento del contrato.</li>
                                     </ul>
                                     <p class="card-highlight">Tu propiedad, en buenas manos.</p>
                                 </div>
@@ -558,9 +558,9 @@
                                         <p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p>
                                     </div>
                                     <div class="card-footer-cta"><a href="https://www.baigunryn.com/emprendimientos/" target="_blank" rel="noopener noreferrer" class="btn-card">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div>
-                                </div>
                             </div>
                         </div>
+                      </div>
                     </article>
                     
                     <!-- Card 7: PERSONAL SHOPPER INMOBILIARIO -->
@@ -866,7 +866,8 @@
         activeCard = card;
         
         const imageSrc = card.querySelector('.card-image').src;
-        card.querySelector('.card-full-details').style.setProperty('--bg-image', `url(${imageSrc})`);
+        // No longer setting --bg-image as background image is removed from ::before
+        // card.querySelector('.card-full-details').style.setProperty('--bg-image', `url(${imageSrc})`);
 
         const state = Flip.getState(card);
         expandedCardContainer.appendChild(card);
@@ -1089,6 +1090,7 @@
     const loaderAnalysis = document.getElementById('loader-analysis');
 
     async function callGeminiAPI(prompt, resultElement, loaderElement) {
+        console.log('callGeminiAPI function called with prompt:', prompt); // Debug log
         loaderElement.style.display = 'inline-block';
         resultElement.textContent = 'Generando...';
         resultElement.style.color = '#e0e0e0';
@@ -1100,13 +1102,20 @@
             const apiKey = ""; // Canvas will automatically provide the API key at runtime
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
+            console.log('Fetching from API:', apiUrl, 'with payload:', payload); // Debug log
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`API error: ${response.status} ${response.statusText} - ${JSON.stringify(errorData)}`);
+            }
+
             const result = await response.json();
+            console.log('API response:', result); // Debug log
 
             if (result.candidates && result.candidates.length > 0 &&
                 result.candidates[0].content && result.candidates[0].content.parts &&
@@ -1129,6 +1138,7 @@
 
     if (generateDescriptionBtn) {
         generateDescriptionBtn.addEventListener('click', () => {
+            console.log('Generate Description button clicked.'); // Debug log
             const prompt = `Genera una descripción inmobiliaria profesional y atractiva para una propiedad con las siguientes características: ${propertyInput.value}. Enfócate en los puntos de venta clave y un lenguaje persuasivo.`;
             callGeminiAPI(prompt, descriptionResult, loaderDescription);
         });
@@ -1136,6 +1146,7 @@
 
     if (generateAnalysisBtn) {
         generateAnalysisBtn.addEventListener('click', () => {
+            console.log('Generate Analysis button clicked.'); // Debug log
             const prompt = `Realiza un análisis de mercado inmobiliario o compara zonas basándote en la siguiente consulta: ${zonesInput.value}. Proporciona información relevante sobre valores de m², potencial de inversión o diferencias clave entre las zonas mencionadas.`;
             callGeminiAPI(prompt, analysisResult, loaderAnalysis);
         });
