@@ -66,7 +66,6 @@
       background: var(--light);
       cursor: none;
     }
-    /* SOLUCIÓN BUG MENÚ MÓVIL: Estilos para bloquear el scroll sin saltos */
     body.no-scroll { 
         overflow: hidden;
         position: fixed;
@@ -76,6 +75,17 @@
     
     a, button, .service-card-stacked, input, select, textarea {
       cursor: none !important;
+    }
+    
+    /* SOLUCIÓN ESTÉTICA: Canvas para partículas de fondo */
+    #particle-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1; /* Detrás de todo el contenido */
+        background-color: var(--dark-bg); /* Fondo oscuro por si el canvas no carga */
     }
 
     .custom-cursor { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 9999; opacity: 0; transition: opacity .3s; }
@@ -121,8 +131,9 @@
     .menu-button.open .bar2 {opacity: 0;}
     .menu-button.open .bar3 {transform: rotate(-45deg) translate(5px, -6px);}
 
-    main { display: block; }
-    section{padding:4.5rem 1.5rem;max-width:1200px;margin: 0 auto;}
+    main { display: block; background-color: transparent; }
+    section{padding:4.5rem 1.5rem;max-width:1200px;margin: 0 auto; background-color: transparent; position: relative; z-index: 1;}
+    .light-section { background-color: var(--light); }
     
     .section-full-width { max-width: none; padding-left: 0; padding-right: 0; }
 
@@ -136,7 +147,7 @@
     .about-text{flex:2;}
     .about-text p{color:var(--gray);line-height:1.8;margin-bottom:1rem;}
     
-    #services-stacked { background-color: var(--dark); color: #fff; padding-top: 4.5rem; padding-bottom: 4.5rem; }
+    #services-stacked { color: #fff; padding-top: 4.5rem; padding-bottom: 4.5rem; }
     #services-stacked > .section-title, #services-stacked > .subtitle { padding-left: 1.5rem; padding-right: 1.5rem; }
     #services-stacked .subtitle { text-align: center; max-width: 700px; margin: -1rem auto 2rem; color: #ccc; z-index: 2; position: relative; }
     
@@ -145,7 +156,8 @@
     .cards-container { display: flex; gap: clamp(2rem, 5vw, 4rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; }
     
     .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; will-change: transform, opacity; }
-    .service-card-stacked::before { content: ''; position: absolute; inset: 0; z-index: 2; border-radius: inherit; background: conic-gradient(from 180deg at 50% 50%, rgba(255, 191, 0, 0.6) 0deg, rgba(255, 191, 0, 0.2) 115deg, rgba(255, 191, 0, 0) 360deg); opacity: 0; transition: opacity 0.4s ease; }
+    .service-card-stacked::before { content: ''; position: absolute; inset: 0; z-index: 2; border-radius: inherit; background: conic-gradient(from 180deg at 50% 50%, rgba(255, 191, 0, 0.6) 0deg, rgba(255, 191, 0, 0.2) 115deg, rgba(255, 191, 0, 0) 360deg); opacity: 0; transition: opacity 0.4s ease; animation: pulse-border 3s infinite; }
+    @keyframes pulse-border { 50% { opacity: 0.7; } }
     .service-card-stacked.is-active::before { opacity: 1; }
     
     .card-inner-content { background: var(--card-bg); width: 100%; height: 100%; border-radius: 18px; position: relative; z-index: 3; overflow: hidden; }
@@ -164,7 +176,12 @@
     .card-expanded-state .card-content-initial { opacity: 0; visibility: hidden; }
     .card-expanded-state .card-full-details { opacity: 1; visibility: visible; }
     
-    .card-full-details { display: flex; flex-direction: column; width: 100%; height: 100%; padding: 2rem; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; position: absolute; top: 0; left: 0; background-color: var(--card-bg); border-radius: 18px; z-index: 4; }
+    .card-full-details { display: flex; flex-direction: column; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: transparent; border-radius: 18px; z-index: 4; overflow: hidden; }
+    /* SOLUCIÓN ESTÉTICA: Fondo de tarjeta expandida */
+    .expanded-card-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; filter: blur(10px) brightness(0.4); transform: scale(1.1); transition: filter 0.5s, transform 0.5s; z-index: -1; }
+    .card-full-details-content { position: relative; z-index: 1; padding: 2rem; display: flex; flex-direction: column; height: 100%; opacity: 0; visibility: hidden; transition: opacity 0.3s 0.2s, visibility 0.3s 0.2s; }
+    .card-expanded-state .card-full-details-content { opacity: 1; visibility: visible; }
+
     .card-full-details h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; }
     .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; line-height: 1.7; }
     .card-full-content-scroll p, .card-full-content-scroll li { color: #e0e0e0; }
@@ -184,9 +201,8 @@
     #overlay-backdrop { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.8); z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; backdrop-filter: blur(5px); }
     #overlay-backdrop.visible { opacity: 1; pointer-events: all; }
 
-    .content-after-sticky { position: relative; z-index: 10; background-color: var(--dark); }
+    .content-after-sticky { position: relative; z-index: 1; background-color: transparent; }
     
-    #portfolio { background-color: var(--dark); padding-top: 8rem; padding-bottom: 4.5rem; }
     #portfolio .section-title { color: #fff; }
     .portfolio-grid-wrapper { max-width: 1200px; margin: auto; padding: 0 1.5rem; }
 
@@ -203,7 +219,6 @@
     .portfolio-item .portfolio-content .view-more {color: var(--primary); opacity: 0; transition: opacity .4s; font-weight: 700; margin-top: 0.25rem;}
     .portfolio-item:hover .portfolio-content .view-more {opacity: 1;}
 
-    #ai-tools { background-color: var(--dark); }
     .ai-tools-wrapper { max-width: 1200px; margin: auto; padding: 0 1.5rem; }
     #ai-tools .subtitle { text-align:center;max-width:600px;margin:-1rem auto 2rem;color:#ccc;line-height:1.6; }
     .ai-button-wrapper { text-align: center; margin-top: 1rem; }
@@ -211,7 +226,6 @@
     .ai-coming-soon h3 { font-family:'Bebas Neue', sans-serif; color:var(--primary); }
     .ai-coming-soon p { padding: 0 1rem; color: #aaa; }
 
-    #contact { background-color: var(--dark); }
     .contact-wrapper { max-width: 1100px; margin: auto; padding: 0 1.5rem; display: grid; grid-template-columns: 1fr; gap: 3rem; align-items: center; }
     .contact-info p { color: #ccc; line-height: 1.7; max-width: 450px; margin-bottom: 2rem; }
     .contact-info .section-title { color: var(--primary) !important; }
@@ -237,7 +251,7 @@
     .whatsapp-float:hover { transform: scale(1.1); animation: none; }
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); } 70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); } }
 
-    footer{background:var(--dark-bg);color:#94a3b8;padding:3rem 1.5rem;text-align:center;font-size:1rem;}
+    footer{background: transparent; color:#94a3b8;padding:3rem 1.5rem;text-align:center;font-size:1rem; position: relative; z-index: 1;}
     footer p { margin: 0; }
     footer a{color: var(--primary); opacity: 0.8; transition: opacity .3s; text-decoration: none;}
     footer a:hover{opacity: 1;}
@@ -261,6 +275,7 @@
   </style>
 </head>
 <body>
+  <canvas id="particle-canvas"></canvas>
   <div id="cursor-regular" class="custom-cursor"><div class="cursor-dot"></div></div>
   <div id="cursor-point" class="custom-cursor"><div class="cursor-point"></div></div>
 
@@ -306,7 +321,7 @@
   </header>
 
   <main>
-    <section id="about" class="about">
+    <section id="about" class="about light-section">
       <div class="about-img">
         <picture>
             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/franco-perfil.webp" type="image/webp">
@@ -337,15 +352,22 @@
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta1.webp" alt="Tasación profesional de una propiedad" class="card-image" loading="lazy">
                         </picture>
                         <div class="card-content-initial"><h3>QUIERO TASAR <span>MI PROPIEDAD</span></h3><p class="short-desc">Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><h3>QUIERO TASAR MI PROPIEDAD</h3><div class="card-full-content-scroll">
-                            <p>Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p>
-                            <ul>
-                                <li>✅ En 48 horas hábiles.</li>
-                                <li>✅ Se entrega una carpeta formal con análisis de mercado.</li>
-                                <li>✅ Documentación respaldatoria clara.</li>
-                            </ul>
-                            <p class="card-highlight">El punto de partida para con información poder tomar la mejor decisión.</p>
-                        </div><div class="card-footer-cta"><a href="https://www.gringo.estate/contact" target="_blank" rel="noopener noreferrer" class="btn-card">Solicitar Tasación</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                        <div class="card-full-details">
+                            <div class="expanded-card-bg"></div>
+                            <div class="card-full-details-content">
+                                <h3>QUIERO TASAR MI PROPIEDAD</h3>
+                                <div class="card-full-content-scroll">
+                                    <p>Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p>
+                                    <ul>
+                                        <li>✅ En 48 horas hábiles.</li>
+                                        <li>✅ Se entrega una carpeta formal con análisis de mercado.</li>
+                                        <li>✅ Documentación respaldatoria clara.</li>
+                                    </ul>
+                                    <p class="card-highlight">El punto de partida para con información poder tomar la mejor decisión.</p>
+                                </div>
+                                <div class="card-footer-cta"><a href="https://www.gringo.estate/contact" target="_blank" rel="noopener noreferrer" class="btn-card">Solicitar Tasación</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                            </div>
+                        </div>
                       </div>
                     </article>
 
@@ -357,17 +379,24 @@
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta2.webp" alt="Vender una propiedad con GringoEstate" class="card-image" loading="lazy">
                         </picture>
                         <div class="card-content-initial"><h3>¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3><p class="short-desc">Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3><div class="card-full-content-scroll">
-                            <p>Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p>
-                            <h4>Nuestra estrategia 360° incluye:</h4>
-                            <ul>
-                                <li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li>
-                                <li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li>
-                                <li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li>
-                                <li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li>
-                            </ul>
-                            <p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p>
-                        </div><div class="card-footer-cta"><a href="#contact" class="btn-card">Quiero Vender</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                        <div class="card-full-details">
+                            <div class="expanded-card-bg"></div>
+                            <div class="card-full-details-content">
+                                <h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3>
+                                <div class="card-full-content-scroll">
+                                    <p>Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p>
+                                    <h4>Nuestra estrategia 360° incluye:</h4>
+                                    <ul>
+                                        <li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li>
+                                        <li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li>
+                                        <li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li>
+                                        <li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li>
+                                    </ul>
+                                    <p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p>
+                                </div>
+                                <div class="card-footer-cta"><a href="#contact" class="btn-card">Quiero Vender</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                            </div>
+                        </div>
                       </div>
                     </article>
 
@@ -379,18 +408,25 @@
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta3.webp" alt="Interior de un apartamento de alquiler temporario" class="card-image" loading="lazy">
                         </picture>
                         <div class="card-content-initial"><h3>POTENCIÁ TU <span>ALQUILER TEMPORARIO</span></h3><p class="short-desc">Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><h3>POTENCIÁ TU ALQUILER TEMPORARIO</h3><div class="card-full-content-scroll">
-                            <p>Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p>
-                            <h4>Nuestro servicio "llave en mano" incluye:</h4>
-                            <ul>
-                                <li>✅ Asesoría de home staging gratuita y puesta a punto.</li>
-                                <li>✅ Ejecución de amoblamiento a través de nuestro equipo de arquitectura y red de proveedores.</li>
-                                <li>✅ Publicación profesional en todas las plataformas para un máximo impacto.</li>
-                                <li>✅ Gestión integral (sistemas, anfitrión, limpieza) para maximizar tus ingresos y darte tranquilidad.</li>
-                            </ul>
-                            <p class="card-alert">⚠️ Únicamente tomamos propiedades modernas con opción de self check-in. Para otras unidades, ofrecemos nuestro servicio de alquiler flex o tradicional.</p>
-                            <p class="card-highlight">Delegá la gestión, disfrutá los resultados.</p>
-                        </div><div class="card-footer-cta"><a href="https://www.ambbi.com.ar/" target="_blank" rel="noopener noreferrer" class="btn-card">Conocer AMBBI</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                        <div class="card-full-details">
+                            <div class="expanded-card-bg"></div>
+                            <div class="card-full-details-content">
+                                <h3>POTENCIÁ TU ALQUILER TEMPORARIO</h3>
+                                <div class="card-full-content-scroll">
+                                    <p>Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p>
+                                    <h4>Nuestro servicio "llave en mano" incluye:</h4>
+                                    <ul>
+                                        <li>✅ Asesoría de home staging gratuita y puesta a punto.</li>
+                                        <li>✅ Ejecución de amoblamiento a través de nuestro equipo de arquitectura y red de proveedores.</li>
+                                        <li>✅ Publicación profesional en todas las plataformas para un máximo impacto.</li>
+                                        <li>✅ Gestión integral (sistemas, anfitrión, limpieza) para maximizar tus ingresos y darte tranquilidad.</li>
+                                    </ul>
+                                    <p class="card-alert">⚠️ Únicamente tomamos propiedades modernas con opción de self check-in. Para otras unidades, ofrecemos nuestro servicio de alquiler flex o tradicional.</p>
+                                    <p class="card-highlight">Delegá la gestión, disfrutá los resultados.</p>
+                                </div>
+                                <div class="card-footer-cta"><a href="https://www.ambbi.com.ar/" target="_blank" rel="noopener noreferrer" class="btn-card">Conocer AMBBI</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                            </div>
+                        </div>
                       </div>
                     </article>
                     
@@ -402,22 +438,29 @@
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta4.webp" alt="Llaves de una propiedad siendo entregadas" class="card-image" loading="lazy">
                         </picture>
                         <div class="card-content-initial"><h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3><p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3><div class="card-full-content-scroll">
-                            <p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p>
-                            <h4>Alquiler Flex (1 a 12 meses):</h4>
-                            <ul>
-                                <li>✅ Ideal para propiedades amobladas.</li>
-                                <li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li>
-                                <li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li>
-                            </ul>
-                            <h4>Alquiler Tradicional (2 años):</h4>
-                            <ul>
-                                <li>✅ La opción clásica para una renta estable y predecible.</li>
-                                <li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li>
-                                <li>✅ Administración integral de pagos y seguimiento del contrato.</li>
-                            </ul>
-                            <p class="card-highlight">Tu propiedad, en buenas manos.</p>
-                        </div><div class="card-footer-cta"><a href="https://www.baigunryn.com/" target="_blank" rel="noopener noreferrer" class="btn-card">Consultar por Gestión</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                        <div class="card-full-details">
+                            <div class="expanded-card-bg"></div>
+                            <div class="card-full-details-content">
+                                <h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3>
+                                <div class="card-full-content-scroll">
+                                    <p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p>
+                                    <h4>Alquiler Flex (1 a 12 meses):</h4>
+                                    <ul>
+                                        <li>✅ Ideal para propiedades amobladas.</li>
+                                        <li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li>
+                                        <li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li>
+                                    </ul>
+                                    <h4>Alquiler Tradicional (2 años):</h4>
+                                    <ul>
+                                        <li>✅ La opción clásica para una renta estable y predecible.</li>
+                                        <li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li>
+                                        <li>✅ Administración integral de pagos y seguimiento del contrato.</li>
+                                    </ul>
+                                    <p class="card-highlight">Tu propiedad, en buenas manos.</p>
+                                </div>
+                                <div class="card-footer-cta"><a href="https://www.baigunryn.com/" target="_blank" rel="noopener noreferrer" class="btn-card">Consultar por Gestión</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                            </div>
+                        </div>
                       </div>
                     </article>
 
@@ -429,15 +472,22 @@
                           <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta5.webp" alt="Render de un edificio en construcción" class="card-image" loading="lazy">
                         </picture>
                         <div class="card-content-initial"><h3>INVERTÍ <span>DESDE POZO</span></h3><p class="short-desc">En Baigun R&N, contamos con una cartera única con acceso a oportunidades de inversión inclusive off-market.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><h3>INVERTÍ DESDE POZO</h3><div class="card-full-content-scroll">
-                            <p>En Baigun R&N, contamos con una cartera única con acceso a oportunidades de inversión inclusive off-market.</p>
-                            <ul>
-                                <li>✅ +26 desarrollos en exclusiva que no encontrarás en otro lado.</li>
-                                <li>✅ Análisis de ROI y proyecciones claras para una decisión informada.</li>
-                                <li>✅ Acompañamiento en todo el proceso, desde la firma hasta la entrega.</li>
-                            </ul>
-                            <p class="card-highlight">Invertí de forma inteligente en los mejores proyectos de la ciudad.</p>
-                        </div><div class="card-footer-cta"><a href="https://www.baigunryn.com/emprendimientos/" target="_blank" rel="noopener noreferrer" class="btn-card">Ver Oportunidades</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                        <div class="card-full-details">
+                            <div class="expanded-card-bg"></div>
+                            <div class="card-full-details-content">
+                                <h3>INVERTÍ DESDE POZO</h3>
+                                <div class="card-full-content-scroll">
+                                    <p>En Baigun R&N, contamos con una cartera única con acceso a oportunidades de inversión inclusive off-market.</p>
+                                    <ul>
+                                        <li>✅ +26 desarrollos en exclusiva que no encontrarás en otro lado.</li>
+                                        <li>✅ Análisis de ROI y proyecciones claras para una decisión informada.</li>
+                                        <li>✅ Acompañamiento en todo el proceso, desde la firma hasta la entrega.</li>
+                                    </ul>
+                                    <p class="card-highlight">Invertí de forma inteligente en los mejores proyectos de la ciudad.</p>
+                                </div>
+                                <div class="card-footer-cta"><a href="https://www.baigunryn.com/emprendimientos/" target="_blank" rel="noopener noreferrer" class="btn-card">Ver Oportunidades</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                            </div>
+                        </div>
                       </div>
                     </article>
 
@@ -449,15 +499,22 @@
                                 <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" alt="Un desarrollador revisando planos en una obra" class="card-image" loading="lazy">
                             </picture>
                             <div class="card-content-initial"><h3>¿SOS <span>DESARROLLADOR?</span></h3><p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details"><h3>¿SOS DESARROLLADOR?</h3><div class="card-full-content-scroll">
-                                <p>Una alianza estratégica, no una inmobiliaria más.</p>
-                                <ul>
-                                    <li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li>
-                                    <li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li>
-                                    <li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li>
-                                </ul>
-                                <p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p>
-                            </div><div class="card-footer-cta"><a href="https://www.baigunryn.com/emprendimientos/" target="_blank" rel="noopener noreferrer" class="btn-card">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                            <div class="card-full-details">
+                                <div class="expanded-card-bg"></div>
+                                <div class="card-full-details-content">
+                                    <h3>¿SOS DESARROLLADOR?</h3>
+                                    <div class="card-full-content-scroll">
+                                        <p>Una alianza estratégica, no una inmobiliaria más.</p>
+                                        <ul>
+                                            <li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li>
+                                            <li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li>
+                                            <li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li>
+                                        </ul>
+                                        <p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p>
+                                    </div>
+                                    <div class="card-footer-cta"><a href="https://www.baigunryn.com/emprendimientos/" target="_blank" rel="noopener noreferrer" class="btn-card">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                                </div>
+                            </div>
                         </div>
                     </article>
                     
@@ -469,16 +526,23 @@
                                 <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta7.webp" alt="GringoEstate con clientas" class="card-image" loading="lazy">
                             </picture>
                             <div class="card-content-initial"><h3>PERSONAL SHOPPER <span>INMOBILIARIO</span></h3><p class="short-desc">Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details"><h3>PERSONAL SHOPPER INMOBILIARIO</h3><div class="card-full-content-scroll">
-                                <p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p>
-                                <ul>
-                                    <li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li>
-                                    <li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li>
-                                    <li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li>
-                                </ul>
-                                <p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p>
-                                <p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta. Asesorate con profesionales y delegá lo tedioso.</p>
-                            </div><div class="card-footer-cta"><a href="https://gringo.estate/" target="_blank" rel="noopener noreferrer" class="btn-card">Quiero este Servicio</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                            <div class="card-full-details">
+                                <div class="expanded-card-bg"></div>
+                                <div class="card-full-details-content">
+                                    <h3>PERSONAL SHOPPER INMOBILIARIO</h3>
+                                    <div class="card-full-content-scroll">
+                                        <p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p>
+                                        <ul>
+                                            <li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li>
+                                            <li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li>
+                                            <li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li>
+                                        </ul>
+                                        <p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p>
+                                        <p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta. Asesorate con profesionales y delegá lo tedioso.</p>
+                                    </div>
+                                    <div class="card-footer-cta"><a href="https://gringo.estate/" target="_blank" rel="noopener noreferrer" class="btn-card">Quiero este Servicio</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                                </div>
+                            </div>
                         </div>
                     </article>
 
@@ -490,15 +554,22 @@
                                 <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta8.webp" alt="Local comercial de GringoEstate" class="card-image" loading="lazy">
                             </picture>
                             <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details"><h3>LOCALES COMERCIALES Y OFICINAS</h3><div class="card-full-content-scroll">
-                                <p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p>
-                                <ul>
-                                    <li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li>
-                                    <li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li>
-                                    <li>✅ Asesoramiento integral en contratos comerciales y negociación.</li>
-                                </ul>
-                                <p class="card-highlight">Llevá tu negocio al siguiente nivel.</p>
-                            </div><div class="card-footer-cta"><a href="#contact" class="btn-card">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div></div>
+                            <div class="card-full-details">
+                                <div class="expanded-card-bg"></div>
+                                <div class="card-full-details-content">
+                                    <h3>LOCALES COMERCIALES Y OFICINAS</h3>
+                                    <div class="card-full-content-scroll">
+                                        <p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p>
+                                        <ul>
+                                            <li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li>
+                                            <li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li>
+                                            <li>✅ Asesoramiento integral en contratos comerciales y negociación.</li>
+                                        </ul>
+                                        <p class="card-highlight">Llevá tu negocio al siguiente nivel.</p>
+                                    </div>
+                                    <div class="card-footer-cta"><a href="#contact" class="btn-card">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                                </div>
+                            </div>
                         </div>
                     </article>
 
@@ -635,6 +706,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Flip.min.js"></script>
+  <!-- SOLUCIÓN ESTÉTICA: Librería Three.js para partículas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -749,6 +822,14 @@
     function expandCard(card) {
         if (activeCard) return;
         activeCard = card;
+        
+        // SOLUCIÓN ESTÉTICA: Aplicar imagen de fondo al expandir
+        const imageSrc = card.querySelector('.card-image').src;
+        const expandedBg = card.querySelector('.expanded-card-bg');
+        if (expandedBg) {
+            expandedBg.style.backgroundImage = `url(${imageSrc})`;
+        }
+
         const state = Flip.getState(card);
         expandedCardContainer.appendChild(card);
         overlayBackdrop.classList.add('visible');
@@ -833,7 +914,8 @@
         gsap.set(container, { display: 'flex', flexDirection: 'row' }); 
         
         const scrollWidth = container.scrollWidth - window.innerWidth;
-        gsap.set(horizontalSection, { height: `${scrollWidth + window.innerHeight * 0.5}px` });
+        // SOLUCIÓN RETRASO TRANSICIÓN: Se aumenta el espacio de scroll
+        gsap.set(horizontalSection, { height: `${scrollWidth + window.innerHeight}px` });
 
         horizontalScrollTween = gsap.to(container, {
             x: () => -scrollWidth,
@@ -844,12 +926,10 @@
                 start: "top top",
                 end: () => `+=${scrollWidth}`,
                 pin: wrapper,
-                scrub: 0.2, // Aumenté ligeramente el scrub para más suavidad
+                scrub: 0.2,
                 invalidateOnRefresh: true,
                 onUpdate: self => {
-                    const progress = self.progress;
                     const containerX = gsap.getProperty(container, "x");
-
                     cards.forEach((card) => {
                         const cardCenter = card.offsetLeft + card.offsetWidth / 2;
                         const viewCenter = -containerX + window.innerWidth / 2;
@@ -894,6 +974,64 @@
         });
     }
 
+    // SOLUCIÓN ESTÉTICA: Inicializar animación de partículas
+    function initParticleAnimation() {
+        if (prefersReducedMotion) return;
+
+        const canvas = document.getElementById('particle-canvas');
+        if (!canvas) return;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const particleCount = 5000;
+        const positions = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount * 3; i++) {
+            positions[i] = (Math.random() - 0.5) * 10;
+        }
+
+        const particlesGeometry = new THREE.BufferGeometry();
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        
+        const particlesMaterial = new THREE.PointsMaterial({
+            color: 0xffbf00,
+            size: 0.015,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            opacity: 0.7
+        });
+
+        const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particles);
+
+        camera.position.z = 5;
+
+        const clock = new THREE.Clock();
+
+        const animate = () => {
+            const elapsedTime = clock.getElapsedTime();
+            particles.rotation.y = elapsedTime * 0.05;
+            particles.rotation.x = elapsedTime * 0.02;
+            
+            renderer.render(scene, camera);
+            window.requestAnimationFrame(animate);
+        };
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        });
+    }
+    
+    initParticleAnimation();
     setupHorizontalScroll();
     window.addEventListener('resize', gsap.utils.debounce(() => {
         if (activeCard) {
