@@ -18,7 +18,7 @@
   <!-- Open Graph (para redes sociales como Facebook, LinkedIn) -->
   <meta property="og:title" content="GringoEstate – Real Estate sin corbata">
   <meta property="og:description" content="Transformamos el Real Estate con soluciones innovadoras. Venta en 90 días, gestión de alquiler temporario, personal shopper inmobiliario y más.">
-  <meta property="og:image" content="https://www.gringo.estate/og-image.jpg"> <!-- Cambiar por la URL absoluta de una imagen para compartir -->
+  <meta property="og:image" content="images/og-image.jpg"> <!-- Cambiar por la URL absoluta de una imagen para compartir -->
   <meta property="og:url" content="https://www.gringo.estate"> <!-- Cambiar por la URL final del sitio -->
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_AR">
@@ -27,7 +27,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="GringoEstate – Real Estate sin corbata">
   <meta name="twitter:description" content="Transformamos el Real Estate con soluciones innovadoras. Venta en 90 días, gestión de alquiler temporario y más.">
-  <meta name="twitter:image" content="https://www.gringo.estate/og-image.jpg"> <!-- Cambiar por la URL absoluta de una imagen para compartir -->
+  <meta name="twitter:image" content="images/og-image.jpg"> <!-- Cambiar por la URL absoluta de una imagen para compartir -->
   
   <!-- Preconnect a Google Fonts para carga más rápida -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -66,7 +66,7 @@
     body.no-scroll { overflow: hidden; }
     a, button {cursor: none; text-decoration: none !important; border: none;}
 
-    .custom-cursor { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 9999; opacity: 0; transition: opacity 0.3s; }
+    .custom-cursor { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 9999; opacity: 0; transition: opacity .3s; }
     .cursor-dot { width: 24px; height: 24px; background-color: transparent; border: 2px solid var(--primary); border-radius: 50%; transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
     @media (pointer: fine) { .custom-cursor { opacity: 1; } }
     @media (pointer: coarse) { .custom-cursor { display: none; } body {cursor: auto;} a, button {cursor: pointer;} }
@@ -453,7 +453,7 @@
                 <div class="cards-container">
                     
                     <!-- Card 1 -->
-                    <article class="service-card-stacked">
+                    <article class="service-card-stacked" id="tarjeta1">
                       <div class="card-inner-content">
                         <picture>
                             <source srcset="images/tasacion-profesional-propiedades-gringoestate.webp" type="image/webp">
@@ -465,7 +465,7 @@
                     </article>
 
                     <!-- Card 2 -->
-                    <article class="service-card-stacked">
+                    <article class="service-card-stacked" id="tarjeta2">
                       <div class="card-inner-content">
                         <picture>
                             <source srcset="images/venta-propiedades-90-dias-gringoestate.webp" type="image/webp">
@@ -477,7 +477,7 @@
                     </article>
 
                     <!-- Card 3 -->
-                    <article class="service-card-stacked">
+                    <article class="service-card-stacked" id="tarjeta3">
                       <div class="card-inner-content">
                         <picture>
                             <source srcset="images/gestion-alquiler-temporario-ambbi.webp" type="image/webp">
@@ -489,7 +489,7 @@
                     </article>
                     
                     <!-- Card 4 -->
-                    <article class="service-card-stacked">
+                    <article class="service-card-stacked" id="tarjeta4">
                       <div class="card-inner-content">
                           <picture>
                               <source srcset="images/gestion-alquiler-flex-tradicional-gringoestate.webp" type="image/webp">
@@ -501,7 +501,7 @@
                     </article>
 
                     <!-- Card 5 -->
-                    <article class="service-card-stacked">
+                    <article class="service-card-stacked" id="tarjeta5">
                       <div class="card-inner-content">
                         <picture>
                           <source srcset="images/inversion-desarrollos-desde-pozo-gringoestate.webp" type="image/webp">
@@ -513,7 +513,7 @@
                     </article>
 
                     <!-- Card 6 -->
-                    <article class="service-card-stacked">
+                    <article class="service-card-stacked" id="tarjeta6">
                         <div class="card-inner-content">
                             <picture>
                                 <source srcset="images/locales-comerciales-oficinas-gringoestate.webp" type="image/webp">
@@ -525,7 +525,7 @@
                     </article>
 
                     <!-- Card 7 (NUEVA) -->
-                    <article class="service-card-stacked">
+                    <article class="service-card-stacked" id="tarjeta7">
                         <div class="card-inner-content">
                             <picture>
                                 <source srcset="images/servicio-desarrollador.webp" type="image/webp">
@@ -537,7 +537,7 @@
                     </article>
 
                     <!-- Card 8 (NUEVA) -->
-                    <article class="service-card-stacked">
+                    <article class="service-card-stacked" id="tarjeta8">
                         <div class="card-inner-content">
                             <picture>
                                 <source srcset="images/servicio-shopper.webp" type="image/webp">
@@ -636,10 +636,10 @@
   </main>
   
   <footer>
-    <p>&copy; 2025 Franco Garbini · GringoEstate · Todos los derechos reservados.</p>
+    <p>© 2025 Franco Garbini · GringoEstate · Todos los derechos reservados.</p>
     <p style="margin-top:1rem;">
-      <a href="https://www.linkedin.com/company/gringoestate/" target="_blank" rel="noopener noreferrer">LinkedIn</a> &nbsp;&bull;&nbsp;
-      <a href="https://twitter.com/Gringoestate" target="_blank" rel="noopener noreferrer">Twitter (X)</a> &nbsp;&bull;&nbsp;
+      <a href="https://www.linkedin.com/company/gringoestate/" target="_blank" rel="noopener noreferrer">LinkedIn</a>  • 
+      <a href="https://twitter.com/Gringoestate" target="_blank" rel="noopener noreferrer">Twitter (X)</a>  • 
       <a href="https://instagram.com/Gringoestate" target="_blank" rel="noopener noreferrer">Instagram</a>
     </p>
   </footer>
