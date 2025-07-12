@@ -46,8 +46,9 @@
     :root {
       --primary: #FFBF00;
       --dark: #000000;
-      --light: #f8f9fa;
-      --gray: #cccccc; /* Color de texto gris claro para fondos oscuros */
+      --light: #f8f9fa; 
+      --text-light: #f0f0f0; /* Color de texto principal más blanco */
+      --gray: #cccccc; 
       --dark-bg: #111111;
       --card-bg: #1A1A1A;
     }
@@ -62,7 +63,7 @@
       overflow-x: hidden;
     }
     body {
-      color: var(--light); /* Color de texto por defecto para toda la página */
+      color: var(--text-light);
       background: var(--dark-bg);
       cursor: none;
     }
@@ -83,7 +84,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        z-index: 0; /* Detrás del contenido pero encima del fondo */
+        z-index: 0;
     }
 
     .custom-cursor { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 9999; opacity: 0; transition: opacity .3s; }
@@ -142,8 +143,7 @@
     .about-img{flex:1;min-width:250px;text-align:center;}
     .about-img img{width:280px;height:280px;border-radius:50%;object-fit:cover;object-position: center top; border:8px solid var(--primary);box-shadow: 0 10px 30px rgba(0,0,0,0.1);}
     .about-text{flex:2;}
-    .about-text p{color:var(--gray);line-height:1.8;margin-bottom:1rem;}
-    /* SOLUCIÓN ESTÉTICA: Color de título para sección sobre mí */
+    .about-text p{color:var(--text-light);line-height:1.8;margin-bottom:1rem;}
     .about-text .section-title { color: var(--light); }
     
     #services-stacked { color: #fff; padding-top: 4.5rem; padding-bottom: 4.5rem; }
@@ -172,15 +172,13 @@
 
     .card-expanded-state { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1002; padding: 5vh 5vw; display: flex; justify-content: center; align-items: center; pointer-events: none; }
     .card-expanded-state .service-card-stacked { width: 100%; max-width: 1000px; height: 100%; max-height: 90vh; pointer-events: all; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); }
-    .card-expanded-state .card-content-initial { opacity: 0; visibility: hidden; }
+    .card-expanded-state .card-content-initial { display: none; }
     
-    /* SOLUCIÓN BUG TARJETA OSCURA */
-    .card-full-details { display: flex; flex-direction: column; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: transparent; border-radius: 18px; z-index: 4; overflow: hidden; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
-    .card-expanded-state .card-full-details { opacity: 1; visibility: visible; }
-    .expanded-card-bg { position: absolute; top: -20px; left: -20px; right: -20px; bottom: -20px; background-size: cover; background-position: center; filter: blur(10px); z-index: 1; }
-    .expanded-card-bg::after { content: ''; position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.5); }
-    .card-full-details-content { position: relative; z-index: 2; padding: 2rem; display: flex; flex-direction: column; height: 100%; opacity: 0; visibility: hidden; transition: opacity 0.3s 0.2s, visibility 0.3s 0.2s; }
-    .card-expanded-state .card-full-details-content { opacity: 1; visibility: visible; }
+    .card-full-details { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-color: transparent; border-radius: 18px; z-index: 4; overflow: hidden; }
+    .card-expanded-state .card-full-details { display: flex; flex-direction: column; }
+    .card-full-details::before { content: ''; position: absolute; inset: -20px; background-image: var(--bg-image); background-size: cover; background-position: center; filter: blur(10px) brightness(0.4); z-index: 1; }
+    .card-full-details-content { position: relative; z-index: 2; padding: 2rem; display: flex; flex-direction: column; height: 100%; opacity: 0; transition: opacity 0.3s 0.2s; }
+    .card-expanded-state .card-full-details-content { opacity: 1; }
 
     .card-full-details h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; }
     .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; line-height: 1.7; }
@@ -330,8 +328,8 @@
       </div>
       <div class="about-text">
           <h2 class="section-title text-left">SOY FRANCO GARBINI</h2>
-          <p>Deportista, entusiasta de la tecnología y apasionado del mundo inmobiliario. Hace 4 años renuncié a la seguridad del mundo corporativo (Banco Galicia) para subalquilar mi primer monoambiente. <br>Una apuesta personal...</p>
-          <p>Hoy, esa apuesta se transformó en un sistema de negocios: socio en <strong>Baigun R&N</strong>, fundador de <strong>AMBBI</strong> (<strong>+500 reviews 5⭐️</strong>) y responsable de la comercialización de <strong>edificios completos</strong>. Combino datos, tecnología y un equipo ágil para entregar resultados reales, sin traje ni corbata.</p>
+          <p><strong>Deportista, entusiasta de la tecnología y apasionado del mundo inmobiliario.</strong> Hace 4 años renuncié a la seguridad del mundo corporativo (Banco Galicia) para subalquilar mi primer monoambiente. <br>Una apuesta personal...</p>
+          <p>Hoy, esa apuesta se transformó en un <strong>sistema de negocios</strong>: socio en <strong>Baigun R&N</strong>, fundador de <strong>AMBBI</strong> (<strong>+500 reviews 5⭐️</strong>) y responsable de la comercialización de <strong>edificios completos</strong>. Combino datos, tecnología y un equipo ágil para entregar resultados reales, sin traje ni corbata.</p>
       </div>
     </section>
 
@@ -353,7 +351,6 @@
                         </picture>
                         <div class="card-content-initial"><h3>QUIERO TASAR <span>MI PROPIEDAD</span></h3><p class="short-desc">Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><button class="btn-toggle-expand">Ver más</button></div>
                         <div class="card-full-details">
-                            <div class="expanded-card-bg"></div>
                             <div class="card-full-details-content">
                                 <h3>QUIERO TASAR MI PROPIEDAD</h3>
                                 <div class="card-full-content-scroll">
@@ -380,7 +377,6 @@
                         </picture>
                         <div class="card-content-initial"><h3>¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3><p class="short-desc">Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><button class="btn-toggle-expand">Ver más</button></div>
                         <div class="card-full-details">
-                            <div class="expanded-card-bg"></div>
                             <div class="card-full-details-content">
                                 <h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3>
                                 <div class="card-full-content-scroll">
@@ -409,7 +405,6 @@
                         </picture>
                         <div class="card-content-initial"><h3>POTENCIÁ TU <span>ALQUILER TEMPORARIO</span></h3><p class="short-desc">Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><button class="btn-toggle-expand">Ver más</button></div>
                         <div class="card-full-details">
-                            <div class="expanded-card-bg"></div>
                             <div class="card-full-details-content">
                                 <h3>POTENCIÁ TU ALQUILER TEMPORARIO</h3>
                                 <div class="card-full-content-scroll">
@@ -439,7 +434,6 @@
                         </picture>
                         <div class="card-content-initial"><h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3><p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><button class="btn-toggle-expand">Ver más</button></div>
                         <div class="card-full-details">
-                            <div class="expanded-card-bg"></div>
                             <div class="card-full-details-content">
                                 <h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3>
                                 <div class="card-full-content-scroll">
@@ -473,7 +467,6 @@
                         </picture>
                         <div class="card-content-initial"><h3>INVERTÍ <span>DESDE POZO</span></h3><p class="short-desc">En Baigun R&N, contamos con una cartera única con acceso a oportunidades de inversión inclusive off-market.</p><button class="btn-toggle-expand">Ver más</button></div>
                         <div class="card-full-details">
-                            <div class="expanded-card-bg"></div>
                             <div class="card-full-details-content">
                                 <h3>INVERTÍ DESDE POZO</h3>
                                 <div class="card-full-content-scroll">
@@ -500,7 +493,6 @@
                             </picture>
                             <div class="card-content-initial"><h3>¿SOS <span>DESARROLLADOR?</span></h3><p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p><button class="btn-toggle-expand">Ver más</button></div>
                             <div class="card-full-details">
-                                <div class="expanded-card-bg"></div>
                                 <div class="card-full-details-content">
                                     <h3>¿SOS DESARROLLADOR?</h3>
                                     <div class="card-full-content-scroll">
@@ -527,7 +519,6 @@
                             </picture>
                             <div class="card-content-initial"><h3>PERSONAL SHOPPER <span>INMOBILIARIO</span></h3><p class="short-desc">Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><button class="btn-toggle-expand">Ver más</button></div>
                             <div class="card-full-details">
-                                <div class="expanded-card-bg"></div>
                                 <div class="card-full-details-content">
                                     <h3>PERSONAL SHOPPER INMOBILIARIO</h3>
                                     <div class="card-full-content-scroll">
@@ -555,7 +546,6 @@
                             </picture>
                             <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><button class="btn-toggle-expand">Ver más</button></div>
                             <div class="card-full-details">
-                                <div class="expanded-card-bg"></div>
                                 <div class="card-full-details-content">
                                     <h3>LOCALES COMERCIALES Y OFICINAS</h3>
                                     <div class="card-full-content-scroll">
@@ -823,10 +813,7 @@
         activeCard = card;
         
         const imageSrc = card.querySelector('.card-image').src;
-        const expandedBg = card.querySelector('.expanded-card-bg');
-        if (expandedBg) {
-            expandedBg.style.backgroundImage = `url(${imageSrc})`;
-        }
+        card.querySelector('.card-full-details').style.setProperty('--bg-image', `url(${imageSrc})`);
 
         const state = Flip.getState(card);
         expandedCardContainer.appendChild(card);
