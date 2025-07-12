@@ -194,11 +194,40 @@
     .btn-toggle-expand:hover { color: #fff; transform: translateX(5px); }
     .btn-toggle-expand::after { content: '→'; margin-left: 0.5rem; display: inline-block; transition: transform 0.3s ease; }
 
-    .service-card-stacked.is-expanded { position: fixed; top: 50%; left: 50%; width: 90vw; height: 90vh; max-width: 1000px; z-index: 1002; transform: translate(-50%, -50%) !important; opacity: 1 !important; scale: 1 !important; background-color: var(--card-bg); pointer-events: all; transition: all 0.5s cubic-bezier(0.65, 0, 0.35, 1); padding: 0; }
+    .service-card-stacked.is-expanded { 
+        position: fixed; 
+        top: 50%; 
+        left: 50%; 
+        width: 90vw; 
+        height: 90vh; 
+        max-width: 1000px; 
+        z-index: 1002; 
+        transform: translate(-50%, -50%) !important; 
+        opacity: 1 !important; 
+        scale: 1 !important; 
+        background-color: var(--card-bg); 
+        pointer-events: all; 
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        padding: 0; 
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+    }
     .service-card-stacked.is-expanded::before { display: none; }
     .service-card-stacked.is-expanded .card-inner-content { border-radius: 20px; }
-    .card-full-details { display: none; flex-direction: column; width: 100%; height: 100%; padding: 2rem; opacity: 0; transition: opacity 0.4s 0.2s ease; }
-    .service-card-stacked.is-expanded .card-full-details { display: flex; opacity: 1; }
+    .card-full-details { 
+        display: none; 
+        flex-direction: column; 
+        width: 100%; 
+        height: 100%; 
+        padding: 2rem; 
+        opacity: 0; 
+        transform: translateY(20px);
+        transition: opacity 0.4s 0.2s ease, transform 0.4s 0.2s ease; 
+    }
+    .service-card-stacked.is-expanded .card-full-details { 
+        display: flex; 
+        opacity: 1; 
+        transform: translateY(0);
+    }
     .card-full-details h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; }
     .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; line-height: 1.7; }
     .service-card-stacked.is-expanded .card-full-content-scroll p, 
@@ -217,8 +246,20 @@
     .btn-card:hover { background: #fff; color: var(--dark); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
     .btn-toggle-collapse { background: transparent; border: 1px solid #555; color: #aaa; border-radius: 50px; padding: 0.5rem 1rem; font-size: 1rem; margin-top: 0.5rem; transition: all .3s ease; }
     .btn-toggle-collapse:hover { background: #555; color: #fff; }
-    #overlay-backdrop { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.8); z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
-    #overlay-backdrop.visible { opacity: 1; pointer-events: all; }
+    #overlay-backdrop { 
+        position: fixed; 
+        inset: 0; 
+        background-color: rgba(0, 0, 0, 0.8); 
+        z-index: 1001; 
+        opacity: 0; 
+        pointer-events: none; 
+        transition: opacity 0.3s ease; 
+        backdrop-filter: blur(5px);
+    }
+    #overlay-backdrop.visible { 
+        opacity: 1; 
+        pointer-events: all; 
+    }
 
     .content-after-sticky {
       position: relative;
@@ -754,28 +795,78 @@
         });
     }
     
-    // Lógica para expandir/colapsar tarjetas
+    // Lógica para expandir/colapsar tarjetas con animaciones suaves
     function toggleCardExpansion(cardElement, expand) {
         if (!cardElement || !overlayBackdrop) return;
         
         const st = ScrollTrigger.getById("horizontalScroll");
         
         if (expand) {
-            cardElement.dataset.scrollY = window.scrollY; // Guardar la posición de scroll
+            // Guardar la posición de scroll actual
+            cardElement.dataset.scrollY = window.scrollY;
+            
+            // Desactivar el scroll horizontal temporalmente
             if (st) st.disable();
-            overlayBackdrop.classList.add('visible');
-            cardElement.classList.add('is-expanded');
-            document.body.classList.add('no-scroll');
+            
+            // Mostrar overlay con animación suave
+            gsap.to(overlayBackdrop, {
+                opacity: 1,
+                duration: 0.3,
+                ease: 'power2.out',
+                onStart: () => {
+                    overlayBackdrop.classList.add('visible');
+                }
+            });
+            
+            // Expandir la tarjeta con animación fluida
+            gsap.to(cardElement, {
+                scale: 1,
+                opacity: 1,
+                duration: 0.4,
+                ease: 'power2.out',
+                onStart: () => {
+                    cardElement.classList.add('is-expanded');
+                    document.body.classList.add('no-scroll');
+                }
+            });
+            
         } else {
-            overlayBackdrop.classList.remove('visible');
-            cardElement.classList.remove('is-expanded');
-            document.body.classList.remove('no-scroll');
-            const savedScrollY = cardElement.dataset.scrollY;
-            if (savedScrollY) { window.scrollTo(0, parseFloat(savedScrollY)); }
-            if (st) {
-                st.enable();
-                ScrollTrigger.refresh();
-            }
+            // Colapsar la tarjeta con animación suave
+            gsap.to(cardElement, {
+                scale: 0.95,
+                opacity: 0.8,
+                duration: 0.3,
+                ease: 'power2.in',
+                onComplete: () => {
+                    cardElement.classList.remove('is-expanded');
+                    document.body.classList.remove('no-scroll');
+                    
+                    // Restaurar posición de scroll con animación suave
+                    const savedScrollY = cardElement.dataset.scrollY;
+                    if (savedScrollY) {
+                        window.scrollTo({
+                            top: parseFloat(savedScrollY),
+                            behavior: 'smooth'
+                        });
+                    }
+                    
+                    // Reactivar scroll horizontal
+                    if (st) {
+                        st.enable();
+                        ScrollTrigger.refresh();
+                    }
+                }
+            });
+            
+            // Ocultar overlay con animación
+            gsap.to(overlayBackdrop, {
+                opacity: 0,
+                duration: 0.3,
+                ease: 'power2.in',
+                onComplete: () => {
+                    overlayBackdrop.classList.remove('visible');
+                }
+            });
         }
     }
     
