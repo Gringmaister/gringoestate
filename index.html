@@ -158,6 +158,8 @@
         padding: 2px; /* Espacio para el borde */
         will-change: transform;  
         transition: transform 0.4s ease, box-shadow 0.4s ease;  
+        cursor: pointer; /* Añadido para indicar interactividad */
+        transform: translateZ(0); /* Forzar aceleración de hardware */
     }
     .service-card-stacked::before {
         content: '';
@@ -183,7 +185,7 @@
         overflow: hidden;
     }
 
-    .service-card-stacked:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 25px 55px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 191, 0, 0.2); }
+    .service-card-stacked:hover { transform: translateY(-10px) scale(1.02) translateZ(0); box-shadow: 0 25px 55px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 191, 0, 0.2); }
     .card-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform 0.5s ease; filter: brightness(0.7); }
     .service-card-stacked:hover .card-image { transform: scale(1.05); }
     .card-content-initial { position: relative; z-index: 3; padding: 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%); }
@@ -214,19 +216,22 @@
     .service-card-stacked.is-expanded::before { display: none; }
     .service-card-stacked.is-expanded .card-inner-content { border-radius: 20px; }
     .card-full-details { 
-        display: none; 
+        display: flex; /* Siempre flex, controlaremos visibilidad con opacity/pointer-events */
         flex-direction: column; 
         width: 100%; 
         height: 100%; 
         padding: 2rem; 
         opacity: 0; 
         transform: translateY(20px);
-        transition: opacity 0.4s 0.2s ease, transform 0.4s 0.2s ease; 
+        transition: none; /* GSAP manejará la transición */
+        pointer-events: none; /* Inicialmente no interactuable */
+        position: absolute; /* Para superponerse al contenido inicial */
+        top: 0; left: 0;
+        background-color: var(--card-bg); /* Asegurar un fondo sólido */
+        border-radius: 18px;
     }
     .service-card-stacked.is-expanded .card-full-details { 
-        display: flex; 
-        opacity: 1; 
-        transform: translateY(0);
+        /* Estas propiedades serán manejadas por GSAP durante la expansión */
     }
     .card-full-details h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; }
     .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; line-height: 1.7; }
@@ -784,7 +789,7 @@
                 start: "top top",
                 end: () => `+=${scrollWidth}`,
                 pin: ".horizontal-scroll-wrapper",
-                scrub: 0.5,
+                scrub: 0.1, // Reducido para menos "borrosidad"
                 snap: {
                     snapTo: 1 / (serviceCards.length - 1),
                     duration: { min: 0.2, max: 0.5 },
@@ -800,7 +805,10 @@
         if (!cardElement || !overlayBackdrop) return;
         
         const st = ScrollTrigger.getById("horizontalScroll");
-        
+        const cardImage = cardElement.querySelector('.card-image');
+        const cardContentInitial = cardElement.querySelector('.card-content-initial');
+        const cardFullDetails = cardElement.querySelector('.card-full-details');
+
         if (expand) {
             // Guardar la posición de scroll actual
             cardElement.dataset.scrollY = window.scrollY;
@@ -808,38 +816,41 @@
             // Desactivar el scroll horizontal temporalmente
             if (st) st.disable();
             
-            // Mostrar overlay con animación suave
-            gsap.to(overlayBackdrop, {
-                opacity: 1,
-                duration: 0.3,
-                ease: 'power2.out',
+            // Animación de expansión
+            const expandTimeline = gsap.timeline({
                 onStart: () => {
                     overlayBackdrop.classList.add('visible');
-                }
-            });
-            
-            // Expandir la tarjeta con animación fluida
-            gsap.to(cardElement, {
-                scale: 1,
-                opacity: 1,
-                duration: 0.4,
-                ease: 'power2.out',
-                onStart: () => {
                     cardElement.classList.add('is-expanded');
                     document.body.classList.add('no-scroll');
+                    // Asegurarse de que el contenido completo esté visible para GSAP
+                    gsap.set(cardFullDetails, { display: 'flex', opacity: 0, translateY: 20, pointerEvents: 'none' });
                 }
             });
+
+            expandTimeline
+                .to(overlayBackdrop, { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0)
+                .to(cardElement, {
+                    scale: 1,
+                    opacity: 1,
+                    x: '0%', // Asegurar que no haya traslación horizontal residual
+                    y: '0%', // Asegurar que no haya traslación vertical residual
+                    left: '50%', // Posicionar al centro
+                    top: '50%', // Posicionar al centro
+                    transform: 'translate(-50%, -50%)', // Centrar
+                    duration: 0.4,
+                    ease: 'power2.out'
+                }, 0)
+                .to([cardImage, cardContentInitial], { opacity: 0, duration: 0.3, ease: 'power2.out', pointerEvents: 'none' }, 0.1) // Ocultar contenido inicial
+                .to(cardFullDetails, { opacity: 1, translateY: 0, duration: 0.4, ease: 'power2.out', pointerEvents: 'all' }, 0.2); // Mostrar contenido completo
             
         } else {
-            // Colapsar la tarjeta con animación suave
-            gsap.to(cardElement, {
-                scale: 0.95,
-                opacity: 0.8,
-                duration: 0.3,
-                ease: 'power2.in',
+            // Animación de colapso
+            const collapseTimeline = gsap.timeline({
                 onComplete: () => {
                     cardElement.classList.remove('is-expanded');
                     document.body.classList.remove('no-scroll');
+                    overlayBackdrop.classList.remove('visible');
+                    gsap.set(cardFullDetails, { display: 'none' }); // Ocultar completamente después de la animación
                     
                     // Restaurar posición de scroll con animación suave
                     const savedScrollY = cardElement.dataset.scrollY;
@@ -857,22 +868,40 @@
                     }
                 }
             });
-            
-            // Ocultar overlay con animación
-            gsap.to(overlayBackdrop, {
-                opacity: 0,
-                duration: 0.3,
-                ease: 'power2.in',
-                onComplete: () => {
-                    overlayBackdrop.classList.remove('visible');
-                }
-            });
+
+            collapseTimeline
+                .to(cardFullDetails, { opacity: 0, translateY: 20, duration: 0.3, ease: 'power2.in', pointerEvents: 'none' }, 0) // Ocultar contenido completo
+                .to([cardImage, cardContentInitial], { opacity: 1, duration: 0.3, ease: 'power2.in', pointerEvents: 'all' }, 0.1) // Mostrar contenido inicial
+                .to(cardElement, {
+                    scale: 0.95,
+                    opacity: 0.8,
+                    x: 0, // Volver a la posición original en el scroll horizontal
+                    y: 0,
+                    left: 'auto', // Restaurar posicionamiento original
+                    top: 'auto',
+                    transform: 'none', // Quitar transformaciones fijas
+                    duration: 0.3,
+                    ease: 'power2.in'
+                }, 0.1)
+                .to(overlayBackdrop, { opacity: 0, duration: 0.3, ease: 'power2.in' }, 0.2);
         }
     }
     
     serviceCards.forEach(card => {
         const expandButton = card.querySelector('.btn-toggle-expand');
         const closeButton = card.querySelector('.btn-toggle-collapse');
+        
+        // Listener para la tarjeta completa (para expandir al hacer click en cualquier parte)
+        card.addEventListener('click', (e) => {
+            // Evitar que el click en los botones internos también expanda/colapse dos veces
+            if (e.target.closest('.btn-toggle-expand') || e.target.closest('.btn-toggle-collapse') || e.target.closest('.btn-card')) {
+                return;
+            }
+            if (!card.classList.contains('is-expanded')) {
+                toggleCardExpansion(card, true);
+            }
+        });
+
         if (expandButton) { expandButton.addEventListener('click', (e) => { e.stopPropagation(); toggleCardExpansion(card, true); }); }
         if (closeButton) { closeButton.addEventListener('click', (e) => { e.stopPropagation(); toggleCardExpansion(card, false); }); }
     });
