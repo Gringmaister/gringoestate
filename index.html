@@ -117,6 +117,7 @@
     
     nav ul{list-style:none;font-weight:700; padding-left: 0; margin: 0;}
     
+    /* 4. Menú móvil centrado siempre */
     nav .nav-links-mobile { 
       visibility: hidden; 
       position: fixed; 
@@ -129,7 +130,7 @@
       -webkit-backdrop-filter: blur(10px);
       padding: 6rem 1.5rem 2rem; 
       opacity: 0; 
-      display: flex; 
+      display: flex; /* Changed from none to flex */
       justify-content: center; 
       align-items: center; 
       z-index: 999; 
@@ -175,17 +176,31 @@
     
     .horizontal-scroll-section { position: relative; }
     .horizontal-scroll-wrapper { position: sticky; top: 0; display: flex; align-items: center; height: 100vh; width: 100%; overflow: hidden; }
-    .cards-container { display: flex; gap: clamp(3rem, 7vw, 6rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; }
+    .cards-container { display: flex; gap: clamp(3rem, 7vw, 6rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; will-change: transform; }
     
-    .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; will-change: transform; transition: transform 0.4s ease, box-shadow 0.4s ease; }
-    
-    .service-card-stacked:hover {
-        transform: translateY(-5px); 
-        box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
-    }
+    .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; transition: transform 0.4s ease, box-shadow 0.4s ease; }
     
     .card-inner-content { background: var(--card-bg); width: 100%; height: 100%; border-radius: 18px; position: relative; z-index: 3; overflow: hidden; }
-    .card-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform 0.5s ease; filter: brightness(0.7); }
+    
+    /* 2. Sustituir filter:brightness() */
+    .card-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform 0.5s ease; filter: none; }
+    .card-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.45), transparent 60%);
+      pointer-events: none;
+    }
+
+    /* 3. Micro-animación de borde */
+    @keyframes borderPulse {
+      0% { box-shadow: 0 0 0 0 rgba(255,191,0,0); }
+      50% { box-shadow: 0 0 6px 2px rgba(255,191,0,.4); }
+      100% { box-shadow: 0 0 0 0 rgba(255,191,0,0); }
+    }
+    .service-card-stacked:hover, .service-card-stacked:focus-visible {
+      animation: borderPulse .8s ease-out;
+    }
     
     @media (min-width: 1024px) {
         [data-card-id="tarjeta2"] .card-image,
@@ -211,7 +226,7 @@
     .card-modal.is-visible { opacity: 1; visibility: visible; transition: opacity 0.4s ease; }
     .card-modal-content-wrapper { background-color: var(--card-bg); border-radius: 20px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); width: 90%; max-width: 1000px; height: 90%; max-height: 85vh; position: relative; display: flex; flex-direction: column; overflow: hidden; transform: scale(0.95); transition: transform 0.4s ease; }
     .card-modal.is-visible .card-modal-content-wrapper { transform: scale(1); }
-    .card-modal-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.4); z-index: 1; }
+    .card-modal-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
     .card-modal-text-content { position: relative; z-index: 2; padding: 2rem; display: flex; flex-direction: column; height: 100%; justify-content: space-between; color: var(--text-light); }
     .card-modal-text-content h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; flex-shrink: 0; }
     .card-modal-text-content .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; line-height: 1.7; margin-bottom: 1rem; }
@@ -661,7 +676,8 @@
   <script>
   document.addEventListener('DOMContentLoaded', () => {
 
-    gsap.registerPlugin(ScrollTrigger, Flip);
+    /* Registrar plugins una sola vez */
+    gsap.registerPlugin(ScrollTrigger);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // --- Cursor Logic ---
@@ -688,49 +704,46 @@
     }
 
     // --- Hero Animations ---
-    if (!prefersReducedMotion) {
-        // SOLUCIÓN DEFINITIVA: Animación del logo separada para garantizar visibilidad.
-        gsap.to(".isologo", { 
-            opacity: 1,
-            y: 0,
-            duration: 1,
-            ease: "power3.out",
-            delay: 0.2,
-        });
-
-        gsap.set(".hero-el", {y: 30, opacity: 0});
-        gsap.to(".hero-el", { 
-            opacity: 1, 
-            y: 0, 
-            duration: 1, 
-            stagger: 0.2, 
-            ease: "power3.out", 
-            delay: 0.4, // Un delay mayor para que entre después del logo
-        });
-        
-        const animateOnScroll = (selector, triggerSelector) => {
-             gsap.from(selector, {
-                 opacity: 0,
-                 y: 50,
-                 duration: 1,
-                 ease: 'power3.out',
-                 stagger: 0.15,
-                 scrollTrigger: {
-                     trigger: triggerSelector || selector,
-                     start: "top 85%",
-                     toggleActions: "play none none none"
-                 }
-             });
-        }
-        animateOnScroll(".about-text > *", ".about");
-        animateOnScroll(".about-img", ".about");
-        animateOnScroll(".portfolio-item", ".portfolio-grid");
-        animateOnScroll(".ai-tool-card", "#ai-tools");
-        animateOnScroll(".contact-info > *", ".contact-wrapper");
-        animateOnScroll(".contact-form-wrapper", ".contact-wrapper");
+    /* 4. Logo siempre visible */
+    const iso = document.querySelector('.isologo');
+    if (prefersReducedMotion) {
+      iso.style.opacity = 1;
+      gsap.set(".hero-el", { opacity: 1 });
     } else {
-      // Si las animaciones están desactivadas, solo mostramos los elementos.
-      gsap.set(".hero > *, .isologo", { opacity: 1 });
+      gsap.fromTo(iso, {opacity:0, y:20}, {opacity:1, y:0, duration:1, ease:'power3.out', delay: 0.2});
+
+      gsap.set(".hero-el", {y: 30, opacity: 0});
+      gsap.to(".hero-el", { 
+          opacity: 1, 
+          y: 0, 
+          duration: 1, 
+          stagger: 0.2, 
+          ease: "power3.out", 
+          delay: 0.4,
+      });
+    }
+        
+    const animateOnScroll = (selector, triggerSelector) => {
+          gsap.from(selector, {
+              opacity: 0,
+              y: 50,
+              duration: 1,
+              ease: 'power3.out',
+              stagger: 0.15,
+              scrollTrigger: {
+                  trigger: triggerSelector || selector,
+                  start: "top 85%",
+                  toggleActions: "play none none none"
+              }
+          });
+    }
+    if (!prefersReducedMotion) {
+      animateOnScroll(".about-text > *", ".about");
+      animateOnScroll(".about-img", ".about");
+      animateOnScroll(".portfolio-item", ".portfolio-grid");
+      animateOnScroll(".ai-tool-card", "#ai-tools");
+      animateOnScroll(".contact-info > *", ".contact-wrapper");
+      animateOnScroll(".contact-form-wrapper", ".contact-wrapper");
     }
 
     // --- Navbar Scroll Effect ---
@@ -778,37 +791,37 @@
     };
 
     // --- Mobile Menu Toggle ---
+    /* 3. Menú móvil: display flex ↔ none */
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
+    const tlMenu = gsap.timeline({paused:true, reversed:true})
+      .set(mobileMenu, {display:'flex'})
+      .to(mobileMenu, {autoAlpha:1, duration:0.3})
+      .from(mobileMenu.querySelectorAll('li'),
+            {x:-30, opacity:0, stagger:0.08, duration:0.35}, '-=0.15')
+      .addPause()
+      .to(mobileMenu, {autoAlpha:0, duration:0.25})
+      .set(mobileMenu, {display:'none'});
 
-    if(menuToggle && mobileMenu) {
-        gsap.set(mobileMenu, { autoAlpha: 0 });
-        const mobileMenuTimeline = gsap.timeline({ paused: true, reversed: true })
-            .to(mobileMenu, { autoAlpha: 1, duration: 0.3, ease: 'power2.out' })
-            .fromTo(mobileMenu.querySelectorAll('li'), { x: -30, opacity: 0 }, { x: 0, opacity: 1, stagger: 0.08, duration: 0.4, ease: 'power2.out' }, "-=0.2");
+    menuToggle.addEventListener('click', () => {
+      const isOpen = menuToggle.classList.contains('open');
+      if (!isOpen) { scrollManager.lock(); } else { scrollManager.unlock(); }
+      menuToggle.classList.toggle('open');
+      tlMenu.reversed() ? tlMenu.play() : tlMenu.reverse();
+    });
 
-        const toggleMenu = () => {
-            const isOpen = menuToggle.classList.contains('open');
-            if (!isOpen) {
-                scrollManager.lock();
-            } else {
-                scrollManager.unlock();
-            }
-            menuToggle.classList.toggle('open');
-            mobileMenuTimeline.reversed() ? mobileMenuTimeline.play() : mobileMenuTimeline.reverse();
-        };
-
-        menuToggle.addEventListener('click', toggleMenu);
-        mobileMenu.querySelectorAll('a').forEach(link => {
-            if (link.getAttribute('href').startsWith('#')) {
-                link.addEventListener('click', () => {
-                    if (menuToggle.classList.contains('open')) {
-                        toggleMenu();
-                    }
-                });
-            }
-        });
-    }
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        if (link.getAttribute('href').startsWith('#')) {
+            link.addEventListener('click', () => {
+                if (menuToggle.classList.contains('open')) {
+                  const isOpen = menuToggle.classList.contains('open');
+                  if (!isOpen) { scrollManager.lock(); } else { scrollManager.unlock(); }
+                  menuToggle.classList.toggle('open');
+                  tlMenu.reversed() ? tlMenu.play() : tlMenu.reverse();
+                }
+            });
+        }
+    });
 
     // --- Modal Logic ---
     const overlayBackdrop = document.getElementById('overlay-backdrop');
@@ -879,70 +892,55 @@
     });
 
     // --- Horizontal Scroll Animation Setup ---
+    /* 1. Scroll horizontal fluido */
     function setupHorizontalScroll() {
+        const section = document.querySelector('.horizontal-scroll-section');
+        const wrapper = section.querySelector('.horizontal-scroll-wrapper');
+        const container = section.querySelector('.cards-container');
+        const cards = gsap.utils.toArray('.service-card-stacked');
+
         if (horizontalScrollInstance) {
             horizontalScrollInstance.kill();
             horizontalScrollInstance = null;
         }
 
-        const horizontalSection = document.querySelector('.horizontal-scroll-section');
-        const wrapper = document.querySelector('.horizontal-scroll-wrapper');
-        const container = document.querySelector('.cards-container');
-        const cards = gsap.utils.toArray('.service-card-stacked');
-
         if (window.innerWidth < 768 || prefersReducedMotion) {
-            // SOLUCIÓN: Reset más robusto para móvil y para movimiento reducido.
-            gsap.set(horizontalSection, { clearProps: "all" });
-            gsap.set(wrapper, { clearProps: "all" });
-            gsap.set(container, { clearProps: "all", display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1.5rem' });
-            gsap.set(cards, { clearProps: "all", opacity: 1, width: '100%', maxWidth: '500px', margin: '1rem 0'});
+            gsap.set([section, wrapper, container, cards], { clearProps: 'all' });
+            gsap.set(container, { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1.5rem' });
+            gsap.set(cards, { width: '100%', maxWidth: '500px', margin: '1rem 0' });
+            section.style.height = 'auto';
             ScrollTrigger.refresh();
-            return; 
+            return;
         }
 
-        gsap.set(wrapper, { position: 'sticky', top: 0, height: '100vh', overflow: 'hidden'});
-        gsap.set(container, { display: 'flex', flexDirection: 'row' }); 
-        
-        const scrollWidth = container.scrollWidth - window.innerWidth;
-        gsap.set(horizontalSection, { height: `${scrollWidth + window.innerHeight}px` }); 
+        gsap.set(wrapper, { position: 'sticky', top: 0, height: '100vh', overflow: 'hidden' });
+        gsap.set(container, { display: 'flex', flexDirection: 'row' });
 
-        // MECÁNICA SIMPLIFICADA
+        const scrollW = container.scrollWidth - window.innerWidth;
+        section.style.height = `${scrollW + window.innerHeight}px`;
+
         horizontalScrollInstance = gsap.to(container, {
-            x: () => -scrollWidth,
-            ease: "none",
+            x: -scrollW,
+            ease: 'none',
             scrollTrigger: {
-                trigger: horizontalSection,
-                start: "top top",
-                end: () => `+=${scrollWidth}`,
+                trigger: section,
+                start: 'top top',
+                end: `+=${scrollW}`,
                 pin: wrapper,
-                scrub: 1, // Valor para un movimiento suave y conectado al scroll
-                invalidateOnRefresh: true,
+                pinType: ScrollTrigger.isTouch ? 'transform' : 'fixed',
+                scrub: true,
+                invalidateOnRefresh: true
             }
         });
     }
+    
+    // --- Particle Animation ---
+    const particlesObj = { visible: true }; // Global state for particles
+    const canvas = document.getElementById('particle-canvas');
+    let threejsScene = null;
 
-    // --- IA Tool Form Logic ---
-    if (interestSelect && propertyDetailsDiv) {
-        interestSelect.addEventListener('change', function() {
-            const showDetails = this.value === 'Tasar mi propiedad';
-            gsap.to(propertyDetailsDiv, {
-                height: showDetails ? 'auto' : 0,
-                opacity: showDetails ? 1 : 0,
-                paddingTop: showDetails ? '1rem' : 0,
-                paddingBottom: showDetails ? '1rem' : 0,
-                display: showDetails ? 'flex' : 'none', 
-                duration: 0.4,
-                ease: 'power2.out',
-            });
-        });
-    }
-
-    // --- Particle Animation Initialization ---
     function initParticleAnimation() {
-        if (prefersReducedMotion) return; 
-
-        const canvas = document.getElementById('particle-canvas');
-        if (!canvas) return; 
+        if (prefersReducedMotion || !canvas) return; 
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -970,20 +968,18 @@
 
         const particles = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particles);
-
         camera.position.z = 5;
-
         const clock = new THREE.Clock();
 
         const animate = () => {
+            requestAnimationFrame(animate);
+            if (!particlesObj.visible) return; // Pauses rendering
+
             const elapsedTime = clock.getElapsedTime();
             particles.rotation.y = elapsedTime * 0.05;
             particles.rotation.x = elapsedTime * 0.02;
-            
             renderer.render(scene, camera);
-            window.requestAnimationFrame(animate);
         };
-
         animate();
 
         window.addEventListener('resize', () => {
@@ -993,11 +989,23 @@
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         });
     }
+
+    /* 2. Pausar Three.js cuando se fija */
+    ScrollTrigger.create({
+      trigger: '.horizontal-scroll-section',
+      start: 'top top',
+      end: 'bottom top',
+      onEnter: () => particlesObj.visible = false,
+      onLeave: () => particlesObj.visible = true,
+      onEnterBack: () => particlesObj.visible = false,
+      onLeaveBack: () => particlesObj.visible = true,
+    });
     
+    // --- Initializations ---
     initParticleAnimation();
     setupHorizontalScroll();
     window.addEventListener('resize', gsap.utils.debounce(() => {
-        setupHorizontalScroll(); 
+        setupHorizontalScroll();
         ScrollTrigger.refresh(true);
     }, 250));
 
