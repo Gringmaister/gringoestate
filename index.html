@@ -15,9 +15,11 @@
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp">
 
   <!-- Open Graph -->
+  <!-- Punto 4: Imagen para compartir en redes actualizada -->
   <meta property="og:title" content="GringoEstate – Real Estate sin corbata">
   <meta property="og:description" content="Transformamos el Real Estate con soluciones innovadoras.">
-  <meta property="og:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/og-image.webp">
+  <meta property="og:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp">
+  <!-- Para un resultado óptimo, se recomienda crear una imagen de 1200x630px que combine este fondo con el logo y subirla al servidor. -->
   <meta property="og:url" content="https://www.gringo.estate">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_AR">
@@ -26,7 +28,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="GringoEstate – Real Estate sin corbata">
   <meta name="twitter:description" content="Transformamos el Real Estate con soluciones innovadoras.">
-  <meta name="twitter:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/og-image.webp">
+  <meta name="twitter:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp">
   
   <!-- Preconnect a Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -84,7 +86,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        z-index: -1; /* Lo ponemos detrás de todo */
+        z-index: -1;
     }
 
     .custom-cursor { 
@@ -92,7 +94,7 @@
       left: 0; 
       top: 0; 
       pointer-events: none; 
-      z-index: 10001; /* Z-index aumentado para estar sobre el modal */
+      z-index: 10001;
       opacity: 0; 
       transition: opacity .3s; 
     }
@@ -106,7 +108,8 @@
     .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem;}
     .hero > * { opacity: 0; }
     .hero .isologo{ width: 120px; height: auto; margin: 0 auto 1rem auto; display: block; }
-    .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem;}
+    .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem; perspective: 400px;}
+    .hero h1 .char { display: inline-block; } /* Para animar letras del H1 */
     .hero h1 span{color:var(--primary); letter-spacing: 2px;}
     .hero p{font-size:1.5rem;color:#e2e8f0;margin-bottom:2rem;line-height:1.4;font-family:'Bebas Neue', sans-serif; letter-spacing:1px;}
     .btn-primary{background:var(--primary);color:var(--dark);padding:.75rem 2rem;border-radius:50px;display:inline-block;transition: background-color .3s, color .3s, box-shadow .3s;font-weight:700;font-size:1.1rem;letter-spacing:1px; border: none; text-decoration: none;}
@@ -115,12 +118,12 @@
     nav{position:fixed;top:0;left:0;width:100%;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;z-index:1000;transition: background-color .4s, padding .4s, backdrop-filter .4s; border-bottom: 1px solid rgba(255,255,255,0.1);}
     nav.nav-scrolled { background:rgba(0,0,0,.8); backdrop-filter:blur(8px); padding: 0.75rem 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);}
     
-    nav a.logo { display: inline-block; white-space: nowrap; font-family:'Bebas Neue', sans-serif;font-weight:700;letter-spacing:1px;font-size:1.5rem;color:#fff; text-decoration: none; perspective: 400px; }
+    nav a.logo { display: inline-block; white-space: nowrap; font-family:'Bebas Neue', sans-serif;font-weight:700;letter-spacing:1px;font-size:1.5rem;color:#fff; text-decoration: none;}
     nav a.logo span {color: var(--primary);}
-    .logo-char { display: inline-block; } /* Para animar letras individualmente */
     
     nav ul{list-style:none;font-weight:700; padding-left: 0; margin: 0;}
     
+    /* Punto 4 (versión web) y 6: Fondo del menú móvil */
     nav .nav-links-mobile { 
       visibility: hidden; 
       position: fixed; 
@@ -128,8 +131,7 @@
       left: 0; 
       width: 100%; 
       height: 100%; 
-      background: rgba(10, 10, 10, 0.2); /* Fondo semitransparente */
-      backdrop-filter: blur(10px); /* Efecto vidrio esmerilado */
+      background-color: var(--dark-bg); /* Fondo negro sólido */
       padding: 6rem 1.5rem 2rem; 
       opacity: 0; 
       display: flex; 
@@ -157,8 +159,6 @@
     main { display: block; background-color: transparent; }
     section{padding:4.5rem 1.5rem;max-width:1200px;margin: 0 auto; background-color: transparent; position: relative; z-index: 1;}
     
-    #about { background-color: var(--dark-bg); } /* Fondo negro sólido para esta sección */
-
     .section-full-width { max-width: none; padding-left: 0; padding-right: 0; }
 
     h2.section-title{font-family:'Bebas Neue', sans-serif;letter-spacing:1.5px;font-size:3rem;font-weight:700;margin-bottom:2rem;text-align:center; padding: 0 1.5rem;}
@@ -180,7 +180,12 @@
     .horizontal-scroll-wrapper { position: sticky; top: 0; display: flex; align-items: center; height: 100vh; width: 100%; overflow: hidden; }
     .cards-container { display: flex; gap: clamp(2rem, 5vw, 4rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; }
     
-    .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; will-change: transform, opacity; }
+    .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; will-change: transform, opacity; transition: transform 0.4s ease, box-shadow 0.4s ease; }
+    .service-card-stacked:hover {
+        transform: translateY(-10px) scale(1.03);
+        box-shadow: 0px 10px 40px 5px rgba(255, 191, 0, 0.6);
+    }
+    
     .service-card-stacked::before { 
       content: ''; 
       position: absolute; 
@@ -188,13 +193,12 @@
       z-index: 2; 
       border-radius: inherit; 
       background: conic-gradient(from 180deg at 50% 50%, rgba(255, 191, 0, 0.6) 0deg, rgba(255, 191, 0, 0.2) 115deg, rgba(255, 191, 0, 0) 360deg); 
-      opacity: 0.3; /* Opacidad base sutil */
+      opacity: 0.3;
       transition: opacity 0.4s ease; 
       animation: pulse-border 3s infinite; 
     }
     @keyframes pulse-border { 50% { opacity: 0.6; } }
     
-    /* Animación de brillo más poderosa */
     @keyframes powerful-glow {
         0% { box-shadow: 0 0 10px 0px rgba(255, 191, 0, 0.5); }
         50% { box-shadow: 0 0 25px 10px rgba(255, 191, 0, 0.8); }
@@ -218,7 +222,6 @@
 
     .card-full-details { display: none; }
 
-    /* Estructura del Modal */
     .card-modal {
         position: fixed;
         top: 0;
@@ -290,6 +293,7 @@
         line-height: 1.7;
         margin-bottom: 1rem;
     }
+    /* Punto 9: Barra de scroll amarilla */
     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar { width: 8px; }
     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 10px; }
@@ -315,7 +319,8 @@
     #overlay-backdrop { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.7); z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.4s ease, visibility 0s 0.4s; }
     #overlay-backdrop.visible { opacity: 1; visibility: visible; transition: opacity 0.4s ease; }
 
-    .content-after-sticky { background-color: var(--dark-bg); position: relative; z-index: 1; }
+    /* Punto 10: Extender fondo de partículas */
+    .content-after-sticky { background-color: transparent; position: relative; z-index: 1; }
     
     #portfolio .section-title { color: #fff; }
     .portfolio-grid-wrapper { max-width: 1200px; margin: auto; padding: 0 1.5rem; }
@@ -364,7 +369,7 @@
     .whatsapp-float:hover { transform: scale(1.1); animation: none; }
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); } 70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); } }
 
-    footer{background: transparent; color:#94a3b8;padding:3rem 1.5rem;text-align:center;font-size:1rem; position: relative; z-index: 1;}
+    footer{background: var(--dark-bg); color:#94a3b8;padding:3rem 1.5rem;text-align:center;font-size:1rem; position: relative; z-index: 1;}
     footer p { margin: 0; }
     footer a{color: var(--primary); opacity: 0.8; transition: opacity .3s; text-decoration: none;}
     footer a:hover{opacity: 1;}
@@ -390,13 +395,14 @@
   </style>
 </head>
 <body>
-  <canvas id="particle-canvas"></canvas>
+  <div id="particle-canvas"></div>
   <div id="cursor-regular" class="custom-cursor"><div class="cursor-dot"></div></div>
   <div id="cursor-point" class="custom-cursor"><div class="cursor-point"></div></div>
 
   <div id="overlay-backdrop"></div>
   
   <nav>
+    <!-- Punto 1: Logo de navegación estático -->
     <a class="logo" href="#top">GRINGO<span>ESTATE</span></a>
     <div class="nav-links-desktop">
       <ul>
@@ -459,14 +465,13 @@
             <div class="horizontal-scroll-wrapper">
                 <div class="cards-container">
                     
-                    <!-- Card 1: TASAR MI PROPIEDAD -->
                     <article class="service-card-stacked" data-card-id="tarjeta1">
                       <div class="card-inner-content">
                         <picture>
                             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta1.webp" type="image/webp">
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta1.webp" alt="Tasación profesional de una propiedad" class="card-image" loading="lazy">
                         </picture>
-                        <div class="card-content-initial"><h3>QUIERO TASAR <span>MI PROPIEDAD</span></h3><p class="short-desc">Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p></div>
+                        <div class="card-content-initial"><h3>QUIERO TASAR <span>MI PROPIEDAD</span></h3><p class="short-desc">Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><button class="btn-toggle-expand">Ver más</button></div>
                         <div class="card-full-details">
                             <div class="card-full-details-content">
                                 <h3>QUIERO TASAR MI PROPIEDAD</h3>
@@ -479,20 +484,19 @@
                                     </ul>
                                     <p class="card-highlight">El punto de partida para con información poder tomar la mejor decisión.</p>
                                 </div>
-                                <div class="card-footer-cta"><a href="#contact" class="btn-card">Solicitar Tasación</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                                <div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Solicitar Tasación</a><button class="btn-toggle-collapse">Cerrar</button></div>
                             </div>
                         </div>
                       </div>
                     </article>
 
-                    <!-- Card 2: VENDER CON GRINGOESTATE -->
                     <article class="service-card-stacked" data-card-id="tarjeta2">
                       <div class="card-inner-content">
                         <picture>
                             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta2.webp" type="image/webp">
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta2.webp" alt="Vender una propiedad con GringoEstate" class="card-image" loading="lazy">
                         </picture>
-                        <div class="card-content-initial"><h3>¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3><p class="short-desc">Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p></div>
+                        <div class="card-content-initial"><h3>¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3><p class="short-desc">Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><button class="btn-toggle-expand">Ver más</button></div>
                         <div class="card-full-details">
                             <div class="card-full-details-content">
                                 <h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3>
@@ -507,20 +511,19 @@
                                     </ul>
                                     <p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p>
                                 </div>
-                                <div class="card-footer-cta"><a href="#contact" class="btn-card">Quiero Vender</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                                <div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Quiero Vender</a><button class="btn-toggle-collapse">Cerrar</button></div>
                             </div>
                         </div>
                       </div>
                     </article>
 
-                    <!-- Card 3: POTENCIÁ TU ALQUILER TEMPORARIO -->
                     <article class="service-card-stacked" data-card-id="tarjeta3">
                       <div class="card-inner-content">
                         <picture>
                             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta3.webp" type="image/webp">
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta3.webp" alt="Interior de un apartamento de alquiler temporario" class="card-image" loading="lazy">
                         </picture>
-                        <div class="card-content-initial"><h3>POTENCIÁ TU <span>ALQUILER TEMPORARIO</span></h3><p class="short-desc">Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p></div>
+                        <div class="card-content-initial"><h3>POTENCIÁ TU <span>ALQUILER TEMPORARIO</span></h3><p class="short-desc">Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><button class="btn-toggle-expand">Ver más</button></div>
                         <div class="card-full-details">
                             <div class="card-full-details-content">
                                 <h3>POTENCIÁ TU ALQUILER TEMPORARIO</h3>
@@ -542,14 +545,13 @@
                       </div>
                     </article>
                     
-                    <!-- Card 4: GESTIÓN DE ALQUILER FLEX Y TRADICIONAL -->
                     <article class="service-card-stacked" data-card-id="tarjeta4">
                       <div class="card-inner-content">
                         <picture>
                             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta4.webp" type="image/webp">
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta4.webp" alt="Llaves de una propiedad siendo entregadas" class="card-image" loading="lazy">
                         </picture>
-                        <div class="card-content-initial"><h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3><p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p></div>
+                        <div class="card-content-initial"><h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3><p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><button class="btn-toggle-expand">Ver más</button></div>
                         <div class="card-full-details">
                             <div class="card-full-details-content">
                                 <h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3>
@@ -569,20 +571,19 @@
                                     </ul>
                                     <p class="card-highlight">Tu propiedad, en buenas manos.</p>
                                 </div>
-                                <div class="card-footer-cta"><a href="#contact" class="btn-card">Consultar por Gestión</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                                <div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Gestión de Alquiler Flex y Tradicional">Consultar por Gestión</a><button class="btn-toggle-collapse">Cerrar</button></div>
                             </div>
                         </div>
                       </div>
                     </article>
 
-                    <!-- Card 5: INVERTÍ DESDE POZO -->
                     <article class="service-card-stacked" data-card-id="tarjeta5">
                       <div class="card-inner-content">
                         <picture>
                             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta5.webp" type="image/webp">
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta5.webp" alt="Render de un edificio en construcción" class="card-image" loading="lazy">
                         </picture>
-                        <div class="card-content-initial"><h3>INVERTÍ <span>DESDE POZO</span></h3><p class="short-desc">Accedé a una cartera única de +26 emprendimientos en exclusiva y oportunidades off-market.</p></div>
+                        <div class="card-content-initial"><h3>INVERTÍ <span>DESDE POZO</span></h3><p class="short-desc">Accedé a una cartera única de +26 emprendimientos en exclusiva y oportunidades off-market.</p><button class="btn-toggle-expand">Ver más</button></div>
                         <div class="card-full-details">
                             <div class="card-full-details-content">
                                 <h3>INVERTÍ DESDE POZO</h3>
@@ -601,14 +602,13 @@
                       </div>
                     </article>
 
-                    <!-- Card 6: ¿SOS DESARROLLADOR? -->
                     <article class="service-card-stacked" data-card-id="tarjeta6">
                         <div class="card-inner-content">
                             <picture>
                                 <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" type="image/webp">
                                 <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" alt="Un desarrollador revisando planos en una obra" class="card-image" loading="lazy">
                             </picture>
-                            <div class="card-content-initial"><h3>¿SOS <span>DESARROLLADOR?</span></h3><p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p></div>
+                            <div class="card-content-initial"><h3>¿SOS <span>DESARROLLADOR?</span></h3><p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p><button class="btn-toggle-expand">Ver más</button></div>
                             <div class="card-full-details">
                                 <div class="card-full-details-content">
                                     <h3>¿SOS DESARROLLADOR?</h3>
@@ -621,20 +621,19 @@
                                         </ul>
                                         <p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p>
                                     </div>
-                                    <div class="card-footer-cta"><a href="#contact" class="btn-card">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                                    <div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Asesoría para Desarrolladores">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div>
                                 </div>
                             </div>
                         </div>
                     </article>
                     
-                    <!-- Card 7: PERSONAL SHOPPER INMOBILIARIO -->
                     <article class="service-card-stacked" data-card-id="tarjeta7">
                         <div class="card-inner-content">
                             <picture>
                                 <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta7.webp" type="image/webp">
                                 <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta7.webp" alt="GringoEstate con clientas" class="card-image" loading="lazy">
                             </picture>
-                            <div class="card-content-initial"><h3>PERSONAL SHOPPER <span>INMOBILIARIO</span></h3><p class="short-desc">Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p></div>
+                            <div class="card-content-initial"><h3>PERSONAL SHOPPER <span>INMOBILIARIO</span></h3><p class="short-desc">Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><button class="btn-toggle-expand">Ver más</button></div>
                             <div class="card-full-details">
                                 <div class="card-full-details-content">
                                     <h3>PERSONAL SHOPPER INMOBILIARIO</h3>
@@ -648,20 +647,19 @@
                                         <p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p>
                                         <p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta. Asesorate con profesionales y delegá lo tedioso.</p>
                                     </div>
-                                    <div class="card-footer-cta"><a href="#contact" class="btn-card">Quiero este Servicio</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                                    <div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Personal Shopper Inmobiliario">Quiero este Servicio</a><button class="btn-toggle-collapse">Cerrar</button></div>
                                 </div>
                             </div>
                         </div>
                     </article>
 
-                    <!-- Card 8: LOCALES COMERCIALES Y OFICINAS -->
                     <article class="service-card-stacked" data-card-id="tarjeta8">
                         <div class="card-inner-content">
                             <picture>
                                 <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta8.webp" type="image/webp">
                                 <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta8.webp" alt="Local comercial de GringoEstate" class="card-image" loading="lazy">
                             </picture>
-                            <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p></div>
+                            <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><button class="btn-toggle-expand">Ver más</button></div>
                             <div class="card-full-details">
                                 <div class="card-full-details-content">
                                     <h3>LOCALES COMERCIALES Y OFICINAS</h3>
@@ -674,7 +672,7 @@
                                         </ul>
                                         <p class="card-highlight">Llevá tu negocio al siguiente nivel.</p>
                                     </div>
-                                    <div class="card-footer-cta"><a href="#contact" class="btn-card">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                                    <div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Locales Comerciales y Oficinas">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div>
                                 </div>
                             </div>
                         </div>
@@ -772,7 +770,7 @@
                         <select name="interest" id="interest-select" required>
                             <option value="" disabled selected>Estoy interesado/a en...</option>
                             <option value="Tasar mi propiedad">Tasar mi propiedad</option>
-                            <option value="Vender con GringoEstate">Vender con GringoEstate</option>
+                            <!-- Punto 8: Opción "Vender" eliminada -->
                             <option value="Potenciar mi Alquiler Temporario">Potenciar mi Alquiler Temporario</option>
                             <option value="Gestión de Alquiler Flex y Tradicional">Gestión de Alquiler Flex y Tradicional</option>
                             <option value="Invertir desde pozo">Invertir desde pozo</option>
@@ -809,13 +807,11 @@
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width:28px; height:28px; fill:white;"><path d="M380.9 97.1C339.4 55.6 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.8 0-67.6-9.5-97.8-26.7l-7-4.1-72.5 19 19.3-71.1-4.5-7.4c-18.3-30.7-27.9-66.2-27.9-102.3 0-108.6 88.4-197 197-197s197 88.4 197 197-88.4 197-197 197zm83.7-118.2c-3.7-1.9-22.1-10.9-25.6-12.1-3.4-1.2-5.9-1.9-8.4 1.9-2.5 3.7-9.7 12.1-11.9 14.5-2.2 2.5-4.5 2.8-8.2 1-3.7-1.9-15.7-5.8-30-18.5-11.1-9.6-18.7-21.6-20.9-25.3-2.2-3.7-0.2-5.9 1.7-7.7 1.7-1.5 3.7-3.7 5.5-5.5 1.8-1.8 2.5-3.7 3.7-6.2 1.2-2.5 0.6-4.8-0.3-6.7-0.9-1.9-8.4-20.1-11.5-27.5-3.1-7.4-6.2-6.3-8.4-6.3-2.2 0-4.8 0-7.4 0-2.5 0-6.7 1.2-10.3 5.9-3.7 4.8-14.1 13.8-14.1 33.5 0 19.8 14.4 38.9 16.4 41.4 2 2.5 28.2 42.8 68.2 60.1 9.7 4.1 17.3 6.6 23.1 8.8 13.3 5.1 25.6 4.3 35.1 2.6 10.8-1.9 22.1-9 25.2-17.6 3.1-8.6 3.1-16 2.2-17.6-0.9-1.5-3.4-2.5-7.1-4.5z"/></svg>
   </a>
 
-  <!-- Estructura del Modal (vacía, lista para ser llenada) -->
   <div id="card-modal" class="card-modal">
     <div class="card-modal-content-wrapper">
       <button class="card-modal-close-btn">&times;</button>
       <img src="" alt="Imagen de fondo del servicio" class="card-modal-image">
       <div class="card-modal-text-content">
-        <!-- El contenido se inyectará aquí dinámicamente -->
       </div>
     </div>
   </div>
@@ -830,10 +826,6 @@
 
     gsap.registerPlugin(ScrollTrigger, Flip);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    // --- Punto 5: Asegurar visibilidad del Isologo en Hero ---
-    // La animación de GSAP ya se encarga de esto, nos aseguramos que el elemento esté en el DOM.
-    // El isologo está correctamente dentro de .hero con la clase .hero-el, por lo que la animación lo tomará.
     
     if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
         const cursorRegular = document.getElementById('cursor-regular');
@@ -846,7 +838,18 @@
 
     if (!prefersReducedMotion) {
         gsap.set(".hero-el", {y: 30});
-        gsap.to(".hero-el", { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: "power3.out", delay: 0.2 });
+        gsap.to(".hero-el", { 
+            opacity: 1, 
+            y: 0, 
+            duration: 1, 
+            stagger: 0.2, 
+            ease: "power3.out", 
+            delay: 0.2,
+            // Punto 3: Callback para asegurar que el isologo sea visible
+            onComplete: () => {
+                gsap.set('.hero .isologo', { autoAlpha: 1 });
+            }
+        });
         
         const animateOnScroll = (element, trigger) => {
              gsap.from(element, {
@@ -879,54 +882,37 @@
         });
     }
 
-    // --- Punto 7: Animación Innovadora del Logo ---
-    const logo = document.querySelector('nav a.logo');
-    if (logo) {
-        const gringoText = "GRINGO";
-        const estateText = "ESTATE";
-        logo.innerHTML = gringoText.split('').map(char => `<span class="logo-char">${char}</span>`).join('') +
-                         `<span>${estateText.split('').map(char => `<span class="logo-char">${char}</span>`).join('')}</span>`;
+    // Punto 2: Animación del Título Principal
+    const heroTitle = document.querySelector('.hero h1');
+    if (heroTitle && !prefersReducedMotion) {
+        const text = heroTitle.textContent;
+        heroTitle.innerHTML = text.split('').map(char => `<span class="char">${char}</span>`).join('');
+        const chars = heroTitle.querySelectorAll('.char');
 
-        const logoChars = logo.querySelectorAll('.logo-char');
-
-        logo.addEventListener('mouseenter', () => {
-            if (logo.isAnimating) return;
-            logo.isAnimating = true;
-            gsap.to(logoChars, {
-                duration: 0.8,
-                opacity: 0.5,
+        heroTitle.addEventListener('mouseenter', () => {
+            gsap.to(chars, {
+                duration: 0.5,
+                opacity: 0.7,
                 rotationX: 360,
-                rotationY: -360,
-                scale: 0.8,
-                y: (i) => (i % 2 === 0 ? -10 : 10),
-                stagger: {
-                    each: 0.05,
-                    from: "random"
-                },
-                ease: 'back.inOut(1.7)',
-                onComplete: () => { logo.isAnimating = false; }
+                rotationY: () => Math.random() * 360 - 180,
+                scale: 0.9,
+                stagger: 0.03,
+                ease: 'power2.out',
             });
         });
-
-        logo.addEventListener('mouseleave', () => {
-            if (logo.isAnimating) return;
-            logo.isAnimating = true;
-            gsap.to(logoChars, {
-                duration: 0.8,
+        heroTitle.addEventListener('mouseleave', () => {
+            gsap.to(chars, {
+                duration: 0.5,
                 opacity: 1,
                 rotationX: 0,
                 rotationY: 0,
                 scale: 1,
-                y: 0,
-                stagger: {
-                    each: 0.05,
-                    from: "random"
-                },
-                ease: 'back.out(1.7)',
-                onComplete: () => { logo.isAnimating = false; }
+                stagger: 0.03,
+                ease: 'power2.out',
             });
         });
     }
+
 
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
@@ -968,27 +954,6 @@
     
     let horizontalScrollTween = null;
 
-    const scrollManager = {
-        lockCount: 0,
-        lock() { 
-            if (this.lockCount === 0) {
-                scrollPosition = window.pageYOffset;
-                document.body.style.top = `-${scrollPosition}px`;
-                document.body.classList.add('no-scroll');
-            }
-            this.lockCount++;
-        },
-        unlock() { 
-            this.lockCount--;
-            if (this.lockCount <= 0) {
-                this.lockCount = 0;
-                document.body.classList.remove('no-scroll');
-                document.body.style.removeProperty('top');
-                window.scrollTo(0, scrollPosition);
-            }
-        }
-    };
-
     function openCardModal(card) {
         const imageSrc = card.querySelector('.card-image').src;
         const fullDetailsContent = card.querySelector('.card-full-details-content').innerHTML;
@@ -998,18 +963,26 @@
 
         cardModal.classList.add('is-visible');
         overlayBackdrop.classList.add('visible');
-        scrollManager.lock();
+        
+        scrollPosition = window.pageYOffset;
+        document.body.style.top = `-${scrollPosition}px`;
+        document.body.classList.add('no-scroll');
+
         if (horizontalScrollTween) horizontalScrollTween.scrollTrigger.disable();
     }
 
     function closeCardModal() {
         cardModal.classList.remove('is-visible');
         overlayBackdrop.classList.remove('visible');
-        scrollManager.unlock();
+        
+        // Punto 8: No saltar al inicio de la página al cerrar
+        document.body.classList.remove('no-scroll');
+        document.body.style.removeProperty('top');
+        window.scrollTo(0, scrollPosition);
+        
         if (horizontalScrollTween) horizontalScrollTween.scrollTrigger.enable();
     }
 
-    // --- Punto 3: Clic en toda la tarjeta ---
     document.querySelectorAll('.service-card-stacked').forEach(card => {
         card.addEventListener('click', e => {
             if (e.target.closest('a[target="_blank"]')) {
@@ -1021,7 +994,17 @@
     });
 
     cardModal.addEventListener('click', (e) => {
-        if (e.target === cardModal || e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse')) {
+        if (e.target.closest('.btn-card[data-interest]')) {
+             // Punto 7: Redirección de botones a formulario
+            const interestValue = e.target.closest('.btn-card[data-interest]').dataset.interest;
+            const interestSelect = document.getElementById('interest-select');
+            if(interestSelect) {
+                interestSelect.value = interestValue;
+                interestSelect.dispatchEvent(new Event('change'));
+            }
+            closeCardModal();
+            // El href="#contact" se encarga del scroll
+        } else if (e.target === cardModal || e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse')) {
             closeCardModal();
         }
     });
@@ -1097,7 +1080,7 @@
     const propertyDetails = document.getElementById('property-details');
     if (interestSelect && propertyDetails) {
         interestSelect.addEventListener('change', function() {
-            const show = this.value === 'Vender con GringoEstate' || this.value === 'Tasar mi propiedad';
+            const show = this.value === 'Tasar mi propiedad';
             gsap.to(propertyDetails, {
                 height: show ? 'auto' : 0,
                 opacity: show ? 1 : 0,
@@ -1174,7 +1157,6 @@
         ScrollTrigger.refresh(true);
     }, 250));
 
-    // --- Gemini API Integration ---
     const generateDescriptionBtn = document.getElementById('generate-description-btn');
     const propertyInput = document.getElementById('property-input');
     const descriptionResult = document.getElementById('description-result');
@@ -1194,7 +1176,7 @@
             let chatHistory = [];
             chatHistory.push({ role: "user", parts: [{ text: prompt }] });
             const payload = { contents: chatHistory };
-            const apiKey = "AIzaSyDEuE7UkdAk2mGWsprqoLFjpSi2EA68xns"; // API Key
+            const apiKey = "AIzaSyDEuE7UkdAk2mGWsprqoLFjpSi2EA68xns";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
             const response = await fetch(apiUrl, {
