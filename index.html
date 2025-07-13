@@ -71,7 +71,7 @@
         border-radius: 10px;
     }
 
-    html.no-scroll, body.no-scroll {
+    html.no-scroll {
         overflow: hidden;
         /* Evita que la página salte al bloquear el scroll */
         position: fixed;
@@ -856,7 +856,10 @@
             duration: 0.4,
             stagger: 0.08,
             ease: 'power2.out'
-        }, "-=0.2");
+        }, "-=0.2")
+        .eventCallback("onReverseComplete", () => {
+            gsap.set(mobileMenu, { display: 'none' });
+        });
 
     function toggleMenu() {
         const isOpen = menuToggle.classList.toggle('open');
@@ -883,7 +886,6 @@
     // --- Modal Logic ---
     const overlayBackdrop = document.getElementById('overlay-backdrop');
     const cardModal = document.getElementById('card-modal');
-    const cardModalCloseBtn = cardModal.querySelector('.card-modal-close-btn');
     const cardModalImage = cardModal.querySelector('.card-modal-image');
     const cardModalTextContent = cardModal.querySelector('.card-modal-text-content');
     const interestSelect = document.getElementById('interest-select');
