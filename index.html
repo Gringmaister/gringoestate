@@ -60,20 +60,20 @@
       scroll-behavior: smooth;
     }
     body::-webkit-scrollbar {
-        width: 8px;
+      width: 8px;
     }
     body::-webkit-scrollbar-track {
-        background: var(--dark-bg);
+      background: var(--dark-bg);
     }
     body::-webkit-scrollbar-thumb {
-        background-color: var(--primary);
-        border-radius: 10px;
+      background-color: var(--primary);
+      border-radius: 10px;
     }
 
     html.no-scroll {
-        overflow: hidden;
-        position: fixed;
-        width: 100%;
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
     }
     html, body {
       overflow-x: hidden;
@@ -89,12 +89,12 @@
     }
     
     #particle-canvas {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
     }
 
     .custom-cursor { 
@@ -118,16 +118,16 @@
     .hero .hero-el { opacity: 0; }
     
     .hero .isologo{ 
-        width: 160px; 
-        height: auto; 
-        margin: 0 auto 1rem auto; 
-        display: block; 
-        z-index: 10; 
-        position: relative; 
+      width: 160px; 
+      height: auto; 
+      margin: 0 auto 1rem auto; 
+      display: block; 
+      z-index: 10; 
+      position: relative; 
     }
     .hero .isologo img {
-        width: 100%;
-        height: auto;
+      width: 100%;
+      height: auto;
     }
     .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem; perspective: 800px; transform-style: preserve-3d;}
     .hero h1 span{color:var(--primary); letter-spacing: 2px;}
@@ -226,13 +226,13 @@
     }
     
     @media (min-width: 1024px) {
-        [data-card-id="tarjeta2"] .card-image,
-        [data-card-id="tarjeta5"] .card-image {
-            object-position: center 25%;
-        }
-        [data-card-id="tarjeta7"] .card-image {
-            object-position: center top;
-        }
+      [data-card-id="tarjeta2"] .card-image,
+      [data-card-id="tarjeta5"] .card-image {
+        object-position: center 25%;
+      }
+      [data-card-id="tarjeta7"] .card-image {
+        object-position: center top;
+      }
     }
 
     .card-content-initial { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 3; padding: 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%); }
@@ -282,7 +282,7 @@
     .card-modal-close-btn:hover { background-color: rgba(255, 255, 255, 0.1); transform: rotate(90deg); }
     
     #overlay-backdrop { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.7); z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.4s ease, visibility 0s 0.4s; }
-    #overlay-backdrop.visible { opacity: 1; visibility: visible; transition: opacity 0.4s ease; }
+    #overlay-backdrop.visible { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.4s ease; }
 
     .content-after-sticky { background-color: transparent; position: relative; z-index: 1; }
     
@@ -320,15 +320,15 @@
     .ai-tool-card input,
     .ai-tool-card select,
     .ai-tool-card textarea {
-        background-color: #1a1a1a;
-        color: #fff;
-        border: 1px solid #444;
-        border-radius: 8px;
-        padding: 1rem;
-        font-size: 1rem;
-        transition: border-color .3s, box-shadow .3s;
-        -webkit-appearance: none;
-        appearance: none;
+      background-color: #1a1a1a;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 1rem;
+      transition: border-color .3s, box-shadow .3s;
+      -webkit-appearance: none;
+      appearance: none;
     }
     .contact-form-wrapper input:focus,
     .contact-form-wrapper select:focus,
@@ -336,23 +336,23 @@
     .ai-tool-card input:focus,
     .ai-tool-card select:focus,
     .ai-tool-card textarea:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: none;
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: none;
     }
     .btn-enviar-mensaje { 
-        background:var(--primary); 
-        color:var(--dark); 
-        padding:.9rem 2rem; 
-        border-radius:50px;
-        display:inline-block; 
-        transition: background-color .3s, box-shadow .3s; 
-        font-weight:700; 
-        font-size:1.1rem; 
-        letter-spacing:1px; 
-        width:100%; 
-        text-align: center; 
-        border: none; 
+      background:var(--primary); 
+      color:var(--dark); 
+      padding:.9rem 2rem; 
+      border-radius:50px;
+      display:inline-block; 
+      transition: background-color .3s, box-shadow .3s; 
+      font-weight:700; 
+      font-size:1.1rem; 
+      letter-spacing:1px; 
+      width:100%; 
+      text-align: center; 
+      border: none; 
     }
     .btn-enviar-mensaje:hover { background-color: #fff; box-shadow:0 10px 20px rgba(0,0,0,0.2); }
 
@@ -387,14 +387,14 @@
     }
 
     @media (max-width: 768px) {
-        .cards-container { width: 100%; padding: 0 5vw; }
-        .service-card-stacked { width: 100%; }
-        
-        .card-modal-content-wrapper { width: 95%; height: 85%; }
-        .card-modal-text-content { padding: 1.5rem; }
-        .card-modal-text-content h3 { font-size: 2rem; }
-        .btn-card { width: 100%; }
-        h2.section-title { font-size: 2.5rem; }
+      .cards-container { width: 100%; padding: 0 5vw; }
+      .service-card-stacked { width: 100%; }
+      
+      .card-modal-content-wrapper { width: 95%; height: 85%; }
+      .card-modal-text-content { padding: 1.5rem; }
+      .card-modal-text-content h3 { font-size: 2rem; }
+      .btn-card { width: 100%; }
+      h2.section-title { font-size: 2.5rem; }
     }
   </style>
 </head>
@@ -486,7 +486,7 @@
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta2.webp" alt="Vender una propiedad con GringoEstate" class="card-image" loading="lazy">
                         </picture>
                         <div class="card-content-initial"><h3>¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3><p class="short-desc">Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><div class="card-full-details-content"><h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3><div class="card-full-content-scroll"><p>Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><h4>Nuestra estrategia 360° incluye:</h4><ul><li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li><li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li><li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li><li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li></ul><p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Tasar mi propiedad</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                        <div class="card-full-details"><div class="card-full-details-content"><h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3><div class="card-full-content-scroll"><p>Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><h4>Nuestra estrategia 360° incluye:</h4><ul><li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li><li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li><li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li><li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li></ul><p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Vender con GringoEstate">Tasar mi propiedad</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                       </div>
                     </article>
 
@@ -660,6 +660,7 @@
                         <select name="interest" id="interest-select" required>
                             <option value="" disabled selected>Estoy interesado/a en...</option>
                             <option value="Tasar mi propiedad">Tasar mi propiedad</option>
+                            <option value="Vender con GringoEstate">Vender con GringoEstate</option>
                             <option value="Potenciar mi Alquiler Temporario">Potenciar mi Alquiler Temporario</option>
                             <option value="Gestión de Alquiler Flex y Tradicional">Gestión de Alquiler Flex y Tradicional</option>
                             <option value="Invertir desde pozo">Invertir desde pozo</option>
@@ -698,7 +699,7 @@
 
   <div id="card-modal" class="card-modal">
     <div class="card-modal-content-wrapper">
-      <button class="card-modal-close-btn">×</button>
+      <button class="card-modal-close-btn" aria-label="Cerrar modal">×</button>
       <img src="" alt="Imagen de fondo del servicio" class="card-modal-image">
       <div class="card-modal-text-content">
       </div>
@@ -711,11 +712,33 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
+    /* MOD START: scrollManager, menú móvil y modal robustos */
 
-    /* Registrar plugins una sola vez */
+    // --- Setup & Global Variables ---
     gsap.registerPlugin(ScrollTrigger);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let horizontalScrollInstance = null;
+
+    // --- Scroll Lock Manager ---
+    const scrollManager = (() => {
+        let savedScrollY = 0;
+        const htmlEl = document.documentElement;
+
+        function lock() {
+            savedScrollY = window.pageYOffset;
+            htmlEl.style.top = `-${savedScrollY}px`;
+            htmlEl.classList.add('no-scroll');
+        }
+
+        function unlock() {
+            htmlEl.classList.remove('no-scroll');
+            htmlEl.style.removeProperty('top');
+            window.scrollTo(0, savedScrollY);
+        }
+
+        return { lock, unlock };
+    })();
 
     // --- Cursor Logic ---
     if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
@@ -727,15 +750,13 @@
             gsap.to(cursorPoint, { x: e.clientX, y: e.clientY, duration: 0.4, ease: 'power2.out', xPercent: -50, yPercent: -50 });
         });
 
-        const interactiveElements = document.querySelectorAll('a, button, .service-card-stacked');
+        const interactiveElements = document.querySelectorAll('a, button, .service-card-stacked, input, select, textarea');
         interactiveElements.forEach(el => {
             el.addEventListener('mouseenter', () => {
-                gsap.to(cursorRegular, { scale: 0, opacity: 0, duration: 0.2 });
-                gsap.to(cursorPoint, { scale: 1, opacity: 1, duration: 0.2 });
+                gsap.to(cursorRegular.firstElementChild, { scale: 1.5, duration: 0.3 });
             });
             el.addEventListener('mouseleave', () => {
-                gsap.to(cursorRegular, { scale: 1, opacity: 1, duration: 0.2 });
-                gsap.to(cursorPoint, { scale: 0, opacity: 0, duration: 0.2 });
+                gsap.to(cursorRegular.firstElementChild, { scale: 1, duration: 0.3 });
             });
         });
     }
@@ -752,27 +773,26 @@
     });
         
     const animateOnScroll = (selector, triggerSelector) => {
-          gsap.from(selector, {
-              opacity: 0,
-              y: 50,
-              duration: 1,
-              ease: 'power3.out',
-              stagger: 0.15,
-              scrollTrigger: {
-                  trigger: triggerSelector || selector,
-                  start: "top 85%",
-                  toggleActions: "play none none none"
-              }
-          });
+        if (prefersReducedMotion) return;
+        gsap.from(selector, {
+            opacity: 0,
+            y: 50,
+            duration: 1,
+            ease: 'power3.out',
+            stagger: 0.15,
+            scrollTrigger: {
+                trigger: triggerSelector || selector,
+                start: "top 85%",
+                toggleActions: "play none none none"
+            }
+        });
     }
-    if (!prefersReducedMotion) {
-      animateOnScroll(".about-text > *", ".about");
-      animateOnScroll(".about-img", ".about");
-      animateOnScroll(".portfolio-item", ".portfolio-grid");
-      animateOnScroll(".ai-tool-card", "#ai-tools");
-      animateOnScroll(".contact-info > *", ".contact-wrapper");
-      animateOnScroll(".contact-form-wrapper", ".contact-wrapper");
-    }
+    animateOnScroll(".about-text > *", ".about");
+    animateOnScroll(".about-img", ".about");
+    animateOnScroll(".portfolio-item", ".portfolio-grid");
+    animateOnScroll(".ai-tool-card", "#ai-tools");
+    animateOnScroll(".contact-info > *", ".contact-wrapper");
+    animateOnScroll(".contact-form-wrapper", ".contact-wrapper");
 
     // --- Navbar Scroll Effect ---
     const nav = document.querySelector('nav');
@@ -784,103 +804,49 @@
         });
     }
 
-    // --- Hero Title 3D Animation on Hover ---
-    const heroTitle = document.getElementById('hero-title');
-    if (heroTitle && !prefersReducedMotion) {
-        heroTitle.addEventListener('mouseenter', () => {
-            gsap.to(heroTitle, {
-                duration: 0.8,
-                rotationX: 10, 
-                rotationY: -8,
-                scale: 1.03,
-                ease: 'power2.out'
-            });
-        });
-
-        heroTitle.addEventListener('mouseleave', () => {
-            gsap.to(heroTitle, {
-                duration: 0.8,
-                rotationX: 0,
-                rotationY: 0,
-                scale: 1,
-                ease: 'power2.out'
-            });
-        });
-    }
-
-    // --- Scroll Lock Logic ---
-    let scrollPosition = 0;
-    const scrollManager = {
-        lock() {
-            scrollPosition = window.pageYOffset;
-            document.body.style.top = `-${scrollPosition}px`;
-            document.documentElement.classList.add('no-scroll');
-        },
-        unlock() {
-            document.documentElement.classList.remove('no-scroll');
-            document.body.style.removeProperty('top');
-            window.scrollTo(0, scrollPosition);
-        }
-    };
-
-    // =======================================================================
-    //  MODIFICACIÓN 1 · MENÚ HAMBURGUESA MÓVIL ROBUSTO
-    // =======================================================================
+    // --- Mobile Menu Logic ---
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuLinks = mobileMenu.querySelectorAll('a[href^="#"]');
 
-    gsap.set(mobileMenu, { display: 'none', autoAlpha: 0 });
+    gsap.set(mobileMenu, { autoAlpha: 0 });
+    gsap.set(mobileMenu.querySelectorAll('li'), { opacity: 0, y: 20 });
 
-    const menuTimeline = gsap.timeline({ paused: true })
-        .to(mobileMenu, { 
-            display: 'flex',
-            autoAlpha: 1, 
-            duration: 0.4, 
-            ease: 'power2.out' 
-        })
-        .from(mobileMenu.querySelectorAll('li'), {
-            opacity: 0,
-            y: 20,
-            duration: 0.4,
-            stagger: 0.08,
-            ease: 'power2.out'
-        }, "-=0.2")
-        .eventCallback("onReverseComplete", () => {
-            gsap.set(mobileMenu, { display: 'none' });
-            scrollManager.unlock(); // Desbloqueo unificado aquí
-        });
+    const menuTimeline = gsap.timeline({
+        paused: true,
+        onStart: () => scrollManager.lock(),
+        onReverseComplete: () => scrollManager.unlock()
+    })
+    .to(mobileMenu, { autoAlpha: 1, duration: 0.4, ease: 'power2.out' })
+    .to(mobileMenu.querySelectorAll('li'), {
+        opacity: 1,
+        y: 0,
+        duration: 0.4,
+        stagger: 0.08,
+        ease: 'power2.out'
+    }, "-=0.2");
 
-    function toggleMenu() {
+    menuToggle.addEventListener('click', () => {
         const isOpen = menuToggle.classList.toggle('open');
-        if (isOpen) {
-            scrollManager.lock(); // Bloqueo inmediato al abrir
-            menuTimeline.play(0); // Reproducir desde el inicio
-        } else {
-            menuTimeline.reverse(); // El desbloqueo ocurre en onReverseComplete
-        }
-    }
+        isOpen ? menuTimeline.play() : menuTimeline.reverse();
+    });
 
-    menuToggle.addEventListener('click', toggleMenu);
-
-    mobileMenu.querySelectorAll('a[href^="#"]').forEach(link => {
+    mobileMenuLinks.forEach(link => {
         link.addEventListener('click', () => {
             if (menuToggle.classList.contains('open')) {
-                toggleMenu();
+                menuToggle.classList.remove('open');
+                menuTimeline.reverse();
             }
         });
     });
 
-    // =======================================================================
-    //  MODIFICACIÓN 2 · LÓGICA DEL MODAL DE TARJETAS
-    // =======================================================================
+    // --- Service Card Modal Logic ---
     const overlayBackdrop = document.getElementById('overlay-backdrop');
     const cardModal = document.getElementById('card-modal');
     const cardModalImage = cardModal.querySelector('.card-modal-image');
     const cardModalTextContent = cardModal.querySelector('.card-modal-text-content');
     const interestSelect = document.getElementById('interest-select');
     
-    let horizontalScrollInstance = null; 
-
     function openCardModal(card) {
         const imageSrc = card.querySelector('.card-image').src;
         const fullDetailsContent = card.querySelector('.card-full-details-content').innerHTML;
@@ -888,57 +854,76 @@
         cardModalImage.src = imageSrc;
         cardModalTextContent.innerHTML = fullDetailsContent;
 
-        cardModal.classList.add('is-visible');
-        overlayBackdrop.classList.add('visible');
-        scrollManager.lock(); 
+        scrollManager.lock();
+        if (horizontalScrollInstance) horizontalScrollInstance.disable();
 
-        if (horizontalScrollInstance) {
-            horizontalScrollInstance.disable();
-        }
+        overlayBackdrop.classList.add('visible');
+        cardModal.classList.add('is-visible');
     }
 
     function closeCardModal() {
         cardModal.classList.remove('is-visible');
         overlayBackdrop.classList.remove('visible');
-        scrollManager.unlock(); 
-
-        if (horizontalScrollInstance) {
-            horizontalScrollInstance.enable();
-        }
+        
+        scrollManager.unlock();
+        if (horizontalScrollInstance) horizontalScrollInstance.enable();
     }
 
     document.querySelectorAll('.service-card-stacked').forEach(card => {
         card.addEventListener('click', e => {
-            if (e.target.closest('a[target="_blank"]') || e.target.closest('a[href="#contact"]')) {
-                if (e.target.closest('a[href="#contact"]')) {
-                    const interest = e.target.getAttribute('data-interest');
-                    if (interest && interestSelect) {
-                        interestSelect.value = interest;
-                    }
+            // Allow clicks on external links or contact links within the card
+            if (e.target.closest('a[target="_blank"]')) {
+                return;
+            }
+            if (e.target.closest('a[href="#contact"]')) {
+                const interest = e.target.getAttribute('data-interest');
+                if (interest && interestSelect) {
+                    interestSelect.value = interest;
+                    // Trigger change event for contact form logic
+                    interestSelect.dispatchEvent(new Event('change'));
                 }
+                // Allow default behavior to scroll to contact section
                 return; 
             }
-            e.preventDefault(); 
+            e.preventDefault();
             openCardModal(card);
         });
     });
-
-    // Listener de eventos unificado para el modal
-    cardModal.addEventListener('click', (e) => {
-        // Cierra si se hace clic en el botón de cerrar (X) o en el botón "Cerrar" de adentro
-        if (e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse')) {
+    
+    // Delegated event listener for closing the modal
+    cardModal.addEventListener('click', e => {
+        if (e.target.matches('.card-modal-close-btn, .btn-toggle-collapse')) {
             e.preventDefault();
             closeCardModal();
-        } 
-        // Cierra si se hace clic en el fondo oscuro
-        else if (e.target === cardModal) { 
+        }
+    });
+    
+    overlayBackdrop.addEventListener('click', closeCardModal);
+    
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && cardModal.classList.contains('is-visible')) {
             closeCardModal();
+        }
+    });
+    
+    // --- Contact Form Logic (for data-interest) ---
+    cardModal.addEventListener('click', e => {
+        if (e.target.matches('.btn-card[data-interest]')) {
+            const interest = e.target.getAttribute('data-interest');
+            if (interest && interestSelect) {
+                interestSelect.value = interest;
+                interestSelect.dispatchEvent(new Event('change'));
+            }
+            closeCardModal();
+            // Smooth scroll to contact is handled by the href="#contact"
         }
     });
 
     // --- Horizontal Scroll Animation Setup ---
     function setupHorizontalScroll() {
         const section = document.querySelector('.horizontal-scroll-section');
+        if (!section) return;
+
         const wrapper = section.querySelector('.horizontal-scroll-wrapper');
         const container = section.querySelector('.cards-container');
         const cards = gsap.utils.toArray('.service-card-stacked');
@@ -972,8 +957,7 @@
                 start: 'top top',
                 end: `+=${scrollW}`,
                 pin: wrapper,
-                pinType: ScrollTrigger.isTouch ? 'transform' : 'fixed',
-                scrub: true,
+                scrub: 1,
                 invalidateOnRefresh: true
             }
         });
@@ -1029,15 +1013,7 @@
         });
     }
 
-    // --- Initializations ---
-    initParticleAnimation();
-    setupHorizontalScroll();
-    window.addEventListener('resize', gsap.utils.debounce(() => {
-        setupHorizontalScroll();
-        ScrollTrigger.refresh(true);
-    }, 250));
-
-    // --- IA Tool Event Listeners ---
+    // --- IA Tool Event Listeners & Functions ---
     const generateDescriptionBtn = document.getElementById('generate-description-btn');
     const propertyInput = document.getElementById('property-input');
     const descriptionResult = document.getElementById('description-result');
@@ -1050,7 +1026,7 @@
     const alquilerResult = document.getElementById('alquiler-result');
     const loaderAlquiler = document.getElementById('loader-alquiler');
     
-    const IPC_API_URL = "https://datos.gob.ar/series/api/series?ids=148.3_INIVELNAL_DICI_M_26&format=json&limit=5000"; 
+    const IPC_API_URL = "https://apis.datos.gob.ar/series/api/series/?ids=148.3_INIVELNAL_DICI_M_26&limit=5000&format=json"; 
     let ipcDataCache = null;
 
     async function getIpcData() {
@@ -1060,7 +1036,7 @@
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
             ipcDataCache = data.data.reduce((acc, item) => {
-                acc[item.fecha.substring(0, 7)] = parseFloat(item.valor);
+                acc[item[0].substring(0, 7)] = item[1];
                 return acc;
             }, {});
             return ipcDataCache;
@@ -1098,33 +1074,33 @@
         let fechaActual = new Date(startYear, startMonth - 1, 1);
         let montoActual = montoOriginal;
         const hoy = new Date();
-        hoy.setDate(1);
+        hoy.setDate(1); 
 
         let ultimoMontoCalculado = montoOriginal;
-        let ultimaFechaCalculada = fechaActual;
+        let ultimaFechaCalculada = new Date(startYear, startMonth - 1, 1);
 
-        while (fechaActual < hoy) {
-            let fechaAnterior = new Date(fechaActual);
-            fechaActual.setMonth(fechaActual.getMonth() + periodo);
+        let proximoAjuste = new Date(startYear, startMonth - 1, 1);
+        proximoAjuste.setMonth(proximoAjuste.getMonth() + periodo);
 
-            if (fechaActual > hoy) break;
-
-            const fechaAnteriorStr = `${fechaAnterior.getFullYear()}-${String(fechaAnterior.getMonth() + 1).padStart(2, '0')}`;
-            const fechaActualStr = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth() + 1).padStart(2, '0')}`;
+        while (proximoAjuste <= hoy) {
+            const fechaBaseStr = `${ultimaFechaCalculada.getFullYear()}-${String(ultimaFechaCalculada.getMonth() + 1).padStart(2, '0')}`;
+            const fechaAjusteStr = `${proximoAjuste.getFullYear()}-${String(proximoAjuste.getMonth() + 1).padStart(2, '0')}`;
             
-            const ipcAnterior = ipcData[fechaAnteriorStr];
-            const ipcActual = ipcData[fechaActualStr];
+            const ipcBase = ipcData[fechaBaseStr];
+            const ipcActual = ipcData[fechaAjusteStr];
 
-            if (!ipcAnterior || !ipcActual) {
-                alquilerResult.textContent = `No se encontraron datos del IPC para el período que finaliza en ${fechaActual.toLocaleString('es-AR', { month: 'long', year: 'numeric' })}. El último valor calculado es de la fecha anterior.`;
-                alquilerResult.style.color = '#ffda6a';
-                loaderAlquiler.style.display = 'none';
-                return;
+            if (!ipcBase || !ipcActual) {
+                 alquilerResult.textContent = `No se encontraron datos del IPC para el período que finaliza en ${proximoAjuste.toLocaleString('es-AR', { month: 'long', year: 'numeric' })}. El último valor calculado es de la fecha anterior.`;
+                 alquilerResult.style.color = '#ffda6a';
+                 loaderAlquiler.style.display = 'none';
+                 return;
             }
             
-            montoActual = montoActual * (ipcActual / ipcAnterior);
+            montoActual = montoActual * (ipcActual / ipcBase);
             ultimoMontoCalculado = montoActual;
-            ultimaFechaCalculada = fechaActual;
+            ultimaFechaCalculada = new Date(proximoAjuste);
+
+            proximoAjuste.setMonth(proximoAjuste.getMonth() + periodo);
         }
         
         alquilerResult.textContent = `El alquiler actualizado a ${ultimaFechaCalculada.toLocaleString('es-AR', { month: 'long', year: 'numeric' })} sería: $${ultimoMontoCalculado.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
@@ -1136,18 +1112,14 @@
         calcularAlquilerBtn.addEventListener('click', calcularNuevoAlquiler);
     }
 
-
     async function callGeminiAPI(prompt, resultElement, loaderElement) {
         loaderElement.style.display = 'inline-block';
         resultElement.textContent = 'Generando...';
         resultElement.style.color = '#e0e0e0';
 
         const apiKey = "AIzaSyAOnRG_V-xai3kBHTSYup1nTzByKfAxpnY"; 
-
-        const payload = { 
-            contents: [{ parts: [{ text: prompt }] }] 
-        };
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const payload = { contents: [{ parts: [{ text: prompt }] }] };
 
         try {
             const response = await fetch(apiUrl, {
@@ -1159,8 +1131,9 @@
             const result = await response.json();
 
             if (!response.ok) {
+                const errorMsg = result?.error?.message || `HTTP error! status: ${response.status}`;
                 console.error("Error en la respuesta de la API:", result);
-                throw new Error(`API error: ${response.status} ${response.statusText} - ${JSON.stringify(result.error)}`);
+                throw new Error(errorMsg);
             }
 
             if (result.candidates && result.candidates.length > 0 &&
@@ -1170,12 +1143,11 @@
                 const text = result.candidates[0].content.parts[0].text;
                 resultElement.textContent = text;
             } else {
-                resultElement.textContent = 'Error: La respuesta de la IA no tiene el formato esperado.';
-                resultElement.style.color = '#ff6b6b';
                 console.error('Unexpected API response structure:', result);
+                throw new Error('La respuesta de la IA no tiene el formato esperado.');
             }
         } catch (error) {
-            resultElement.textContent = 'Error al conectar con la IA. Revisa la consola del navegador.';
+            resultElement.textContent = `Error al conectar con la IA: ${error.message}. Revisa la consola para más detalles.`;
             resultElement.style.color = '#ff6b6b';
             console.error('Error llamando a la API de Gemini:', error);
         } finally {
@@ -1185,12 +1157,46 @@
 
     if (generateDescriptionBtn) {
         generateDescriptionBtn.addEventListener('click', () => {
+            if (!propertyInput.value.trim()) {
+                descriptionResult.textContent = "Por favor, ingresá las características de la propiedad.";
+                descriptionResult.style.color = '#ffda6a';
+                return;
+            }
             const prompt = `Actúa como un copywriter inmobiliario experto. Genera una descripción profesional, atractiva y persuasiva para una propiedad con las siguientes características: ${propertyInput.value}. El tono debe ser directo, moderno y confiable, como "sin corbata". Estructura el texto con un título llamativo, un párrafo introductorio, una lista de 3-4 puntos clave (usando emojis como ✅) y un párrafo de cierre que invite a la acción.`;
             callGeminiAPI(prompt, descriptionResult, loaderDescription);
         });
     }
+    
+    // --- Contact Form conditional fields ---
+    const propertyDetailsDiv = document.getElementById('property-details');
+    if (interestSelect && propertyDetailsDiv) {
+        interestSelect.addEventListener('change', () => {
+            const selectedValue = interestSelect.value;
+            const showDetails = [
+                "Tasar mi propiedad",
+                "Vender con GringoEstate",
+                "Potenciar mi Alquiler Temporario",
+                "Gestión de Alquiler Flex y Tradicional"
+            ].includes(selectedValue);
 
-  }); // End of DOMContentLoaded
+            if (showDetails) {
+                propertyDetailsDiv.style.display = 'flex';
+            } else {
+                propertyDetailsDiv.style.display = 'none';
+            }
+        });
+    }
+
+    // --- Initializations ---
+    initParticleAnimation();
+    setupHorizontalScroll();
+    window.addEventListener('resize', gsap.utils.debounce(() => {
+        setupHorizontalScroll();
+        ScrollTrigger.refresh(true);
+    }, 250));
+    
+    /* MOD END */
+}); // End of DOMContentLoaded
   </script>
 
 </body>
