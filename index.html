@@ -192,80 +192,151 @@
     .btn-toggle-expand:hover { color: #fff; transform: translateX(5px); }
     .btn-toggle-expand::after { content: '→'; margin-left: 0.5rem; display: inline-block; transition: transform 0.3s ease; }
 
-    .card-expanded-state { 
-        position: fixed; 
-        top: 0; 
-        left: 0; 
-        width: 100%; 
-        height: 100%; 
-        z-index: 9999; /* Aumentado para asegurar que esté por encima de todo */
-        padding: 5vh 5vw; 
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-        pointer-events: none; 
-    }
-    .card-expanded-state .service-card-stacked { width: 100%; max-width: 1000px; height: 100%; max-height: 90vh; pointer-events: all; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); }
-    .card-expanded-state .card-content-initial { display: none; }
-    
-    .card-full-details { 
-        display: none; 
-        width: 100%; 
-        height: 100%; 
-        position: absolute; 
-        top: 0; 
-        left: 0; 
-        background-color: var(--card-bg); /* Asegura un fondo visible */
-        border-radius: 18px; 
-        z-index: 4; 
-        overflow: hidden; 
-    }
-    .card-expanded-state .card-full-details { display: flex; }
-    .card-full-details::before { 
-        /* Eliminado el pseudo-elemento ::before */
-        display: none;
-    }
-    .card-full-details-content { 
-        position: relative; 
-        z-index: 2; 
-        padding: 2rem; 
-        display: flex; 
-        flex-direction: column; /* Organiza los hijos verticalmente */
-        height: 100%; /* Asegura que el flexbox ocupe toda la altura */
-        justify-content: space-between; /* Empuja el h3 arriba y el resto abajo */
-        opacity: 0; 
-        transition: opacity 0.3s 0.2s; 
-        background-color: transparent; /* Fondo transparente para el contenido */
-    }
-    .card-expanded-state .card-full-details-content { opacity: 1; }
+    /* Eliminado: .card-expanded-state */
+    /* Eliminado: .card-full-details */
+    /* Eliminado: .card-full-details::before */
+    /* Eliminado: .card-full-details-content */
 
-    .card-full-details h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; }
-    .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; line-height: 1.7; }
-    .card-full-content-scroll p, .card-full-content-scroll li { color: #e0e0e0; }
-    .card-full-content-scroll h4 { font-family: 'Bebas Neue', sans-serif; font-size: 1.25rem; color: #fff; margin-top: 1.5rem; margin-bottom: 0.5rem; }
-    .card-full-content-scroll::-webkit-scrollbar { width: 8px; }
-    .card-full-content-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-    .card-full-content-scroll::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 10px; }
-    .card-full-content-scroll ul { list-style: none; padding-left: 0; margin: 1rem 0; }
-    .card-full-content-scroll ul li { margin-bottom: 0.75rem; display: flex; align-items: flex-start; gap: 0.75rem; }
-    .card-highlight { font-weight: 700; color: #fff; background-color: rgba(255, 191, 0, 0.1); padding: 0.75rem; border-left: 3px solid var(--primary); margin: 1.5rem 0; font-style: italic; }
-    .card-alert { color: #ffda6a; font-size: 0.9rem; margin-top: 1rem; border-left: 3px solid #ffda6a; padding: 0.5rem 0.75rem; background-color: rgba(255, 218, 106, 0.05); }
-    .card-footer-cta { display: flex; flex-direction: column; gap: 1rem; margin-top: auto; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); align-items: center; }
-    .btn-card { background: var(--primary); color: var(--dark); padding: 0.75rem 1.5rem; border-radius: 50px; display: inline-block; font-weight: 700; font-size: 1rem; text-align: center; transition: all .3s; width: 80%; max-width: 280px; text-decoration: none; }
-    .btn-card:hover { background: #fff; color: var(--dark); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
-    .btn-toggle-collapse { background: transparent; border: 1px solid #555; color: #aaa; border-radius: 50px; padding: 0.5rem 1rem; font-size: 1rem; margin-top: 0.5rem; transition: all .3s ease; }
-    .btn-toggle-collapse:hover { background: #555; color: #fff; }
+    /* Nueva arquitectura de modal/popup */
+    .card-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8); /* Fondo oscuro semitransparente del modal */
+        z-index: 10000; /* Asegura que esté por encima de todo */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+
+    .card-modal.is-visible {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .card-modal-content-wrapper {
+        background-color: var(--card-bg); /* Fondo de la tarjeta en el modal */
+        border-radius: 20px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+        width: 90%;
+        max-width: 1000px;
+        height: 90%;
+        max-height: 90vh;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; /* Para que el scroll interno funcione */
+    }
+
+    .card-modal-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(0.4); /* Oscurece la imagen de fondo para que el texto resalte */
+        z-index: 1;
+    }
+
+    .card-modal-text-content {
+        position: relative;
+        z-index: 2; /* Asegura que el contenido de texto esté por encima de la imagen */
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        justify-content: space-between; /* Alinea título arriba y resto abajo */
+        color: var(--text-light);
+        background-color: rgba(26, 26, 26, 0.6); /* Fondo semitransparente para el texto */
+        overflow-y: auto; /* Permite scroll si el contenido es largo */
+    }
+
+    .card-modal-text-content h3 {
+        font-family: 'Bebas Neue', sans-serif;
+        color: var(--primary);
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .card-modal-text-content .card-full-content-scroll {
+        flex-grow: 1; /* Permite que el área de scroll ocupe el espacio disponible */
+        overflow-y: auto;
+        padding-right: 15px; /* Espacio para la barra de scroll */
+        line-height: 1.7;
+    }
+
+    .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar { width: 8px; }
+    .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+    .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 10px; }
+    .card-modal-text-content .card-full-content-scroll ul { list-style: none; padding-left: 0; margin: 1rem 0; }
+    .card-modal-text-content .card-full-content-scroll ul li { margin-bottom: 0.75rem; display: flex; align-items: flex-start; gap: 0.75rem; }
+    .card-modal-text-content .card-highlight { font-weight: 700; color: #fff; background-color: rgba(255, 191, 0, 0.1); padding: 0.75rem; border-left: 3px solid var(--primary); margin: 1.5rem 0; font-style: italic; }
+    .card-modal-text-content .card-alert { color: #ffda6a; font-size: 0.9rem; margin-top: 1rem; border-left: 3px solid #ffda6a; padding: 0.5rem 0.75rem; background-color: rgba(255, 218, 106, 0.05); }
+
+    .card-modal-footer-cta {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: auto; /* Empuja el footer hacia abajo */
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        align-items: center;
+    }
+
+    .card-modal-footer-cta .btn-card {
+        background: var(--primary);
+        color: var(--dark);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        display: inline-block;
+        font-weight: 700;
+        font-size: 1rem;
+        text-align: center;
+        transition: all .3s;
+        width: 80%;
+        max-width: 280px;
+        text-decoration: none;
+    }
+    .card-modal-footer-cta .btn-card:hover { background: #fff; color: var(--dark); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
+
+
+    .card-modal-close-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 2rem;
+        cursor: pointer;
+        z-index: 3; /* Asegura que esté por encima del contenido de la tarjeta */
+        line-height: 1;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+    }
+    .card-modal-close-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
     #overlay-backdrop { 
         position: fixed; 
         inset: 0; 
         background-color: rgba(0, 0, 0, 0.7); /* Opacidad ajustada */
         z-index: 1001; 
         opacity: 0; 
+        visibility: hidden; /* Cambiado a visibility */
         pointer-events: none; 
-        transition: opacity 0.4s ease; 
+        transition: opacity 0.4s ease, visibility 0.4s ease; 
         /* Eliminado backdrop-filter */
     }
-    #overlay-backdrop.visible { opacity: 1; pointer-events: all; }
+    #overlay-backdrop.visible { opacity: 1; visibility: visible; pointer-events: all; }
 
     .content-after-sticky { background-color: var(--dark-bg); /* Asegura que las secciones posteriores cubran el hero */ position: relative; z-index: 1; }
     
@@ -422,6 +493,7 @@
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta1.webp" alt="Tasación profesional de una propiedad" class="card-image" loading="lazy">
                         </picture>
                         <div class="card-content-initial"><h3>QUIERO TASAR <span>MI PROPIEDAD</span></h3><p class="short-desc">Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><button class="btn-toggle-expand">Ver más</button></div>
+                        <!-- .card-full-details y su contenido se usarán como plantilla para el modal -->
                         <div class="card-full-details">
                             <div class="card-full-details-content">
                                 <h3>QUIERO TASAR MI PROPIEDAD</h3>
@@ -575,7 +647,7 @@
                                         </ul>
                                         <p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p>
                                     </div>
-                                    <div class="card-footer-cta"><a href="https://www.baigunryn.com/emprendimientos/" target="_blank" rel="noopener noreferrer" class="btn-card">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                                    <div class="card-footer-cta"><a href="https://www.baigunryn.com/" target="_blank" rel="noopener noreferrer" class="btn-card">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div>
                             </div>
                         </div>
                       </div>
@@ -589,23 +661,23 @@
                                 <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta7.webp" alt="GringoEstate con clientas" class="card-image" loading="lazy">
                             </picture>
                             <div class="card-content-initial"><h3>PERSONAL SHOPPER <span>INMOBILIARIO</span></h3><p class="short-desc">Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details">
-                                <div class="card-full-details-content">
-                                    <h3>PERSONAL SHOPPER INMOBILIARIO</h3>
-                                    <div class="card-full-content-scroll">
-                                        <p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p>
-                                        <ul>
-                                            <li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li>
-                                            <li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li>
-                                            <li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li>
-                                        </ul>
-                                        <p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p>
-                                        <p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta. Asesorate con profesionales y delegá lo tedioso.</p>
-                                    </div>
-                                    <div class="card-footer-cta"><a href="https://gringo.estate/" target="_blank" rel="noopener noreferrer" class="btn-card">Quiero este Servicio</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                        <div class="card-full-details">
+                            <div class="card-full-details-content">
+                                <h3>PERSONAL SHOPPER INMOBILIARIO</h3>
+                                <div class="card-full-content-scroll">
+                                    <p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p>
+                                    <ul>
+                                        <li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li>
+                                        <li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li>
+                                        <li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li>
+                                    </ul>
+                                    <p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p>
+                                    <p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta. Asesorate con profesionales y delegá lo tedioso.</p>
                                 </div>
+                                <div class="card-footer-cta"><a href="https://gringo.estate/" target="_blank" rel="noopener noreferrer" class="btn-card">Quiero este Servicio</a><button class="btn-toggle-collapse">Cerrar</button></div>
                             </div>
                         </div>
+                      </div>
                     </article>
 
                     <!-- Card 8: LOCALES COMERCIALES Y OFICINAS -->
@@ -637,7 +709,7 @@
                 </div>
             </div>
         </div>
-        <div class="card-expanded-state"></div>
+        <!-- Eliminado: <div class="card-expanded-state"></div> -->
     </section>
     
     <div class="content-after-sticky">
@@ -764,6 +836,17 @@
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width:28px; height:28px; fill:white;"><path d="M380.9 97.1C339.4 55.6 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.8 0-67.6-9.5-97.8-26.7l-7-4.1-72.5 19 19.3-71.1-4.5-7.4c-18.3-30.7-27.9-66.2-27.9-102.3 0-108.6 88.4-197 197-197s197 88.4 197 197-88.4 197-197 197zm83.7-118.2c-3.7-1.9-22.1-10.9-25.6-12.1-3.4-1.2-5.9-1.9-8.4 1.9-2.5 3.7-9.7 12.1-11.9 14.5-2.2 2.5-4.5 2.8-8.2 1-3.7-1.9-15.7-5.8-30-18.5-11.1-9.6-18.7-21.6-20.9-25.3-2.2-3.7-0.2-5.9 1.7-7.7 1.7-1.5 3.7-3.7 5.5-5.5 1.8-1.8 2.5-3.7 3.7-6.2 1.2-2.5 0.6-4.8-0.3-6.7-0.9-1.9-8.4-20.1-11.5-27.5-3.1-7.4-6.2-6.3-8.4-6.3-2.2 0-4.8 0-7.4 0-2.5 0-6.7 1.2-10.3 5.9-3.7 4.8-14.1 13.8-14.1 33.5 0 19.8 14.4 38.9 16.4 41.4 2 2.5 28.2 42.8 68.2 60.1 9.7 4.1 17.3 6.6 23.1 8.8 13.3 5.1 25.6 4.3 35.1 2.6 10.8-1.9 22.1-9 25.2-17.6 3.1-8.6 3.1-16 2.2-17.6-0.9-1.5-3.4-2.5-7.1-4.5z"/></svg>
   </a>
 
+  <!-- Nuevo div para la estructura del modal -->
+  <div id="card-modal" class="card-modal">
+    <div class="card-modal-content-wrapper">
+      <button class="card-modal-close-btn">&times;</button>
+      <img src="" alt="Imagen de fondo de la tarjeta" class="card-modal-image">
+      <div class="card-modal-text-content">
+        <!-- El contenido se inyectará aquí dinámicamente -->
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Flip.min.js"></script>
@@ -853,9 +936,12 @@
     }
 
     const cardsContainer = document.querySelector('.cards-container');
-    const expandedCardContainer = document.querySelector('.card-expanded-state');
     const overlayBackdrop = document.getElementById('overlay-backdrop');
-    let activeCard = null;
+    const cardModal = document.getElementById('card-modal');
+    const cardModalImage = cardModal.querySelector('.card-modal-image');
+    const cardModalTextContent = cardModal.querySelector('.card-modal-text-content');
+    const cardModalCloseBtn = cardModal.querySelector('.card-modal-close-btn');
+
     let horizontalScrollTween = null;
 
     const scrollManager = {
@@ -879,72 +965,41 @@
         }
     };
 
-    function expandCard(card) {
-        if (activeCard) return;
-        activeCard = card;
-        
+    function openCardModal(card) {
+        // Obtener el contenido de la tarjeta clicada
         const imageSrc = card.querySelector('.card-image').src;
-        // No longer setting --bg-image as background image is removed from ::before
-        // card.querySelector('.card-full-details').style.setProperty('--bg-image', `url(${imageSrc})`);
+        const fullDetailsContent = card.querySelector('.card-full-details-content').innerHTML;
 
-        const state = Flip.getState(card);
-        expandedCardContainer.appendChild(card);
+        // Inyectar el contenido en el modal
+        cardModalImage.src = imageSrc;
+        cardModalTextContent.innerHTML = fullDetailsContent;
+
+        // Mostrar el modal
+        cardModal.classList.add('is-visible');
         overlayBackdrop.classList.add('visible');
         scrollManager.lock();
-        if (horizontalScrollTween) horizontalScrollTween.disable(); // Usar .disable() en lugar de .scrollTrigger.disable()
-
-        Flip.from(state, {
-            duration: 0.5,
-            ease: "power3.inOut",
-            absolute: true,
-            onStart: () => expandedCardContainer.classList.add('visible'),
-            onComplete: () => gsap.set(card.querySelector('.card-full-content-scroll'), { overflowY: 'auto' })
-        });
+        if (horizontalScrollTween) horizontalScrollTween.disable();
     }
 
-    function collapseCard() {
-        if (!activeCard) return;
-        const cardToCollapse = activeCard;
-        
-        gsap.set(cardToCollapse.querySelector('.card-full-content-scroll'), { overflowY: 'hidden' });
-        const state = Flip.getState(cardToCollapse, {props: "box-shadow, border-radius"});
-        
-        const originalPlaceholder = document.querySelector(`.card-placeholder[data-card-id="${cardToCollapse.dataset.cardId}"]`);
-        originalPlaceholder.parentElement.insertBefore(cardToCollapse, originalPlaceholder);
-        
+    function closeCardModal() {
+        cardModal.classList.remove('is-visible');
         overlayBackdrop.classList.remove('visible');
-        
-        Flip.from(state, {
-            duration: 0.5,
-            ease: "power3.inOut",
-            absolute: true,
-            onStart: () => expandedCardContainer.classList.remove('visible'),
-            onComplete: () => {
-                activeCard = null;
-                scrollManager.unlock();
-                if (horizontalScrollTween) horizontalScrollTween.enable(); // Usar .enable() en lugar de .scrollTrigger.enable()
-            }
-        });
+        scrollManager.unlock();
+        if (horizontalScrollTween) horizontalScrollTween.enable();
     }
 
     document.querySelectorAll('.service-card-stacked').forEach(card => {
-        const placeholder = document.createElement('div');
-        placeholder.className = 'card-placeholder';
-        placeholder.style.display = 'none';
-        placeholder.dataset.cardId = card.dataset.cardId;
-        card.parentElement.insertBefore(placeholder, card);
-
         card.addEventListener('click', e => {
-            if (e.target.closest('.btn-toggle-collapse, .btn-card, a')) return;
-            if (!activeCard) expandCard(card);
-        });
-        card.querySelector('.btn-toggle-collapse').addEventListener('click', e => {
-            e.stopPropagation();
-            collapseCard();
+            if (e.target.closest('.btn-toggle-expand')) { // Solo expandir si se hace clic en el botón "Ver más"
+                e.stopPropagation(); // Evita que el clic se propague a otros elementos
+                openCardModal(card);
+            }
         });
     });
 
-    overlayBackdrop.addEventListener('click', collapseCard);
+    cardModalCloseBtn.addEventListener('click', closeCardModal);
+    overlayBackdrop.addEventListener('click', closeCardModal);
+
 
     function setupHorizontalScroll() {
         if (horizontalScrollTween) {
@@ -1089,9 +1144,7 @@
     initParticleAnimation();
     setupHorizontalScroll();
     window.addEventListener('resize', gsap.utils.debounce(() => {
-        if (activeCard) {
-            collapseCard();
-        }
+        // No es necesario llamar a collapseCard aquí, ya que el modal se gestiona por separado
         setupHorizontalScroll();
         ScrollTrigger.refresh(true);
     }, 250));
