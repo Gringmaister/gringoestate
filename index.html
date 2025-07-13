@@ -15,11 +15,10 @@
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp">
 
   <!-- Open Graph -->
-  <!-- Punto 4: Imagen para compartir en redes actualizada -->
   <meta property="og:title" content="GringoEstate – Real Estate sin corbata">
   <meta property="og:description" content="Transformamos el Real Estate con soluciones innovadoras.">
+  <!-- Punto 4: Imagen para preview en redes sociales -->
   <meta property="og:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp">
-  <!-- Para un resultado óptimo, se recomienda crear una imagen de 1200x630px que combine este fondo con el logo y subirla al servidor. -->
   <meta property="og:url" content="https://www.gringo.estate">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_AR">
@@ -28,6 +27,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="GringoEstate – Real Estate sin corbata">
   <meta name="twitter:description" content="Transformamos el Real Estate con soluciones innovadoras.">
+  <!-- Punto 4: Imagen para preview en redes sociales -->
   <meta name="twitter:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp">
   
   <!-- Preconnect a Google Fonts -->
@@ -108,9 +108,9 @@
     .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem;}
     .hero > * { opacity: 0; }
     .hero .isologo{ width: 120px; height: auto; margin: 0 auto 1rem auto; display: block; }
-    .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem; perspective: 400px;}
-    .hero h1 .char { display: inline-block; } /* Para animar letras del H1 */
+    .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem; perspective: 800px; transform-style: preserve-3d;}
     .hero h1 span{color:var(--primary); letter-spacing: 2px;}
+    .hero h1 .char { display: inline-block; } /* Para animación de letras del H1 */
     .hero p{font-size:1.5rem;color:#e2e8f0;margin-bottom:2rem;line-height:1.4;font-family:'Bebas Neue', sans-serif; letter-spacing:1px;}
     .btn-primary{background:var(--primary);color:var(--dark);padding:.75rem 2rem;border-radius:50px;display:inline-block;transition: background-color .3s, color .3s, box-shadow .3s;font-weight:700;font-size:1.1rem;letter-spacing:1px; border: none; text-decoration: none;}
     .btn-primary:hover{background:#fff;color:var(--dark);transform:translateY(-3px) !important;box-shadow:0 10px 20px rgba(0,0,0,0.2);}
@@ -118,12 +118,12 @@
     nav{position:fixed;top:0;left:0;width:100%;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;z-index:1000;transition: background-color .4s, padding .4s, backdrop-filter .4s; border-bottom: 1px solid rgba(255,255,255,0.1);}
     nav.nav-scrolled { background:rgba(0,0,0,.8); backdrop-filter:blur(8px); padding: 0.75rem 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);}
     
-    nav a.logo { display: inline-block; white-space: nowrap; font-family:'Bebas Neue', sans-serif;font-weight:700;letter-spacing:1px;font-size:1.5rem;color:#fff; text-decoration: none;}
+    nav a.logo { display: inline-block; white-space: nowrap; font-family:'Bebas Neue', sans-serif;font-weight:700;letter-spacing:1px;font-size:1.5rem;color:#fff; text-decoration: none; }
     nav a.logo span {color: var(--primary);}
     
     nav ul{list-style:none;font-weight:700; padding-left: 0; margin: 0;}
     
-    /* Punto 4 (versión web) y 6: Fondo del menú móvil */
+    /* Punto 5: Fondo del Menú Móvil */
     nav .nav-links-mobile { 
       visibility: hidden; 
       position: fixed; 
@@ -157,8 +157,11 @@
     .menu-button.open .bar3 {transform: rotate(-45deg) translate(5px, -6px);}
 
     main { display: block; background-color: transparent; }
+    /* Punto 11: Extensión del Fondo de Partículas */
     section{padding:4.5rem 1.5rem;max-width:1200px;margin: 0 auto; background-color: transparent; position: relative; z-index: 1;}
     
+    #about { background-color: var(--dark-bg); } /* Fondo negro sólido para esta sección */
+
     .section-full-width { max-width: none; padding-left: 0; padding-right: 0; }
 
     h2.section-title{font-family:'Bebas Neue', sans-serif;letter-spacing:1.5px;font-size:3rem;font-weight:700;margin-bottom:2rem;text-align:center; padding: 0 1.5rem;}
@@ -181,11 +184,13 @@
     .cards-container { display: flex; gap: clamp(2rem, 5vw, 4rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; }
     
     .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; will-change: transform, opacity; transition: transform 0.4s ease, box-shadow 0.4s ease; }
+    
+    /* Punto 7: Animación de "Iluminación" al Pasar el Cursor */
     .service-card-stacked:hover {
         transform: translateY(-10px) scale(1.03);
         box-shadow: 0px 10px 40px 5px rgba(255, 191, 0, 0.6);
     }
-    
+
     .service-card-stacked::before { 
       content: ''; 
       position: absolute; 
@@ -293,7 +298,7 @@
         line-height: 1.7;
         margin-bottom: 1rem;
     }
-    /* Punto 9: Barra de scroll amarilla */
+    /* Punto 10: Color de Barra de Scroll en Modal (Móvil) */
     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar { width: 8px; }
     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 10px; }
@@ -319,7 +324,7 @@
     #overlay-backdrop { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.7); z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.4s ease, visibility 0s 0.4s; }
     #overlay-backdrop.visible { opacity: 1; visibility: visible; transition: opacity 0.4s ease; }
 
-    /* Punto 10: Extender fondo de partículas */
+    /* Punto 11: Extensión del Fondo de Partículas */
     .content-after-sticky { background-color: transparent; position: relative; z-index: 1; }
     
     #portfolio .section-title { color: #fff; }
@@ -369,7 +374,7 @@
     .whatsapp-float:hover { transform: scale(1.1); animation: none; }
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); } 70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); } }
 
-    footer{background: var(--dark-bg); color:#94a3b8;padding:3rem 1.5rem;text-align:center;font-size:1rem; position: relative; z-index: 1;}
+    footer{background: transparent; color:#94a3b8;padding:3rem 1.5rem;text-align:center;font-size:1rem; position: relative; z-index: 1;}
     footer p { margin: 0; }
     footer a{color: var(--primary); opacity: 0.8; transition: opacity .3s; text-decoration: none;}
     footer a:hover{opacity: 1;}
@@ -395,14 +400,14 @@
   </style>
 </head>
 <body>
-  <div id="particle-canvas"></div>
+  <canvas id="particle-canvas"></canvas>
   <div id="cursor-regular" class="custom-cursor"><div class="cursor-dot"></div></div>
   <div id="cursor-point" class="custom-cursor"><div class="cursor-point"></div></div>
 
   <div id="overlay-backdrop"></div>
   
   <nav>
-    <!-- Punto 1: Logo de navegación estático -->
+    <!-- Punto 1: Título de Navegación (Logo) estático -->
     <a class="logo" href="#top">GRINGO<span>ESTATE</span></a>
     <div class="nav-links-desktop">
       <ul>
@@ -471,22 +476,8 @@
                             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta1.webp" type="image/webp">
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta1.webp" alt="Tasación profesional de una propiedad" class="card-image" loading="lazy">
                         </picture>
-                        <div class="card-content-initial"><h3>QUIERO TASAR <span>MI PROPIEDAD</span></h3><p class="short-desc">Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details">
-                            <div class="card-full-details-content">
-                                <h3>QUIERO TASAR MI PROPIEDAD</h3>
-                                <div class="card-full-content-scroll">
-                                    <p>Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p>
-                                    <ul>
-                                        <li>✅ En 48 horas hábiles.</li>
-                                        <li>✅ Se entrega una carpeta formal con análisis de mercado.</li>
-                                        <li>✅ Documentación respaldatoria clara.</li>
-                                    </ul>
-                                    <p class="card-highlight">El punto de partida para con información poder tomar la mejor decisión.</p>
-                                </div>
-                                <div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Solicitar Tasación</a><button class="btn-toggle-collapse">Cerrar</button></div>
-                            </div>
-                        </div>
+                        <div class="card-content-initial"><h3>QUIERO TASAR <span>MI PROPIEDAD</span></h3><p class="short-desc">Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><!-- Punto 6: Restaurar Indicador Visual "Ver más" --><button class="btn-toggle-expand">Ver más</button></div>
+                        <div class="card-full-details"><div class="card-full-details-content"><h3>QUIERO TASAR MI PROPIEDAD</h3><div class="card-full-content-scroll"><p>Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><ul><li>✅ En 48 horas hábiles.</li><li>✅ Se entrega una carpeta formal con análisis de mercado.</li><li>✅ Documentación respaldatoria clara.</li></ul><p class="card-highlight">El punto de partida para con información poder tomar la mejor decisión.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Solicitar Tasación</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                       </div>
                     </article>
 
@@ -496,24 +487,8 @@
                             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta2.webp" type="image/webp">
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta2.webp" alt="Vender una propiedad con GringoEstate" class="card-image" loading="lazy">
                         </picture>
-                        <div class="card-content-initial"><h3>¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3><p class="short-desc">Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details">
-                            <div class="card-full-details-content">
-                                <h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3>
-                                <div class="card-full-content-scroll">
-                                    <p>Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p>
-                                    <h4>Nuestra estrategia 360° incluye:</h4>
-                                    <ul>
-                                        <li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li>
-                                        <li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li>
-                                        <li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li>
-                                        <li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li>
-                                    </ul>
-                                    <p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p>
-                                </div>
-                                <div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Quiero Vender</a><button class="btn-toggle-collapse">Cerrar</button></div>
-                            </div>
-                        </div>
+                        <div class="card-content-initial"><h3>¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3><p class="short-desc">Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><!-- Punto 6: Restaurar Indicador Visual "Ver más" --><button class="btn-toggle-expand">Ver más</button></div>
+                        <div class="card-full-details"><div class="card-full-details-content"><h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3><div class="card-full-content-scroll"><p>Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><h4>Nuestra estrategia 360° incluye:</h4><ul><li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li><li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li><li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li><li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li></ul><p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p></div><!-- Punto 8: Consolidación de CTA --><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Tasar mi propiedad</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                       </div>
                     </article>
 
@@ -523,25 +498,8 @@
                             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta3.webp" type="image/webp">
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta3.webp" alt="Interior de un apartamento de alquiler temporario" class="card-image" loading="lazy">
                         </picture>
-                        <div class="card-content-initial"><h3>POTENCIÁ TU <span>ALQUILER TEMPORARIO</span></h3><p class="short-desc">Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details">
-                            <div class="card-full-details-content">
-                                <h3>POTENCIÁ TU ALQUILER TEMPORARIO</h3>
-                                <div class="card-full-content-scroll">
-                                    <p>Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p>
-                                    <h4>Nuestro servicio "llave en mano" incluye:</h4>
-                                    <ul>
-                                        <li>✅ Asesoría de home staging gratuita y puesta a punto.</li>
-                                        <li>✅ Ejecución de amoblamiento a través de nuestro equipo de arquitectura y red de proveedores.</li>
-                                        <li>✅ Publicación profesional en todas las plataformas para un máximo impacto.</li>
-                                        <li>✅ Gestión integral (sistemas, anfitrión, limpieza) para maximizar tus ingresos y darte tranquilidad.</li>
-                                    </ul>
-                                    <p class="card-alert">⚠️ Únicamente tomamos propiedades modernas con opción de self check-in. Para otras unidades, ofrecemos nuestro servicio de alquiler flex o tradicional.</p>
-                                    <p class="card-highlight">Delegá la gestión, disfrutá los resultados.</p>
-                                </div>
-                                <div class="card-footer-cta"><a href="https://www.ambbi.com.ar/" target="_blank" rel="noopener noreferrer" class="btn-card">Conocer AMBBI</a><button class="btn-toggle-collapse">Cerrar</button></div>
-                            </div>
-                        </div>
+                        <div class="card-content-initial"><h3>POTENCIÁ TU <span>ALQUILER TEMPORARIO</span></h3><p class="short-desc">Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><!-- Punto 6: Restaurar Indicador Visual "Ver más" --><button class="btn-toggle-expand">Ver más</button></div>
+                        <div class="card-full-details"><div class="card-full-details-content"><h3>POTENCIÁ TU ALQUILER TEMPORARIO</h3><div class="card-full-content-scroll"><p>Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><h4>Nuestro servicio "llave en mano" incluye:</h4><ul><li>✅ Asesoría de home staging gratuita y puesta a punto.</li><li>✅ Ejecución de amoblamiento a través de nuestro equipo de arquitectura y red de proveedores.</li><li>✅ Publicación profesional en todas las plataformas para un máximo impacto.</li><li>✅ Gestión integral (sistemas, anfitrión, limpieza) para maximizar tus ingresos y darte tranquilidad.</li></ul><p class="card-alert">⚠️ Únicamente tomamos propiedades modernas con opción de self check-in. Para otras unidades, ofrecemos nuestro servicio de alquiler flex o tradicional.</p><p class="card-highlight">Delegá la gestión, disfrutá los resultados.</p></div><div class="card-footer-cta"><a href="https://www.ambbi.com.ar/" target="_blank" rel="noopener noreferrer" class="btn-card">Conocer AMBBI</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                       </div>
                     </article>
                     
@@ -551,29 +509,8 @@
                             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta4.webp" type="image/webp">
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta4.webp" alt="Llaves de una propiedad siendo entregadas" class="card-image" loading="lazy">
                         </picture>
-                        <div class="card-content-initial"><h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3><p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details">
-                            <div class="card-full-details-content">
-                                <h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3>
-                                <div class="card-full-content-scroll">
-                                    <p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p>
-                                    <h4>Alquiler Flex (1 a 12 meses):</h4>
-                                    <ul>
-                                        <li>✅ Ideal para propiedades amobladas.</li>
-                                        <li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li>
-                                        <li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li>
-                                        <li>✅ Administración integral de pagos y seguimiento del contrato.</li>
-                                    </ul>
-                                    <h4>Alquiler Tradicional (2 años):</h4>
-                                    <ul>
-                                        <li>✅ La opción clásica para una renta estable y predecible.</li>
-                                        <li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li>
-                                    </ul>
-                                    <p class="card-highlight">Tu propiedad, en buenas manos.</p>
-                                </div>
-                                <div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Gestión de Alquiler Flex y Tradicional">Consultar por Gestión</a><button class="btn-toggle-collapse">Cerrar</button></div>
-                            </div>
-                        </div>
+                        <div class="card-content-initial"><h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3><p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><!-- Punto 6: Restaurar Indicador Visual "Ver más" --><button class="btn-toggle-expand">Ver más</button></div>
+                        <div class="card-full-details"><div class="card-full-details-content"><h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3><div class="card-full-content-scroll"><p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><h4>Alquiler Flex (1 a 12 meses):</h4><ul><li>✅ Ideal para propiedades amobladas.</li><li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li><li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li><li>✅ Administración integral de pagos y seguimiento del contrato.</li></ul><h4>Alquiler Tradicional (2 años):</h4><ul><li>✅ La opción clásica para una renta estable y predecible.</li><li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li></ul><p class="card-highlight">Tu propiedad, en buenas manos.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Gestión de Alquiler Flex y Tradicional">Consultar por Gestión</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                       </div>
                     </article>
 
@@ -583,22 +520,8 @@
                             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta5.webp" type="image/webp">
                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta5.webp" alt="Render de un edificio en construcción" class="card-image" loading="lazy">
                         </picture>
-                        <div class="card-content-initial"><h3>INVERTÍ <span>DESDE POZO</span></h3><p class="short-desc">Accedé a una cartera única de +26 emprendimientos en exclusiva y oportunidades off-market.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details">
-                            <div class="card-full-details-content">
-                                <h3>INVERTÍ DESDE POZO</h3>
-                                <div class="card-full-content-scroll">
-                                    <p>Accedé a una cartera única de +26 emprendimientos en exclusiva y oportunidades off-market.</p>
-                                    <ul>
-                                        <li>✅ +26 desarrollos en exclusiva que no encontrarás en otro lado.</li>
-                                        <li>✅ Análisis de ROI y proyecciones claras para una decisión informada.</li>
-                                        <li>✅ Acompañamiento en todo el proceso, desde la firma hasta la entrega.</li>
-                                    </ul>
-                                    <p class="card-highlight">Invertí de forma inteligente en los mejores proyectos de la ciudad.</p>
-                                </div>
-                                <div class="card-footer-cta"><a href="https://www.baigunryn.com/emprendimientos/" target="_blank" rel="noopener noreferrer" class="btn-card">Ver Oportunidades</a><button class="btn-toggle-collapse">Cerrar</button></div>
-                            </div>
-                        </div>
+                        <div class="card-content-initial"><h3>INVERTÍ <span>DESDE POZO</span></h3><p class="short-desc">Accedé a una cartera única de +26 emprendimientos en exclusiva y oportunidades off-market.</p><!-- Punto 6: Restaurar Indicador Visual "Ver más" --><button class="btn-toggle-expand">Ver más</button></div>
+                        <div class="card-full-details"><div class="card-full-details-content"><h3>INVERTÍ DESDE POZO</h3><div class="card-full-content-scroll"><p>Accedé a una cartera única de +26 emprendimientos en exclusiva y oportunidades off-market.</p><ul><li>✅ +26 desarrollos en exclusiva que no encontrarás en otro lado.</li><li>✅ Análisis de ROI y proyecciones claras para una decisión informada.</li><li>✅ Acompañamiento en todo el proceso, desde la firma hasta la entrega.</li></ul><p class="card-highlight">Invertí de forma inteligente en los mejores proyectos de la ciudad.</p></div><div class="card-footer-cta"><a href="https://www.baigunryn.com/emprendimientos/" target="_blank" rel="noopener noreferrer" class="btn-card">Ver Oportunidades</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                       </div>
                     </article>
 
@@ -608,22 +531,8 @@
                                 <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" type="image/webp">
                                 <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" alt="Un desarrollador revisando planos en una obra" class="card-image" loading="lazy">
                             </picture>
-                            <div class="card-content-initial"><h3>¿SOS <span>DESARROLLADOR?</span></h3><p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details">
-                                <div class="card-full-details-content">
-                                    <h3>¿SOS DESARROLLADOR?</h3>
-                                    <div class="card-full-content-scroll">
-                                        <p>Una alianza estratégica, no una inmobiliaria más.</p>
-                                        <ul>
-                                            <li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li>
-                                            <li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li>
-                                            <li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li>
-                                        </ul>
-                                        <p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p>
-                                    </div>
-                                    <div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Asesoría para Desarrolladores">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div>
-                                </div>
-                            </div>
+                            <div class="card-content-initial"><h3>¿SOS <span>DESARROLLADOR?</span></h3><p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p><!-- Punto 6: Restaurar Indicador Visual "Ver más" --><button class="btn-toggle-expand">Ver más</button></div>
+                            <div class="card-full-details"><div class="card-full-details-content"><h3>¿SOS DESARROLLADOR?</h3><div class="card-full-content-scroll"><p>Una alianza estratégica, no una inmobiliaria más.</p><ul><li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li><li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li><li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li></ul><p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Asesoría para Desarrolladores">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                         </div>
                     </article>
                     
@@ -633,23 +542,8 @@
                                 <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta7.webp" type="image/webp">
                                 <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta7.webp" alt="GringoEstate con clientas" class="card-image" loading="lazy">
                             </picture>
-                            <div class="card-content-initial"><h3>PERSONAL SHOPPER <span>INMOBILIARIO</span></h3><p class="short-desc">Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details">
-                                <div class="card-full-details-content">
-                                    <h3>PERSONAL SHOPPER INMOBILIARIO</h3>
-                                    <div class="card-full-content-scroll">
-                                        <p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p>
-                                        <ul>
-                                            <li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li>
-                                            <li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li>
-                                            <li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li>
-                                        </ul>
-                                        <p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p>
-                                        <p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta. Asesorate con profesionales y delegá lo tedioso.</p>
-                                    </div>
-                                    <div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Personal Shopper Inmobiliario">Quiero este Servicio</a><button class="btn-toggle-collapse">Cerrar</button></div>
-                                </div>
-                            </div>
+                            <div class="card-content-initial"><h3>PERSONAL SHOPPER <span>INMOBILIARIO</span></h3><p class="short-desc">Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><!-- Punto 6: Restaurar Indicador Visual "Ver más" --><button class="btn-toggle-expand">Ver más</button></div>
+                            <div class="card-full-details"><div class="card-full-details-content"><h3>PERSONAL SHOPPER INMOBILIARIO</h3><div class="card-full-content-scroll"><p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><ul><li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li><li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li><li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li></ul><p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p><p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta. Asesorate con profesionales y delegá lo tedioso.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Personal Shopper Inmobiliario">Quiero este Servicio</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                         </div>
                     </article>
 
@@ -659,22 +553,8 @@
                                 <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta8.webp" type="image/webp">
                                 <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta8.webp" alt="Local comercial de GringoEstate" class="card-image" loading="lazy">
                             </picture>
-                            <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details">
-                                <div class="card-full-details-content">
-                                    <h3>LOCALES COMERCIALES Y OFICINAS</h3>
-                                    <div class="card-full-content-scroll">
-                                        <p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p>
-                                        <ul>
-                                            <li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li>
-                                            <li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li>
-                                            <li>✅ Asesoramiento integral en contratos comerciales y negociación.</li>
-                                        </ul>
-                                        <p class="card-highlight">Llevá tu negocio al siguiente nivel.</p>
-                                    </div>
-                                    <div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Locales Comerciales y Oficinas">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div>
-                                </div>
-                            </div>
+                            <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><!-- Punto 6: Restaurar Indicador Visual "Ver más" --><button class="btn-toggle-expand">Ver más</button></div>
+                            <div class="card-full-details"><div class="card-full-details-content"><h3>LOCALES COMERCIALES Y OFICINAS</h3><div class="card-full-content-scroll"><p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><ul><li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li><li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li><li>✅ Asesoramiento integral en contratos comerciales y negociación.</li></ul><p class="card-highlight">Llevá tu negocio al siguiente nivel.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Locales Comerciales y Oficinas">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                         </div>
                     </article>
 
@@ -769,8 +649,8 @@
                         <input type="tel" name="phone" placeholder="Tu Celular" required>
                         <select name="interest" id="interest-select" required>
                             <option value="" disabled selected>Estoy interesado/a en...</option>
+                            <!-- Punto 8: Consolidación de Formularios -->
                             <option value="Tasar mi propiedad">Tasar mi propiedad</option>
-                            <!-- Punto 8: Opción "Vender" eliminada -->
                             <option value="Potenciar mi Alquiler Temporario">Potenciar mi Alquiler Temporario</option>
                             <option value="Gestión de Alquiler Flex y Tradicional">Gestión de Alquiler Flex y Tradicional</option>
                             <option value="Invertir desde pozo">Invertir desde pozo</option>
@@ -826,7 +706,7 @@
 
     gsap.registerPlugin(ScrollTrigger, Flip);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    
+
     if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
         const cursorRegular = document.getElementById('cursor-regular');
         const cursorPoint = document.getElementById('cursor-point');
@@ -838,6 +718,7 @@
 
     if (!prefersReducedMotion) {
         gsap.set(".hero-el", {y: 30});
+        // Punto 3: Isologo Faltante en Versión Web (Bug Crítico)
         gsap.to(".hero-el", { 
             opacity: 1, 
             y: 0, 
@@ -845,7 +726,6 @@
             stagger: 0.2, 
             ease: "power3.out", 
             delay: 0.2,
-            // Punto 3: Callback para asegurar que el isologo sea visible
             onComplete: () => {
                 gsap.set('.hero .isologo', { autoAlpha: 1 });
             }
@@ -882,37 +762,34 @@
         });
     }
 
-    // Punto 2: Animación del Título Principal
+    // Punto 2: Animación en Título Principal (Hero)
     const heroTitle = document.querySelector('.hero h1');
     if (heroTitle && !prefersReducedMotion) {
-        const text = heroTitle.textContent;
-        heroTitle.innerHTML = text.split('').map(char => `<span class="char">${char}</span>`).join('');
+        const text = heroTitle.textContent.trim();
+        const splitText = text.split('').map(char => `<span class="char">${char === ' ' ? '&nbsp;' : char}</span>`).join('');
+        heroTitle.innerHTML = splitText.replace("GRINGOESTATE", `GRINGO<span>ESTATE</span>`);
         const chars = heroTitle.querySelectorAll('.char');
 
         heroTitle.addEventListener('mouseenter', () => {
             gsap.to(chars, {
                 duration: 0.5,
-                opacity: 0.7,
                 rotationX: 360,
-                rotationY: () => Math.random() * 360 - 180,
-                scale: 0.9,
+                color: '#FFBF00',
                 stagger: 0.03,
-                ease: 'power2.out',
+                ease: 'power2.out'
             });
         });
+
         heroTitle.addEventListener('mouseleave', () => {
             gsap.to(chars, {
                 duration: 0.5,
-                opacity: 1,
                 rotationX: 0,
-                rotationY: 0,
-                scale: 1,
+                color: '#ffffff',
                 stagger: 0.03,
-                ease: 'power2.out',
+                ease: 'power2.out'
             });
         });
     }
-
 
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
@@ -954,6 +831,28 @@
     
     let horizontalScrollTween = null;
 
+    const scrollManager = {
+        lockCount: 0,
+        lock() { 
+            if (this.lockCount === 0) {
+                scrollPosition = window.pageYOffset;
+                document.body.style.top = `-${scrollPosition}px`;
+                document.body.classList.add('no-scroll');
+            }
+            this.lockCount++;
+        },
+        // Punto 9: Cierre del Modal sin Saltar al Inicio
+        unlock() { 
+            this.lockCount--;
+            if (this.lockCount <= 0) {
+                this.lockCount = 0;
+                document.body.classList.remove('no-scroll');
+                document.body.style.removeProperty('top');
+                // Se elimina la línea window.scrollTo(0, scrollPosition); para evitar el salto.
+            }
+        }
+    };
+
     function openCardModal(card) {
         const imageSrc = card.querySelector('.card-image').src;
         const fullDetailsContent = card.querySelector('.card-full-details-content').innerHTML;
@@ -963,29 +862,30 @@
 
         cardModal.classList.add('is-visible');
         overlayBackdrop.classList.add('visible');
-        
-        scrollPosition = window.pageYOffset;
-        document.body.style.top = `-${scrollPosition}px`;
-        document.body.classList.add('no-scroll');
-
+        scrollManager.lock();
         if (horizontalScrollTween) horizontalScrollTween.scrollTrigger.disable();
     }
 
     function closeCardModal() {
         cardModal.classList.remove('is-visible');
         overlayBackdrop.classList.remove('visible');
-        
-        // Punto 8: No saltar al inicio de la página al cerrar
-        document.body.classList.remove('no-scroll');
-        document.body.style.removeProperty('top');
-        window.scrollTo(0, scrollPosition);
-        
+        scrollManager.unlock();
         if (horizontalScrollTween) horizontalScrollTween.scrollTrigger.enable();
     }
 
     document.querySelectorAll('.service-card-stacked').forEach(card => {
         card.addEventListener('click', e => {
+            // No abrir modal si se hace clic en un enlace externo
             if (e.target.closest('a[target="_blank"]')) {
+                return;
+            }
+            // No abrir modal si se hace clic en un botón que lleva a #contact
+            if (e.target.closest('a[href="#contact"]')) {
+                const interest = e.target.getAttribute('data-interest');
+                if (interest && interestSelect) {
+                    interestSelect.value = interest;
+                    interestSelect.dispatchEvent(new Event('change'));
+                }
                 return;
             }
             e.preventDefault();
@@ -994,21 +894,18 @@
     });
 
     cardModal.addEventListener('click', (e) => {
-        if (e.target.closest('.btn-card[data-interest]')) {
-             // Punto 7: Redirección de botones a formulario
-            const interestValue = e.target.closest('.btn-card[data-interest]').dataset.interest;
-            const interestSelect = document.getElementById('interest-select');
-            if(interestSelect) {
-                interestSelect.value = interestValue;
+        if (e.target.closest('a[href="#contact"]')) {
+            const interest = e.target.getAttribute('data-interest');
+            if (interest && interestSelect) {
+                interestSelect.value = interest;
                 interestSelect.dispatchEvent(new Event('change'));
             }
             closeCardModal();
-            // El href="#contact" se encarga del scroll
+            // No es necesario un return, el enlace ya tiene el href
         } else if (e.target === cardModal || e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse')) {
             closeCardModal();
         }
     });
-
 
     function setupHorizontalScroll() {
         if (horizontalScrollTween) {
@@ -1080,6 +977,7 @@
     const propertyDetails = document.getElementById('property-details');
     if (interestSelect && propertyDetails) {
         interestSelect.addEventListener('change', function() {
+            // Se muestran los detalles si el interés es "Tasar mi propiedad"
             const show = this.value === 'Tasar mi propiedad';
             gsap.to(propertyDetails, {
                 height: show ? 'auto' : 0,
@@ -1176,7 +1074,7 @@
             let chatHistory = [];
             chatHistory.push({ role: "user", parts: [{ text: prompt }] });
             const payload = { contents: chatHistory };
-            const apiKey = "AIzaSyDEuE7UkdAk2mGWsprqoLFjpSi2EA68xns";
+            const apiKey = ""; // Dejar en blanco para que Canvas lo gestione
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
             const response = await fetch(apiUrl, {
