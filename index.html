@@ -101,8 +101,8 @@
     header{height:100vh;background:url('https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp') center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff; perspective: 1000px;}
     header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}  
     .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem;}
-    .hero > *:not(.isologo) { opacity: 0; } /* Oculta todo menos el logo para la animación JS */
-    .hero .isologo{ width: 120px; height: auto; margin: 0 auto 1rem auto; display: block; z-index: 10; position: relative; opacity: 0; } /* El logo empieza oculto */
+    .hero > *:not(.isologo) { opacity: 0; }
+    .hero .isologo{ width: 120px; height: auto; margin: 0 auto 1rem auto; display: block; z-index: 10; position: relative; opacity: 0; }
     .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem; perspective: 800px; transform-style: preserve-3d;}
     .hero h1 span{color:var(--primary); letter-spacing: 2px;}
     .hero p{font-size:1.5rem;color:#e2e8f0;margin-bottom:2rem;line-height:1.4;font-family:'Bebas Neue', sans-serif; letter-spacing:1px;}
@@ -117,7 +117,6 @@
     
     nav ul{list-style:none;font-weight:700; padding-left: 0; margin: 0;}
     
-    /* AJUSTE: Menú móvil con fondo traslúcido y blur */
     nav .nav-links-mobile { 
       visibility: hidden; 
       position: fixed; 
@@ -174,14 +173,14 @@
     #services-stacked > .section-title, #services-stacked > .subtitle { padding-left: 1.5rem; padding-right: 1.5rem; }
     #services-stacked .subtitle { text-align: center; max-width: 700px; margin: -1rem auto 2rem; color: #ccc; z-index: 2; position: relative; }
     
-    .horizontal-scroll-section { position: relative; perspective: 1500px; }
+    .horizontal-scroll-section { position: relative; }
     .horizontal-scroll-wrapper { position: sticky; top: 0; display: flex; align-items: center; height: 100vh; width: 100%; overflow: hidden; }
     .cards-container { display: flex; gap: clamp(3rem, 7vw, 6rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; }
     
     .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; will-change: transform; transition: transform 0.4s ease, box-shadow 0.4s ease; }
     
     .service-card-stacked:hover {
-        transform: translateY(-5px) !important; /* Prioritize hover effect */
+        transform: translateY(-5px); 
         box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
     }
     
@@ -891,8 +890,8 @@
         const container = document.querySelector('.cards-container');
         const cards = gsap.utils.toArray('.service-card-stacked');
 
-        if (window.innerWidth < 768) {
-            // SOLUCIÓN: Reset más robusto para móvil
+        if (window.innerWidth < 768 || prefersReducedMotion) {
+            // SOLUCIÓN: Reset más robusto para móvil y para movimiento reducido.
             gsap.set(horizontalSection, { clearProps: "all" });
             gsap.set(wrapper, { clearProps: "all" });
             gsap.set(container, { clearProps: "all", display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1.5rem' });
@@ -907,6 +906,7 @@
         const scrollWidth = container.scrollWidth - window.innerWidth;
         gsap.set(horizontalSection, { height: `${scrollWidth + window.innerHeight}px` }); 
 
+        // MECÁNICA SIMPLIFICADA
         horizontalScrollInstance = gsap.to(container, {
             x: () => -scrollWidth,
             ease: "none",
@@ -915,28 +915,8 @@
                 start: "top top",
                 end: () => `+=${scrollWidth}`,
                 pin: wrapper,
-                scrub: 1.5,
+                scrub: 1, // Valor para un movimiento suave y conectado al scroll
                 invalidateOnRefresh: true,
-                onUpdate: self => {
-                    const viewportCenter = window.innerWidth / 2;
-                    cards.forEach(card => {
-                        const rect = card.getBoundingClientRect();
-                        const cardCenter = rect.left + rect.width / 2;
-                        const distanceFromCenter = cardCenter - viewportCenter;
-                        
-                        // Mapea la distancia a la rotación y la escala
-                        const rotation = gsap.utils.mapRange(-viewportCenter, viewportCenter, -35, 35)(distanceFromCenter);
-                        const scale = gsap.utils.mapRange(0, viewportCenter, 1.05, 0.85)(Math.abs(distanceFromCenter));
-
-                        gsap.to(card, {
-                            rotationY: rotation,
-                            scale: scale,
-                            duration: 0.5,
-                            ease: 'power3.out',
-                            overwrite: true
-                        });
-                    });
-                }
             }
         });
     }
