@@ -15,6 +15,7 @@
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp">
 
   <!-- Open Graph -->
+  <!-- Aseguramos que og:image apunte a una URL directa si es posible -->
   <meta property="og:title" content="GringoEstate – Real Estate sin corbata">
   <meta property="og:description" content="Transformamos el Real Estate con soluciones innovadoras.">
   <meta property="og:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp">
@@ -105,7 +106,7 @@
     header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}  
     .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem;}
     .hero > * { opacity: 0; }
-    .hero .isologo{ width: 120px; height: auto; margin: 0 auto 1rem auto; display: block; z-index: 10; /* Ensure it's above the background */ position: relative; /* Necessary for z-index to work */ }
+    .hero .isologo{ width: 120px; height: auto; margin: 0 auto 1rem auto; display: block; z-index: 10; position: relative; }
     .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem; perspective: 800px; transform-style: preserve-3d;}
     .hero h1 span{color:var(--primary); letter-spacing: 2px;}
     .hero p{font-size:1.5rem;color:#e2e8f0;margin-bottom:2rem;line-height:1.4;font-family:'Bebas Neue', sans-serif; letter-spacing:1px;}
@@ -178,21 +179,17 @@
     .horizontal-scroll-wrapper { position: sticky; top: 0; display: flex; align-items: center; height: 100vh; width: 100%; overflow: hidden; }
     .cards-container { display: flex; gap: clamp(2rem, 5vw, 4rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; }
     
-    .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; will-change: transform, opacity; transition: transform 0.3s ease, box-shadow 0.3s ease; /* Slightly faster and lighter transition */ }
+    .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; will-change: transform, opacity; transition: transform 0.3s ease, box-shadow 0.3s ease; }
     
     /* Animación Sutil de Hover para tarjetas */
     .service-card-stacked:hover {
-        transform: translateY(-5px); /* Mínimo movimiento hacia arriba */
-        box-shadow: 0px 8px 25px 3px rgba(255, 191, 0, 0.4); /* Sutil brillo */
+        transform: translateY(-5px); 
+        box-shadow: 0px 8px 25px 3px rgba(255, 191, 0, 0.4); 
     }
-
-    /* Se eliminan las animaciones de ::before para reducir consumo */
-    /* .service-card-stacked::before { ... } */
     
     .card-inner-content { background: var(--card-bg); width: 100%; height: 100%; border-radius: 18px; position: relative; z-index: 3; overflow: hidden; }
     .card-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform 0.5s ease; filter: brightness(0.7); }
-    /* .service-card-stacked.is-active .card-image { transform: scale(1.05); } */ /* Desactivada para optimizar */
-    .card-content-initial { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 3; padding: 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%); }
+    .card-content-initial { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 3; padding: 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; /* Alinea al final */ height: 100%; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%); }
     .card-content-initial h3 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 3.5vw, 2.8rem); line-height: 1.1; letter-spacing: 1px; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); color: white; margin-bottom: 0.75rem; }
     .card-content-initial h3 span { color: var(--primary); }
     .card-content-initial .short-desc { color: #e0e0e0; line-height: 1.5; margin-bottom: 1.5rem; min-height: 60px; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); }
@@ -408,7 +405,6 @@
 
   <header id="top">
     <div class="hero">
-        <!-- El isologo ahora tiene z-index: 10 y position: relative para asegurar visibilidad -->
         <picture>
             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp">
             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" alt="Isologo de GringoEstate" class="isologo hero-el" width="120" height="120">
@@ -506,7 +502,7 @@
                                 <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" alt="Un desarrollador revisando planos en una obra" class="card-image" loading="lazy">
                             </picture>
                             <div class="card-content-initial"><h3>¿SOS <span>DESARROLLADOR?</span></h3><p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details"><div class="card-full-details-content"><h3>¿SOS DESARROLLADOR?</h3><div class="card-full-content-scroll"><p>Una alianza estratégica, no una inmobiliaria más.</p><ul><li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li><li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li><li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacuntas en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li></ul><p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Asesoría para Desarrolladores">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                            <div class="card-full-details"><div class="card-full-details-content"><h3>¿SOS DESARROLLADOR?</h3><div class="card-full-content-scroll"><p>Una alianza estratégica, no una inmobiliaria más.</p><ul><li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li><li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li><li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li></ul><p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Asesoría para Desarrolladores">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                         </div>
                     </article>
                     
@@ -756,7 +752,7 @@
         heroTitle.addEventListener('mouseenter', () => {
             gsap.to(heroTitle, {
                 duration: 0.8,
-                rotationX: 15, // Subtle 3D tilt
+                rotationX: 15, 
                 rotationY: 10,
                 scale: 1.02,
                 ease: 'power2.out'
@@ -897,7 +893,7 @@
         }
     });
 
-    // --- Horizontal Scroll Animation Setup (Optimized) ---
+    // --- Horizontal Scroll Animation Setup (Optimized for Performance) ---
     function setupHorizontalScroll() {
         if (horizontalScrollInstance) {
             horizontalScrollInstance.kill();
@@ -908,17 +904,21 @@
         const container = document.querySelector('.cards-container');
         const cards = gsap.utils.toArray('.service-card-stacked');
 
+        // Responsive handling: if screen is too small, stack cards vertically instead of horizontal scroll
         if (window.innerWidth < 768) {
+            // Reset to default vertical layout
             if (wrapper) gsap.set(wrapper, { position: 'static', height: 'auto', overflow: 'visible'});
             if (container) gsap.set(container, { x: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'auto', padding: '0' });
-            if (cards.length > 0) gsap.set(cards, {clearProps: "scale,opacity,transform", width: '100%', margin: '10px 0'});
-            
-            cards.forEach(card => card.classList.remove('is-active')); 
-            if (horizontalSection) horizontalSection.style.height = 'auto'; 
+            if (cards.length > 0) {
+                gsap.set(cards, {clearProps: "scale,opacity,transform,width,margin", opacity: 1, y: 0, width: '100%', margin: '10px 0'}); // Reset for vertical stack
+                cards.forEach(card => card.classList.remove('is-active')); // Remove active state
+            }
+            if (horizontalSection) horizontalSection.style.height = 'auto'; // Remove fixed height
 
-            return; 
+            return; // Exit if not setting up horizontal scroll
         }
 
+        // Setup for horizontal scroll on larger screens
         gsap.set(wrapper, { position: 'sticky', top: 0, height: '100vh', overflow: 'hidden'});
         gsap.set(container, { display: 'flex', flexDirection: 'row' }); 
         
@@ -935,11 +935,13 @@
                 pin: wrapper,
                 scrub: 0.2,
                 invalidateOnRefresh: true,
+                // Simplified animation for better performance
                 onUpdate: self => {
                     const progress = self.progress; 
                     cards.forEach((card, i) => {
                         const cardVisibilityProgress = progress - (i * 0.1); 
                         
+                        // Simple fade-in and slight move-up animation as cards enter view
                         if (cardVisibilityProgress > -0.2 && cardVisibilityProgress < 0.8) { 
                             gsap.to(card, {
                                 opacity: 1,
@@ -951,6 +953,7 @@
                             });
                             card.classList.add('is-active'); 
                         } else {
+                            // Fade out and move down if completely out of view (start of scroll)
                             gsap.to(card, {
                                 opacity: cardVisibilityProgress < 0 ? 0 : 1, 
                                 y: cardVisibilityProgress < 0 ? 20 : 0,
@@ -1063,7 +1066,7 @@
         resultElement.textContent = 'Generando...';
         resultElement.style.color = '#e0e0e0';
 
-        const apiKey = "AIzaSyDEuE7UkdAk2mGWsprqoLFjpSi2EA68xns"; // <<<<<<<<<<<<< TU CLAVE API AQUÍ
+        const apiKey = "AIzaSyCERci1So_lJ1dRtjMFEXPpY-nImmHpydU"; // <<<<<<<<<<<<< TU CLAVE API AQUÍ
 
         if (!apiKey || apiKey.includes("YOUR_API_KEY") || apiKey.length < 10) { 
             resultElement.textContent = 'Error: Clave API no configurada o inválida. Por favor, inserta tu clave API de Google Gemini en el script.';
