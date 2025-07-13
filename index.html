@@ -15,7 +15,6 @@
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp">
 
   <!-- Open Graph -->
-  <!-- Aseguramos que og:image apunte a una URL directa si es posible -->
   <meta property="og:title" content="GringoEstate – Real Estate sin corbata">
   <meta property="og:description" content="Transformamos el Real Estate con soluciones innovadoras.">
   <meta property="og:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp">
@@ -156,7 +155,7 @@
     main { display: block; background-color: transparent; }
     section{padding:4.5rem 1.5rem;max-width:1200px;margin: 0 auto; background-color: transparent; position: relative; z-index: 1;}
     
-    #about { background-color: var(--dark-bg); } /* Fondo negro sólido para esta sección */
+    #about { background-color: var(--dark-bg); } 
 
     .section-full-width { max-width: none; padding-left: 0; padding-right: 0; }
 
@@ -181,7 +180,7 @@
     
     .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; will-change: transform, opacity; transition: transform 0.3s ease, box-shadow 0.3s ease; }
     
-    /* Animación Sutil de Hover para tarjetas */
+    /* Animación Sutil de Hover para tarjetas - MINIMALISTA */
     .service-card-stacked:hover {
         transform: translateY(-5px); 
         box-shadow: 0px 8px 25px 3px rgba(255, 191, 0, 0.4); 
@@ -409,7 +408,6 @@
             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp">
             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" alt="Isologo de GringoEstate" class="isologo hero-el" width="120" height="120">
         </picture>
-        <!-- Título del Hero con animación 3D SUTIL al hover -->
         <h1 class="hero-el" id="hero-title">GRINGO<span>ESTATE</span></h1>
         <p class="hero-el">LA POSTA INMOBILIARIA. SIN CORBATA.</p>
         <a href="#contact" class="btn-primary hero-el">AGENDÁ UNA LLAMADA</a>
@@ -587,19 +585,23 @@
                     <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div>
                 </div>
                 <div class="ai-tool-card">
-                    <h3>Análisis de Zonas y Valor M²</h3>
-                    <p>¿Dudando entre dos barrios? ¿Querés saber el valor de referencia del m² en una zona? Pedí un análisis y obtené una respuesta clara.</p>
-                    <textarea id="zones-input" placeholder="Ej: Comparar inversión en Recoleta vs. Colegiales O 'Valor del m² en Palermo'"></textarea>
+                    <!-- Nueva Herramienta: Calculador de Alquiler por IPC -->
+                    <h3>Calculadora de Alquiler (IPC)</h3>
+                    <p>Actualizá tu contrato de alquiler según la variación del IPC. Ingresá el monto original, fecha de inicio y fecha actual.</p>
+                    <input type="number" id="alquiler-original-input" placeholder="Monto Original del Alquiler ($)">
+                    <input type="month" id="fecha-inicio-input" placeholder="Fecha de Inicio (Mes/Año)">
+                    <input type="month" id="fecha-actual-input" placeholder="Fecha Actual (Mes/Año)">
                     <div class="ai-button-wrapper">
-                        <button id="generate-analysis-btn">Generar Análisis ✨</button>
-                        <div id="loader-analysis" class="loader"></div>
+                        <button id="calcular-alquiler-btn">Calcular Nuevo Alquiler ✨</button>
+                        <div id="loader-alquiler" class="loader"></div>
                     </div>
-                    <div id="analysis-result" class="ai-result">El análisis generado aparecerá aquí...</div>
+                    <div id="alquiler-result" class="ai-result">El monto actualizado aparecerá aquí...</div>
+                    <p class="ai-alert" style="text-align: center; margin-top: 1rem;">⚠️ Los datos del IPC se obtienen de fuentes oficiales y pueden tener un pequeño retraso en la última actualización.</p>
                 </div>
                 <div class="ai-coming-soon">
                     <h3>MÁS HERRAMIENTAS EN CONSTRUCCIÓN...</h3>
                     <p>
-                        El arsenal de GringoEstate seguirá creciendo. Pronto integraremos una <strong>Calculadora de Ajuste de Alquiler por IPC</strong>, un <strong>Asistente para Redactar Contratos</strong> y otras herramientas para que tomes las mejores decisiones.
+                        El arsenal de GringoEstate seguirá creciendo. Pronto integraremos un <strong>Asistente para Redactar Contratos</strong> y otras herramientas para que tomes las mejores decisiones.
                     </p>
                 </div>
             </div>
@@ -827,8 +829,6 @@
                 this.lockCount = 0;
                 document.body.classList.remove('no-scroll');
                 document.body.style.removeProperty('top');
-                // Keep this commented to prevent explicit scrollTo and rely on browser's natural scroll restoration
-                // window.scrollTo(0, scrollPosition); 
             }
         }
     };
@@ -915,7 +915,7 @@
             }
             if (horizontalSection) horizontalSection.style.height = 'auto'; // Remove fixed height
 
-            return; // Exit if not setting up horizontal scroll
+            return; 
         }
 
         // Setup for horizontal scroll on larger screens
@@ -941,7 +941,6 @@
                     cards.forEach((card, i) => {
                         const cardVisibilityProgress = progress - (i * 0.1); 
                         
-                        // Simple fade-in and slight move-up animation as cards enter view
                         if (cardVisibilityProgress > -0.2 && cardVisibilityProgress < 0.8) { 
                             gsap.to(card, {
                                 opacity: 1,
@@ -953,7 +952,6 @@
                             });
                             card.classList.add('is-active'); 
                         } else {
-                            // Fade out and move down if completely out of view (start of scroll)
                             gsap.to(card, {
                                 opacity: cardVisibilityProgress < 0 ? 0 : 1, 
                                 y: cardVisibilityProgress < 0 ? 20 : 0,
@@ -1056,11 +1054,97 @@
     const descriptionResult = document.getElementById('description-result');
     const loaderDescription = document.getElementById('loader-description');
 
-    const generateAnalysisBtn = document.getElementById('generate-analysis-btn');
-    const zonesInput = document.getElementById('zones-input');
-    const analysisResult = document.getElementById('analysis-result');
-    const loaderAnalysis = document.getElementById('loader-analysis');
+    // Calculadora de Alquiler IPC
+    const alquilerOriginalInput = document.getElementById('alquiler-original-input');
+    const fechaInicioInput = document.getElementById('fecha-inicio-input');
+    const fechaActualInput = document.getElementById('fecha-actual-input');
+    const calcularAlquilerBtn = document.getElementById('calcular-alquiler-btn');
+    const alquilerResult = document.getElementById('alquiler-result');
+    const loaderAlquiler = document.getElementById('loader-alquiler');
+    
+    // Constante para la API del INDEC (IPC Nacional)
+    const IPC_API_URL = "https://datos.gob.ar/series/api/series?ids=148.3_INIVELNAL_DICI_M_26&format=json"; // IPC Base Dic-2016 = 100
 
+    async function getIpcData() {
+        try {
+            const response = await fetch(IPC_API_URL);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            // La estructura de datos puede variar, usualmente es un array de objetos con fecha y valor
+            // Asumimos que data.data es un array de puntos de series, cada uno con 'fecha' y 'valor'
+            // Convertimos la fecha a un formato que podamos comparar fácilmente (YYYY-MM)
+            return data.data.map(item => ({
+                fecha: item.fecha.substring(0, 7), // Obtener YYYY-MM
+                valor: parseFloat(item.valor)
+            }));
+        } catch (error) {
+            console.error("Error al obtener datos del IPC:", error);
+            return null; // Devuelve null en caso de error
+        }
+    }
+
+    function formatMonthYear(dateString) { // Input: "YYYY-MM-DD" or "YYYY-MM"
+        if (!dateString) return null;
+        return dateString.substring(0, 7); // Retorna "YYYY-MM"
+    }
+
+    async function calcularNuevoAlquiler() {
+        const montoOriginal = parseFloat(alquilerOriginalInput.value);
+        const fechaInicioStr = fechaInicioInput.value; // Formato "YYYY-MM"
+        const fechaActualStr = fechaActualInput.value; // Formato "YYYY-MM"
+
+        if (isNaN(montoOriginal) || !fechaInicioStr || !fechaActualStr) {
+            alquilerResult.textContent = 'Por favor, completa todos los campos y selecciona fechas válidas.';
+            alquilerResult.style.color = '#ff6b6b';
+            return;
+        }
+
+        // Validar que fechaInicio sea anterior o igual a fechaActual
+        if (fechaInicioStr > fechaActualStr) {
+            alquilerResult.textContent = 'La fecha de inicio debe ser anterior o igual a la fecha actual.';
+            alquilerResult.style.color = '#ff6b6b';
+            return;
+        }
+
+        loaderAlquiler.style.display = 'inline-block';
+        alquilerResult.textContent = 'Calculando...';
+        alquilerResult.style.color = '#e0e0e0';
+
+        const ipcData = await getIpcData();
+
+        if (!ipcData) {
+            alquilerResult.textContent = 'Error al obtener datos del IPC. Intenta más tarde.';
+            alquilerResult.style.color = '#ff6b6b';
+            loaderAlquiler.style.display = 'none';
+            return;
+        }
+
+        const ipcApertura = ipcData.find(item => item.fecha === fechaInicioStr);
+        const ipcCierre = ipcData.find(item => item.fecha === fechaActualStr);
+
+        if (!ipcApertura || !ipcCierre) {
+            alquilerResult.textContent = 'No se encontraron datos del IPC para las fechas seleccionadas. Verifica las fechas o la disponibilidad de datos.';
+            alquilerResult.style.color = '#ff6b6b';
+            loaderAlquiler.style.display = 'none';
+            return;
+        }
+
+        const factorAjuste = ipcCierre.valor / ipcApertura.valor;
+        const nuevoMonto = montoOriginal * factorAjuste;
+
+        alquilerResult.textContent = `El nuevo monto del alquiler sería: $ ${nuevoMonto.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+        alquilerResult.style.color = '#e0e0e0'; 
+        loaderAlquiler.style.display = 'none';
+    }
+
+    if (calcularAlquilerBtn) {
+        calcularAlquilerBtn.addEventListener('click', calcularNuevoAlquiler);
+    }
+
+
+    // --- Gemini API Call Logic (Generador de Descripciones) ---
     async function callGeminiAPI(prompt, resultElement, loaderElement) {
         loaderElement.style.display = 'inline-block';
         resultElement.textContent = 'Generando...';
@@ -1118,13 +1202,6 @@
         generateDescriptionBtn.addEventListener('click', () => {
             const prompt = `Actúa como un copywriter inmobiliario experto. Genera una descripción profesional, atractiva y persuasiva para una propiedad con las siguientes características: ${propertyInput.value}. El tono debe ser directo, moderno y confiable, como "sin corbata". Estructura el texto con un título llamativo, un párrafo introductorio, una lista de 3-4 puntos clave (usando emojis como ✅) y un párrafo de cierre que invite a la acción.`;
             callGeminiAPI(prompt, descriptionResult, loaderDescription);
-        });
-    }
-
-    if (generateAnalysisBtn) {
-        generateAnalysisBtn.addEventListener('click', () => {
-            const prompt = `Actúa como un analista de mercado inmobiliario. Realiza un análisis conciso y basado en datos sobre la siguiente consulta: "${zonesInput.value}". Proporciona información relevante sobre valores promedio de m², potencial de inversión, diferencias clave entre zonas, o pros y contras. El lenguaje debe ser claro y directo, para un inversor inteligente.`;
-            callGeminiAPI(prompt, analysisResult, loaderAnalysis);
         });
     }
 
