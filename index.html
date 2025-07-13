@@ -323,8 +323,13 @@
     .contact-info .section-title { color: var(--primary) !important; }
     .circulo-decorativo { width: 50px; height: 50px; border: 2px solid var(--primary); border-radius: 50%; margin-top: 40px; }
     .contact-form-wrapper form { display: flex; flex-direction: column; gap: 1rem; }
-    .contact-form-wrapper input, .contact-form-wrapper select, .contact-form-wrapper textarea { padding: 1rem; border:1px solid #333; border-radius:8px; font-size:1rem; width:100%; background-color: #1a1a1a; color: #fff; transition: border-color .3s, box-shadow .3s; }
-    .contact-form-wrapper input:focus, .contact-form-wrapper select:focus, .contact-form-wrapper textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 191, 0, 0.4); }
+    /* Estilo de inputs de IA para que coincidan con el formulario de contacto */
+    .ai-tool-card textarea, .ai-tool-card input[type="text"], .ai-tool-card input[type="month"], .ai-tool-card input[type="number"] { 
+        padding: 1rem; border:1px solid #333; border-radius:8px; font-size:1rem; width:100%; background-color: #1a1a1a; color: #fff; transition: border-color .3s, box-shadow .3s; 
+    }
+    .ai-tool-card textarea:focus, .ai-tool-card input[type="text"]:focus, .ai-tool-card input[type="month"]:focus, .ai-tool-card input[type="number"]:focus { 
+        outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 191, 0, 0.4); 
+    }
     .btn-enviar-mensaje { background:var(--primary); color:var(--dark); padding:.9rem 2rem; border-radius:50px; display:inline-block; transition: background-color .3s, box-shadow .3s; font-weight:700; font-size:1.1rem; letter-spacing:1px; width:100%; text-align: center; border: none; }
     .btn-enviar-mensaje:hover { background-color: #fff; box-shadow:0 10px 20px rgba(0,0,0,0.2); }
 
@@ -1062,8 +1067,7 @@
     const alquilerResult = document.getElementById('alquiler-result');
     const loaderAlquiler = document.getElementById('loader-alquiler');
     
-    // Constante para la API del INDEC (IPC Nacional)
-    const IPC_API_URL = "https://datos.gob.ar/series/api/series?ids=148.3_INIVELNAL_DICI_M_26&format=json"; // IPC Base Dic-2016 = 100
+    const IPC_API_URL = "https://datos.gob.ar/series/api/series?ids=148.3_INIVELNAL_DICI_M_26&format=json"; 
 
     async function getIpcData() {
         try {
@@ -1072,28 +1076,25 @@
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            // La estructura de datos puede variar, usualmente es un array de objetos con fecha y valor
-            // Asumimos que data.data es un array de puntos de series, cada uno con 'fecha' y 'valor'
-            // Convertimos la fecha a un formato que podamos comparar fácilmente (YYYY-MM)
             return data.data.map(item => ({
-                fecha: item.fecha.substring(0, 7), // Obtener YYYY-MM
+                fecha: item.fecha.substring(0, 7), 
                 valor: parseFloat(item.valor)
             }));
         } catch (error) {
             console.error("Error al obtener datos del IPC:", error);
-            return null; // Devuelve null en caso de error
+            return null; 
         }
     }
 
-    function formatMonthYear(dateString) { // Input: "YYYY-MM-DD" or "YYYY-MM"
+    function formatMonthYear(dateString) { 
         if (!dateString) return null;
-        return dateString.substring(0, 7); // Retorna "YYYY-MM"
+        return dateString.substring(0, 7); 
     }
 
     async function calcularNuevoAlquiler() {
         const montoOriginal = parseFloat(alquilerOriginalInput.value);
-        const fechaInicioStr = fechaInicioInput.value; // Formato "YYYY-MM"
-        const fechaActualStr = fechaActualInput.value; // Formato "YYYY-MM"
+        const fechaInicioStr = fechaInicioInput.value; 
+        const fechaActualStr = fechaActualInput.value; 
 
         if (isNaN(montoOriginal) || !fechaInicioStr || !fechaActualStr) {
             alquilerResult.textContent = 'Por favor, completa todos los campos y selecciona fechas válidas.';
@@ -1101,7 +1102,6 @@
             return;
         }
 
-        // Validar que fechaInicio sea anterior o igual a fechaActual
         if (fechaInicioStr > fechaActualStr) {
             alquilerResult.textContent = 'La fecha de inicio debe ser anterior o igual a la fecha actual.';
             alquilerResult.style.color = '#ff6b6b';
