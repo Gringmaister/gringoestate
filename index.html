@@ -117,7 +117,6 @@
     
     nav ul{list-style:none;font-weight:700; padding-left: 0; margin: 0;}
     
-    /* 4. Menú móvil centrado siempre */
     nav .nav-links-mobile { 
       visibility: hidden; 
       position: fixed; 
@@ -130,7 +129,7 @@
       -webkit-backdrop-filter: blur(10px);
       padding: 6rem 1.5rem 2rem; 
       opacity: 0; 
-      display: flex; /* Changed from none to flex */
+      display: flex;
       justify-content: center; 
       align-items: center; 
       z-index: 999; 
@@ -178,11 +177,10 @@
     .horizontal-scroll-wrapper { position: sticky; top: 0; display: flex; align-items: center; height: 100vh; width: 100%; overflow: hidden; }
     .cards-container { display: flex; gap: clamp(3rem, 7vw, 6rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; will-change: transform; }
     
-    .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; transition: transform 0.4s ease, box-shadow 0.4s ease; }
+    .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; will-change: transform; transition: transform 0.4s ease, box-shadow 0.4s ease; }
     
     .card-inner-content { background: var(--card-bg); width: 100%; height: 100%; border-radius: 18px; position: relative; z-index: 3; overflow: hidden; }
     
-    /* 2. Sustituir filter:brightness() */
     .card-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform 0.5s ease; filter: none; }
     .card-image::after {
       content: '';
@@ -192,7 +190,6 @@
       pointer-events: none;
     }
 
-    /* 3. Micro-animación de borde */
     @keyframes borderPulse {
       0% { box-shadow: 0 0 0 0 rgba(255,191,0,0); }
       50% { box-shadow: 0 0 6px 2px rgba(255,191,0,.4); }
@@ -227,6 +224,12 @@
     .card-modal-content-wrapper { background-color: var(--card-bg); border-radius: 20px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); width: 90%; max-width: 1000px; height: 90%; max-height: 85vh; position: relative; display: flex; flex-direction: column; overflow: hidden; transform: scale(0.95); transition: transform 0.4s ease; }
     .card-modal.is-visible .card-modal-content-wrapper { transform: scale(1); }
     .card-modal-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+    .card-modal-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+    }
     .card-modal-text-content { position: relative; z-index: 2; padding: 2rem; display: flex; flex-direction: column; height: 100%; justify-content: space-between; color: var(--text-light); }
     .card-modal-text-content h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; flex-shrink: 0; }
     .card-modal-text-content .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; line-height: 1.7; margin-bottom: 1rem; }
@@ -676,7 +679,6 @@
   <script>
   document.addEventListener('DOMContentLoaded', () => {
 
-    /* Registrar plugins una sola vez */
     gsap.registerPlugin(ScrollTrigger);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -704,7 +706,6 @@
     }
 
     // --- Hero Animations ---
-    /* 4. Logo siempre visible */
     const iso = document.querySelector('.isologo');
     if (prefersReducedMotion) {
       iso.style.opacity = 1;
@@ -791,17 +792,12 @@
     };
 
     // --- Mobile Menu Toggle ---
-    /* 3. Menú móvil: display flex ↔ none */
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
-    const tlMenu = gsap.timeline({paused:true, reversed:true})
-      .set(mobileMenu, {display:'flex'})
-      .to(mobileMenu, {autoAlpha:1, duration:0.3})
-      .from(mobileMenu.querySelectorAll('li'),
-            {x:-30, opacity:0, stagger:0.08, duration:0.35}, '-=0.15')
-      .addPause()
-      .to(mobileMenu, {autoAlpha:0, duration:0.25})
-      .set(mobileMenu, {display:'none'});
+    const tlMenu = gsap.timeline({ paused: true, reversed: true })
+      .to(mobileMenu, { autoAlpha: 1, duration: 0.3, onStart: () => mobileMenu.style.display = 'flex' })
+      .from(mobileMenu.querySelectorAll('li'), { x: -30, opacity: 0, stagger: 0.08, duration: 0.35 }, '-=0.15')
+      .eventCallback("onReverseComplete", () => mobileMenu.style.display = 'none');
 
     menuToggle.addEventListener('click', () => {
       const isOpen = menuToggle.classList.contains('open');
@@ -814,10 +810,7 @@
         if (link.getAttribute('href').startsWith('#')) {
             link.addEventListener('click', () => {
                 if (menuToggle.classList.contains('open')) {
-                  const isOpen = menuToggle.classList.contains('open');
-                  if (!isOpen) { scrollManager.lock(); } else { scrollManager.unlock(); }
-                  menuToggle.classList.toggle('open');
-                  tlMenu.reversed() ? tlMenu.play() : tlMenu.reverse();
+                  menuToggle.click();
                 }
             });
         }
@@ -892,7 +885,6 @@
     });
 
     // --- Horizontal Scroll Animation Setup ---
-    /* 1. Scroll horizontal fluido */
     function setupHorizontalScroll() {
         const section = document.querySelector('.horizontal-scroll-section');
         const wrapper = section.querySelector('.horizontal-scroll-wrapper');
@@ -928,19 +920,32 @@
                 end: `+=${scrollW}`,
                 pin: wrapper,
                 pinType: ScrollTrigger.isTouch ? 'transform' : 'fixed',
-                scrub: true,
-                invalidateOnRefresh: true
+                scrub: 1.5,
+                invalidateOnRefresh: true,
+                onUpdate: self => {
+                    const viewportCenter = window.innerWidth / 2;
+                    cards.forEach(card => {
+                        const rect = card.getBoundingClientRect();
+                        const cardCenter = rect.left + rect.width / 2;
+                        const distance = Math.abs(viewportCenter - cardCenter);
+                        const scale = gsap.utils.mapRange(0, viewportCenter, 1.05, 0.95)(distance);
+                        gsap.to(card, {
+                            scale: scale,
+                            duration: 0.5,
+                            ease: 'power3.out',
+                            overwrite: true
+                        });
+                    });
+                }
             }
         });
     }
     
     // --- Particle Animation ---
-    const particlesObj = { visible: true }; // Global state for particles
-    const canvas = document.getElementById('particle-canvas');
-    let threejsScene = null;
-
     function initParticleAnimation() {
-        if (prefersReducedMotion || !canvas) return; 
+        if (prefersReducedMotion) return; 
+        const canvas = document.getElementById('particle-canvas');
+        if (!canvas) return; 
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -973,8 +978,6 @@
 
         const animate = () => {
             requestAnimationFrame(animate);
-            if (!particlesObj.visible) return; // Pauses rendering
-
             const elapsedTime = clock.getElapsedTime();
             particles.rotation.y = elapsedTime * 0.05;
             particles.rotation.x = elapsedTime * 0.02;
@@ -989,17 +992,6 @@
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         });
     }
-
-    /* 2. Pausar Three.js cuando se fija */
-    ScrollTrigger.create({
-      trigger: '.horizontal-scroll-section',
-      start: 'top top',
-      end: 'bottom top',
-      onEnter: () => particlesObj.visible = false,
-      onLeave: () => particlesObj.visible = true,
-      onEnterBack: () => particlesObj.visible = false,
-      onLeaveBack: () => particlesObj.visible = true,
-    });
     
     // --- Initializations ---
     initParticleAnimation();
