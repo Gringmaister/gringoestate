@@ -395,15 +395,6 @@
         .card-modal-text-content h3 { font-size: 2rem; }
         .btn-card { width: 100%; }
         h2.section-title { font-size: 2.5rem; }
-
-        .horizontal-scroll-wrapper {
-            height: auto !important;
-            overflow: visible !important;
-            position: static !important;
-        }
-        .horizontal-scroll-section {
-            height: auto !important;
-        }
     }
   </style>
 </head>
@@ -722,9 +713,11 @@
   <script>
   document.addEventListener('DOMContentLoaded', () => {
 
+    /* Registrar plugins una sola vez */
     gsap.registerPlugin(ScrollTrigger);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    // --- Cursor Logic ---
     if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
         const cursorRegular = document.getElementById('cursor-regular');
         const cursorPoint = document.getElementById('cursor-point');
@@ -747,6 +740,7 @@
         });
     }
 
+    // --- Hero Animations ---
     gsap.set(".hero-el", {y: 30, opacity: 0});
     gsap.to(".hero-el", { 
         opacity: 1, 
@@ -780,6 +774,7 @@
       animateOnScroll(".contact-form-wrapper", ".contact-wrapper");
     }
 
+    // --- Navbar Scroll Effect ---
     const nav = document.querySelector('nav');
     if(nav) {
         ScrollTrigger.create({
@@ -789,6 +784,7 @@
         });
     }
 
+    // --- Hero Title 3D Animation on Hover ---
     const heroTitle = document.getElementById('hero-title');
     if (heroTitle && !prefersReducedMotion) {
         heroTitle.addEventListener('mouseenter', () => {
@@ -812,6 +808,7 @@
         });
     }
 
+    // --- Scroll Lock Logic ---
     let scrollPosition = 0;
     const scrollManager = {
         lock() {
