@@ -59,7 +59,6 @@
       font-family: 'Roboto', sans-serif;
       scroll-behavior: smooth;
     }
-    /* SOLUCIÓN: Estilos para la barra de scroll amarilla */
     body::-webkit-scrollbar {
         width: 8px;
     }
@@ -73,7 +72,6 @@
 
     html.no-scroll {
         overflow: hidden;
-        /* Evita que la página salte al bloquear el scroll */
         position: fixed;
         width: 100%;
     }
@@ -120,7 +118,6 @@
     .hero .hero-el { opacity: 0; }
     
     .hero .isologo{ 
-        /* SOLUCIÓN: Isologo agrandado */
         width: 160px; 
         height: auto; 
         margin: 0 auto 1rem auto; 
@@ -146,7 +143,6 @@
     
     nav ul{list-style:none;font-weight:700; padding-left: 0; margin: 0;}
     
-    /* Menú móvil */
     nav .nav-links-mobile { 
       visibility: hidden; 
       position: fixed; 
@@ -282,7 +278,6 @@
     .btn-toggle-collapse { background: transparent; border: 1px solid #555; color: #aaa; border-radius: 50px; padding: 0.5rem 1rem; font-size: 1rem; margin-top: 0.5rem; transition: all .3s ease; }
     .btn-toggle-collapse:hover { background: #555; color: #fff; }
     
-    /* SOLUCIÓN: Animación para el botón de cerrar */
     .card-modal-close-btn { position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: #fff; font-size: 2rem; z-index: 3; line-height: 1; padding: 0.5rem; border-radius: 50%; transition: background-color 0.3s ease, transform 0.3s ease; }
     .card-modal-close-btn:hover { background-color: rgba(255, 255, 255, 0.1); transform: rotate(90deg); }
     
@@ -727,11 +722,9 @@
   <script>
   document.addEventListener('DOMContentLoaded', () => {
 
-    /* Registrar plugins una sola vez */
     gsap.registerPlugin(ScrollTrigger);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // --- Cursor Logic ---
     if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
         const cursorRegular = document.getElementById('cursor-regular');
         const cursorPoint = document.getElementById('cursor-point');
@@ -754,7 +747,6 @@
         });
     }
 
-    // --- Hero Animations ---
     gsap.set(".hero-el", {y: 30, opacity: 0});
     gsap.to(".hero-el", { 
         opacity: 1, 
@@ -788,7 +780,6 @@
       animateOnScroll(".contact-form-wrapper", ".contact-wrapper");
     }
 
-    // --- Navbar Scroll Effect ---
     const nav = document.querySelector('nav');
     if(nav) {
         ScrollTrigger.create({
@@ -798,7 +789,6 @@
         });
     }
 
-    // --- Hero Title 3D Animation on Hover ---
     const heroTitle = document.getElementById('hero-title');
     if (heroTitle && !prefersReducedMotion) {
         heroTitle.addEventListener('mouseenter', () => {
@@ -822,7 +812,6 @@
         });
     }
 
-    // --- Scroll Lock Logic ---
     let scrollPosition = 0;
     const scrollManager = {
         lock() {
@@ -837,7 +826,9 @@
         }
     };
 
-    // --- SOLUCIÓN MENÚ MÓVIL ---
+    // =======================================================================
+    //  MODIFICACIÓN 1 · MENÚ HAMBURGUESA MÓVIL ROBUSTO
+    // =======================================================================
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
 
@@ -859,17 +850,16 @@
         }, "-=0.2")
         .eventCallback("onReverseComplete", () => {
             gsap.set(mobileMenu, { display: 'none' });
+            scrollManager.unlock(); // Desbloqueo unificado aquí
         });
 
     function toggleMenu() {
         const isOpen = menuToggle.classList.toggle('open');
         if (isOpen) {
-            scrollManager.lock();
-            menuTimeline.play();
+            scrollManager.lock(); // Bloqueo inmediato al abrir
+            menuTimeline.play(0); // Reproducir desde el inicio
         } else {
-            menuTimeline.reverse().then(() => {
-                scrollManager.unlock();
-            });
+            menuTimeline.reverse(); // El desbloqueo ocurre en onReverseComplete
         }
     }
 
@@ -883,7 +873,9 @@
         });
     });
 
-    // --- Modal Logic ---
+    // =======================================================================
+    //  MODIFICACIÓN 2 · LÓGICA DEL MODAL DE TARJETAS
+    // =======================================================================
     const overlayBackdrop = document.getElementById('overlay-backdrop');
     const cardModal = document.getElementById('card-modal');
     const cardModalImage = cardModal.querySelector('.card-modal-image');
@@ -934,7 +926,7 @@
         });
     });
 
-    // SOLUCIÓN: Listener para cerrar la tarjeta
+    // Listener de eventos unificado para el modal
     cardModal.addEventListener('click', (e) => {
         // Cierra si se hace clic en el botón de cerrar (X) o en el botón "Cerrar" de adentro
         if (e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse')) {
@@ -944,15 +936,6 @@
         // Cierra si se hace clic en el fondo oscuro
         else if (e.target === cardModal) { 
             closeCardModal();
-        } 
-        // Si se hace clic en un CTA, actualiza el formulario y cierra
-        else if (e.target.closest('a[href="#contact"]')) { 
-            const interest = e.target.getAttribute('data-interest');
-            if (interest && interestSelect) {
-                interestSelect.value = interest;
-            }
-            // No cerramos el modal aquí para que el usuario pueda ver que el formulario se actualizó,
-            // pero el enlace lo llevará a la sección de contacto al hacer clic.
         }
     });
 
@@ -1162,7 +1145,6 @@
         resultElement.textContent = 'Generando...';
         resultElement.style.color = '#e0e0e0';
 
-        // SOLUCIÓN: Se agregó la clave de API proporcionada
         const apiKey = "AIzaSyDEuE7UkdAk2mGWsprqoLFjpSi2EA68xns"; 
 
         const payload = { 
