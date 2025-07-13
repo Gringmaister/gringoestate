@@ -227,13 +227,6 @@
     .card-modal-content-wrapper { background-color: var(--card-bg); border-radius: 20px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); width: 90%; max-width: 1000px; height: 90%; max-height: 85vh; position: relative; display: flex; flex-direction: column; overflow: hidden; transform: scale(0.95); transition: transform 0.4s ease; }
     .card-modal.is-visible .card-modal-content-wrapper { transform: scale(1); }
     .card-modal-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
-    .card-modal-image::after { /* Capa oscura para legibilidad */
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.5); /* Más oscuro para el modal */
-      z-index: 1;
-    }
     .card-modal-text-content { position: relative; z-index: 2; padding: 2rem; display: flex; flex-direction: column; height: 100%; justify-content: space-between; color: var(--text-light); }
     .card-modal-text-content h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; flex-shrink: 0; }
     .card-modal-text-content .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; line-height: 1.7; margin-bottom: 1rem; }
@@ -357,52 +350,8 @@
     }
 
     @media (max-width: 768px) {
-        .cards-container { 
-            display: flex;
-            flex-direction: row; 
-            overflow-x: auto; /* Scroll horizontal nativo */
-            -webkit-overflow-scrolling: touch; 
-            scroll-snap-type: x mandatory; /* Snap a cada tarjeta */
-            padding: 0 1.5rem; /* Padding lateral */
-            width: 100%; 
-            gap: 1rem; /* Espacio entre tarjetas */
-            padding-left: 1.5rem; /* Reasegura el padding inicial */
-            padding-right: 1.5rem; /* Reasegura el padding final */
-        }
-        .cards-container::-webkit-scrollbar {
-            display: none; /* Oculta la barra de scroll nativa */
-        }
-        .service-card-stacked {
-            flex-shrink: 0; 
-            width: 90vw; /* Ancho de la tarjeta en móvil */
-            max-width: 400px; /* Máximo para que no se vean exageradamente grandes */
-            height: clamp(400px, 70vh, 550px); /* Altura ajustada */
-            scroll-snap-align: start; /* Para el scroll-snap */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Sombra más pronunciada en móvil */
-        }
-
-        /* Capa oscura para mejorar legibilidad en tarjetas expandidas en móvil */
-        .card-full-details-content {
-            position: relative; /* Necesario para el pseudo-elemento */
-            z-index: 1;
-        }
-        .card-full-details-content::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent 50%); /* Capa oscura */
-            z-index: 0; /* Por debajo del texto */
-            pointer-events: none; /* Permite que los clicks pasen */
-        }
-        .card-full-details-content h3,
-        .card-full-details-content p,
-        .card-full-details-content li {
-            position: relative; /* Asegura que el texto esté por encima del pseudo-elemento */
-            z-index: 1;
-        }
+        .cards-container { width: 100%; padding: 0 5vw; }
+        .service-card-stacked { width: 100%; }
         
         .card-modal-content-wrapper { width: 95%; height: 85%; }
         .card-modal-text-content { padding: 1.5rem; }
@@ -544,7 +493,7 @@
                                 <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" alt="Un desarrollador revisando planos en una obra" class="card-image" loading="lazy">
                             </picture>
                             <div class="card-content-initial"><h3>¿SOS <span>DESARROLLADOR?</span></h3><p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details"><div class="card-full-details-content"><h3>¿SOS DESARROLLADOR?</h3><div class="card-full-content-scroll"><p>Una alianza estratégica, no una inmobiliaria más.</p><ul><li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li><li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li><li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacunas en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li></ul><p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Asesoría para Desarrolladores">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                            <div class="card-full-details"><div class="card-full-details-content"><h3>¿SOS DESARROLLADOR?</h3><div class="card-full-content-scroll"><p>Una alianza estratégica, no una inmobiliaria más.</p><ul><li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li><li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li><li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li></ul><p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Asesoría para Desarrolladores">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                         </div>
                     </article>
                     
@@ -727,6 +676,7 @@
   <script>
   document.addEventListener('DOMContentLoaded', () => {
 
+    /* Registrar plugins una sola vez */
     gsap.registerPlugin(ScrollTrigger);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -740,7 +690,7 @@
             gsap.to(cursorPoint, { x: e.clientX, y: e.clientY, duration: 0.4, ease: 'power2.out', xPercent: -50, yPercent: -50 });
         });
 
-        const interactiveElements = document.querySelectorAll('a, button, .service-card-stacked, .btn-toggle-expand, .btn-card'); // Añadidos elementos interactivos
+        const interactiveElements = document.querySelectorAll('a, button, .service-card-stacked');
         interactiveElements.forEach(el => {
             el.addEventListener('mouseenter', () => {
                 gsap.to(cursorRegular, { scale: 0, opacity: 0, duration: 0.2 });
@@ -754,6 +704,7 @@
     }
 
     // --- Hero Animations ---
+    /* 4. Logo siempre visible */
     const iso = document.querySelector('.isologo');
     if (prefersReducedMotion) {
       iso.style.opacity = 1;
@@ -840,63 +791,31 @@
     };
 
     // --- Mobile Menu Toggle ---
-    /* 3. Menú móvil: display flex ↔ none con animaciones GSAP más pulidas */
+    /* 3. Menú móvil: display flex ↔ none */
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
-    
-    // Timeline TLMenu ajustada para manejar mejor la visibilidad y animaciones
-    const tlMenu = gsap.timeline({ paused: true, reversed: true });
-
-    tlMenu.to(mobileMenu, { 
-        autoAlpha: 1, 
-        duration: 0.3, 
-        ease: "power2.out",
-        onStart: () => { 
-            mobileMenu.style.display = 'flex'; // Asegurar que se muestre
-            scrollManager.lock(); // Bloquear scroll al abrir
-        },
-        onComplete: () => {
-            // Animar los items uno por uno después de que el contenedor es visible
-            gsap.to(mobileMenu.querySelectorAll('li'), { 
-                x: 0, 
-                opacity: 1, 
-                stagger: 0.08, 
-                duration: 0.35, 
-                ease: "power3.out"
-            });
-        }
-    });
-
-    tlMenu.reverse(); // Asegura que al inicio esté en estado 'reversed'
+    const tlMenu = gsap.timeline({paused:true, reversed:true})
+      .set(mobileMenu, {display:'flex'})
+      .to(mobileMenu, {autoAlpha:1, duration:0.3})
+      .from(mobileMenu.querySelectorAll('li'),
+            {x:-30, opacity:0, stagger:0.08, duration:0.35}, '-=0.15')
+      .addPause()
+      .to(mobileMenu, {autoAlpha:0, duration:0.25})
+      .set(mobileMenu, {display:'none'});
 
     menuToggle.addEventListener('click', () => {
       const isOpen = menuToggle.classList.contains('open');
-      
-      if (!isOpen) {
-          tlMenu.play(); // Reproducir la animación de apertura
-      } else {
-          // Animar los items saliendo primero
-          gsap.to(mobileMenu.querySelectorAll('li'), { 
-              x: -30, 
-              opacity: 0, 
-              stagger: 0.08, 
-              duration: 0.35, 
-              ease: "power3.in",
-              onComplete: () => {
-                  tlMenu.reverse(); // Luego invertir la animación principal del contenedor
-              }
-          });
-      }
+      if (!isOpen) { scrollManager.lock(); } else { scrollManager.unlock(); }
       menuToggle.classList.toggle('open');
+      tlMenu.reversed() ? tlMenu.play() : tlMenu.reverse();
     });
 
     mobileMenu.querySelectorAll('a').forEach(link => {
         if (link.getAttribute('href').startsWith('#')) {
             link.addEventListener('click', () => {
                 if (menuToggle.classList.contains('open')) {
-                  // Al hacer clic en un enlace, cerrar el menú
                   const isOpen = menuToggle.classList.contains('open');
-                  if (!isOpen) { scrollManager.lock(); } else { scrollManager.unlock(); } // Asegura el estado del scroll
+                  if (!isOpen) { scrollManager.lock(); } else { scrollManager.unlock(); }
                   menuToggle.classList.toggle('open');
                   tlMenu.reversed() ? tlMenu.play() : tlMenu.reverse();
                 }
@@ -910,7 +829,7 @@
     const cardModalImage = cardModal.querySelector('.card-modal-image');
     const cardModalTextContent = cardModal.querySelector('.card-modal-text-content');
     const interestSelect = document.getElementById('interest-select');
-    // const propertyDetailsDiv = document.getElementById('property-details'); // No se usa directamente aquí
+    const propertyDetailsDiv = document.getElementById('property-details'); 
     
     let horizontalScrollInstance = null; 
 
@@ -925,7 +844,6 @@
         overlayBackdrop.classList.add('visible');
         scrollManager.lock(); 
 
-        // Deshabilitar scroll horizontal si está activo
         if (horizontalScrollInstance) {
             horizontalScrollInstance.disable();
         }
@@ -936,23 +854,28 @@
         overlayBackdrop.classList.remove('visible');
         scrollManager.unlock(); 
 
-        // Habilitar scroll horizontal si se deshabilitó
         if (horizontalScrollInstance) {
             horizontalScrollInstance.enable();
         }
     }
 
-    // Event listeners para abrir el modal
     document.querySelectorAll('.service-card-stacked').forEach(card => {
-        const toggleButton = card.querySelector('.btn-toggle-expand');
-        
-        toggleButton.addEventListener('click', (e) => {
-            e.stopPropagation(); // Evita que el evento se propague al padre (la tarjeta)
+        card.addEventListener('click', e => {
+            if (e.target.closest('a[target="_blank"]') || e.target.closest('a[href="#contact"]')) {
+                if (e.target.closest('a[href="#contact"]')) {
+                    const interest = e.target.getAttribute('data-interest');
+                    if (interest && interestSelect) {
+                        interestSelect.value = interest;
+                        interestSelect.dispatchEvent(new Event('change'));
+                    }
+                }
+                return; 
+            }
+            e.preventDefault(); 
             openCardModal(card);
         });
     });
 
-    // Event listeners para cerrar el modal
     cardModal.addEventListener('click', (e) => {
         if (e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse')) {
             closeCardModal();
@@ -969,207 +892,52 @@
     });
 
     // --- Horizontal Scroll Animation Setup ---
-    /* 1. Scroll horizontal fluido con GSAP */
+    /* 1. Scroll horizontal fluido */
     function setupHorizontalScroll() {
-        const section = document.querySelector('#services-stacked'); 
+        const section = document.querySelector('.horizontal-scroll-section');
         const wrapper = section.querySelector('.horizontal-scroll-wrapper');
         const container = section.querySelector('.cards-container');
         const cards = gsap.utils.toArray('.service-card-stacked');
 
-        // Limpiar instancias previas de ScrollTrigger para evitar conflictos al redimensionar
         if (horizontalScrollInstance) {
             horizontalScrollInstance.kill();
             horizontalScrollInstance = null;
         }
-        // También limpiar ScrollTriggers de las tarjetas si se añadieron individualmente
-        ScrollTrigger.getAll().forEach(st => st.kill());
 
-        // Condición para el comportamiento móvil
         if (window.innerWidth < 768 || prefersReducedMotion) {
-            // Desactivar la funcionalidad de scroll horizontal de escritorio de GSAP
-            gsap.set(container, { clearProps: "x,transform,scrollTrigger" });
-            gsap.set(wrapper, { clearProps: "height,position,top,overflow,scrollTrigger" });
-            
-            // Estilos específicos para móvil (scroll nativo)
-            gsap.set(container, { 
-                display: 'flex', 
-                flexDirection: 'row', /* Mantener row para el scroll horizontal nativo */
-                overflowX: 'auto', /* Permitir scroll nativo */
-                scrollSnapType: 'x mandatory',
-                padding: '0 1.5rem', /* Padding lateral para el scroll */
-                width: '100%'
-            });
-            gsap.set(cards, { 
-                flexShrink: 0, /* Importante para el scroll horizontal */
-                width: '90vw', /* Ancho de la tarjeta en móvil */
-                maxWidth: '400px', /* Máximo para que no se vean exageradamente grandes */
-                scrollSnapAlign: 'start', /* Para el scroll-snap */
-                scale: 1, /* Resetear escala */
-                clearProps: "transform" /* Limpiar cualquier transform GSAP previo */
-            });
-            section.style.height = 'auto'; // Ajustar altura de sección para que no ocupe 100vh si no es necesario
-            
-            // Lógica para expandir/colapsar tarjetas en móvil (simplificada)
-            document.querySelectorAll('.service-card-stacked').forEach(card => {
-                const toggleButton = card.querySelector('.btn-toggle-expand');
-                const expandCard = card.querySelector('.card-full-details');
-                const cardInner = card.querySelector('.card-inner-content');
-
-                // Asegurarse de que el contenido detallado esté oculto inicialmente
-                gsap.set(expandCard, { height: 0, opacity: 0, display: 'none' });
-                gsap.set(toggleButton, { rotate: 0 }); // Resetear rotación
-
-                toggleButton.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const isExpanded = expandCard.style.display === 'block';
-
-                    gsap.to(expandCard, { 
-                        height: isExpanded ? 0 : 'auto', 
-                        opacity: isExpanded ? 0 : 1, 
-                        duration: 0.4, 
-                        ease: "power3.out", 
-                        onComplete: () => { if (!isExpanded) expandCard.style.display = 'block'; },
-                        onReverseComplete: () => { expandCard.style.display = 'none'; }
-                    });
-                    
-                    gsap.to(toggleButton, { 
-                        rotate: isExpanded ? 0 : 180, 
-                        duration: 0.4, 
-                        ease: "power3.out" 
-                    });
-
-                    // Si abrimos una tarjeta, cerramos las otras que pudieran estar abiertas
-                    cards.forEach(otherCard => {
-                        if (otherCard !== card) {
-                            const otherExpandCard = otherCard.querySelector('.card-full-details');
-                            const otherToggleButton = otherCard.querySelector('.btn-toggle-expand');
-                            if (otherExpandCard.style.display === 'block') {
-                                gsap.to(otherExpandCard, { height: 0, opacity: 0, duration: 0.4, ease: "power3.in", onComplete: () => otherExpandCard.style.display = 'none' });
-                                gsap.to(otherToggleButton, { rotate: 0, duration: 0.4 });
-                            }
-                        }
-                    });
-                });
-
-                // Listener para cerrar la tarjeta expandida
-                const closeButton = card.querySelector('.btn-toggle-collapse');
-                closeButton.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    gsap.to(expandCard, { height: 0, opacity: 0, duration: 0.4, ease: "power3.in", onComplete: () => expandCard.style.display = 'none' });
-                    gsap.to(toggleButton, { rotate: 0, duration: 0.4 });
-                });
-            });
-            
-            ScrollTrigger.refresh(true); // Refrescar ScrollTrigger después de aplicar estilos
-            return; // Salir de la función si es móvil
-        }
-
-        // --- Lógica para Escritorio (Scroll Horizontal GSAP) ---
-        gsap.set(wrapper, { position: 'sticky', top: 0, height: '100vh', overflow: 'hidden' });
-        gsap.set(container, { display: 'flex', flexDirection: 'row', willChange: 'transform' });
-        gsap.set(cards, { scale: 1, clearProps: "transform" }); // Resetear escala y transform
-
-        // Calcular el ancho necesario para el scroll
-        const containerWidth = container.scrollWidth;
-        const viewportWidth = window.innerWidth;
-        const scrollDistance = containerWidth - viewportWidth;
-
-        if (scrollDistance > 0) {
-            section.style.height = `${scrollDistance + viewportWidth}px`; // Altura de la sección para que el scroll dure lo necesario
-
-            horizontalScrollInstance = gsap.to(container, {
-                x: -scrollDistance,
-                ease: 'none', // 'none' para movimiento directo con el scroll
-                scrollTrigger: {
-                    trigger: section,
-                    start: 'top top',
-                    end: `+=${scrollDistance}`,
-                    pin: wrapper, // Ancla el wrapper mientras dura el scroll
-                    pinType: ScrollTrigger.isTouch ? 'transform' : 'fixed',
-                    scrub: 1.5, // Para una sensación más suave y conectada al scroll
-                    invalidateOnRefresh: true, // Recalcula al redimensionar
-                    onUpdate: self => { // Efecto de escala de las tarjetas
-                        const viewportCenter = window.innerWidth / 2;
-                        cards.forEach(card => {
-                            const rect = card.getBoundingClientRect();
-                            const cardCenter = rect.left + rect.width / 2;
-                            const distanceToCenter = Math.abs(viewportCenter - cardCenter);
-                            // Mapear distancia a escala: cuanto más cerca del centro, más grande
-                            const scaleFactor = gsap.utils.mapRange(0, viewportCenter * 1.5, 1.08, 0.95)(distanceToCenter); // Ajusta los rangos si es necesario
-                            gsap.to(card, {
-                                scale: scaleFactor,
-                                duration: 0.3, // Duración corta para que parezca en tiempo real
-                                ease: 'power3.out',
-                                overwrite: true // Sobrescribe animaciones anteriores de escala
-                            });
-                        });
-                    }
-                }
-            });
-            
-            // Lógica para expandir/colapsar tarjetas en escritorio
-            cards.forEach(card => {
-                const toggleButton = card.querySelector('.btn-toggle-expand');
-                const expandCard = card.querySelector('.card-full-details');
-                const cardInner = card.querySelector('.card-inner-content');
-
-                // Asegurarse de que el contenido detallado esté oculto inicialmente
-                gsap.set(expandCard, { height: 0, opacity: 0, display: 'none' });
-                gsap.set(toggleButton, { rotate: 0 }); // Resetear rotación
-
-                toggleButton.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const isExpanded = expandCard.style.display === 'block';
-
-                    // Animar la expansión/contracción del contenido detallado
-                    gsap.to(expandCard, { 
-                        height: isExpanded ? 0 : 'auto', 
-                        opacity: isExpanded ? 0 : 1, 
-                        duration: 0.4, 
-                        ease: "power3.out", 
-                        onComplete: () => { if (!isExpanded) expandCard.style.display = 'block'; },
-                        onReverseComplete: () => { expandCard.style.display = 'none'; }
-                    });
-                    
-                    // Animar la flecha/icono del botón
-                    gsap.to(toggleButton, { 
-                        rotate: isExpanded ? 0 : 180, 
-                        duration: 0.4, 
-                        ease: "power3.out" 
-                    });
-
-                    // Si abrimos una tarjeta, cerramos las otras que pudieran estar abiertas
-                    cards.forEach(otherCard => {
-                        if (otherCard !== card) {
-                            const otherExpandCard = otherCard.querySelector('.card-full-details');
-                            const otherToggleButton = otherCard.querySelector('.btn-toggle-expand');
-                            if (otherExpandCard.style.display === 'block') {
-                                gsap.to(otherExpandCard, { height: 0, opacity: 0, duration: 0.4, ease: "power3.in", onComplete: () => otherExpandCard.style.display = 'none' });
-                                gsap.to(otherToggleButton, { rotate: 0, duration: 0.4 });
-                            }
-                        }
-                    });
-                });
-
-                // Listener para cerrar la tarjeta expandida
-                const closeButton = card.querySelector('.btn-toggle-collapse');
-                closeButton.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    gsap.to(expandCard, { height: 0, opacity: 0, duration: 0.4, ease: "power3.in", onComplete: () => expandCard.style.display = 'none' });
-                    gsap.to(toggleButton, { rotate: 0, duration: 0.4 });
-                });
-            });
-        } else {
-            // Si no hay scroll (pocas tarjetas o pantalla muy ancha), solo ajustamos estilo
-            gsap.set(container, { display: 'flex', flexDirection: 'row', gap: '3rem', justifyContent: 'center' });
+            gsap.set([section, wrapper, container, cards], { clearProps: 'all' });
+            gsap.set(container, { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1.5rem' });
+            gsap.set(cards, { width: '100%', maxWidth: '500px', margin: '1rem 0' });
             section.style.height = 'auto';
+            ScrollTrigger.refresh();
+            return;
         }
+
+        gsap.set(wrapper, { position: 'sticky', top: 0, height: '100vh', overflow: 'hidden' });
+        gsap.set(container, { display: 'flex', flexDirection: 'row' });
+
+        const scrollW = container.scrollWidth - window.innerWidth;
+        section.style.height = `${scrollW + window.innerHeight}px`;
+
+        horizontalScrollInstance = gsap.to(container, {
+            x: -scrollW,
+            ease: 'none',
+            scrollTrigger: {
+                trigger: section,
+                start: 'top top',
+                end: `+=${scrollW}`,
+                pin: wrapper,
+                pinType: ScrollTrigger.isTouch ? 'transform' : 'fixed',
+                scrub: true,
+                invalidateOnRefresh: true
+            }
+        });
     }
     
     // --- Particle Animation ---
     const particlesObj = { visible: true }; // Global state for particles
     const canvas = document.getElementById('particle-canvas');
-    let threejsScene = null; // Variable para mantener la instancia de la escena si fuera necesario.
+    let threejsScene = null;
 
     function initParticleAnimation() {
         if (prefersReducedMotion || !canvas) return; 
@@ -1222,30 +990,24 @@
         });
     }
 
-    /* 2. Pausar Three.js cuando se fija el carrusel */
+    /* 2. Pausar Three.js cuando se fija */
     ScrollTrigger.create({
       trigger: '.horizontal-scroll-section',
-      start: 'top top', // Cuando el inicio de la sección llega a la parte superior del viewport
-      end: 'bottom top', // Cuando el final de la sección llega a la parte superior del viewport
-      onEnter: () => particlesObj.visible = false, // Al entrar en la sección, pausar partículas
-      onLeave: () => particlesObj.visible = true,  // Al salir, reanudar
-      onEnterBack: () => particlesObj.visible = false, // Al volver a entrar desde abajo, pausar
-      onLeaveBack: () => particlesObj.visible = true,  // Al salir de nuevo hacia arriba, reanudar
+      start: 'top top',
+      end: 'bottom top',
+      onEnter: () => particlesObj.visible = false,
+      onLeave: () => particlesObj.visible = true,
+      onEnterBack: () => particlesObj.visible = false,
+      onLeaveBack: () => particlesObj.visible = true,
     });
     
     // --- Initializations ---
     initParticleAnimation();
-    setupHorizontalScroll(); // Inicializa el scroll horizontal
-    
-    // Listener para redimensionamiento de ventana. Usamos debounce para evitar ejecuciones excesivas.
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            setupHorizontalScroll(); // Reconfigura el scroll al redimensionar
-            ScrollTrigger.refresh(true); // Refresca los ScrollTriggers que puedan haberse invalidado
-        }, 250); // Espera 250ms después de la última redimensión
-    });
+    setupHorizontalScroll();
+    window.addEventListener('resize', gsap.utils.debounce(() => {
+        setupHorizontalScroll();
+        ScrollTrigger.refresh(true);
+    }, 250));
 
     // --- IA Tool Event Listeners ---
     const generateDescriptionBtn = document.getElementById('generate-description-btn');
@@ -1270,9 +1032,7 @@
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
             ipcDataCache = data.data.reduce((acc, item) => {
-                // Formato "YYYY-MM"
-                const fechaKey = item.fecha.substring(0, 7); 
-                acc[fechaKey] = parseFloat(item.valor);
+                acc[item.fecha.substring(0, 7)] = parseFloat(item.valor);
                 return acc;
             }, {});
             return ipcDataCache;
@@ -1284,7 +1044,7 @@
 
     async function calcularNuevoAlquiler() {
         const montoOriginal = parseFloat(alquilerOriginalInput.value);
-        const fechaInicioStr = fechaInicioInput.value; // Formato YYYY-MM
+        const fechaInicioStr = fechaInicioInput.value; 
         const periodo = parseInt(periodoIndexacionInput.value);
 
         if (isNaN(montoOriginal) || !fechaInicioStr || isNaN(periodo)) {
@@ -1306,28 +1066,28 @@
             return;
         }
 
-        let fechaActual = new Date(fechaInicioStr + '-01'); // Aseguramos el día 01 para la comparación
+        const [startYear, startMonth] = fechaInicioStr.split('-').map(Number);
+        let fechaActual = new Date(startYear, startMonth - 1, 1);
         let montoActual = montoOriginal;
         const hoy = new Date();
-        hoy.setDate(1); // Usamos el primer día del mes actual para la comparación
+        hoy.setDate(1);
 
         let ultimoMontoCalculado = montoOriginal;
-        let ultimaFechaCalculada = new Date(fechaActual); // Copia para no modificar la original
+        let ultimaFechaCalculada = fechaActual;
 
         while (fechaActual < hoy) {
-            let fechaAnterior = new Date(fechaActual); // Fecha de inicio del período
-            fechaActual.setMonth(fechaActual.getMonth() + periodo); // Avanzamos el mes para el fin del período
+            let fechaAnterior = new Date(fechaActual);
+            fechaActual.setMonth(fechaActual.getMonth() + periodo);
 
-            // Si la fecha calculada ya es posterior a la fecha actual, salimos
             if (fechaActual > hoy) break;
 
-            const fechaAnteriorKey = `${fechaAnterior.getFullYear()}-${String(fechaAnterior.getMonth() + 1).padStart(2, '0')}`;
-            const fechaActualKey = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth() + 1).padStart(2, '0')}`;
+            const fechaAnteriorStr = `${fechaAnterior.getFullYear()}-${String(fechaAnterior.getMonth() + 1).padStart(2, '0')}`;
+            const fechaActualStr = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth() + 1).padStart(2, '0')}`;
             
-            const ipcAnterior = ipcData[fechaAnteriorKey];
-            const ipcActual = ipcData[fechaActualKey];
+            const ipcAnterior = ipcData[fechaAnteriorStr];
+            const ipcActual = ipcData[fechaActualStr];
 
-            if (ipcAnterior === undefined || ipcActual === undefined) {
+            if (!ipcAnterior || !ipcActual) {
                 alquilerResult.textContent = `No se encontraron datos del IPC para el período que finaliza en ${fechaActual.toLocaleString('es-AR', { month: 'long', year: 'numeric' })}. El último valor calculado es de la fecha anterior.`;
                 alquilerResult.style.color = '#ffda6a';
                 loaderAlquiler.style.display = 'none';
@@ -1336,15 +1096,10 @@
             
             montoActual = montoActual * (ipcActual / ipcAnterior);
             ultimoMontoCalculado = montoActual;
-            ultimaFechaCalculada = new Date(fechaActual); // Guardamos la fecha de fin del período válido
+            ultimaFechaCalculada = fechaActual;
         }
         
-        // Formatear la fecha para mostrarla
-        const displayFecha = ultimaFechaCalculada.toLocaleString('es-AR', { month: 'long', year: 'numeric' });
-        // Formatear el número con separadores de miles y coma decimal
-        const formattedMonto = Intl.NumberFormat('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(ultimoMontoCalculado);
-
-        alquilerResult.textContent = `El alquiler actualizado a ${displayFecha} sería: $${formattedMonto}`;
+        alquilerResult.textContent = `El alquiler actualizado a ${ultimaFechaCalculada.toLocaleString('es-AR', { month: 'long', year: 'numeric' })} sería: $${ultimoMontoCalculado.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
         alquilerResult.style.color = '#e0e0e0'; 
         loaderAlquiler.style.display = 'none';
     }
@@ -1359,17 +1114,7 @@
         resultElement.textContent = 'Generando...';
         resultElement.style.color = '#e0e0e0';
 
-        // *** ADVERTENCIA: La API Key NO DEBE estar en el frontend. ***
-        // Considera usar un backend o funciones serverless para esto.
-        // Para DEMOSTRACIÓN, la dejo aquí, pero EN PRODUCCIÓN, esto es un RIESGO DE SEGURIDAD.
-        const apiKey = ""; // ¡¡¡CAMBIAR ESTO POR UNA LLAMADA A UN BACKEND!!!
-
-        if (!apiKey || apiKey === "") { // Chequeo más simple, asumiendo que si está vacía no funciona.
-            resultElement.textContent = 'Error de configuración: La clave API no está establecida.';
-            resultElement.style.color = '#ff6b6b';
-            loaderElement.style.display = 'none';
-            return;
-        }
+        const apiKey = ""; 
 
         const payload = { 
             contents: [{ parts: [{ text: prompt }] }] 
@@ -1402,7 +1147,7 @@
                 console.error('Unexpected API response structure:', result);
             }
         } catch (error) {
-            resultElement.textContent = 'Error al conectar con la IA. Revisa la consola del navegador.';
+            resultElement.textContent = 'Error al conectar con la IA. Revisa la consola del navegador o tu clave API.';
             resultElement.style.color = '#ff6b6b';
             console.error('Error calling Gemini API:', error);
         } finally {
