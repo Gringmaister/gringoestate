@@ -102,7 +102,8 @@
     header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}  
     .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem;}
     
-    /* SOLUCIÓN: Se eliminó la regla .hero > *:not(.isologo) que causaba el conflicto con el logo. */
+    /* SOLUCIÓN LOGO: Se establece la opacidad inicial de los elementos a animar */
+    .hero .hero-el { opacity: 0; }
     
     .hero .isologo{ 
         width: 120px; 
@@ -111,7 +112,6 @@
         display: block; 
         z-index: 10; 
         position: relative; 
-        opacity: 0; 
     }
     .hero .isologo img {
         width: 100%;
@@ -430,10 +430,9 @@
 
   <header id="top">
     <div class="hero">
-        <!-- SOLUCIÓN: Se movió la clase 'isologo' a la etiqueta <picture> -->
-        <picture class="isologo">
+        <!-- SOLUCIÓN LOGO: Se añade la clase 'hero-el' a la etiqueta <picture> para que se anime junto al resto -->
+        <picture class="isologo hero-el">
             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp">
-            <!-- Se eliminó la clase del <img> -->
             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" alt="Isologo de GringoEstate" width="120" height="120">
         </picture>
         <h1 class="hero-el" id="hero-title">GRINGO<span>ESTATE</span></h1>
@@ -739,23 +738,16 @@
     }
 
     // --- Hero Animations ---
-    const iso = document.querySelector('.isologo');
-    if (prefersReducedMotion) {
-      iso.style.opacity = 1;
-      gsap.set(".hero-el", { opacity: 1 });
-    } else {
-      gsap.fromTo(iso, {opacity:0, y:20}, {opacity:1, y:0, duration:1, ease:'power3.out', delay: 0.2});
-
-      gsap.set(".hero-el", {y: 30, opacity: 0});
-      gsap.to(".hero-el", { 
-          opacity: 1, 
-          y: 0, 
-          duration: 1, 
-          stagger: 0.2, 
-          ease: "power3.out", 
-          delay: 0.4,
-      });
-    }
+    // SOLUCIÓN LOGO: Se unifica la animación. 'hero-el' ahora incluye el logo.
+    gsap.set(".hero-el", {y: 30, opacity: 0});
+    gsap.to(".hero-el", { 
+        opacity: 1, 
+        y: 0, 
+        duration: 1, 
+        stagger: 0.2, 
+        ease: "power3.out", 
+        delay: 0.2,
+    });
         
     const animateOnScroll = (selector, triggerSelector) => {
           gsap.from(selector, {
@@ -824,46 +816,47 @@
         }
     };
 
-    // --- Mobile Menu Toggle - CORREGIDO ---
+    // --- SOLUCIÓN MENÚ: Lógica de animación del menú móvil corregida y simplificada ---
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
 
-    // SOLUCIÓN: Se creó una línea de tiempo solo para la animación de apertura.
-    const tlOpen = gsap.timeline({ paused: true, reversed: true })
-        .set(mobileMenu, { display: 'flex' })
-        .to(mobileMenu, { autoAlpha: 1, duration: 0.4, ease: 'power2.out' })
+    gsap.set(mobileMenu, { display: 'none', autoAlpha: 0 });
+
+    const menuTimeline = gsap.timeline({ paused: true, reversed: true })
+        .to(mobileMenu, { 
+            display: 'flex',
+            autoAlpha: 1, 
+            duration: 0.4, 
+            ease: 'power2.out' 
+        })
         .from(mobileMenu.querySelectorAll('li'), {
             opacity: 0,
             y: 20,
             duration: 0.4,
             stagger: 0.08,
             ease: 'power2.out'
-        }, "-=0.2");
+        }, "-=0.2")
+        .eventCallback("onReverseComplete", () => {
+            gsap.set(mobileMenu, { display: 'none' });
+        });
 
-    function openMenu() {
-        scrollManager.lock();
-        menuToggle.classList.add('open');
-        tlOpen.timeScale(1).play();
-    }
-
-    function closeMenu() {
-        scrollManager.unlock();
-        menuToggle.classList.remove('open');
-        tlOpen.timeScale(1.5).reverse();
-    }
-
-    menuToggle.addEventListener('click', () => {
-        if (menuToggle.classList.contains('open')) {
-            closeMenu();
+    function toggleMenu() {
+        menuToggle.classList.toggle('open');
+        if (menuTimeline.reversed()) {
+            scrollManager.lock();
+            menuTimeline.play();
         } else {
-            openMenu();
+            scrollManager.unlock();
+            menuTimeline.reverse();
         }
-    });
+    }
+
+    menuToggle.addEventListener('click', toggleMenu);
 
     mobileMenu.querySelectorAll('a[href^="#"]').forEach(link => {
         link.addEventListener('click', () => {
             if (menuToggle.classList.contains('open')) {
-                closeMenu();
+                toggleMenu();
             }
         });
     });
@@ -1143,12 +1136,16 @@
         resultElement.style.color = '#e0e0e0';
 
         // ¡OJO! Debes reemplazar "" con tu clave de API real de Google AI Studio.
-        const apiKey = "AIzaSyDEuE7UkdAk2mGWsprqoLFjpSi2EA68xns"; 
+        const apiKey = "TU_CLAVE_DE_API_AQUI"; 
 
         const payload = { 
             contents: [{ parts: [{ text: prompt }] }] 
         };
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+        // Logs para depuración
+        console.log("Enviando a Gemini API...");
+        console.log("Prompt:", prompt);
 
         try {
             const response = await fetch(apiUrl, {
@@ -1157,12 +1154,14 @@
                 body: JSON.stringify(payload)
             });
 
+            const result = await response.json();
+
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`API error: ${response.status} ${response.statusText} - ${JSON.stringify(errorData)}`);
+                console.error("Error en la respuesta de la API:", result);
+                throw new Error(`API error: ${response.status} ${response.statusText} - ${JSON.stringify(result.error)}`);
             }
 
-            const result = await response.json();
+            console.log("Respuesta recibida de la API:", result);
 
             if (result.candidates && result.candidates.length > 0 &&
                 result.candidates[0].content && result.candidates[0].content.parts &&
@@ -1178,7 +1177,7 @@
         } catch (error) {
             resultElement.textContent = 'Error al conectar con la IA. Revisa la consola del navegador o tu clave API.';
             resultElement.style.color = '#ff6b6b';
-            console.error('Error calling Gemini API:', error);
+            console.error('Error llamando a la API de Gemini:', error);
         } finally {
             loaderElement.style.display = 'none';
         }
