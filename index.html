@@ -108,7 +108,7 @@
     .hero .isologo{ width: 120px; height: auto; margin: 0 auto 1rem auto; display: block; }
     .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem; perspective: 800px; transform-style: preserve-3d;}
     .hero h1 span{color:var(--primary); letter-spacing: 2px;}
-    .hero h1 .char { display: inline-block; } /* Para animación de letras del H1 */
+    /* .hero h1 .char { display: inline-block; } */ /* Eliminada animación de letras del H1 */
     .hero p{font-size:1.5rem;color:#e2e8f0;margin-bottom:2rem;line-height:1.4;font-family:'Bebas Neue', sans-serif; letter-spacing:1px;}
     .btn-primary{background:var(--primary);color:var(--dark);padding:.75rem 2rem;border-radius:50px;display:inline-block;transition: background-color .3s, color .3s, box-shadow .3s;font-weight:700;font-size:1.1rem;letter-spacing:1px; border: none; text-decoration: none;}
     .btn-primary:hover{background:#fff;color:var(--dark);transform:translateY(-3px) !important;box-shadow:0 10px 20px rgba(0,0,0,0.2);}
@@ -432,6 +432,7 @@
             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp">
             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" alt="Isologo de GringoEstate" class="isologo hero-el" width="120" height="120">
         </picture>
+        <!-- Título del Hero SIN animación, solo texto -->
         <h1 class="hero-el">GRINGO<span>ESTATE</span></h1>
         <p class="hero-el">LA POSTA INMOBILIARIA. SIN CORBATA.</p>
         <a href="#contact" class="btn-primary hero-el">AGENDÁ UNA LLAMADA</a>
@@ -708,7 +709,6 @@
             gsap.to(cursorPoint, { x: e.clientX, y: e.clientY, duration: 0.4, ease: 'power2.out', xPercent: -50, yPercent: -50 });
         });
 
-        // Change cursor to 'point' on interactive elements
         const interactiveElements = document.querySelectorAll('a, button, .service-card-stacked');
         interactiveElements.forEach(el => {
             el.addEventListener('mouseenter', () => {
@@ -740,10 +740,10 @@
         const animateOnScroll = (selector, triggerSelector) => {
              gsap.from(selector, {
                  opacity: 0,
-                 y: 50,
+                 y: 50, // Slight upward movement for entrance
                  duration: 1,
                  ease: 'power3.out',
-                 stagger: 0.15, // Slightly reduced stagger for smoother feel
+                 stagger: 0.15,
                  scrollTrigger: {
                      trigger: triggerSelector || selector,
                      start: "top 85%",
@@ -763,43 +763,15 @@
     const nav = document.querySelector('nav');
     if(nav) {
         ScrollTrigger.create({
-            start: 'top -80', // Start applying class when scrolled 80px down
+            start: 'top -80',
             end: 99999,
             toggleClass: { className: 'nav-scrolled', targets: nav }
         });
     }
 
-    // --- Hero Title Animation ---
-    const heroTitle = document.querySelector('.hero h1');
-    if (heroTitle && !prefersReducedMotion) {
-        const text = heroTitle.textContent.trim();
-        // Split text into spans for animation
-        const splitText = text.split('').map(char => `<span class="char">${char === ' ' ? ' ' : char}</span>`).join('');
-        // Ensure the <span> for ESTATE is preserved correctly
-        heroTitle.innerHTML = splitText.replace("GRINGO ESTATE", `GRINGO<span>ESTATE</span>`);
-        const chars = heroTitle.querySelectorAll('.char');
-
-        // Animation on hover (as per original code)
-        heroTitle.addEventListener('mouseenter', () => {
-            gsap.to(chars, {
-                duration: 0.5,
-                rotationX: 360,
-                color: '#FFBF00',
-                stagger: 0.03,
-                ease: 'power2.out'
-            });
-        });
-
-        heroTitle.addEventListener('mouseleave', () => {
-            gsap.to(chars, {
-                duration: 0.5,
-                rotationX: 0,
-                color: '#ffffff', // Reset to original color
-                stagger: 0.03,
-                ease: 'power2.out'
-            });
-        });
-    }
+    // --- Hero Title (No Animation) ---
+    // The h1 is already set up statically, no animation needed as requested.
+    // The previous animation logic for letters has been commented out/removed.
 
     // --- Mobile Menu Toggle ---
     const menuToggle = document.getElementById('menu-toggle');
@@ -815,22 +787,19 @@
         const toggleMenu = () => {
             const isOpen = menuToggle.classList.contains('open');
             if (!isOpen) {
-                // When opening menu: save scroll position, prevent body scroll
                 scrollPosition = window.pageYOffset;
-                document.body.style.top = `-${scrollPosition}px`; // Use negative top to mimic scrolling
+                document.body.style.top = `-${scrollPosition}px`; 
                 document.body.classList.add('no-scroll');
             } else {
-                // When closing menu: remove body scroll class, restore scroll position
                 document.body.classList.remove('no-scroll');
                 document.body.style.removeProperty('top');
-                window.scrollTo(0, scrollPosition); // Restore scroll position
+                // window.scrollTo(0, scrollPosition); // Removing explicit scrollTo to test smoother transition
             }
             menuToggle.classList.toggle('open');
             mobileMenuTimeline.reversed() ? mobileMenuTimeline.play() : mobileMenuTimeline.reverse();
         };
 
         menuToggle.addEventListener('click', toggleMenu);
-        // Close menu when a link is clicked (if it's an anchor link)
         mobileMenu.querySelectorAll('a').forEach(link => {
             if (link.getAttribute('href').startsWith('#')) {
                 link.addEventListener('click', toggleMenu);
@@ -844,16 +813,15 @@
     const cardModalImage = cardModal.querySelector('.card-modal-image');
     const cardModalTextContent = cardModal.querySelector('.card-modal-text-content');
     const interestSelect = document.getElementById('interest-select');
-    const propertyDetailsDiv = document.getElementById('property-details'); // Renamed to avoid conflict
+    const propertyDetailsDiv = document.getElementById('property-details'); 
 
-    // Custom scroll management to prevent background scroll when modal is open
     const scrollManager = {
         lockCount: 0,
         lock() { 
             if (this.lockCount === 0) {
-                scrollPosition = window.pageYOffset; // Save current scroll position
-                document.body.style.top = `-${scrollPosition}px`; // Apply negative top to body
-                document.body.classList.add('no-scroll'); // Add class to prevent scroll
+                scrollPosition = window.pageYOffset;
+                document.body.style.top = `-${scrollPosition}px`;
+                document.body.classList.add('no-scroll');
             }
             this.lockCount++;
         },
@@ -861,14 +829,14 @@
             this.lockCount--;
             if (this.lockCount <= 0) {
                 this.lockCount = 0;
-                document.body.classList.remove('no-scroll'); // Remove class
-                document.body.style.removeProperty('top'); // Remove inline style
-                window.scrollTo(0, scrollPosition); // Restore scroll position
+                document.body.classList.remove('no-scroll');
+                document.body.style.removeProperty('top');
+                // Removed the explicit window.scrollTo(0, scrollPosition);
+                // This should allow the browser to naturally resume scroll
             }
         }
     };
     
-    // Global variable to store the ScrollTrigger instance for horizontal scroll
     let horizontalScrollInstance = null; 
 
     function openCardModal(card) {
@@ -876,13 +844,12 @@
         const fullDetailsContent = card.querySelector('.card-full-details-content').innerHTML;
 
         cardModalImage.src = imageSrc;
-        cardModalTextContent.innerHTML = fullDetailsContent; // Inject content
+        cardModalTextContent.innerHTML = fullDetailsContent;
 
         cardModal.classList.add('is-visible');
         overlayBackdrop.classList.add('visible');
-        scrollManager.lock(); // Lock background scroll
+        scrollManager.lock(); 
 
-        // Disable horizontal scroll trigger when modal is open
         if (horizontalScrollInstance) {
             horizontalScrollInstance.disable();
         }
@@ -891,9 +858,8 @@
     function closeCardModal() {
         cardModal.classList.remove('is-visible');
         overlayBackdrop.classList.remove('visible');
-        scrollManager.unlock(); // Unlock background scroll
+        scrollManager.unlock(); 
 
-        // Re-enable horizontal scroll trigger
         if (horizontalScrollInstance) {
             horizontalScrollInstance.enable();
         }
@@ -901,42 +867,38 @@
 
     document.querySelectorAll('.service-card-stacked').forEach(card => {
         card.addEventListener('click', e => {
-            // Prevent opening modal if clicking an external link or a contact link
             if (e.target.closest('a[target="_blank"]') || e.target.closest('a[href="#contact"]')) {
-                // If it's a contact link, pre-fill the form
                 if (e.target.closest('a[href="#contact"]')) {
                     const interest = e.target.getAttribute('data-interest');
                     if (interest && interestSelect) {
                         interestSelect.value = interest;
-                        interestSelect.dispatchEvent(new Event('change')); // Trigger change event to show/hide property details
+                        interestSelect.dispatchEvent(new Event('change'));
                     }
                 }
-                return; // Do not open modal
+                return; 
             }
-            e.preventDefault(); // Prevent default link behavior if any
+            e.preventDefault(); 
             openCardModal(card);
         });
     });
 
-    // Close modal when clicking backdrop, close button, or collapse button
     cardModal.addEventListener('click', (e) => {
         if (e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse')) {
             closeCardModal();
-        } else if (e.target === overlayBackdrop || e.target === cardModal) { // Clicked on the overlay or the modal wrapper itself
+        } else if (e.target === overlayBackdrop || e.target === cardModal) { 
             closeCardModal();
-        } else if (e.target.closest('a[href="#contact"]')) { // If a contact link is clicked inside the modal
+        } else if (e.target.closest('a[href="#contact"]')) { 
             const interest = e.target.getAttribute('data-interest');
             if (interest && interestSelect) {
                 interestSelect.value = interest;
                 interestSelect.dispatchEvent(new Event('change'));
             }
-            closeCardModal(); // Close the modal after processing the link
+            closeCardModal(); 
         }
     });
 
-    // --- Horizontal Scroll Animation Setup ---
+    // --- Horizontal Scroll Animation Setup (Optimized) ---
     function setupHorizontalScroll() {
-        // Kill previous instance if it exists
         if (horizontalScrollInstance) {
             horizontalScrollInstance.kill();
         }
@@ -946,63 +908,67 @@
         const container = document.querySelector('.cards-container');
         const cards = gsap.utils.toArray('.service-card-stacked');
 
-        // If elements are not found or on very small screens, disable horizontal scroll
-        if (!horizontalSection || !container || !wrapper || cards.length === 0 || window.innerWidth < 768) {
-            // Ensure elements are not sticky or have special positioning on small screens
+        // Responsive handling: if screen is too small, stack cards vertically instead of horizontal scroll
+        if (window.innerWidth < 768) {
+            // Reset to default vertical layout
             if (wrapper) gsap.set(wrapper, { position: 'static', height: 'auto', overflow: 'visible'});
-            if (container) gsap.set(container, { x: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 5vw' });
-            if (cards.length > 0) gsap.set(cards, {clearProps: "scale,opacity,transform", width: '100%', margin: '10px 0'}); // Adjust for vertical stacking
+            if (container) gsap.set(container, { x: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'auto', padding: '0' }); // Adjust padding for column
+            if (cards.length > 0) gsap.set(cards, {clearProps: "scale,opacity,transform", width: '100%', margin: '10px 0'}); // Ensure cards take full width and add vertical margin
             
-            // Remove is-active class if present
-            cards.forEach(card => card.classList.remove('is-active'));
+            cards.forEach(card => card.classList.remove('is-active')); // Remove active state
+            if (horizontalSection) horizontalSection.style.height = 'auto'; // Remove fixed height
 
-            // Remove height from horizontalSection to avoid conflicts
-            if (horizontalSection) horizontalSection.style.height = 'auto';
-
-            return; // Exit if not setting up horizontal scroll
+            return; 
         }
 
-        // --- Setup for horizontal scroll (larger screens) ---
+        // Setup for horizontal scroll on larger screens
         gsap.set(wrapper, { position: 'sticky', top: 0, height: '100vh', overflow: 'hidden'});
         gsap.set(container, { display: 'flex', flexDirection: 'row' }); 
         
         const scrollWidth = container.scrollWidth - window.innerWidth;
-        gsap.set(horizontalSection, { height: `${scrollWidth + window.innerHeight}px` }); // Set total height for scrolltrigger
+        gsap.set(horizontalSection, { height: `${scrollWidth + window.innerHeight}px` }); 
 
         horizontalScrollInstance = gsap.to(container, {
-            x: () => -scrollWidth, // Move container to the left
-            ease: "none", // Linear motion
+            x: () => -scrollWidth,
+            ease: "none",
             scrollTrigger: {
                 trigger: horizontalSection,
-                start: "top top", // Start when the top of the section hits the viewport top
-                end: () => `+=${scrollWidth}`, // End after scrolling the full width of the content
-                pin: wrapper, // Pin the wrapper element
-                scrub: 0.2, // Smooth scrubbing effect
-                invalidateOnRefresh: true, // Re-calculate on resize
+                start: "top top",
+                end: () => `+=${scrollWidth}`,
+                pin: wrapper,
+                scrub: 0.2,
+                invalidateOnRefresh: true,
+                // Simplified onUpdate for better performance
                 onUpdate: self => {
-                    const containerX = gsap.getProperty(container, "x");
-                    cards.forEach((card) => {
-                        // Calculate distance from the center of the card to the center of the viewport
-                        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
-                        const viewCenter = -containerX + window.innerWidth / 2;
-                        const distance = Math.abs(cardCenter - viewCenter);
+                    const progress = self.progress; // GSAP progress from 0 to 1
+                    cards.forEach((card, i) => {
+                        // Animate cards to fade in and slightly move up as they come into view
+                        // This animation is less intensive than scaling and fading based on distance
+                        const cardVisibilityProgress = progress - (i * 0.1); // Stagger visibility slightly
                         
-                        // Map distance to scale and opacity
-                        const scale = gsap.utils.mapRange(0, window.innerWidth / 1.5, 1, 0.85); // Scale down cards further away
-                        const opacity = gsap.utils.mapRange(0, window.innerWidth, 1, 0.5); // Fade out cards further away
-                        
-                        const newScale = scale(distance);
-                        const newOpacity = opacity(distance);
-
-                        card.classList.toggle('is-active', newScale > 0.98); // Add 'is-active' class for styling active card
-
-                        gsap.to(card, {
-                            scale: newScale,
-                            opacity: newOpacity,
-                            duration: 0.5,
-                            ease: 'power3.out',
-                            overwrite: 'auto' // Ensure animations are overwritten correctly
-                        });
+                        if (cardVisibilityProgress > -0.2 && cardVisibilityProgress < 0.8) { // When card is roughly in view
+                            gsap.to(card, {
+                                opacity: 1,
+                                y: 0,
+                                duration: 0.5,
+                                ease: 'power3.out',
+                                // Use a unique ID for each card animation to avoid conflicts
+                                id: `cardAnim-${i}`, 
+                                overwrite: true 
+                            });
+                            card.classList.add('is-active'); // Add active class for potential styling
+                        } else {
+                            // Optionally fade out cards that are completely out of view
+                            gsap.to(card, {
+                                opacity: cardVisibilityProgress < 0 ? 0 : 1, // Fade out if before start, otherwise keep visible if after end
+                                y: cardVisibilityProgress < 0 ? 20 : 0,
+                                duration: 0.5,
+                                ease: 'power3.out',
+                                id: `cardAnim-${i}`,
+                                overwrite: true
+                            });
+                            if (cardVisibilityProgress > 0.8) card.classList.remove('is-active');
+                        }
                     });
                 }
             }
@@ -1018,7 +984,7 @@
                 opacity: showDetails ? 1 : 0,
                 paddingTop: showDetails ? '1rem' : 0,
                 paddingBottom: showDetails ? '1rem' : 0,
-                display: showDetails ? 'flex' : 'none', // Ensure it's display:flex when visible
+                display: showDetails ? 'flex' : 'none', 
                 duration: 0.4,
                 ease: 'power2.out',
             });
@@ -1027,21 +993,20 @@
 
     // --- Particle Animation Initialization ---
     function initParticleAnimation() {
-        if (prefersReducedMotion) return; // Don't run if motion is reduced
+        if (prefersReducedMotion) return; 
 
         const canvas = document.getElementById('particle-canvas');
-        if (!canvas) return; // Exit if canvas element not found
+        if (!canvas) return; 
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true }); // Alpha: true for transparent background
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimize for high DPI displays
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
         const particleCount = 5000;
         const positions = new Float32Array(particleCount * 3);
         for (let i = 0; i < particleCount * 3; i++) {
-            // Distribute particles in a cube around the origin
             positions[i] = (Math.random() - 0.5) * 10;
         }
 
@@ -1049,34 +1014,32 @@
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         
         const particlesMaterial = new THREE.PointsMaterial({
-            color: 0xffbf00, // Primary color
+            color: 0xffbf00, 
             size: 0.015,
             transparent: true,
-            blending: THREE.AdditiveBlending, // Makes particles glow
-            depthWrite: false, // Important for transparency and blending
+            blending: THREE.AdditiveBlending, 
+            depthWrite: false, 
             opacity: 0.7
         });
 
         const particles = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particles);
 
-        camera.position.z = 5; // Set camera position
+        camera.position.z = 5;
 
-        const clock = new THREE.Clock(); // For time-based animations
+        const clock = new THREE.Clock();
 
         const animate = () => {
             const elapsedTime = clock.getElapsedTime();
-            // Rotate particles for a dynamic effect
             particles.rotation.y = elapsedTime * 0.05;
             particles.rotation.x = elapsedTime * 0.02;
             
-            renderer.render(scene, camera); // Render the scene
-            window.requestAnimationFrame(animate); // Loop the animation
+            renderer.render(scene, camera);
+            window.requestAnimationFrame(animate);
         };
 
-        animate(); // Start the animation loop
+        animate();
 
-        // Update renderer and camera on window resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -1085,13 +1048,12 @@
         });
     }
     
-    // Initialize components
     initParticleAnimation();
-    setupHorizontalScroll(); // Initial setup for horizontal scroll
+    setupHorizontalScroll();
     window.addEventListener('resize', gsap.utils.debounce(() => {
-        setupHorizontalScroll(); // Re-setup on resize
-        ScrollTrigger.refresh(true); // Refresh ScrollTriggers
-    }, 250)); // Debounce resize for performance
+        setupHorizontalScroll(); 
+        ScrollTrigger.refresh(true);
+    }, 250));
 
     // --- IA Tool Event Listeners ---
     const generateDescriptionBtn = document.getElementById('generate-description-btn');
@@ -1105,18 +1067,19 @@
     const loaderAnalysis = document.getElementById('loader-analysis');
 
     async function callGeminiAPI(prompt, resultElement, loaderElement) {
-        loaderElement.style.display = 'inline-block'; // Show loader
+        loaderElement.style.display = 'inline-block';
         resultElement.textContent = 'Generando...';
-        resultElement.style.color = '#e0e0e0'; // Set a neutral color while loading
+        resultElement.style.color = '#e0e0e0';
 
-        // ** IMPORTANT: INSERT YOUR GOOGLE GEMINI API KEY HERE **
-        const apiKey = ""; // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< REEMPLAZA ESTO CON TU CLAVE API DE GOOGLE GEMINI
-        // Ejemplo: const apiKey = "AIzaSy...";
+        // ** IMPORTANTE: INSERTA TU CLAVE DE API DE GOOGLE GEMINI AQUÍ **
+        // Por favor, reemplaza la cadena vacía con tu clave API real.
+        // Recuerda que exponer esta clave públicamente puede ser un riesgo de seguridad.
+        const apiKey = "AIzaSyDEuE7UkdAk2mGWsprqoLFjpSi2EA68xns"; // <<<<<<<<<<<<< TU CLAVE API AQUÍ
 
-        if (!apiKey || apiKey.includes("YOUR_API_KEY")) {
-            resultElement.textContent = 'Error: Clave API no configurada. Por favor, inserta tu clave API de Google Gemini en el script.';
-            resultElement.style.color = '#ff6b6b'; // Red color for error
-            loaderElement.style.display = 'none'; // Hide loader
+        if (!apiKey || apiKey.includes("YOUR_API_KEY") || apiKey.length < 10) { // Simple validation
+            resultElement.textContent = 'Error: Clave API no configurada o inválida. Por favor, inserta tu clave API de Google Gemini en el script.';
+            resultElement.style.color = '#ff6b6b'; 
+            loaderElement.style.display = 'none';
             return;
         }
 
@@ -1144,7 +1107,7 @@
                 result.candidates[0].content.parts.length > 0) {
                 
                 const text = result.candidates[0].content.parts[0].text;
-                resultElement.textContent = text; // Display the generated text
+                resultElement.textContent = text;
             } else {
                 resultElement.textContent = 'Error: La respuesta de la IA no tiene el formato esperado.';
                 resultElement.style.color = '#ff6b6b';
@@ -1155,7 +1118,7 @@
             resultElement.style.color = '#ff6b6b';
             console.error('Error calling Gemini API:', error);
         } finally {
-            loaderElement.style.display = 'none'; // Hide loader
+            loaderElement.style.display = 'none';
         }
     }
 
