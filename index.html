@@ -93,7 +93,24 @@
     @media (pointer: fine) { .custom-cursor { opacity: 1; } }
     @media (pointer: coarse) { .custom-cursor { display: none; } body, a, button, input, select, textarea { cursor: auto !important; } }
 
-    header{height:100vh;background:url('https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp') center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff; perspective: 1000px;}
+    /* Estilos para el fondo fijo del hero */
+    .fixed-hero-bg {
+        /* Eliminado: este div ya no es necesario para el fondo fijo */
+        display: none; 
+    }
+
+    header{
+        height:100vh;
+        /* Revertido el fondo al header */
+        background:url('https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp') center/cover no-repeat;
+        position:relative;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        text-align:center;
+        color:#fff; 
+        perspective: 1000px;
+    }
     header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}  
     .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem;}
     .hero > * { opacity: 0; }
@@ -133,6 +150,11 @@
     main { display: block; background-color: transparent; }
     section{padding:4.5rem 1.5rem;max-width:1200px;margin: 0 auto; background-color: transparent; position: relative; z-index: 1;}
     
+    #about {
+        /* Revertido a su color de fondo original */
+        background-color: var(--dark-bg); 
+    }
+
     .section-full-width { max-width: none; padding-left: 0; padding-right: 0; }
 
     h2.section-title{font-family:'Bebas Neue', sans-serif;letter-spacing:1.5px;font-size:3rem;font-weight:700;margin-bottom:2rem;text-align:center; padding: 0 1.5rem;}
@@ -214,11 +236,12 @@
         z-index: 2; 
         padding: 2rem; 
         display: flex; 
-        flex-direction: column; 
-        height: 100%; 
+        flex-direction: column; /* Organiza los hijos verticalmente */
+        height: 100%; /* Asegura que el flexbox ocupe toda la altura */
+        justify-content: space-between; /* Empuja el h3 arriba y el resto abajo */
         opacity: 0; 
         transition: opacity 0.3s 0.2s; 
-        background-color: rgba(26, 26, 26, 0.95); /* Fondo semitransparente para el contenido */
+        background-color: rgba(255, 255, 255, 0.1); /* Fondo blanco muy transparente para el contenido */
     }
     .card-expanded-state .card-full-details-content { opacity: 1; }
 
@@ -250,7 +273,7 @@
     }
     #overlay-backdrop.visible { opacity: 1; pointer-events: all; }
 
-    .content-after-sticky { position: relative; z-index: 1; background-color: transparent; }
+    .content-after-sticky { background-color: var(--dark-bg); /* Asegura que las secciones posteriores cubran el hero */ position: relative; z-index: 1; }
     
     #portfolio .section-title { color: #fff; }
     .portfolio-grid-wrapper { max-width: 1200px; margin: auto; padding: 0 1.5rem; }
@@ -329,6 +352,8 @@
   <canvas id="particle-canvas"></canvas>
   <div id="cursor-regular" class="custom-cursor"><div class="cursor-dot"></div></div>
   <div id="cursor-point" class="custom-cursor"><div class="cursor-point"></div></div>
+
+  <!-- Eliminado: <div class="fixed-hero-bg"></div> -->
 
   <div id="overlay-backdrop"></div>
   
@@ -461,8 +486,7 @@
                             <div class="card-full-details-content">
                                 <h3>POTENCIÁ TU ALQUILER TEMPORARIO</h3>
                                 <div class="card-full-content-scroll">
-                                    <p>Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p>
-                                    <h4>Nuestro servicio "llave en mano" incluye:</h4>
+                                    <p>Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p>
                                     <ul>
                                         <li>✅ Asesoría de home staging gratuita y puesta a punto.</li>
                                         <li>✅ Ejecución de amoblamiento a través de nuestro equipo de arquitectura y red de proveedores.</li>
@@ -531,7 +555,7 @@
                                     </ul>
                                     <p class="card-highlight">Invertí de forma inteligente en los mejores proyectos de la ciudad.</p>
                                 </div>
-                                <div class="card-footer-cta"><a href="https://www.baigunryn.com/emprendimientos/" target="_blank" rel="noopener noreferrer" class="btn-card">Ver Oportunidades</a><button class="btn-toggle-collapse">Cerrar</button></div>
+                                <div class="card-footer-cta"><a href="https://www.baigunryn.com/" target="_blank" rel="noopener noreferrer" class="btn-card">Ver Oportunidades</a><button class="btn-toggle-collapse">Cerrar</button></div>
                             </div>
                         </div>
                       </div>
@@ -1099,7 +1123,7 @@
             let chatHistory = [];
             chatHistory.push({ role: "user", parts: [{ text: prompt }] });
             const payload = { contents: chatHistory };
-            const apiKey = ""; // Canvas will automatically provide the API key at runtime
+            const apiKey = "AIzaSyDEuE7UkdAk2mGWsprqoLFjpSi2EA68xns"; // API Key actualizada
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
             console.log('Fetching from API:', apiUrl, 'with payload:', payload); // Debug log
