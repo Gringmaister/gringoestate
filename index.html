@@ -222,14 +222,8 @@
     }
     .card-expanded-state .card-full-details { display: flex; }
     .card-full-details::before { 
-        content: ''; 
-        position: absolute; 
-        inset: -20px; 
-        /* Eliminado background-image para que no haya imagen de fondo */
-        background-size: cover; 
-        background-position: center; 
-        /* Eliminado el filtro de brillo y blur para que la imagen se vea nítida */
-        z-index: 1; 
+        /* Eliminado el pseudo-elemento ::before */
+        display: none;
     }
     .card-full-details-content { 
         position: relative; 
@@ -241,7 +235,7 @@
         justify-content: space-between; /* Empuja el h3 arriba y el resto abajo */
         opacity: 0; 
         transition: opacity 0.3s 0.2s; 
-        background-color: rgba(255, 255, 255, 0.1); /* Fondo blanco muy transparente para el contenido */
+        background-color: transparent; /* Fondo transparente para el contenido */
     }
     .card-expanded-state .card-full-details-content { opacity: 1; }
 
@@ -897,7 +891,7 @@
         expandedCardContainer.appendChild(card);
         overlayBackdrop.classList.add('visible');
         scrollManager.lock();
-        if (horizontalScrollTween) horizontalScrollTween.scrollTrigger.disable();
+        if (horizontalScrollTween) horizontalScrollTween.disable(); // Usar .disable() en lugar de .scrollTrigger.disable()
 
         Flip.from(state, {
             duration: 0.5,
@@ -928,7 +922,7 @@
             onComplete: () => {
                 activeCard = null;
                 scrollManager.unlock();
-                if (horizontalScrollTween) horizontalScrollTween.scrollTrigger.enable();
+                if (horizontalScrollTween) horizontalScrollTween.enable(); // Usar .enable() en lugar de .scrollTrigger.enable()
             }
         });
     }
