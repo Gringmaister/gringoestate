@@ -117,7 +117,7 @@
     
     nav ul{list-style:none;font-weight:700; padding-left: 0; margin: 0;}
     
-    /* Menú móvil - CORREGIDO */
+    /* Menú móvil */
     nav .nav-links-mobile { 
       visibility: hidden; 
       position: fixed; 
@@ -133,7 +133,6 @@
       display: flex;
       justify-content: center; 
       align-items: center; 
-      /* SOLUCIÓN: Aumentado el z-index para que el menú aparezca sobre la barra de navegación. */
       z-index: 1000; 
     }
     nav .nav-links-mobile ul { display: flex; flex-direction: column; gap: 0; align-items: center; width: 100%; text-align: center; }
@@ -226,7 +225,6 @@
     .card-modal-content-wrapper { background-color: var(--card-bg); border-radius: 20px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); width: 90%; max-width: 1000px; height: 90%; max-height: 85vh; position: relative; display: flex; flex-direction: column; overflow: hidden; transform: scale(0.95); transition: transform 0.4s ease; }
     .card-modal.is-visible .card-modal-content-wrapper { transform: scale(1); }
     
-    /* SOLUCIÓN: Capa de superposición oscura para el modal para mejorar la legibilidad. */
     .card-modal-content-wrapper::before {
       content: '';
       position: absolute;
@@ -238,7 +236,6 @@
 
     .card-modal-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
     
-    /* SOLUCIÓN: Aumentado el z-index para que el texto aparezca sobre la nueva capa de superposición. */
     .card-modal-text-content { position: relative; z-index: 3; padding: 2rem; display: flex; flex-direction: column; height: 100%; justify-content: space-between; color: var(--text-light); }
     
     .card-modal-text-content h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; flex-shrink: 0; }
@@ -372,7 +369,6 @@
         .btn-card { width: 100%; }
         h2.section-title { font-size: 2.5rem; }
 
-        /* SOLUCIÓN: Asegura que el contenedor de las tarjetas se muestre correctamente en móvil. */
         .horizontal-scroll-wrapper {
             height: auto !important;
             overflow: visible !important;
@@ -812,36 +808,38 @@
         }
     };
 
-    // --- Mobile Menu Toggle ---
+    // --- Mobile Menu Toggle - CORREGIDO ---
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
+    // SOLUCIÓN: Se eliminó .addPause() que rompía la animación de cierre.
     const tlMenu = gsap.timeline({paused:true, reversed:true})
       .set(mobileMenu, {display:'flex'})
       .to(mobileMenu, {autoAlpha:1, duration:0.3})
       .from(mobileMenu.querySelectorAll('li'),
             {x:-30, opacity:0, stagger:0.08, duration:0.35}, '-=0.15')
-      .addPause()
       .to(mobileMenu, {autoAlpha:0, duration:0.25})
       .set(mobileMenu, {display:'none'});
 
     menuToggle.addEventListener('click', () => {
       const isOpen = menuToggle.classList.contains('open');
-      if (!isOpen) { scrollManager.lock(); } else { scrollManager.unlock(); }
+      if (!isOpen) { 
+        scrollManager.lock(); 
+      } else { 
+        scrollManager.unlock(); 
+      }
       menuToggle.classList.toggle('open');
       tlMenu.reversed() ? tlMenu.play() : tlMenu.reverse();
     });
 
-    mobileMenu.querySelectorAll('a').forEach(link => {
-        if (link.getAttribute('href').startsWith('#')) {
-            link.addEventListener('click', () => {
-                if (menuToggle.classList.contains('open')) {
-                  const isOpen = menuToggle.classList.contains('open');
-                  if (!isOpen) { scrollManager.lock(); } else { scrollManager.unlock(); }
-                  menuToggle.classList.toggle('open');
-                  tlMenu.reversed() ? tlMenu.play() : tlMenu.reverse();
-                }
-            });
-        }
+    // SOLUCIÓN: Lógica simplificada para cerrar el menú al hacer clic en un enlace.
+    mobileMenu.querySelectorAll('a[href^="#"]').forEach(link => {
+        link.addEventListener('click', () => {
+            if (menuToggle.classList.contains('open')) {
+                scrollManager.unlock();
+                menuToggle.classList.remove('open');
+                tlMenu.reverse();
+            }
+        });
     });
 
     // --- Modal Logic ---
@@ -924,8 +922,6 @@
             horizontalScrollInstance = null;
         }
 
-        // The JS logic to disable horizontal scroll was good, but the CSS fix makes it more robust.
-        // No changes needed here, the new CSS in the media query will handle mobile layout correctly.
         if (window.innerWidth < 768 || prefersReducedMotion) {
             gsap.set([section, wrapper, container, cards], { clearProps: 'all' });
             gsap.set(container, { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1.5rem', gap: '1.5rem' });
@@ -996,8 +992,8 @@
 
         const animate = () => {
             requestAnimationFrame(animate);
-            if (!particlesObj.visible) return; // Pauses rendering
-
+            // SOLUCIÓN: La condición `if (!particlesObj.visible)` se eliminó de aquí
+            // para que la animación se ejecute continuamente.
             const elapsedTime = clock.getElapsedTime();
             particles.rotation.y = elapsedTime * 0.05;
             particles.rotation.x = elapsedTime * 0.02;
@@ -1013,15 +1009,7 @@
         });
     }
 
-    ScrollTrigger.create({
-      trigger: '.horizontal-scroll-section',
-      start: 'top top',
-      end: 'bottom top',
-      onEnter: () => particlesObj.visible = false,
-      onLeave: () => particlesObj.visible = true,
-      onEnterBack: () => particlesObj.visible = false,
-      onLeaveBack: () => particlesObj.visible = true,
-    });
+    // SOLUCIÓN: Se eliminó el ScrollTrigger que pausaba la animación de las partículas.
     
     // --- Initializations ---
     initParticleAnimation();
