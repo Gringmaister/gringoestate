@@ -173,7 +173,8 @@
     
     .horizontal-scroll-section { position: relative; }
     .horizontal-scroll-wrapper { position: sticky; top: 0; display: flex; align-items: center; height: 100vh; width: 100%; overflow: hidden; }
-    .cards-container { display: flex; gap: clamp(2rem, 5vw, 4rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; }
+    /* AJUSTE: Más espacio entre tarjetas */
+    .cards-container { display: flex; gap: clamp(3rem, 7vw, 6rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; }
     
     .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; will-change: transform, opacity; transition: transform 0.4s ease, box-shadow 0.4s ease, scale 0.4s ease; }
     
@@ -185,11 +186,10 @@
     .card-inner-content { background: var(--card-bg); width: 100%; height: 100%; border-radius: 18px; position: relative; z-index: 3; overflow: hidden; }
     .card-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform 0.5s ease; filter: brightness(0.7); }
     
-    /* AJUSTE: Posición de imagen en tarjetas 2 y 5 */
     @media (min-width: 1024px) {
         [data-card-id="tarjeta2"] .card-image,
         [data-card-id="tarjeta5"] .card-image {
-            object-position: center 25%; /* Un poco más abajo que 'top' */
+            object-position: center 25%;
         }
         [data-card-id="tarjeta7"] .card-image {
             object-position: center top;
@@ -248,7 +248,7 @@
     .portfolio-item .portfolio-content .view-more {color: var(--primary); opacity: 0; transition: opacity .4s; font-weight: 700; margin-top: 0.25rem;}
     .portfolio-item:hover .portfolio-content .view-more {opacity: 1;}
 
-    .ai-tools-wrapper { max-width: 1200px; margin: auto; padding: 0 1.5rem; }
+    .ai-tools-wrapper { max-width: 1100px; margin: auto; padding: 0 1.5rem; }
     #ai-tools .subtitle { text-align:center;max-width:600px;margin:-1rem auto 2rem;color:#ccc;line-height:1.6; }
     .ai-button-wrapper { text-align: center; margin-top: 1rem; }
     .ai-coming-soon { text-align:center; margin-top: 5rem; padding-top: 2rem; }
@@ -261,30 +261,38 @@
     .circulo-decorativo { width: 50px; height: 50px; border: 2px solid var(--primary); border-radius: 50%; margin-top: 40px; }
     .contact-form-wrapper form { display: flex; flex-direction: column; gap: 1rem; }
     
-    /* AJUSTE: Estilos del formulario de contacto para coincidir con la imagen */
+    /* AJUSTE: Estilos unificados para todos los formularios */
     .contact-form-wrapper input,
     .contact-form-wrapper select,
-    .contact-form-wrapper textarea {
+    .contact-form-wrapper textarea,
+    .ai-tool-card input,
+    .ai-tool-card select,
+    .ai-tool-card textarea {
         background-color: #1a1a1a;
         color: #fff;
-        border: 1px solid #444; /* Borde sutil por defecto */
+        border: 1px solid #444;
         border-radius: 8px;
         padding: 1rem;
         font-size: 1rem;
         transition: border-color .3s, box-shadow .3s;
+        -webkit-appearance: none; /* Quita estilos por defecto en iOS */
+        appearance: none;
     }
     .contact-form-wrapper input:focus,
     .contact-form-wrapper select:focus,
-    .contact-form-wrapper textarea:focus {
+    .contact-form-wrapper textarea:focus,
+    .ai-tool-card input:focus,
+    .ai-tool-card select:focus,
+    .ai-tool-card textarea:focus {
         outline: none;
-        border-color: var(--primary); /* Borde amarillo al hacer foco */
-        box-shadow: none; /* Sin box-shadow */
+        border-color: var(--primary);
+        box-shadow: none;
     }
     .btn-enviar-mensaje { 
         background:var(--primary); 
         color:var(--dark); 
         padding:.9rem 2rem; 
-        border-radius:50px; /* Botón tipo píldora */
+        border-radius:50px;
         display:inline-block; 
         transition: background-color .3s, box-shadow .3s; 
         font-weight:700; 
@@ -301,6 +309,7 @@
     .ai-tool-card { background-color: #1a1a1a; padding: 2rem; border-radius: 10px; margin-top: 2rem; border: 1px solid #333;}
     .ai-tool-card h3 { color: var(--primary); font-size: 1.75rem; margin-bottom: 1rem; text-align: center; font-family: 'Bebas Neue', sans-serif; }
     .ai-tool-card p { color: #ccc; margin-bottom: 1rem; text-align: center; }
+    .ai-tool-card form { display: flex; flex-direction: column; gap: 1rem; }
     .ai-tool-card textarea { min-height: 120px; }
     .ai-tool-card button { background-color: var(--primary); color: var(--dark); padding: .75rem 1.5rem; border-radius: 50px; transition: all .3s; font-weight: 700; border: none; }
     .ai-tool-card button:hover { background-color: #fff; }
@@ -377,9 +386,8 @@
             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp">
             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" alt="Isologo de GringoEstate" class="isologo hero-el" width="120" height="120">
         </picture>
-        <!-- TÍTULO RESTAURADO A SU VERSIÓN ORIGINAL -->
         <h1 class="hero-el" id="hero-title">GRINGO<span>ESTATE</span></h1>
-        <p class="hero-el">LA POSTA INMOBILIaria. SIN CORBATA.</p>
+        <p class="hero-el">LA POSTA INMOBILIARIA. SIN CORBATA.</p>
         <a href="#contact" class="btn-primary hero-el">AGENDÁ UNA LLAMADA</a>
     </div>
   </header>
@@ -545,16 +553,19 @@
             </p>
             <div class="ai-tools-wrapper">
                 <div class="ai-tool-card">
+                  <form>
                     <h3>Generador de Descripciones de Propiedades</h3>
                     <p>Ingresá los datos clave de tu propiedad y creá una descripción profesional y atractiva en segundos.</p>
                     <textarea id="property-input" placeholder="Ej: 3 ambientes en Palermo, 75m2, balcón con vista abierta, muy luminoso, piso alto, cerca del subte D..."></textarea>
                     <div class="ai-button-wrapper">
-                        <button id="generate-description-btn">Generar Descripción ✨</button>
+                        <button type="button" id="generate-description-btn">Generar Descripción ✨</button>
                         <div id="loader-description" class="loader"></div>
                     </div>
+                  </form>
                     <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div>
                 </div>
                 <div class="ai-tool-card">
+                  <form>
                     <h3>Calculadora de Actualización de Alquiler (IPC)</h3>
                     <p>Calculá el valor actualizado de tu alquiler según el IPC. Ingresá los datos de tu contrato.</p>
                     <input type="number" id="alquiler-original-input" placeholder="Monto Original del Alquiler ($)">
@@ -566,9 +577,10 @@
                         <option value="6">Semestral (6 meses)</option>
                     </select>
                     <div class="ai-button-wrapper">
-                        <button id="calcular-alquiler-btn">Calcular Alquiler Actual ✨</button>
+                        <button type="button" id="calcular-alquiler-btn">Calcular Alquiler Actual ✨</button>
                         <div id="loader-alquiler" class="loader"></div>
                     </div>
+                  </form>
                     <div id="alquiler-result" class="ai-result">El monto actualizado aparecerá aquí...</div>
                     <p class="ai-alert" style="text-align: center; margin-top: 1rem;">⚠️ Los datos del IPC se obtienen de fuentes oficiales (datos.gob.ar) y pueden tener un retraso en la última actualización.</p>
                 </div>
@@ -677,7 +689,6 @@
 
     // --- Hero Animations ---
     if (!prefersReducedMotion) {
-        // AJUSTE: Animación de entrada restaurada a la original, sin dividir en caracteres.
         gsap.set(".hero-el", {y: 30, opacity: 0});
         gsap.to(".hero-el", { 
             opacity: 1, 
@@ -892,29 +903,21 @@
                 start: "top top",
                 end: () => `+=${scrollWidth}`,
                 pin: wrapper,
-                scrub: 1, // AJUSTE: Aumentado para mayor fluidez
+                scrub: 1.5, // AJUSTE: Aumentado para mayor fluidez
                 invalidateOnRefresh: true,
                 onUpdate: self => {
                     const viewportCenter = window.innerWidth / 2;
-                    let closestCard = null;
-                    let minDistance = Infinity;
-
                     cards.forEach(card => {
                         const rect = card.getBoundingClientRect();
                         const cardCenter = rect.left + rect.width / 2;
                         const distance = Math.abs(viewportCenter - cardCenter);
-
-                        if (distance < minDistance) {
-                            minDistance = distance;
-                            closestCard = card;
-                        }
-                    });
-
-                    cards.forEach(card => {
+                        // AJUSTE: Mapeo de rango para escalar tarjetas. La del centro es 1.1, las de los bordes 0.9
+                        const scale = gsap.utils.mapRange(0, viewportCenter, 1.1, 0.9)(distance);
                         gsap.to(card, {
-                            scale: card === closestCard ? 1.05 : 1,
-                            duration: 0.4,
-                            ease: 'power2.out'
+                            scale: scale,
+                            duration: 0.5,
+                            ease: 'power3.out',
+                            overwrite: true
                         });
                     });
                 }
