@@ -103,8 +103,7 @@
     .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem;}
     .hero > * { opacity: 0; }
     .hero .isologo{ width: 120px; height: auto; margin: 0 auto 1rem auto; display: block; z-index: 10; position: relative; }
-    .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem; perspective: 800px; transform-style: preserve-3d; display: flex; flex-wrap: wrap; justify-content: center;}
-    .hero h1 .char { display: inline-block; } /* Required for GSAP animation */
+    .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem; perspective: 800px; transform-style: preserve-3d;}
     .hero h1 span{color:var(--primary); letter-spacing: 2px;}
     .hero p{font-size:1.5rem;color:#e2e8f0;margin-bottom:2rem;line-height:1.4;font-family:'Bebas Neue', sans-serif; letter-spacing:1px;}
     .btn-primary{background:var(--primary);color:var(--dark);padding:.75rem 2rem;border-radius:50px;display:inline-block;transition: background-color .3s, color .3s, box-shadow .3s;font-weight:700;font-size:1.1rem;letter-spacing:1px; border: none; text-decoration: none;}
@@ -125,7 +124,7 @@
       left: 0; 
       width: 100%; 
       height: 100%; 
-      background-color: var(--dark-bg); /* Fondo negro sólido */
+      background-color: var(--dark-bg);
       padding: 6rem 1.5rem 2rem; 
       opacity: 0; 
       display: flex; 
@@ -178,7 +177,6 @@
     
     .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; will-change: transform, opacity; transition: transform 0.4s ease, box-shadow 0.4s ease, scale 0.4s ease; }
     
-    /* Animación Sutil de Hover para tarjetas - CORREGIDA */
     .service-card-stacked:hover {
         transform: translateY(-5px); 
         box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
@@ -187,16 +185,18 @@
     .card-inner-content { background: var(--card-bg); width: 100%; height: 100%; border-radius: 18px; position: relative; z-index: 3; overflow: hidden; }
     .card-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform 0.5s ease; filter: brightness(0.7); }
     
-    /* CORRECCIÓN: object-position para tarjetas específicas en desktop */
+    /* AJUSTE: Posición de imagen en tarjetas 2 y 5 */
     @media (min-width: 1024px) {
         [data-card-id="tarjeta2"] .card-image,
-        [data-card-id="tarjeta5"] .card-image,
+        [data-card-id="tarjeta5"] .card-image {
+            object-position: center 25%; /* Un poco más abajo que 'top' */
+        }
         [data-card-id="tarjeta7"] .card-image {
             object-position: center top;
         }
     }
 
-    .card-content-initial { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 3; padding: 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; /* Alinea al final */ height: 100%; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%); }
+    .card-content-initial { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 3; padding: 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%); }
     .card-content-initial h3 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 3.5vw, 2.8rem); line-height: 1.1; letter-spacing: 1px; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); color: white; margin-bottom: 0.75rem; }
     .card-content-initial h3 span { color: var(--primary); }
     .card-content-initial .short-desc { color: #e0e0e0; line-height: 1.5; margin-bottom: 1.5rem; min-height: 60px; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); }
@@ -206,77 +206,14 @@
 
     .card-full-details { display: none; }
 
-    .card-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 10000;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.4s ease, visibility 0s 0.4s;
-    }
-    .card-modal.is-visible {
-        opacity: 1;
-        visibility: visible;
-        transition: opacity 0.4s ease;
-    }
-    .card-modal-content-wrapper {
-        background-color: var(--card-bg);
-        border-radius: 20px;
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
-        width: 90%;
-        max-width: 1000px;
-        height: 90%;
-        max-height: 85vh;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        transform: scale(0.95);
-        transition: transform 0.4s ease;
-    }
-    .card-modal.is-visible .card-modal-content-wrapper {
-        transform: scale(1);
-    }
-    .card-modal-image {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        filter: brightness(0.4);
-        z-index: 1;
-    }
-    .card-modal-text-content {
-        position: relative;
-        z-index: 2;
-        padding: 2rem;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        justify-content: space-between;
-        color: var(--text-light);
-    }
-    .card-modal-text-content h3 {
-        font-family: 'Bebas Neue', sans-serif;
-        color: var(--primary);
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-        flex-shrink: 0;
-    }
-    .card-modal-text-content .card-full-content-scroll {
-        flex-grow: 1;
-        overflow-y: auto;
-        padding-right: 15px;
-        line-height: 1.7;
-        margin-bottom: 1rem;
-    }
+    .card-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0s 0.4s; }
+    .card-modal.is-visible { opacity: 1; visibility: visible; transition: opacity 0.4s ease; }
+    .card-modal-content-wrapper { background-color: var(--card-bg); border-radius: 20px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); width: 90%; max-width: 1000px; height: 90%; max-height: 85vh; position: relative; display: flex; flex-direction: column; overflow: hidden; transform: scale(0.95); transition: transform 0.4s ease; }
+    .card-modal.is-visible .card-modal-content-wrapper { transform: scale(1); }
+    .card-modal-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.4); z-index: 1; }
+    .card-modal-text-content { position: relative; z-index: 2; padding: 2rem; display: flex; flex-direction: column; height: 100%; justify-content: space-between; color: var(--text-light); }
+    .card-modal-text-content h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; flex-shrink: 0; }
+    .card-modal-text-content .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; line-height: 1.7; margin-bottom: 1rem; }
     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar { width: 8px; }
     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 10px; }
@@ -284,15 +221,7 @@
     .card-modal-text-content .card-full-content-scroll li { margin-bottom: 0.75rem; display: flex; align-items: flex-start; gap: 0.75rem; }
     .card-modal-text-content .card-highlight { font-weight: 700; color: #fff; background-color: rgba(255, 191, 0, 0.1); padding: 0.75rem; border-left: 3px solid var(--primary); margin: 1.5rem 0; font-style: italic; }
     .card-modal-text-content .card-alert { color: #ffda6a; font-size: 0.9rem; margin-top: 1rem; border-left: 3px solid #ffda6a; padding: 0.5rem 0.75rem; background-color: rgba(255, 218, 106, 0.05); }
-    .card-footer-cta {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid rgba(255,255,255,0.1);
-        align-items: center;
-        flex-shrink: 0;
-    }
+    .card-footer-cta { display: flex; flex-direction: column; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); align-items: center; flex-shrink: 0; }
     .btn-card { background: var(--primary); color: var(--dark); padding: 0.75rem 1.5rem; border-radius: 50px; display: inline-block; font-weight: 700; font-size: 1rem; text-align: center; transition: all .3s; width: 80%; max-width: 280px; text-decoration: none; }
     .btn-card:hover { background: #fff; color: var(--dark); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
     .btn-toggle-collapse { background: transparent; border: 1px solid #555; color: #aaa; border-radius: 50px; padding: 0.5rem 1rem; font-size: 1rem; margin-top: 0.5rem; transition: all .3s ease; }
@@ -332,20 +261,47 @@
     .circulo-decorativo { width: 50px; height: 50px; border: 2px solid var(--primary); border-radius: 50%; margin-top: 40px; }
     .contact-form-wrapper form { display: flex; flex-direction: column; gap: 1rem; }
     
-    .ai-tool-card select, .ai-tool-card textarea, .ai-tool-card input[type="text"], .ai-tool-card input[type="month"], .ai-tool-card input[type="number"] { 
-        padding: 1rem; border:1px solid #333; border-radius:8px; font-size:1rem; width:100%; background-color: #1a1a1a; color: #fff; transition: border-color .3s, box-shadow .3s; 
+    /* AJUSTE: Estilos del formulario de contacto para coincidir con la imagen */
+    .contact-form-wrapper input,
+    .contact-form-wrapper select,
+    .contact-form-wrapper textarea {
+        background-color: #1a1a1a;
+        color: #fff;
+        border: 1px solid #444; /* Borde sutil por defecto */
+        border-radius: 8px;
+        padding: 1rem;
+        font-size: 1rem;
+        transition: border-color .3s, box-shadow .3s;
     }
-    .ai-tool-card select:focus, .ai-tool-card textarea:focus, .ai-tool-card input[type="text"]:focus, .ai-tool-card input[type="month"]:focus, .ai-tool-card input[type="number"]:focus { 
-        outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 191, 0, 0.4); 
+    .contact-form-wrapper input:focus,
+    .contact-form-wrapper select:focus,
+    .contact-form-wrapper textarea:focus {
+        outline: none;
+        border-color: var(--primary); /* Borde amarillo al hacer foco */
+        box-shadow: none; /* Sin box-shadow */
     }
-    .btn-enviar-mensaje { background:var(--primary); color:var(--dark); padding:.9rem 2rem; border-radius:50px; display:inline-block; transition: background-color .3s, box-shadow .3s; font-weight:700; font-size:1.1rem; letter-spacing:1px; width:100%; text-align: center; border: none; }
+    .btn-enviar-mensaje { 
+        background:var(--primary); 
+        color:var(--dark); 
+        padding:.9rem 2rem; 
+        border-radius:50px; /* Botón tipo píldora */
+        display:inline-block; 
+        transition: background-color .3s, box-shadow .3s; 
+        font-weight:700; 
+        font-size:1.1rem; 
+        letter-spacing:1px; 
+        width:100%; 
+        text-align: center; 
+        border: none; 
+    }
     .btn-enviar-mensaje:hover { background-color: #fff; box-shadow:0 10px 20px rgba(0,0,0,0.2); }
+
 
     #property-details { display: none; flex-direction: column; gap: 1rem; }
     .ai-tool-card { background-color: #1a1a1a; padding: 2rem; border-radius: 10px; margin-top: 2rem; border: 1px solid #333;}
     .ai-tool-card h3 { color: var(--primary); font-size: 1.75rem; margin-bottom: 1rem; text-align: center; font-family: 'Bebas Neue', sans-serif; }
     .ai-tool-card p { color: #ccc; margin-bottom: 1rem; text-align: center; }
-    .ai-tool-card textarea { background-color: #222; color: #fff; border-radius: 6px; padding: 1rem; width: 100%; min-height: 120px; transition: border-color .3s, box-shadow .3s; border: 1px solid #333; }
+    .ai-tool-card textarea { min-height: 120px; }
     .ai-tool-card button { background-color: var(--primary); color: var(--dark); padding: .75rem 1.5rem; border-radius: 50px; transition: all .3s; font-weight: 700; border: none; }
     .ai-tool-card button:hover { background-color: #fff; }
     .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: pre-wrap; line-height: 1.7; color: #e0e0e0; }
@@ -421,11 +377,9 @@
             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp">
             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" alt="Isologo de GringoEstate" class="isologo hero-el" width="120" height="120">
         </picture>
-        <!-- TÍTULO CON CADA LETRA EN UN SPAN PARA ANIMACIÓN -->
-        <h1 class="hero-el" id="hero-title">
-            <span class="char">G</span><span class="char">R</span><span class="char">I</span><span class="char">N</span><span class="char">G</span><span class="char">O</span><span>&nbsp;</span><span class="char">E</span><span class="char">S</span><span class="char">T</span><span class="char">A</span><span class="char">T</span><span class="char">E</span>
-        </h1>
-        <p class="hero-el">LA POSTA INMOBILIARIA. SIN CORBATA.</p>
+        <!-- TÍTULO RESTAURADO A SU VERSIÓN ORIGINAL -->
+        <h1 class="hero-el" id="hero-title">GRINGO<span>ESTATE</span></h1>
+        <p class="hero-el">LA POSTA INMOBILIaria. SIN CORBATA.</p>
         <a href="#contact" class="btn-primary hero-el">AGENDÁ UNA LLAMADA</a>
     </div>
   </header>
@@ -601,7 +555,6 @@
                     <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div>
                 </div>
                 <div class="ai-tool-card">
-                    <!-- NUEVA CALCULADORA IPC -->
                     <h3>Calculadora de Actualización de Alquiler (IPC)</h3>
                     <p>Calculá el valor actualizado de tu alquiler según el IPC. Ingresá los datos de tu contrato.</p>
                     <input type="number" id="alquiler-original-input" placeholder="Monto Original del Alquiler ($)">
@@ -724,8 +677,7 @@
 
     // --- Hero Animations ---
     if (!prefersReducedMotion) {
-        // CORRECCIÓN: Se eliminó el onComplete que causaba el bug del logo.
-        // El logo ahora se anima correctamente como parte de la clase .hero-el
+        // AJUSTE: Animación de entrada restaurada a la original, sin dividir en caracteres.
         gsap.set(".hero-el", {y: 30, opacity: 0});
         gsap.to(".hero-el", { 
             opacity: 1, 
@@ -733,18 +685,7 @@
             duration: 1, 
             stagger: 0.2, 
             ease: "power3.out", 
-            delay: 0.5, // Aumentado para dar tiempo a la animación del título
-        });
-
-        // MEJORA: Animación de entrada para cada letra del título
-        gsap.set(".char", { y: '100%', opacity: 0 });
-        gsap.to(".char", {
-            y: '0%',
-            opacity: 1,
-            stagger: 0.05,
-            duration: 1,
-            ease: 'power3.out',
-            delay: 0.2
+            delay: 0.2,
         });
         
         const animateOnScroll = (selector, triggerSelector) => {
@@ -785,9 +726,9 @@
         heroTitle.addEventListener('mouseenter', () => {
             gsap.to(heroTitle, {
                 duration: 0.8,
-                rotationX: 15, 
-                rotationY: 10,
-                scale: 1.02,
+                rotationX: 10, 
+                rotationY: -8,
+                scale: 1.03,
                 ease: 'power2.out'
             });
         });
@@ -803,7 +744,7 @@
         });
     }
 
-    // --- CORRECCIÓN: Scroll Lock Logic ---
+    // --- Scroll Lock Logic ---
     const scrollManager = {
         lock() {
             document.documentElement.classList.add('no-scroll');
@@ -838,7 +779,6 @@
         mobileMenu.querySelectorAll('a').forEach(link => {
             if (link.getAttribute('href').startsWith('#')) {
                 link.addEventListener('click', () => {
-                    // Solo cierra si está abierto
                     if (menuToggle.classList.contains('open')) {
                         toggleMenu();
                     }
@@ -915,7 +855,7 @@
         }
     });
 
-    // --- Horizontal Scroll Animation Setup (Optimized for Performance) ---
+    // --- Horizontal Scroll Animation Setup ---
     function setupHorizontalScroll() {
         if (horizontalScrollInstance) {
             horizontalScrollInstance.kill();
@@ -927,7 +867,6 @@
         const container = document.querySelector('.cards-container');
         const cards = gsap.utils.toArray('.service-card-stacked');
 
-        // CORRECCIÓN: Lógica mejorada para apilamiento vertical en móvil
         if (window.innerWidth < 768) {
             if (wrapper) gsap.set(wrapper, { clearProps: "all" });
             if (container) gsap.set(container, { clearProps: "all", display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'auto', padding: '0 1.5rem' });
@@ -939,7 +878,6 @@
             return; 
         }
 
-        // Setup para scroll horizontal en pantallas grandes
         gsap.set(wrapper, { position: 'sticky', top: 0, height: '100vh', overflow: 'hidden'});
         gsap.set(container, { display: 'flex', flexDirection: 'row' }); 
         
@@ -954,7 +892,7 @@
                 start: "top top",
                 end: () => `+=${scrollWidth}`,
                 pin: wrapper,
-                scrub: 0.5, // Un poco más suave
+                scrub: 1, // AJUSTE: Aumentado para mayor fluidez
                 invalidateOnRefresh: true,
                 onUpdate: self => {
                     const viewportCenter = window.innerWidth / 2;
@@ -972,7 +910,6 @@
                         }
                     });
 
-                    // MEJORA: Escala la tarjeta del centro
                     cards.forEach(card => {
                         gsap.to(card, {
                             scale: card === closestCard ? 1.05 : 1,
@@ -1071,7 +1008,6 @@
     const descriptionResult = document.getElementById('description-result');
     const loaderDescription = document.getElementById('loader-description');
 
-    // --- CORRECCIÓN: Nueva Calculadora de Alquiler IPC ---
     const alquilerOriginalInput = document.getElementById('alquiler-original-input');
     const fechaInicioInput = document.getElementById('fecha-inicio-input');
     const periodoIndexacionInput = document.getElementById('periodo-indexacion-input');
@@ -1127,7 +1063,7 @@
         let fechaActual = new Date(startYear, startMonth - 1, 1);
         let montoActual = montoOriginal;
         const hoy = new Date();
-        hoy.setDate(1); // Normalizar a principio de mes
+        hoy.setDate(1);
 
         let ultimoMontoCalculado = montoOriginal;
         let ultimaFechaCalculada = fechaActual;
@@ -1166,13 +1102,11 @@
     }
 
 
-    // --- Gemini API Call Logic (Generador de Descripciones) ---
     async function callGeminiAPI(prompt, resultElement, loaderElement) {
         loaderElement.style.display = 'inline-block';
         resultElement.textContent = 'Generando...';
         resultElement.style.color = '#e0e0e0';
 
-        // IMPORTANTE: La clave API se deja vacía. El entorno la proveerá.
         const apiKey = ""; 
 
         const payload = { 
