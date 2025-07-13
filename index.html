@@ -10,7 +10,7 @@
   <meta name="keywords" content="real estate, inmobiliaria, venta de propiedades, alquiler temporario, personal shopper inmobiliario, desarrollos, baigun, ambbi, franco garbini">
   <meta name="author" content="GringoEstate">
 
-  <!-- Favicon - CORREGIDO -->
+  <!-- Favicon -->
   <link rel="icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp" sizes="any">
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp">
 
@@ -101,8 +101,22 @@
     header{height:100vh;background:url('https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp') center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff; perspective: 1000px;}
     header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}  
     .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem;}
-    .hero > *:not(.isologo) { opacity: 0; }
-    .hero .isologo{ width: 120px; height: auto; margin: 0 auto 1rem auto; display: block; z-index: 10; position: relative; opacity: 0; }
+    
+    /* SOLUCIÓN: Se eliminó la regla .hero > *:not(.isologo) que causaba el conflicto con el logo. */
+    
+    .hero .isologo{ 
+        width: 120px; 
+        height: auto; 
+        margin: 0 auto 1rem auto; 
+        display: block; 
+        z-index: 10; 
+        position: relative; 
+        opacity: 0; 
+    }
+    .hero .isologo img {
+        width: 100%;
+        height: auto;
+    }
     .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem; perspective: 800px; transform-style: preserve-3d;}
     .hero h1 span{color:var(--primary); letter-spacing: 2px;}
     .hero p{font-size:1.5rem;color:#e2e8f0;margin-bottom:2rem;line-height:1.4;font-family:'Bebas Neue', sans-serif; letter-spacing:1px;}
@@ -416,9 +430,11 @@
 
   <header id="top">
     <div class="hero">
-        <picture>
+        <!-- SOLUCIÓN: Se movió la clase 'isologo' a la etiqueta <picture> -->
+        <picture class="isologo">
             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp">
-            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" alt="Isologo de GringoEstate" class="isologo" width="120" height="120">
+            <!-- Se eliminó la clase del <img> -->
+            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" alt="Isologo de GringoEstate" width="120" height="120">
         </picture>
         <h1 class="hero-el" id="hero-title">GRINGO<span>ESTATE</span></h1>
         <p class="hero-el">LA POSTA INMOBILIARIA. SIN CORBATA.</p>
@@ -811,33 +827,43 @@
     // --- Mobile Menu Toggle - CORREGIDO ---
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
-    // SOLUCIÓN: Se eliminó .addPause() que rompía la animación de cierre.
-    const tlMenu = gsap.timeline({paused:true, reversed:true})
-      .set(mobileMenu, {display:'flex'})
-      .to(mobileMenu, {autoAlpha:1, duration:0.3})
-      .from(mobileMenu.querySelectorAll('li'),
-            {x:-30, opacity:0, stagger:0.08, duration:0.35}, '-=0.15')
-      .to(mobileMenu, {autoAlpha:0, duration:0.25})
-      .set(mobileMenu, {display:'none'});
+
+    // SOLUCIÓN: Se creó una línea de tiempo solo para la animación de apertura.
+    const tlOpen = gsap.timeline({ paused: true, reversed: true })
+        .set(mobileMenu, { display: 'flex' })
+        .to(mobileMenu, { autoAlpha: 1, duration: 0.4, ease: 'power2.out' })
+        .from(mobileMenu.querySelectorAll('li'), {
+            opacity: 0,
+            y: 20,
+            duration: 0.4,
+            stagger: 0.08,
+            ease: 'power2.out'
+        }, "-=0.2");
+
+    function openMenu() {
+        scrollManager.lock();
+        menuToggle.classList.add('open');
+        tlOpen.timeScale(1).play();
+    }
+
+    function closeMenu() {
+        scrollManager.unlock();
+        menuToggle.classList.remove('open');
+        tlOpen.timeScale(1.5).reverse();
+    }
 
     menuToggle.addEventListener('click', () => {
-      const isOpen = menuToggle.classList.contains('open');
-      if (!isOpen) { 
-        scrollManager.lock(); 
-      } else { 
-        scrollManager.unlock(); 
-      }
-      menuToggle.classList.toggle('open');
-      tlMenu.reversed() ? tlMenu.play() : tlMenu.reverse();
+        if (menuToggle.classList.contains('open')) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
     });
 
-    // SOLUCIÓN: Lógica simplificada para cerrar el menú al hacer clic en un enlace.
     mobileMenu.querySelectorAll('a[href^="#"]').forEach(link => {
         link.addEventListener('click', () => {
             if (menuToggle.classList.contains('open')) {
-                scrollManager.unlock();
-                menuToggle.classList.remove('open');
-                tlMenu.reverse();
+                closeMenu();
             }
         });
     });
@@ -954,16 +980,12 @@
     }
     
     // --- Particle Animation ---
-    const particlesObj = { visible: true }; // Global state for particles
-    const canvas = document.getElementById('particle-canvas');
-    let threejsScene = null;
-
     function initParticleAnimation() {
-        if (prefersReducedMotion || !canvas) return; 
+        if (prefersReducedMotion || !document.getElementById('particle-canvas')) return; 
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('particle-canvas'), alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -992,8 +1014,6 @@
 
         const animate = () => {
             requestAnimationFrame(animate);
-            // SOLUCIÓN: La condición `if (!particlesObj.visible)` se eliminó de aquí
-            // para que la animación se ejecute continuamente.
             const elapsedTime = clock.getElapsedTime();
             particles.rotation.y = elapsedTime * 0.05;
             particles.rotation.x = elapsedTime * 0.02;
@@ -1009,8 +1029,6 @@
         });
     }
 
-    // SOLUCIÓN: Se eliminó el ScrollTrigger que pausaba la animación de las partículas.
-    
     // --- Initializations ---
     initParticleAnimation();
     setupHorizontalScroll();
@@ -1124,6 +1142,7 @@
         resultElement.textContent = 'Generando...';
         resultElement.style.color = '#e0e0e0';
 
+        // ¡OJO! Debes reemplazar "" con tu clave de API real de Google AI Studio.
         const apiKey = ""; 
 
         const payload = { 
