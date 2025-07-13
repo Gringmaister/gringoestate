@@ -186,8 +186,31 @@
         box-shadow: 0px 8px 25px 3px rgba(255, 191, 0, 0.4); 
     }
     
+    /* Trazo amarillo para la tarjeta central activa */
+    .service-card-stacked.is-active {
+        transform: scale(1.05); /* Agranda la tarjeta central */
+    }
+    .service-card-stacked.is-active::before { 
+      content: ''; 
+      position: absolute; 
+      inset: 0; 
+      z-index: 2; 
+      border-radius: inherit; 
+      background: conic-gradient(from 180deg at 50% 50%, rgba(255, 191, 0, 0.6) 0deg, rgba(255, 191, 0, 0.2) 115deg, rgba(255, 191, 0, 0) 360deg); 
+      opacity: 0.7; /* Más opaco para que se note el trazo */
+      animation: pulse-border 3s infinite; /* Animación de pulso */
+    }
+    @keyframes pulse-border { 50% { opacity: 1; } }
+
     .card-inner-content { background: var(--card-bg); width: 100%; height: 100%; border-radius: 18px; position: relative; z-index: 3; overflow: hidden; }
     .card-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform 0.5s ease; filter: brightness(0.7); }
+    /* Ajuste para mostrar la parte superior de la imagen en tarjetas específicas (web) */
+    .service-card-stacked[data-card-id="tarjeta2"] .card-image,
+    .service-card-stacked[data-card-id="tarjeta5"] .card-image,
+    .service-card-stacked[data-card-id="tarjeta7"] .card-image {
+        object-position: top center; /* Muestra la parte superior de la imagen */
+    }
+
     .card-content-initial { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 3; padding: 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; /* Alinea al final */ height: 100%; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%); }
     .card-content-initial h3 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 3.5vw, 2.8rem); line-height: 1.1; letter-spacing: 1px; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); color: white; margin-bottom: 0.75rem; }
     .card-content-initial h3 span { color: var(--primary); }
@@ -596,6 +619,13 @@
                     <input type="number" id="alquiler-original-input" placeholder="Monto Original del Alquiler ($)">
                     <input type="month" id="fecha-inicio-input" placeholder="Fecha de Inicio (Mes/Año)">
                     <input type="month" id="fecha-actual-input" placeholder="Fecha Actual (Mes/Año)">
+                    <!-- Selector de frecuencia de indexación -->
+                    <select id="frecuencia-indexacion">
+                        <option value="" disabled selected>Frecuencia de Indexación...</option>
+                        <option value="trimestral">Trimestral</option>
+                        <option value="cuatrimestral">Cuatrimestral</option>
+                        <option value="semestral">Semestral</option>
+                    </select>
                     <div class="ai-button-wrapper">
                         <button id="calcular-alquiler-btn">Calcular Nuevo Alquiler ✨</button>
                         <div id="loader-alquiler" class="loader"></div>
@@ -681,7 +711,7 @@
   document.addEventListener('DOMContentLoaded', () => {
 
     gsap.registerPlugin(ScrollTrigger, Flip);
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReducedMotion = window.matchMotionPreference(); // Use the new method for checking preference
 
     // --- Cursor Logic ---
     if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
@@ -915,10 +945,10 @@
             if (wrapper) gsap.set(wrapper, { position: 'static', height: 'auto', overflow: 'visible'});
             if (container) gsap.set(container, { x: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'auto', padding: '0' });
             if (cards.length > 0) {
-                gsap.set(cards, {clearProps: "scale,opacity,transform,width,margin", opacity: 1, y: 0, width: '100%', margin: '10px 0'}); // Reset for vertical stack
+                gsap.set(cards, {clearProps: "scale,opacity,transform,width,margin", opacity: 1, y: 0, width: '100%', margin: '10px 0'}); 
                 cards.forEach(card => card.classList.remove('is-active')); // Remove active state
             }
-            if (horizontalSection) horizontalSection.style.height = 'auto'; // Remove fixed height
+            if (horizontalSection) horizontalSection.style.height = 'auto'; 
 
             return; 
         }
@@ -940,32 +970,37 @@
                 pin: wrapper,
                 scrub: 0.2,
                 invalidateOnRefresh: true,
-                // Simplified animation for better performance
+                // Animation only for the central active card
                 onUpdate: self => {
                     const progress = self.progress; 
                     cards.forEach((card, i) => {
-                        const cardVisibilityProgress = progress - (i * 0.1); 
-                        
-                        if (cardVisibilityProgress > -0.2 && cardVisibilityProgress < 0.8) { 
+                        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+                        const viewCenter = -gsap.getProperty(container, "x") + window.innerWidth / 2;
+                        const distance = Math.abs(cardCenter - viewCenter);
+                        const threshold = window.innerWidth / 2; // Distance threshold for the center card
+
+                        if (distance < threshold) {
+                            // Card is in the center/active
                             gsap.to(card, {
-                                opacity: 1,
-                                y: 0,
-                                duration: 0.5,
-                                ease: 'power3.out',
-                                id: `cardAnim-${i}`, 
-                                overwrite: true 
-                            });
-                            card.classList.add('is-active'); 
-                        } else {
-                            gsap.to(card, {
-                                opacity: cardVisibilityProgress < 0 ? 0 : 1, 
-                                y: cardVisibilityProgress < 0 ? 20 : 0,
-                                duration: 0.5,
-                                ease: 'power3.out',
-                                id: `cardAnim-${i}`,
+                                scale: 1.05, // Slightly larger
+                                y: -10, // Slight upward movement
+                                boxShadow: '0px 10px 40px 5px rgba(255, 191, 0, 0.6)', // Glow
+                                duration: 0.4,
+                                ease: 'power2.out',
                                 overwrite: true
                             });
-                            if (cardVisibilityProgress > 0.8) card.classList.remove('is-active');
+                            card.classList.add('is-active'); // Add class for ::before styles
+                        } else {
+                            // Card is not in the center
+                            gsap.to(card, {
+                                scale: 1, // Reset scale
+                                y: 0, // Reset position
+                                boxShadow: '0 15px 45px rgba(0, 0, 0, 0.4)', // Reset shadow
+                                duration: 0.4,
+                                ease: 'power2.out',
+                                overwrite: true
+                            });
+                            card.classList.remove('is-active'); // Remove class
                         }
                     });
                 }
@@ -1063,6 +1098,7 @@
     const alquilerOriginalInput = document.getElementById('alquiler-original-input');
     const fechaInicioInput = document.getElementById('fecha-inicio-input');
     const fechaActualInput = document.getElementById('fecha-actual-input');
+    const frecuenciaIndexacionSelect = document.getElementById('frecuencia-indexacion'); // Selector de frecuencia
     const calcularAlquilerBtn = document.getElementById('calcular-alquiler-btn');
     const alquilerResult = document.getElementById('alquiler-result');
     const loaderAlquiler = document.getElementById('loader-alquiler');
@@ -1095,9 +1131,10 @@
         const montoOriginal = parseFloat(alquilerOriginalInput.value);
         const fechaInicioStr = fechaInicioInput.value; 
         const fechaActualStr = fechaActualInput.value; 
+        const frecuencia = frecuenciaIndexacionSelect.value;
 
-        if (isNaN(montoOriginal) || !fechaInicioStr || !fechaActualStr) {
-            alquilerResult.textContent = 'Por favor, completa todos los campos y selecciona fechas válidas.';
+        if (isNaN(montoOriginal) || !fechaInicioStr || !fechaActualStr || !frecuencia) {
+            alquilerResult.textContent = 'Por favor, completa todos los campos y selecciona una frecuencia.';
             alquilerResult.style.color = '#ff6b6b';
             return;
         }
@@ -1121,20 +1158,64 @@
             return;
         }
 
-        const ipcApertura = ipcData.find(item => item.fecha === fechaInicioStr);
-        const ipcCierre = ipcData.find(item => item.fecha === fechaActualStr);
+        // --- Lógica de Indexación Trimestral, Cuatrimestral, Semestral ---
+        let montoActualizado = montoOriginal;
+        let fechaActualIterada = fechaInicioStr; // Empezamos desde la fecha de inicio
+        let ipcAplicadoPreviamente = ipcData.find(item => item.fecha === fechaInicioStr);
 
-        if (!ipcApertura || !ipcCierre) {
-            alquilerResult.textContent = 'No se encontraron datos del IPC para las fechas seleccionadas. Verifica las fechas o la disponibilidad de datos.';
+        if (!ipcAplicadoPreviamente) {
+            alquilerResult.textContent = 'No se encontraron datos del IPC para la fecha de inicio seleccionada.';
             alquilerResult.style.color = '#ff6b6b';
             loaderAlquiler.style.display = 'none';
             return;
         }
 
-        const factorAjuste = ipcCierre.valor / ipcApertura.valor;
-        const nuevoMonto = montoOriginal * factorAjuste;
+        let mesInicioNum = parseInt(fechaInicioStr.split('-')[1]);
+        let anioInicio = parseInt(fechaInicioStr.split('-')[0]);
+        let mesActualNum = parseInt(fechaActualStr.split('-')[1]);
+        let anioActual = parseInt(fechaActualStr.split('-')[0]);
 
-        alquilerResult.textContent = `El nuevo monto del alquiler sería: $ ${nuevoMonto.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+        while (true) {
+            let proximoMes = mesInicioNum + parseInt(frecuencia.replace(/\D/g,'')); // Obtener el número de meses a avanzar
+            let proximoAnio = anioInicio;
+            
+            if (proximoMes > 12) {
+                proximoAnio += Math.floor((proximoMes - 1) / 12);
+                proximoMes = (proximoMes - 1) % 12 + 1;
+            }
+            
+            const proximaFechaIndexacion = `${proximoAnio}-${String(proximoMes).padStart(2, '0')}`;
+
+            // Si la próxima fecha a indexar es posterior a la fecha actual, salimos del loop
+            if (proximaFechaIndexacion > fechaActualStr) {
+                break;
+            }
+
+            const ipcAperturaPeriodo = ipcAplicadoPreviamente; // IPC del inicio del periodo
+            const ipcCierrePeriodo = ipcData.find(item => item.fecha === proximaFechaIndexacion); // IPC del final del periodo
+
+            if (!ipcCierrePeriodo) {
+                // Si no encontramos datos para la fecha de cierre, usamos el último IPC disponible y salimos.
+                console.warn(`IPC no encontrado para ${proximaFechaIndexacion}. Usando último IPC disponible.`);
+                break;
+            }
+
+            const factorAjuste = ipcCierrePeriodo.valor / ipcAperturaPeriodo.valor;
+            montoActualizado *= factorAjuste;
+            
+            // Preparamos para la siguiente iteración
+            fechaInicioStr = proximaFechaIndexacion; // La fecha de inicio del siguiente periodo es la de cierre del actual
+            mesInicioNum = proximoMes;
+            anioInicio = proximoAnio;
+            ipcAplicadoPreviamente = ipcCierrePeriodo; // Guardamos el IPC de cierre para la próxima apertura
+
+            // Prevenir loop infinito si algo falla (ej: no se actualiza la fecha)
+            if (proximaFechaIndexacion === `${anioActual}-${String(mesActualNum).padStart(2, '0')}` && proximoMes > mesActualNum) {
+                 break; // Si ya llegamos a la fecha actual y el próximo paso la supera, rompemos.
+            }
+        }
+
+        alquilerResult.textContent = `El nuevo monto del alquiler sería: $ ${montoActualizado.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
         alquilerResult.style.color = '#e0e0e0'; 
         loaderAlquiler.style.display = 'none';
     }
