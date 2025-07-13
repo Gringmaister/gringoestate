@@ -10,8 +10,8 @@
   <meta name="keywords" content="real estate, inmobiliaria, venta de propiedades, alquiler temporario, personal shopper inmobiliario, desarrollos, baigun, ambbi, franco garbini">
   <meta name="author" content="GringoEstate">
 
-  <!-- Favicon -->
-  <link rel="icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp">
+  <!-- Favicon - CORREGIDO -->
+  <link rel="icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp" sizes="any">
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp">
 
   <!-- Open Graph para WhatsApp, Facebook, etc. -->
@@ -117,7 +117,7 @@
     
     nav ul{list-style:none;font-weight:700; padding-left: 0; margin: 0;}
     
-    /* 4. Menú móvil centrado siempre */
+    /* Menú móvil - CORREGIDO */
     nav .nav-links-mobile { 
       visibility: hidden; 
       position: fixed; 
@@ -130,10 +130,11 @@
       -webkit-backdrop-filter: blur(10px);
       padding: 6rem 1.5rem 2rem; 
       opacity: 0; 
-      display: flex; /* Changed from none to flex */
+      display: flex;
       justify-content: center; 
       align-items: center; 
-      z-index: 999; 
+      /* SOLUCIÓN: Aumentado el z-index para que el menú aparezca sobre la barra de navegación. */
+      z-index: 1000; 
     }
     nav .nav-links-mobile ul { display: flex; flex-direction: column; gap: 0; align-items: center; width: 100%; text-align: center; }
     nav .nav-links-mobile li { width: 100%; opacity: 0; }
@@ -182,7 +183,6 @@
     
     .card-inner-content { background: var(--card-bg); width: 100%; height: 100%; border-radius: 18px; position: relative; z-index: 3; overflow: hidden; }
     
-    /* 2. Sustituir filter:brightness() */
     .card-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform 0.5s ease; filter: none; }
     .card-image::after {
       content: '';
@@ -192,7 +192,6 @@
       pointer-events: none;
     }
 
-    /* 3. Micro-animación de borde */
     @keyframes borderPulse {
       0% { box-shadow: 0 0 0 0 rgba(255,191,0,0); }
       50% { box-shadow: 0 0 6px 2px rgba(255,191,0,.4); }
@@ -226,8 +225,22 @@
     .card-modal.is-visible { opacity: 1; visibility: visible; transition: opacity 0.4s ease; }
     .card-modal-content-wrapper { background-color: var(--card-bg); border-radius: 20px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); width: 90%; max-width: 1000px; height: 90%; max-height: 85vh; position: relative; display: flex; flex-direction: column; overflow: hidden; transform: scale(0.95); transition: transform 0.4s ease; }
     .card-modal.is-visible .card-modal-content-wrapper { transform: scale(1); }
+    
+    /* SOLUCIÓN: Capa de superposición oscura para el modal para mejorar la legibilidad. */
+    .card-modal-content-wrapper::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 2;
+      border-radius: 20px;
+    }
+
     .card-modal-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
-    .card-modal-text-content { position: relative; z-index: 2; padding: 2rem; display: flex; flex-direction: column; height: 100%; justify-content: space-between; color: var(--text-light); }
+    
+    /* SOLUCIÓN: Aumentado el z-index para que el texto aparezca sobre la nueva capa de superposición. */
+    .card-modal-text-content { position: relative; z-index: 3; padding: 2rem; display: flex; flex-direction: column; height: 100%; justify-content: space-between; color: var(--text-light); }
+    
     .card-modal-text-content h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; flex-shrink: 0; }
     .card-modal-text-content .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; line-height: 1.7; margin-bottom: 1rem; }
     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar { width: 8px; }
@@ -358,6 +371,16 @@
         .card-modal-text-content h3 { font-size: 2rem; }
         .btn-card { width: 100%; }
         h2.section-title { font-size: 2.5rem; }
+
+        /* SOLUCIÓN: Asegura que el contenedor de las tarjetas se muestre correctamente en móvil. */
+        .horizontal-scroll-wrapper {
+            height: auto !important;
+            overflow: visible !important;
+            position: static !important;
+        }
+        .horizontal-scroll-section {
+            height: auto !important;
+        }
     }
   </style>
 </head>
@@ -704,7 +727,6 @@
     }
 
     // --- Hero Animations ---
-    /* 4. Logo siempre visible */
     const iso = document.querySelector('.isologo');
     if (prefersReducedMotion) {
       iso.style.opacity = 1;
@@ -791,7 +813,6 @@
     };
 
     // --- Mobile Menu Toggle ---
-    /* 3. Menú móvil: display flex ↔ none */
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
     const tlMenu = gsap.timeline({paused:true, reversed:true})
@@ -892,7 +913,6 @@
     });
 
     // --- Horizontal Scroll Animation Setup ---
-    /* 1. Scroll horizontal fluido */
     function setupHorizontalScroll() {
         const section = document.querySelector('.horizontal-scroll-section');
         const wrapper = section.querySelector('.horizontal-scroll-wrapper');
@@ -904,11 +924,14 @@
             horizontalScrollInstance = null;
         }
 
+        // The JS logic to disable horizontal scroll was good, but the CSS fix makes it more robust.
+        // No changes needed here, the new CSS in the media query will handle mobile layout correctly.
         if (window.innerWidth < 768 || prefersReducedMotion) {
             gsap.set([section, wrapper, container, cards], { clearProps: 'all' });
-            gsap.set(container, { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1.5rem' });
-            gsap.set(cards, { width: '100%', maxWidth: '500px', margin: '1rem 0' });
-            section.style.height = 'auto';
+            gsap.set(container, { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1.5rem', gap: '1.5rem' });
+            gsap.set(cards, { width: '100%', maxWidth: '500px', margin: '0' });
+            gsap.set(wrapper, {height: 'auto'});
+            gsap.set(section, {height: 'auto'});
             ScrollTrigger.refresh();
             return;
         }
@@ -990,7 +1013,6 @@
         });
     }
 
-    /* 2. Pausar Three.js cuando se fija */
     ScrollTrigger.create({
       trigger: '.horizontal-scroll-section',
       start: 'top top',
