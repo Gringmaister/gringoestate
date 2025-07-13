@@ -1,1293 +1,1268 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <!-- SEO & Metadata Optimizados -->
-  <title>GringoEstate – Real Estate sin corbata</title>
-  <meta name="description" content="Transformamos el Real Estate con soluciones innovadoras. Venta en 90 días, gestión de alquiler temporario, personal shopper inmobiliario y asesoría para desarrolladores.">
-  <meta name="keywords" content="real estate, inmobiliaria, venta de propiedades, alquiler temporario, personal shopper inmobiliario, desarrollos, baigun, ambbi, franco garbini">
-  <meta name="author" content="GringoEstate">
-
-  <!-- Favicon -->
-  <link rel="icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp">
-  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp">
-
-  <!-- Open Graph -->
-  <meta property="og:title" content="GringoEstate – Real Estate sin corbata">
-  <meta property="og:description" content="Transformamos el Real Estate con soluciones innovadoras.">
-  <meta property="og:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp">
-  <meta property="og:url" content="https://www.gringo.estate">
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="es_AR">
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="GringoEstate – Real Estate sin corbata">
-  <meta name="twitter:description" content="Transformamos el Real Estate con soluciones innovadoras.">
-  <meta name="twitter:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp">
-  
-  <!-- Preconnect a Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-  
-  <!-- Google Tag Manager -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y1DWC69608"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-Y1DWC69608');
-  </script>
-  
-  <style>
-    :root {
-      --primary: #FFBF00;
-      --dark: #000000;
-      --light: #f8f9fa; 
-      --text-light: #f0f0f0;
-      --gray: #cccccc; 
-      --dark-bg: #111111;
-      --card-bg: #1A1A1A;
-    }
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Roboto', sans-serif;
-      scroll-behavior: smooth;
-    }
-    html, body {
-      overflow-x: hidden;
-    }
-    body {
-      color: var(--text-light);
-      background: var(--dark-bg);
-      cursor: none;
-    }
-    body.no-scroll { 
-        overflow: hidden;
-        position: fixed;
-        width: 100%;
-        height: 100%;
-    }
-    
-    a, button, .service-card-stacked, input, select, textarea {
-      cursor: none !important;
-    }
-    
-    #particle-canvas {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
-    }
-
-    .custom-cursor { 
-      position: fixed; 
-      left: 0; 
-      top: 0; 
-      pointer-events: none; 
-      z-index: 10001;
-      opacity: 0; 
-      transition: opacity .3s; 
-    }
-    .cursor-dot { width: 24px; height: 24px; background-color: transparent; border: 2px solid var(--primary); border-radius: 50%; transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
-    .cursor-point { width: 6px; height: 6px; background-color: #ffffff; border-radius: 50%; z-index: 9998; }
-    @media (pointer: fine) { .custom-cursor { opacity: 1; } }
-    @media (pointer: coarse) { .custom-cursor { display: none; } body, a, button, input, select, textarea { cursor: auto !important; } }
-
-    header{height:100vh;background:url('https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp') center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff; perspective: 1000px;}
-    header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}  
-    .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem;}
-    .hero > * { opacity: 0; }
-    .hero .isologo{ width: 120px; height: auto; margin: 0 auto 1rem auto; display: block; z-index: 10; position: relative; }
-    .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem; perspective: 800px; transform-style: preserve-3d;}
-    .hero h1 span{color:var(--primary); letter-spacing: 2px;}
-    .hero p{font-size:1.5rem;color:#e2e8f0;margin-bottom:2rem;line-height:1.4;font-family:'Bebas Neue', sans-serif; letter-spacing:1px;}
-    .btn-primary{background:var(--primary);color:var(--dark);padding:.75rem 2rem;border-radius:50px;display:inline-block;transition: background-color .3s, color .3s, box-shadow .3s;font-weight:700;font-size:1.1rem;letter-spacing:1px; border: none; text-decoration: none;}
-    .btn-primary:hover{background:#fff;color:var(--dark);transform:translateY(-3px) !important;box-shadow:0 10px 20px rgba(0,0,0,0.2);}
-    
-    nav{position:fixed;top:0;left:0;width:100%;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;z-index:1000;transition: background-color .4s, padding .4s, backdrop-filter .4s; border-bottom: 1px solid rgba(255,255,255,0.1);}
-    nav.nav-scrolled { background:rgba(0,0,0,.8); backdrop-filter:blur(8px); padding: 0.75rem 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);}
-    
-    nav a.logo { display: inline-block; white-space: nowrap; font-family:'Bebas Neue', sans-serif;font-weight:700;letter-spacing:1px;font-size:1.5rem;color:#fff; text-decoration: none; }
-    nav a.logo span {color: var(--primary);}
-    
-    nav ul{list-style:none;font-weight:700; padding-left: 0; margin: 0;}
-    
-    nav .nav-links-mobile { 
-      visibility: hidden; 
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%; 
-      background-color: var(--dark-bg); /* Fondo negro sólido */
-      padding: 6rem 1.5rem 2rem; 
-      opacity: 0; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      z-index: 999; 
-    }
-    nav .nav-links-mobile ul { display: flex; flex-direction: column; gap: 0; align-items: center; width: 100%; text-align: center; }
-    nav .nav-links-mobile li { width: 100%; opacity: 0; }
-    nav .nav-links-mobile a { display: flex; justify-content: center; align-items: center; width: 100%; padding: 1.5rem 1rem; font-size: 1.5rem; color: #fff; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1.5px; border-bottom: 1px solid rgba(255,255,255,0.1); transition: color .3s, background-color .3s; text-decoration: none; }
-    nav .nav-links-mobile li:first-child a { border-top: 1px solid rgba(255,255,255,0.1); }
-    nav .nav-links-mobile a:hover { background-color: rgba(255, 191, 0, 0.1); color: var(--primary); }
-    .menu-item-number { font-size: 0.8rem; color: var(--primary); opacity: 0.7; margin-right: 1rem; font-family: 'Roboto', sans-serif; font-weight: 400; }
-    .nav-links-desktop {display: none;}
-    .nav-links-desktop a { padding-bottom: 5px; position: relative; color: #fff; text-decoration: none;}
-    .nav-links-desktop a:hover { color: var(--primary); }
-    .nav-links-desktop a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--primary); transform: scaleX(0); transform-origin: left; transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1); }
-    .nav-links-desktop a:hover::after { transform: scaleX(1); }
-    .menu-button {display: flex; flex-direction: column; justify-content: space-around; width: 24px; height: 24px; background: transparent; padding: 0; z-index: 1001; border: none;}
-    .menu-button .bar {display: block; width: 24px; height: 3px; background-color: white; border-radius: 10px; transition: all 0.3s ease-in-out;}
-    .menu-button.open .bar1 {transform: rotate(45deg) translate(5px, 6px);}
-    .menu-button.open .bar2 {opacity: 0;}
-    .menu-button.open .bar3 {transform: rotate(-45deg) translate(5px, -6px);}
-
-    main { display: block; background-color: transparent; }
-    section{padding:4.5rem 1.5rem;max-width:1200px;margin: 0 auto; background-color: transparent; position: relative; z-index: 1;}
-    
-    #about { background-color: var(--dark-bg); } 
-
-    .section-full-width { max-width: none; padding-left: 0; padding-right: 0; }
-
-    h2.section-title{font-family:'Bebas Neue', sans-serif;letter-spacing:1.5px;font-size:3rem;font-weight:700;margin-bottom:2rem;text-align:center; padding: 0 1.5rem;}
-    h2.section-title span {color: var(--primary); letter-spacing: 2px;}
-    .text-left { text-align: left !important; }
-
-    .about{display:flex; align-items:center; gap:3rem; flex-wrap:wrap;}
-    .about-img{flex:1;min-width:250px;text-align:center;}
-    .about-img img{width:280px;height:280px;border-radius:50%;object-fit:cover;object-position: center top; border:8px solid var(--primary);box-shadow:0 10px 30px rgba(0,0,0,0.1);}
-    .about-text{flex:2;}
-    .about-text p{color:var(--text-light);line-height:1.8;margin-bottom:1rem;}
-    .about-text .section-title { color: var(--light); }
-    
-    #services-stacked { color: #fff; padding-top: 4.5rem; padding-bottom: 4.5rem; background-color: transparent; }
-    #services-stacked > .section-title, #services-stacked > .subtitle { padding-left: 1.5rem; padding-right: 1.5rem; }
-    #services-stacked .subtitle { text-align: center; max-width: 700px; margin: -1rem auto 2rem; color: #ccc; z-index: 2; position: relative; }
-    
-    .horizontal-scroll-section { position: relative; }
-    .horizontal-scroll-wrapper { position: sticky; top: 0; display: flex; align-items: center; height: 100vh; width: 100%; overflow: hidden; }
-    .cards-container { display: flex; gap: clamp(2rem, 5vw, 4rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; }
-    
-    .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; will-change: transform, opacity; transition: transform 0.3s ease, box-shadow 0.3s ease; }
-    
-    /* Animación Sutil de Hover para tarjetas - MINIMALISTA */
-    .service-card-stacked:hover {
-        transform: translateY(-5px); 
-        box-shadow: 0px 8px 25px 3px rgba(255, 191, 0, 0.4); 
-    }
-    
-    /* Trazo amarillo para la tarjeta central activa */
-    .service-card-stacked.is-active {
-        transform: scale(1.05); /* Agranda la tarjeta central */
-    }
-    .service-card-stacked.is-active::before { 
-      content: ''; 
-      position: absolute; 
-      inset: 0; 
-      z-index: 2; 
-      border-radius: inherit; 
-      background: conic-gradient(from 180deg at 50% 50%, rgba(255, 191, 0, 0.6) 0deg, rgba(255, 191, 0, 0.2) 115deg, rgba(255, 191, 0, 0) 360deg); 
-      opacity: 0.7; /* Más opaco para que se note el trazo */
-      animation: pulse-border 3s infinite; /* Animación de pulso */
-    }
-    @keyframes pulse-border { 50% { opacity: 1; } }
-
-    .card-inner-content { background: var(--card-bg); width: 100%; height: 100%; border-radius: 18px; position: relative; z-index: 3; overflow: hidden; }
-    .card-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform 0.5s ease; filter: brightness(0.7); }
-    /* Ajuste para mostrar la parte superior de la imagen en tarjetas específicas (web) */
-    .service-card-stacked[data-card-id="tarjeta2"] .card-image,
-    .service-card-stacked[data-card-id="tarjeta5"] .card-image,
-    .service-card-stacked[data-card-id="tarjeta7"] .card-image {
-        object-position: top center; /* Muestra la parte superior de la imagen */
-    }
-
-    .card-content-initial { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 3; padding: 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; /* Alinea al final */ height: 100%; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%); }
-    .card-content-initial h3 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 3.5vw, 2.8rem); line-height: 1.1; letter-spacing: 1px; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); color: white; margin-bottom: 0.75rem; }
-    .card-content-initial h3 span { color: var(--primary); }
-    .card-content-initial .short-desc { color: #e0e0e0; line-height: 1.5; margin-bottom: 1.5rem; min-height: 60px; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); }
-    .btn-toggle-expand { background: none; border: none; color: var(--primary); font-weight: 700; font-size: 1rem; align-self: flex-start; transition: all .3s ease; padding: 0.5rem 0; }
-    .btn-toggle-expand:hover { color: #fff; transform: translateX(5px); }
-    .btn-toggle-expand::after { content: '→'; margin-left: 0.5rem; display: inline-block; transition: transform 0.3s ease; }
-
-    .card-full-details { display: none; }
-
-    .card-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 10000;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.4s ease, visibility 0s 0.4s;
-    }
-    .card-modal.is-visible {
-        opacity: 1;
-        visibility: visible;
-        transition: opacity 0.4s ease;
-    }
-    .card-modal-content-wrapper {
-        background-color: var(--card-bg);
-        border-radius: 20px;
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
-        width: 90%;
-        max-width: 1000px;
-        height: 90%;
-        max-height: 85vh;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        transform: scale(0.95);
-        transition: transform 0.4s ease;
-    }
-    .card-modal.is-visible .card-modal-content-wrapper {
-        transform: scale(1);
-    }
-    .card-modal-image {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        filter: brightness(0.4);
-        z-index: 1;
-    }
-    .card-modal-text-content {
-        position: relative;
-        z-index: 2;
-        padding: 2rem;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        justify-content: space-between;
-        color: var(--text-light);
-    }
-    .card-modal-text-content h3 {
-        font-family: 'Bebas Neue', sans-serif;
-        color: var(--primary);
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-        flex-shrink: 0;
-    }
-    .card-modal-text-content .card-full-content-scroll {
-        flex-grow: 1;
-        overflow-y: auto;
-        padding-right: 15px;
-        line-height: 1.7;
-        margin-bottom: 1rem;
-    }
-    .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar { width: 8px; }
-    .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-    .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 10px; }
-    .card-modal-text-content .card-full-content-scroll ul { list-style: none; padding-left: 0; margin: 1rem 0; }
-    .card-modal-text-content .card-full-content-scroll li { margin-bottom: 0.75rem; display: flex; align-items: flex-start; gap: 0.75rem; }
-    .card-modal-text-content .card-highlight { font-weight: 700; color: #fff; background-color: rgba(255, 191, 0, 0.1); padding: 0.75rem; border-left: 3px solid var(--primary); margin: 1.5rem 0; font-style: italic; }
-    .card-modal-text-content .card-alert { color: #ffda6a; font-size: 0.9rem; margin-top: 1rem; border-left: 3px solid #ffda6a; padding: 0.5rem 0.75rem; background-color: rgba(255, 218, 106, 0.05); }
-    .card-footer-cta {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid rgba(255,255,255,0.1);
-        align-items: center;
-        flex-shrink: 0;
-    }
-    .btn-card { background: var(--primary); color: var(--dark); padding: 0.75rem 1.5rem; border-radius: 50px; display: inline-block; font-weight: 700; font-size: 1rem; text-align: center; transition: all .3s; width: 80%; max-width: 280px; text-decoration: none; }
-    .btn-card:hover { background: #fff; color: var(--dark); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
-    .btn-toggle-collapse { background: transparent; border: 1px solid #555; color: #aaa; border-radius: 50px; padding: 0.5rem 1rem; font-size: 1rem; margin-top: 0.5rem; transition: all .3s ease; }
-    .btn-toggle-collapse:hover { background: #555; color: #fff; }
-    .card-modal-close-btn { position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: #fff; font-size: 2rem; z-index: 3; line-height: 1; padding: 0.5rem; border-radius: 50%; transition: background-color 0.3s ease, transform 0.3s ease; }
-    .card-modal-close-btn:hover { background-color: rgba(255, 255, 255, 0.1); transform: rotate(90deg); }
-    #overlay-backdrop { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.7); z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.4s ease, visibility 0s 0.4s; }
-    #overlay-backdrop.visible { opacity: 1; visibility: visible; transition: opacity 0.4s ease; }
-
-    .content-after-sticky { background-color: transparent; position: relative; z-index: 1; }
-    
-    #portfolio .section-title { color: #fff; }
-    .portfolio-grid-wrapper { max-width: 1200px; margin: auto; padding: 0 1.5rem; }
-    .portfolio-grid{margin-top:2rem;display:grid;grid-template-columns: 1fr; gap:1.5rem;}
-    .portfolio-item{position:relative;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.1);}
-    .portfolio-item::after {content:''; position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background .4s;}
-    .portfolio-item:hover::after {background: rgba(0,0,0,0.5);}
-    .portfolio-item img{width:100%;height:250px;object-fit:cover;display:block;transition:transform .4s cubic-bezier(0.2, 1, 0.2, 1);}
-    .portfolio-item:hover img{transform:scale(1.05);}
-    .portfolio-item .portfolio-content {position:absolute;bottom:0;left:0;width:100%;padding:1rem; z-index: 2; transform: translateY(calc(100% - 48px)); transition: transform .4s cubic-bezier(0.2, 1, 0.2, 1);}
-    .portfolio-item:hover .portfolio-content {transform: translateY(0);}
-    .portfolio-item .portfolio-content .project-title {display:block;color:#fff;font-size:1.25rem;font-family:'Bebas Neue', sans-serif;letter-spacing:1px;}
-    .portfolio-item .portfolio-content .project-location { color: var(--primary); font-family: 'Bebas Neue', sans-serif; }
-    .portfolio-item .portfolio-content .view-more {color: var(--primary); opacity: 0; transition: opacity .4s; font-weight: 700; margin-top: 0.25rem;}
-    .portfolio-item:hover .portfolio-content .view-more {opacity: 1;}
-
-    .ai-tools-wrapper { max-width: 1200px; margin: auto; padding: 0 1.5rem; }
-    #ai-tools .subtitle { text-align:center;max-width:600px;margin:-1rem auto 2rem;color:#ccc;line-height:1.6; }
-    .ai-button-wrapper { text-align: center; margin-top: 1rem; }
-    .ai-coming-soon { text-align:center; margin-top: 5rem; padding-top: 2rem; }
-    .ai-coming-soon h3 { font-family:'Bebas Neue', sans-serif; color:var(--primary); }
-    .ai-coming-soon p { padding: 0 1rem; color: #aaa; }
-
-    .contact-wrapper { max-width: 1100px; margin: auto; padding: 0 1.5rem; display: grid; grid-template-columns: 1fr; gap: 3rem; align-items: center; }
-    .contact-info p { color: #ccc; line-height: 1.7; max-width: 450px; margin-bottom: 2rem; }
-    .contact-info .section-title { color: var(--primary) !important; }
-    .circulo-decorativo { width: 50px; height: 50px; border: 2px solid var(--primary); border-radius: 50%; margin-top: 40px; }
-    .contact-form-wrapper form { display: flex; flex-direction: column; gap: 1rem; }
-    /* Estilo de inputs de IA para que coincidan con el formulario de contacto */
-    .ai-tool-card textarea, .ai-tool-card input[type="text"], .ai-tool-card input[type="month"], .ai-tool-card input[type="number"] { 
-        padding: 1rem; border:1px solid #333; border-radius:8px; font-size:1rem; width:100%; background-color: #1a1a1a; color: #fff; transition: border-color .3s, box-shadow .3s; 
-    }
-    .ai-tool-card textarea:focus, .ai-tool-card input[type="text"]:focus, .ai-tool-card input[type="month"]:focus, .ai-tool-card input[type="number"]:focus { 
-        outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 191, 0, 0.4); 
-    }
-    .btn-enviar-mensaje { background:var(--primary); color:var(--dark); padding:.9rem 2rem; border-radius:50px; display:inline-block; transition: background-color .3s, box-shadow .3s; font-weight:700; font-size:1.1rem; letter-spacing:1px; width:100%; text-align: center; border: none; }
-    .btn-enviar-mensaje:hover { background-color: #fff; box-shadow:0 10px 20px rgba(0,0,0,0.2); }
-
-    #property-details { display: none; flex-direction: column; gap: 1rem; }
-    .ai-tool-card { background-color: #1a1a1a; padding: 2rem; border-radius: 10px; margin-top: 2rem; border: 1px solid #333;}
-    .ai-tool-card h3 { color: var(--primary); font-size: 1.75rem; margin-bottom: 1rem; text-align: center; font-family: 'Bebas Neue', sans-serif; }
-    .ai-tool-card p { color: #ccc; margin-bottom: 1rem; text-align: center; }
-    .ai-tool-card textarea { background-color: #222; color: #fff; border-radius: 6px; padding: 1rem; width: 100%; min-height: 120px; transition: border-color .3s, box-shadow .3s; border: 1px solid #333; }
-    .ai-tool-card button { background-color: var(--primary); color: var(--dark); padding: .75rem 1.5rem; border-radius: 50px; transition: all .3s; font-weight: 700; border: none; }
-    .ai-tool-card button:hover { background-color: #fff; }
-    .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: pre-wrap; line-height: 1.7; color: #e0e0e0; }
-    .loader { width: 24px; height: 24px; border: 3px solid #FFF; border-bottom-color: transparent; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; margin-top: 1rem; display: none; }
-    @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    
-    .whatsapp-float { position: fixed; width: 60px; height: 60px; bottom: 20px; right: 20px; background-color: #25d366; color: #FFF; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 6px rgba(0,0,0,0.25); z-index: 1000; display: flex; align-items: center; justify-content: center; transition: transform 0.3s; animation: pulse 2.5s infinite 2s; }
-    .whatsapp-float:hover { transform: scale(1.1); animation: none; }
-    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); } 70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); } }
-
-    footer{background: transparent; color:#94a3b8;padding:3rem 1.5rem;text-align:center;font-size:1rem; position: relative; z-index: 1;}
-    footer p { margin: 0; }
-    footer a{color: var(--primary); opacity: 0.8; transition: opacity .3s; text-decoration: none;}
-    footer a:hover{opacity: 1;}
-
-    @media (min-width: 1024px) {
-      .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
-      .contact-wrapper { grid-template-columns: 1fr 1fr; }
-      .menu-button { display: none; }
-      .nav-links-desktop { display: flex; }
-      .nav-links-desktop ul { display:flex; flex-direction: row; gap: 2rem;}
-    }
-
-    @media (max-width: 768px) {
-        .cards-container { width: 100%; padding: 0 5vw; }
-        .service-card-stacked { width: 100%; }
-        
-        .card-modal-content-wrapper { width: 95%; height: 85%; }
-        .card-modal-text-content { padding: 1.5rem; }
-        .card-modal-text-content h3 { font-size: 2rem; }
-        .btn-card { width: 100%; }
-        h2.section-title { font-size: 2.5rem; }
-    }
-  </style>
-</head>
-<body>
-  <canvas id="particle-canvas"></canvas>
-  <div id="cursor-regular" class="custom-cursor"><div class="cursor-dot"></div></div>
-  <div id="cursor-point" class="custom-cursor"><div class="cursor-point"></div></div>
-
-  <div id="overlay-backdrop"></div>
-  
-  <nav>
-    <a class="logo" href="#top">GRINGO<span>ESTATE</span></a>
-    <div class="nav-links-desktop">
-      <ul>
-        <li><a href="#about">Sobre Mí</a></li>
-        <li><a href="#services-stacked">Servicios</a></li>
-        <li><a href="#portfolio">Proyectos</a></li>
-        <li><a href="#ai-tools">Herramientas IA ✨</a></li>
-        <li><a href="#contact">Contacto</a></li>
-      </ul>
-    </div>
-    <div class="nav-links-mobile" id="mobile-menu">
-      <ul>
-        <li><a href="#about"><span class="menu-item-number">01</span>Sobre Mí</a></li>
-        <li><a href="#services-stacked"><span class="menu-item-number">02</span>Servicios</a></li>
-        <li><a href="#portfolio"><span class="menu-item-number">03</span>Proyectos</a></li>
-        <li><a href="#ai-tools"><span class="menu-item-number">04</span>Herramientas IA ✨</a></li>
-        <li><a href="#contact"><span class="menu-item-number">05</span>Contacto</a></li>
-      </ul>
-    </div>
-    <button class="menu-button" id="menu-toggle" aria-label="Abrir o cerrar menú de navegación">
-        <span class="bar bar1"></span>
-        <span class="bar bar2"></span>
-        <span class="bar bar3"></span>
-    </button>
-  </nav>
-
-  <header id="top">
-    <div class="hero">
-        <picture>
-            <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp">
-            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" alt="Isologo de GringoEstate" class="isologo hero-el" width="120" height="120">
-        </picture>
-        <h1 class="hero-el" id="hero-title">GRINGO<span>ESTATE</span></h1>
-        <p class="hero-el">LA POSTA INMOBILIARIA. SIN CORBATA.</p>
-        <a href="#contact" class="btn-primary hero-el">AGENDÁ UNA LLAMADA</a>
-    </div>
-  </header>
-
-  <main>
-    <section id="about" class="about">
-      <div class="about-img">
-        <picture>
-            <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/franco-perfil.webp" type="image/webp">
-            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/franco-perfil.webp" alt="Retrato de Franco Garbini, fundador de GringoEstate" loading="lazy" width="280" height="280">
-        </picture>
-      </div>
-      <div class="about-text">
-          <h2 class="section-title text-left">SOY FRANCO GARBINI</h2>
-          <p><strong>Deportista, entusiasta de la tecnología y apasionado del mundo inmobiliario.</strong> Hace 4 años renuncié a la seguridad del mundo corporativo (Banco Galicia) para subalquilar mi primer monoambiente. <br>Una apuesta personal...</p>
-          <p>Hoy, esa apuesta se transformó en un <strong>sistema de negocios</strong>: socio en <strong>Baigun R&N</strong>, fundador de <strong>AMBBI</strong> (<strong>+500 reviews 5⭐️</strong>) y responsable de la comercialización de <strong>edificios completos</strong>. Combino datos, tecnología y un equipo ágil para entregar resultados reales, sin traje ni corbata.</p>
-      </div>
-    </section>
-
-    <section id="services-stacked" class="section-full-width">
-        <h2 class="section-title">NUESTROS <span>SERVICIOS</span></h2>
-        <p class="subtitle">
-            Descubrí cómo GringoEstate transforma el Real Estate con soluciones innovadoras y un enfoque directo.
-        </p>
-        <div class="horizontal-scroll-section">
-            <div class="horizontal-scroll-wrapper">
-                <div class="cards-container">
-                    
-                    <article class="service-card-stacked" data-card-id="tarjeta1">
-                      <div class="card-inner-content">
-                        <picture>
-                            <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta1.webp" type="image/webp">
-                            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta1.webp" alt="Tasación profesional de una propiedad" class="card-image" loading="lazy">
-                        </picture>
-                        <div class="card-content-initial"><h3>QUIERO TASAR <span>MI PROPIEDAD</span></h3><p class="short-desc">Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><div class="card-full-details-content"><h3>QUIERO TASAR MI PROPIEDAD</h3><div class="card-full-content-scroll"><p>Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><ul><li>✅ En 48 horas hábiles.</li><li>✅ Se entrega una carpeta formal con análisis de mercado.</li><li>✅ Documentación respaldatoria clara.</li></ul><p class="card-highlight">El punto de partida para con información poder tomar la mejor decisión.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Solicitar Tasación</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                      </div>
-                    </article>
-
-                    <article class="service-card-stacked" data-card-id="tarjeta2">
-                      <div class="card-inner-content">
-                        <picture>
-                            <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta2.webp" type="image/webp">
-                            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta2.webp" alt="Vender una propiedad con GringoEstate" class="card-image" loading="lazy">
-                        </picture>
-                        <div class="card-content-initial"><h3>¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3><p class="short-desc">Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><div class="card-full-details-content"><h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3><div class="card-full-content-scroll"><p>Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><h4>Nuestra estrategia 360° incluye:</h4><ul><li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li><li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li><li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li><li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li></ul><p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Tasar mi propiedad</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                      </div>
-                    </article>
-
-                    <article class="service-card-stacked" data-card-id="tarjeta3">
-                      <div class="card-inner-content">
-                        <picture>
-                            <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta3.webp" type="image/webp">
-                            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta3.webp" alt="Interior de un apartamento de alquiler temporario" class="card-image" loading="lazy">
-                        </picture>
-                        <div class="card-content-initial"><h3>POTENCIÁ TU <span>ALQUILER TEMPORARIO</span></h3><p class="short-desc">Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><div class="card-full-details-content"><h3>POTENCIÁ TU ALQUILER TEMPORARIO</h3><div class="card-full-content-scroll"><p>Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><h4>Nuestro servicio "llave en mano" incluye:</h4><ul><li>✅ Asesoría de home staging gratuita y puesta a punto.</li><li>✅ Ejecución de amoblamiento a través de nuestro equipo de arquitectura y red de proveedores.</li><li>✅ Publicación profesional en todas las plataformas para un máximo impacto.</li><li>✅ Gestión integral (sistemas, anfitrión, limpieza) para maximizar tus ingresos y darte tranquilidad.</li></ul><p class="card-alert">⚠️ Únicamente tomamos propiedades modernas con opción de self check-in. Para otras unidades, ofrecemos nuestro servicio de alquiler flex o tradicional.</p><p class="card-highlight">Delegá la gestión, disfrutá los resultados.</p></div><div class="card-footer-cta"><a href="https://www.ambbi.com.ar/" target="_blank" rel="noopener noreferrer" class="btn-card">Conocer AMBBI</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                      </div>
-                    </article>
-                    
-                    <article class="service-card-stacked" data-card-id="tarjeta4">
-                      <div class="card-inner-content">
-                        <picture>
-                            <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta4.webp" type="image/webp">
-                            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta4.webp" alt="Llaves de una propiedad siendo entregadas" class="card-image" loading="lazy">
-                        </picture>
-                        <div class="card-content-initial"><h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3><p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><div class="card-full-details-content"><h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3><div class="card-full-content-scroll"><p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><h4>Alquiler Flex (1 a 12 meses):</h4><ul><li>✅ Ideal para propiedades amobladas.</li><li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li><li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li><li>✅ Administración integral de pagos y seguimiento del contrato.</li></ul><h4>Alquiler Tradicional (2 años):</h4><ul><li>✅ La opción clásica para una renta estable y predecible.</li><li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li></ul><p class="card-highlight">Tu propiedad, en buenas manos.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Gestión de Alquiler Flex y Tradicional">Consultar por Gestión</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                      </div>
-                    </article>
-
-                    <article class="service-card-stacked" data-card-id="tarjeta5">
-                      <div class="card-inner-content">
-                        <picture>
-                            <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta5.webp" type="image/webp">
-                            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta5.webp" alt="Render de un edificio en construcción" class="card-image" loading="lazy">
-                        </picture>
-                        <div class="card-content-initial"><h3>INVERTÍ <span>DESDE POZO</span></h3><p class="short-desc">Accedé a una cartera única de +26 emprendimientos en exclusiva y oportunidades off-market.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><div class="card-full-details-content"><h3>INVERTÍ DESDE POZO</h3><div class="card-full-content-scroll"><p>Accedé a una cartera única de +26 emprendimientos en exclusiva y oportunidades off-market.</p><ul><li>✅ +26 desarrollos en exclusiva que no encontrarás en otro lado.</li><li>✅ Análisis de ROI y proyecciones claras para una decisión informada.</li><li>✅ Acompañamiento en todo el proceso, desde la firma hasta la entrega.</li></ul><p class="card-highlight">Invertí de forma inteligente en los mejores proyectos de la ciudad.</p></div><div class="card-footer-cta"><a href="https://www.baigunryn.com/emprendimientos/" target="_blank" rel="noopener noreferrer" class="btn-card">Ver Oportunidades</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                      </div>
-                    </article>
-
-                    <article class="service-card-stacked" data-card-id="tarjeta6">
-                        <div class="card-inner-content">
-                            <picture>
-                                <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" type="image/webp">
-                                <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" alt="Un desarrollador revisando planos en una obra" class="card-image" loading="lazy">
-                            </picture>
-                            <div class="card-content-initial"><h3>¿SOS <span>DESARROLLADOR?</span></h3><p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details"><div class="card-full-details-content"><h3>¿SOS DESARROLLADOR?</h3><div class="card-full-content-scroll"><p>Una alianza estratégica, no una inmobiliaria más.</p><ul><li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li><li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li><li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li></ul><p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Asesoría para Desarrolladores">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                        </div>
-                    </article>
-                    
-                    <article class="service-card-stacked" data-card-id="tarjeta7">
-                        <div class="card-inner-content">
-                            <picture>
-                                <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta7.webp" type="image/webp">
-                                <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta7.webp" alt="GringoEstate con clientas" class="card-image" loading="lazy">
-                            </picture>
-                            <div class="card-content-initial"><h3>PERSONAL SHOPPER <span>INMOBILIARIO</span></h3><p class="short-desc">Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details"><div class="card-full-details-content"><h3>PERSONAL SHOPPER INMOBILIARIO</h3><div class="card-full-content-scroll"><p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><ul><li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li><li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li><li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li></ul><p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p><p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta. Asesorate con profesionales y delegá lo tedioso.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Personal Shopper Inmobiliario">Quiero este Servicio</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                        </div>
-                    </article>
-
-                    <article class="service-card-stacked" data-card-id="tarjeta8">
-                        <div class="card-inner-content">
-                            <picture>
-                                <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta8.webp" type="image/webp">
-                                <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta8.webp" alt="Local comercial de GringoEstate" class="card-image" loading="lazy">
-                            </picture>
-                            <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details"><div class="card-full-details-content"><h3>LOCALES COMERCIALES Y OFICINAS</h3><div class="card-full-content-scroll"><p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><ul><li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li><li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li><li>✅ Asesoramiento integral en contratos comerciales y negociación.</li></ul><p class="card-highlight">Llevá tu negocio al siguiente nivel.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Locales Comerciales y Oficinas">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                        </div>
-                    </article>
-
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <div class="content-after-sticky">
-        <section id="portfolio" class="section-full-width">
-            <div class="portfolio-grid-wrapper">
-                <h2 class="section-title">PROYECTOS <span>DESTACADOS</span></h2>
-                <div class="portfolio-grid">
-                    <div class="portfolio-item">
-                        <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-ambar.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-ambar.webp" alt="Fachada del proyecto Ámbar en Recoleta" loading="lazy" width="600" height="400"/></picture>
-                        <div class="portfolio-content">
-                            <span class="project-title">Ámbar · <span class="project-location">Recoleta (15 Unidades)</span></span>
-                            <div class="view-more">Ver más →</div>
-                        </div>
-                    </div>
-                    <div class="portfolio-item">
-                        <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-charlone.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-charlone.webp" alt="Render de la Torre Charlone en Colegiales" loading="lazy" width="600" height="400"/></picture>
-                        <div class="portfolio-content">
-                            <span class="project-title">Torre Charlone · <span class="project-location">Colegiales</span></span>
-                            <div class="view-more">Ver más →</div>
-                        </div>
-                    </div>
-                    <div class="portfolio-item">
-                        <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-nunez.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-nunez.webp" alt="Exterior del proyecto Casona en Núñez" loading="lazy" width="600" height="400"/></picture>
-                        <div class="portfolio-content">
-                            <span class="project-title">Casona · <span class="project-location">Núñez</span></span>
-                            <div class="view-more">Ver más →</div>
-                        </div>
-                    </div>
-                    <div class="portfolio-item">
-                        <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-palermo.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-palermo.webp" alt="Render del proyecto Concepción Live en Palermo" loading="lazy" width="600" height="400"/></picture>
-                        <div class="portfolio-content">
-                            <span class="project-title">Concepción Live · <span class="project-location">Palermo</span></span>
-                            <div class="view-more">Ver más →</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <section id="ai-tools" class="section-full-width">
-            <h2 class="section-title" style="color:#fff;">HERRAMIENTAS CON <span>IA ✨</span></h2>
-            <p class="subtitle">
-                Potenciá tus proyectos con estas herramientas exclusivas, diseñadas para darte una ventaja en el mercado.
-            </p>
-            <div class="ai-tools-wrapper">
-                <div class="ai-tool-card">
-                    <h3>Generador de Descripciones de Propiedades</h3>
-                    <p>Ingresá los datos clave de tu propiedad y creá una descripción profesional y atractiva en segundos.</p>
-                    <textarea id="property-input" placeholder="Ej: 3 ambientes en Palermo, 75m2, balcón con vista abierta, muy luminoso, piso alto, cerca del subte D..."></textarea>
-                    <div class="ai-button-wrapper">
-                        <button id="generate-description-btn">Generar Descripción ✨</button>
-                        <div id="loader-description" class="loader"></div>
-                    </div>
-                    <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div>
-                </div>
-                <div class="ai-tool-card">
-                    <!-- Nueva Herramienta: Calculador de Alquiler por IPC -->
-                    <h3>Calculadora de Alquiler (IPC)</h3>
-                    <p>Actualizá tu contrato de alquiler según la variación del IPC. Ingresá el monto original, fecha de inicio y fecha actual.</p>
-                    <input type="number" id="alquiler-original-input" placeholder="Monto Original del Alquiler ($)">
-                    <input type="month" id="fecha-inicio-input" placeholder="Fecha de Inicio (Mes/Año)">
-                    <input type="month" id="fecha-actual-input" placeholder="Fecha Actual (Mes/Año)">
-                    <!-- Selector de frecuencia de indexación -->
-                    <select id="frecuencia-indexacion">
-                        <option value="" disabled selected>Frecuencia de Indexación...</option>
-                        <option value="trimestral">Trimestral</option>
-                        <option value="cuatrimestral">Cuatrimestral</option>
-                        <option value="semestral">Semestral</option>
-                    </select>
-                    <div class="ai-button-wrapper">
-                        <button id="calcular-alquiler-btn">Calcular Nuevo Alquiler ✨</button>
-                        <div id="loader-alquiler" class="loader"></div>
-                    </div>
-                    <div id="alquiler-result" class="ai-result">El monto actualizado aparecerá aquí...</div>
-                    <p class="ai-alert" style="text-align: center; margin-top: 1rem;">⚠️ Los datos del IPC se obtienen de fuentes oficiales y pueden tener un pequeño retraso en la última actualización.</p>
-                </div>
-                <div class="ai-coming-soon">
-                    <h3>MÁS HERRAMIENTAS EN CONSTRUCCIÓN...</h3>
-                    <p>
-                        El arsenal de GringoEstate seguirá creciendo. Pronto integraremos un <strong>Asistente para Redactar Contratos</strong> y otras herramientas para que tomes las mejores decisiones.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <section id="contact" class="section-full-width">
-            <div class="contact-wrapper">
-                <div class="contact-info">
-                    <h2 class="section-title text-left">HABLEMOS</h2>
-                    <p>Contame tu proyecto o propiedad y descubramos juntos cómo maximizar su potencial. Agendemos una llamada sin compromiso.</p>
-                    <div class="circulo-decorativo"></div>
-                </div>
-                <div class="contact-form-wrapper">
-                    <form id="contact-form" action="https://formspree.io/f/mldnnkev" method="POST">
-                        <input type="text" name="name" placeholder="Tu Nombre" required>
-                        <input type="email" name="email" placeholder="Tu Email" required>
-                        <input type="tel" name="phone" placeholder="Tu Celular" required>
-                        <select name="interest" id="interest-select" required>
-                            <option value="" disabled selected>Estoy interesado/a en...</option>
-                            <option value="Tasar mi propiedad">Tasar mi propiedad</option>
-                            <option value="Potenciar mi Alquiler Temporario">Potenciar mi Alquiler Temporario</option>
-                            <option value="Gestión de Alquiler Flex y Tradicional">Gestión de Alquiler Flex y Tradicional</option>
-                            <option value="Invertir desde pozo">Invertir desde pozo</option>
-                            <option value="Locales Comerciales y Oficinas">Locales Comerciales y Oficinas</option>
-                            <option value="Asesoría para Desarrolladores">Asesoría para Desarrolladores</option>
-                            <option value="Personal Shopper Inmobiliario">Personal Shopper Inmobiliario</option>
-                            <option value="Otro">Otro</option>
-                        </select>
-                        <div id="property-details">
-                            <input type="text" name="property_address" placeholder="Dirección de la propiedad">
-                            <input type="text" name="property_zone" placeholder="Zona / Barrio">
-                            <input type="text" name="property_rooms" placeholder="Ambientes">
-                            <input type="text" name="property_size" placeholder="Superficie (m²)">
-                        </div>
-                        <textarea name="message" rows="4" placeholder="Contame un poco sobre tu proyecto..." required></textarea>
-                        <button type="submit" class="btn-enviar-mensaje">Enviar Mensaje</button>
-                    </form>
-                </div>
-            </div>
-        </section>
-    </div>
-  </main>
-  
-  <footer>
-    <p>© 2025 Franco Garbini · GringoEstate · Todos los derechos reservados.</p>
-    <p style="margin-top:1rem;">
-      <a href="https://www.linkedin.com/company/gringoestate/" target="_blank" rel="noopener noreferrer">LinkedIn</a>  •  
-      <a href="https://twitter.com/Gringoestate" target="_blank" rel="noopener noreferrer">Twitter (X)</a>  •  
-      <a href="https://instagram.com/Gringoestate" target="_blank" rel="noopener noreferrer">Instagram</a>
-    </p>
-  </footer>
-
-  <a href="https://wa.me/5491156106169" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width:28px; height:28px; fill:white;"><path d="M380.9 97.1C339.4 55.6 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.8 0-67.6-9.5-97.8-26.7l-7-4.1-72.5 19 19.3-71.1-4.5-7.4c-18.3-30.7-27.9-66.2-27.9-102.3 0-108.6 88.4-197 197-197s197 88.4 197 197-88.4 197-197 197zm83.7-118.2c-3.7-1.9-22.1-10.9-25.6-12.1-3.4-1.2-5.9-1.9-8.4 1.9-2.5 3.7-9.7 12.1-11.9 14.5-2.2 2.5-4.5 2.8-8.2 1-3.7-1.9-15.7-5.8-30-18.5-11.1-9.6-18.7-21.6-20.9-25.3-2.2-3.7-0.2-5.9 1.7-7.7 1.7-1.5 3.7-3.7 5.5-5.5 1.8-1.8 2.5-3.7 3.7-6.2 1.2-2.5 0.6-4.8-0.3-6.7-0.9-1.9-8.4-20.1-11.5-27.5-3.1-7.4-6.2-6.3-8.4-6.3-2.2 0-4.8 0-7.4 0-2.5 0-6.7 1.2-10.3 5.9-3.7 4.8-14.1 13.8-14.1 33.5 0 19.8 14.4 38.9 16.4 41.4 2 2.5 28.2 42.8 68.2 60.1 9.7 4.1 17.3 6.6 23.1 8.8 13.3 5.1 25.6 4.3 35.1 2.6 10.8-1.9 22.1-9 25.2-17.6 3.1-8.6 3.1-16 2.2-17.6-0.9-1.5-3.4-2.5-7.1-4.5z"/></svg>
-  </a>
-
-  <div id="card-modal" class="card-modal">
-    <div class="card-modal-content-wrapper">
-      <button class="card-modal-close-btn">×</button>
-      <img src="" alt="Imagen de fondo del servicio" class="card-modal-image">
-      <div class="card-modal-text-content">
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Flip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-  <script>
-  document.addEventListener('DOMContentLoaded', () => {
-
-    gsap.registerPlugin(ScrollTrigger, Flip);
-    const prefersReducedMotion = window.matchMotionPreference(); // Use the new method for checking preference
-
-    // --- Cursor Logic ---
-    if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
-        const cursorRegular = document.getElementById('cursor-regular');
-        const cursorPoint = document.getElementById('cursor-point');
-        
-        window.addEventListener('mousemove', e => {
-            gsap.to(cursorRegular, { x: e.clientX, y: e.clientY, duration: 0.2, ease: 'power2.out', xPercent: -50, yPercent: -50 });
-            gsap.to(cursorPoint, { x: e.clientX, y: e.clientY, duration: 0.4, ease: 'power2.out', xPercent: -50, yPercent: -50 });
-        });
-
-        const interactiveElements = document.querySelectorAll('a, button, .service-card-stacked');
-        interactiveElements.forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                gsap.to(cursorRegular, { scale: 0, opacity: 0, duration: 0.2 });
-                gsap.to(cursorPoint, { scale: 1, opacity: 1, duration: 0.2 });
-            });
-            el.addEventListener('mouseleave', () => {
-                gsap.to(cursorRegular, { scale: 1, opacity: 1, duration: 0.2 });
-                gsap.to(cursorPoint, { scale: 0, opacity: 0, duration: 0.2 });
-            });
-        });
-    }
-
-    // --- Hero Animations ---
-    if (!prefersReducedMotion) {
-        gsap.set(".hero-el", {y: 30, opacity: 0});
-        gsap.to(".hero-el", { 
-            opacity: 1, 
-            y: 0, 
-            duration: 1, 
-            stagger: 0.2, 
-            ease: "power3.out", 
-            delay: 0.2,
-            onComplete: () => {
-                gsap.set('.hero .isologo', { autoAlpha: 1 });
-            }
-        });
-        
-        const animateOnScroll = (selector, triggerSelector) => {
-             gsap.from(selector, {
-                 opacity: 0,
-                 y: 50,
-                 duration: 1,
-                 ease: 'power3.out',
-                 stagger: 0.15,
-                 scrollTrigger: {
-                     trigger: triggerSelector || selector,
-                     start: "top 85%",
-                     toggleActions: "play none none none"
-                 }
-             });
-        }
-        animateOnScroll(".about-text > *", ".about");
-        animateOnScroll(".about-img", ".about");
-        animateOnScroll(".portfolio-item", ".portfolio-grid");
-        animateOnScroll(".ai-tool-card", "#ai-tools");
-        animateOnScroll(".contact-info > *", ".contact-wrapper");
-        animateOnScroll(".contact-form-wrapper", ".contact-wrapper");
-    }
-
-    // --- Navbar Scroll Effect ---
-    const nav = document.querySelector('nav');
-    if(nav) {
-        ScrollTrigger.create({
-            start: 'top -80',
-            end: 99999,
-            toggleClass: { className: 'nav-scrolled', targets: nav }
-        });
-    }
-
-    // --- Hero Title 3D Animation on Hover ---
-    const heroTitle = document.getElementById('hero-title');
-    if (heroTitle && !prefersReducedMotion) {
-        heroTitle.addEventListener('mouseenter', () => {
-            gsap.to(heroTitle, {
-                duration: 0.8,
-                rotationX: 15, 
-                rotationY: 10,
-                scale: 1.02,
-                ease: 'power2.out'
-            });
-        });
-
-        heroTitle.addEventListener('mouseleave', () => {
-            gsap.to(heroTitle, {
-                duration: 0.8,
-                rotationX: 0,
-                rotationY: 0,
-                scale: 1,
-                ease: 'power2.out'
-            });
-        });
-    }
-
-    // --- Mobile Menu Toggle ---
-    const menuToggle = document.getElementById('menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
-    let scrollPosition = 0; 
-
-    if(menuToggle && mobileMenu) {
-        gsap.set(mobileMenu, { autoAlpha: 0 });
-        const mobileMenuTimeline = gsap.timeline({ paused: true, reversed: true })
-            .to(mobileMenu, { autoAlpha: 1, duration: 0.3, ease: 'power2.out' })
-            .fromTo(mobileMenu.querySelectorAll('li'), { x: -30, opacity: 0 }, { x: 0, opacity: 1, stagger: 0.08, duration: 0.4, ease: 'power2.out' }, "-=0.2");
-
-        const toggleMenu = () => {
-            const isOpen = menuToggle.classList.contains('open');
-            if (!isOpen) {
-                scrollPosition = window.pageYOffset;
-                document.body.style.top = `-${scrollPosition}px`; 
-                document.body.classList.add('no-scroll');
-            } else {
-                document.body.classList.remove('no-scroll');
-                document.body.style.removeProperty('top');
-            }
-            menuToggle.classList.toggle('open');
-            mobileMenuTimeline.reversed() ? mobileMenuTimeline.play() : mobileMenuTimeline.reverse();
-        };
-
-        menuToggle.addEventListener('click', toggleMenu);
-        mobileMenu.querySelectorAll('a').forEach(link => {
-            if (link.getAttribute('href').startsWith('#')) {
-                link.addEventListener('click', toggleMenu);
-            }
-        });
-    }
-
-    // --- Modal Logic ---
-    const overlayBackdrop = document.getElementById('overlay-backdrop');
-    const cardModal = document.getElementById('card-modal');
-    const cardModalImage = cardModal.querySelector('.card-modal-image');
-    const cardModalTextContent = cardModal.querySelector('.card-modal-text-content');
-    const interestSelect = document.getElementById('interest-select');
-    const propertyDetailsDiv = document.getElementById('property-details'); 
-
-    const scrollManager = {
-        lockCount: 0,
-        lock() { 
-            if (this.lockCount === 0) {
-                scrollPosition = window.pageYOffset;
-                document.body.style.top = `-${scrollPosition}px`;
-                document.body.classList.add('no-scroll');
-            }
-            this.lockCount++;
-        },
-        unlock() { 
-            this.lockCount--;
-            if (this.lockCount <= 0) {
-                this.lockCount = 0;
-                document.body.classList.remove('no-scroll');
-                document.body.style.removeProperty('top');
-            }
-        }
-    };
-    
-    let horizontalScrollInstance = null; 
-
-    function openCardModal(card) {
-        const imageSrc = card.querySelector('.card-image').src;
-        const fullDetailsContent = card.querySelector('.card-full-details-content').innerHTML;
-
-        cardModalImage.src = imageSrc;
-        cardModalTextContent.innerHTML = fullDetailsContent;
-
-        cardModal.classList.add('is-visible');
-        overlayBackdrop.classList.add('visible');
-        scrollManager.lock(); 
-
-        if (horizontalScrollInstance) {
-            horizontalScrollInstance.disable();
-        }
-    }
-
-    function closeCardModal() {
-        cardModal.classList.remove('is-visible');
-        overlayBackdrop.classList.remove('visible');
-        scrollManager.unlock(); 
-
-        if (horizontalScrollInstance) {
-            horizontalScrollInstance.enable();
-        }
-    }
-
-    document.querySelectorAll('.service-card-stacked').forEach(card => {
-        card.addEventListener('click', e => {
-            if (e.target.closest('a[target="_blank"]') || e.target.closest('a[href="#contact"]')) {
-                if (e.target.closest('a[href="#contact"]')) {
-                    const interest = e.target.getAttribute('data-interest');
-                    if (interest && interestSelect) {
-                        interestSelect.value = interest;
-                        interestSelect.dispatchEvent(new Event('change'));
-                    }
-                }
-                return; 
-            }
-            e.preventDefault(); 
-            openCardModal(card);
-        });
-    });
-
-    cardModal.addEventListener('click', (e) => {
-        if (e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse')) {
-            closeCardModal();
-        } else if (e.target === overlayBackdrop || e.target === cardModal) { 
-            closeCardModal();
-        } else if (e.target.closest('a[href="#contact"]')) { 
-            const interest = e.target.getAttribute('data-interest');
-            if (interest && interestSelect) {
-                interestSelect.value = interest;
-                interestSelect.dispatchEvent(new Event('change'));
-            }
-            closeCardModal(); 
-        }
-    });
-
-    // --- Horizontal Scroll Animation Setup (Optimized for Performance) ---
-    function setupHorizontalScroll() {
-        if (horizontalScrollInstance) {
-            horizontalScrollInstance.kill();
-        }
-
-        const horizontalSection = document.querySelector('.horizontal-scroll-section');
-        const wrapper = document.querySelector('.horizontal-scroll-wrapper');
-        const container = document.querySelector('.cards-container');
-        const cards = gsap.utils.toArray('.service-card-stacked');
-
-        // Responsive handling: if screen is too small, stack cards vertically instead of horizontal scroll
-        if (window.innerWidth < 768) {
-            // Reset to default vertical layout
-            if (wrapper) gsap.set(wrapper, { position: 'static', height: 'auto', overflow: 'visible'});
-            if (container) gsap.set(container, { x: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'auto', padding: '0' });
-            if (cards.length > 0) {
-                gsap.set(cards, {clearProps: "scale,opacity,transform,width,margin", opacity: 1, y: 0, width: '100%', margin: '10px 0'}); 
-                cards.forEach(card => card.classList.remove('is-active')); // Remove active state
-            }
-            if (horizontalSection) horizontalSection.style.height = 'auto'; 
-
-            return; 
-        }
-
-        // Setup for horizontal scroll on larger screens
-        gsap.set(wrapper, { position: 'sticky', top: 0, height: '100vh', overflow: 'hidden'});
-        gsap.set(container, { display: 'flex', flexDirection: 'row' }); 
-        
-        const scrollWidth = container.scrollWidth - window.innerWidth;
-        gsap.set(horizontalSection, { height: `${scrollWidth + window.innerHeight}px` }); 
-
-        horizontalScrollInstance = gsap.to(container, {
-            x: () => -scrollWidth,
-            ease: "none",
-            scrollTrigger: {
-                trigger: horizontalSection,
-                start: "top top",
-                end: () => `+=${scrollWidth}`,
-                pin: wrapper,
-                scrub: 0.2,
-                invalidateOnRefresh: true,
-                // Animation only for the central active card
-                onUpdate: self => {
-                    const progress = self.progress; 
-                    cards.forEach((card, i) => {
-                        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
-                        const viewCenter = -gsap.getProperty(container, "x") + window.innerWidth / 2;
-                        const distance = Math.abs(cardCenter - viewCenter);
-                        const threshold = window.innerWidth / 2; // Distance threshold for the center card
-
-                        if (distance < threshold) {
-                            // Card is in the center/active
-                            gsap.to(card, {
-                                scale: 1.05, // Slightly larger
-                                y: -10, // Slight upward movement
-                                boxShadow: '0px 10px 40px 5px rgba(255, 191, 0, 0.6)', // Glow
-                                duration: 0.4,
-                                ease: 'power2.out',
-                                overwrite: true
-                            });
-                            card.classList.add('is-active'); // Add class for ::before styles
-                        } else {
-                            // Card is not in the center
-                            gsap.to(card, {
-                                scale: 1, // Reset scale
-                                y: 0, // Reset position
-                                boxShadow: '0 15px 45px rgba(0, 0, 0, 0.4)', // Reset shadow
-                                duration: 0.4,
-                                ease: 'power2.out',
-                                overwrite: true
-                            });
-                            card.classList.remove('is-active'); // Remove class
-                        }
-                    });
-                }
-            }
-        });
-    }
-
-    // --- IA Tool Form Logic ---
-    if (interestSelect && propertyDetailsDiv) {
-        interestSelect.addEventListener('change', function() {
-            const showDetails = this.value === 'Tasar mi propiedad';
-            gsap.to(propertyDetailsDiv, {
-                height: showDetails ? 'auto' : 0,
-                opacity: showDetails ? 1 : 0,
-                paddingTop: showDetails ? '1rem' : 0,
-                paddingBottom: showDetails ? '1rem' : 0,
-                display: showDetails ? 'flex' : 'none', 
-                duration: 0.4,
-                ease: 'power2.out',
-            });
-        });
-    }
-
-    // --- Particle Animation Initialization ---
-    function initParticleAnimation() {
-        if (prefersReducedMotion) return; 
-
-        const canvas = document.getElementById('particle-canvas');
-        if (!canvas) return; 
-
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        const particleCount = 5000;
-        const positions = new Float32Array(particleCount * 3);
-        for (let i = 0; i < particleCount * 3; i++) {
-            positions[i] = (Math.random() - 0.5) * 10;
-        }
-
-        const particlesGeometry = new THREE.BufferGeometry();
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        
-        const particlesMaterial = new THREE.PointsMaterial({
-            color: 0xffbf00, 
-            size: 0.015,
-            transparent: true,
-            blending: THREE.AdditiveBlending, 
-            depthWrite: false, 
-            opacity: 0.7
-        });
-
-        const particles = new THREE.Points(particlesGeometry, particlesMaterial);
-        scene.add(particles);
-
-        camera.position.z = 5;
-
-        const clock = new THREE.Clock();
-
-        const animate = () => {
-            const elapsedTime = clock.getElapsedTime();
-            particles.rotation.y = elapsedTime * 0.05;
-            particles.rotation.x = elapsedTime * 0.02;
-            
-            renderer.render(scene, camera);
-            window.requestAnimationFrame(animate);
-        };
-
-        animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        });
-    }
-    
-    initParticleAnimation();
-    setupHorizontalScroll();
-    window.addEventListener('resize', gsap.utils.debounce(() => {
-        setupHorizontalScroll(); 
-        ScrollTrigger.refresh(true);
-    }, 250));
-
-    // --- IA Tool Event Listeners ---
-    const generateDescriptionBtn = document.getElementById('generate-description-btn');
-    const propertyInput = document.getElementById('property-input');
-    const descriptionResult = document.getElementById('description-result');
-    const loaderDescription = document.getElementById('loader-description');
-
-    // Calculadora de Alquiler IPC
-    const alquilerOriginalInput = document.getElementById('alquiler-original-input');
-    const fechaInicioInput = document.getElementById('fecha-inicio-input');
-    const fechaActualInput = document.getElementById('fecha-actual-input');
-    const frecuenciaIndexacionSelect = document.getElementById('frecuencia-indexacion'); // Selector de frecuencia
-    const calcularAlquilerBtn = document.getElementById('calcular-alquiler-btn');
-    const alquilerResult = document.getElementById('alquiler-result');
-    const loaderAlquiler = document.getElementById('loader-alquiler');
-    
-    const IPC_API_URL = "https://datos.gob.ar/series/api/series?ids=148.3_INIVELNAL_DICI_M_26&format=json"; 
-
-    async function getIpcData() {
-        try {
-            const response = await fetch(IPC_API_URL);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            return data.data.map(item => ({
-                fecha: item.fecha.substring(0, 7), 
-                valor: parseFloat(item.valor)
-            }));
-        } catch (error) {
-            console.error("Error al obtener datos del IPC:", error);
-            return null; 
-        }
-    }
-
-    function formatMonthYear(dateString) { 
-        if (!dateString) return null;
-        return dateString.substring(0, 7); 
-    }
-
-    async function calcularNuevoAlquiler() {
-        const montoOriginal = parseFloat(alquilerOriginalInput.value);
-        const fechaInicioStr = fechaInicioInput.value; 
-        const fechaActualStr = fechaActualInput.value; 
-        const frecuencia = frecuenciaIndexacionSelect.value;
-
-        if (isNaN(montoOriginal) || !fechaInicioStr || !fechaActualStr || !frecuencia) {
-            alquilerResult.textContent = 'Por favor, completa todos los campos y selecciona una frecuencia.';
-            alquilerResult.style.color = '#ff6b6b';
-            return;
-        }
-
-        if (fechaInicioStr > fechaActualStr) {
-            alquilerResult.textContent = 'La fecha de inicio debe ser anterior o igual a la fecha actual.';
-            alquilerResult.style.color = '#ff6b6b';
-            return;
-        }
-
-        loaderAlquiler.style.display = 'inline-block';
-        alquilerResult.textContent = 'Calculando...';
-        alquilerResult.style.color = '#e0e0e0';
-
-        const ipcData = await getIpcData();
-
-        if (!ipcData) {
-            alquilerResult.textContent = 'Error al obtener datos del IPC. Intenta más tarde.';
-            alquilerResult.style.color = '#ff6b6b';
-            loaderAlquiler.style.display = 'none';
-            return;
-        }
-
-        // --- Lógica de Indexación Trimestral, Cuatrimestral, Semestral ---
-        let montoActualizado = montoOriginal;
-        let fechaActualIterada = fechaInicioStr; // Empezamos desde la fecha de inicio
-        let ipcAplicadoPreviamente = ipcData.find(item => item.fecha === fechaInicioStr);
-
-        if (!ipcAplicadoPreviamente) {
-            alquilerResult.textContent = 'No se encontraron datos del IPC para la fecha de inicio seleccionada.';
-            alquilerResult.style.color = '#ff6b6b';
-            loaderAlquiler.style.display = 'none';
-            return;
-        }
-
-        let mesInicioNum = parseInt(fechaInicioStr.split('-')[1]);
-        let anioInicio = parseInt(fechaInicioStr.split('-')[0]);
-        let mesActualNum = parseInt(fechaActualStr.split('-')[1]);
-        let anioActual = parseInt(fechaActualStr.split('-')[0]);
-
-        while (true) {
-            let proximoMes = mesInicioNum + parseInt(frecuencia.replace(/\D/g,'')); // Obtener el número de meses a avanzar
-            let proximoAnio = anioInicio;
-            
-            if (proximoMes > 12) {
-                proximoAnio += Math.floor((proximoMes - 1) / 12);
-                proximoMes = (proximoMes - 1) % 12 + 1;
-            }
-            
-            const proximaFechaIndexacion = `${proximoAnio}-${String(proximoMes).padStart(2, '0')}`;
-
-            // Si la próxima fecha a indexar es posterior a la fecha actual, salimos del loop
-            if (proximaFechaIndexacion > fechaActualStr) {
-                break;
-            }
-
-            const ipcAperturaPeriodo = ipcAplicadoPreviamente; // IPC del inicio del periodo
-            const ipcCierrePeriodo = ipcData.find(item => item.fecha === proximaFechaIndexacion); // IPC del final del periodo
-
-            if (!ipcCierrePeriodo) {
-                // Si no encontramos datos para la fecha de cierre, usamos el último IPC disponible y salimos.
-                console.warn(`IPC no encontrado para ${proximaFechaIndexacion}. Usando último IPC disponible.`);
-                break;
-            }
-
-            const factorAjuste = ipcCierrePeriodo.valor / ipcAperturaPeriodo.valor;
-            montoActualizado *= factorAjuste;
-            
-            // Preparamos para la siguiente iteración
-            fechaInicioStr = proximaFechaIndexacion; // La fecha de inicio del siguiente periodo es la de cierre del actual
-            mesInicioNum = proximoMes;
-            anioInicio = proximoAnio;
-            ipcAplicadoPreviamente = ipcCierrePeriodo; // Guardamos el IPC de cierre para la próxima apertura
-
-            // Prevenir loop infinito si algo falla (ej: no se actualiza la fecha)
-            if (proximaFechaIndexacion === `${anioActual}-${String(mesActualNum).padStart(2, '0')}` && proximoMes > mesActualNum) {
-                 break; // Si ya llegamos a la fecha actual y el próximo paso la supera, rompemos.
-            }
-        }
-
-        alquilerResult.textContent = `El nuevo monto del alquiler sería: $ ${montoActualizado.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
-        alquilerResult.style.color = '#e0e0e0'; 
-        loaderAlquiler.style.display = 'none';
-    }
-
-    if (calcularAlquilerBtn) {
-        calcularAlquilerBtn.addEventListener('click', calcularNuevoAlquiler);
-    }
-
-
-    // --- Gemini API Call Logic (Generador de Descripciones) ---
-    async function callGeminiAPI(prompt, resultElement, loaderElement) {
-        loaderElement.style.display = 'inline-block';
-        resultElement.textContent = 'Generando...';
-        resultElement.style.color = '#e0e0e0';
-
-        const apiKey = "AIzaSyCERci1So_lJ1dRtjMFEXPpY-nImmHpydU"; // <<<<<<<<<<<<< TU CLAVE API AQUÍ
-
-        if (!apiKey || apiKey.includes("YOUR_API_KEY") || apiKey.length < 10) { 
-            resultElement.textContent = 'Error: Clave API no configurada o inválida. Por favor, inserta tu clave API de Google Gemini en el script.';
-            resultElement.style.color = '#ff6b6b'; 
-            loaderElement.style.display = 'none';
-            return;
-        }
-
-        const payload = { 
-            contents: [{ parts: [{ text: prompt }] }] 
-        };
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-        try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`API error: ${response.status} ${response.statusText} - ${JSON.stringify(errorData)}`);
-            }
-
-            const result = await response.json();
-
-            if (result.candidates && result.candidates.length > 0 &&
-                result.candidates[0].content && result.candidates[0].content.parts &&
-                result.candidates[0].content.parts.length > 0) {
-                
-                const text = result.candidates[0].content.parts[0].text;
-                resultElement.textContent = text;
-            } else {
-                resultElement.textContent = 'Error: La respuesta de la IA no tiene el formato esperado.';
-                resultElement.style.color = '#ff6b6b';
-                console.error('Unexpected API response structure:', result);
-            }
-        } catch (error) {
-            resultElement.textContent = 'Error al conectar con la IA. Revisa la consola del navegador o tu clave API.';
-            resultElement.style.color = '#ff6b6b';
-            console.error('Error calling Gemini API:', error);
-        } finally {
-            loaderElement.style.display = 'none';
-        }
-    }
-
-    if (generateDescriptionBtn) {
-        generateDescriptionBtn.addEventListener('click', () => {
-            const prompt = `Actúa como un copywriter inmobiliario experto. Genera una descripción profesional, atractiva y persuasiva para una propiedad con las siguientes características: ${propertyInput.value}. El tono debe ser directo, moderno y confiable, como "sin corbata". Estructura el texto con un título llamativo, un párrafo introductorio, una lista de 3-4 puntos clave (usando emojis como ✅) y un párrafo de cierre que invite a la acción.`;
-            callGeminiAPI(prompt, descriptionResult, loaderDescription);
-        });
-    }
-
-  }); // End of DOMContentLoaded
-  </script>
-
-</body>
-</html>
+<!DOCTYPE html> 
+ <html lang="es"> 
+ <head> 
+   <meta charset="UTF-8" /> 
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" /> 
+    
+     <title>GringoEstate – Real Estate sin corbata</title> 
+   <meta name="description" content="Soy Franco Garbini y hago que el Real Estate en CABA sea más simple y rentable para vos. Esta es mi carta de presentación y mis servicios. ¿Tenés una idea? Agendá una llamada y la bajamos a tierra."> 
+   <meta name="keywords" content="real estate, inmobiliaria, venta de propiedades, alquiler temporario, personal shopper inmobiliario, desarrollos, baigun, ambbi, franco garbini, CABA, argentina, bienes raices"> 
+   <meta name="author" content="GringoEstate"> 
+
+     <link rel="icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp"> 
+   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp"> 
+
+     <meta property="og:title" content="GringoEstate – Real Estate sin corbata"> 
+   <meta property="og:description" content="Soy Franco Garbini y hago que el Real Estate en CABA sea más simple y rentable para vos. Esta es mi carta de presentación y mis servicios. ¿Tenés una idea? Agendá una llamada y la bajamos a tierra."> 
+   <meta property="og:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp"> 
+   <meta property="og:url" content="https://www.gringo.estate"> 
+   <meta property="og:type" content="website"> 
+   <meta property="og:locale" content="es_AR"> 
+
+     <meta name="twitter:card" content="summary_large_image"> 
+   <meta name="twitter:title" content="GringoEstate – Real Estate sin corbata"> 
+   <meta name="twitter:description" content="Soy Franco Garbini y hago que el Real Estate en CABA sea más simple y rentable para vos. Esta es mi carta de presentación y mis servicios. ¿Tenés una idea? Agendá una llamada y la bajamos a tierra."> 
+   <meta name="twitter:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp"> 
+    
+     <link rel="preconnect" href="https://fonts.googleapis.com" /> 
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /> 
+   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet" /> 
+    
+     <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y1DWC69608"></script> 
+   <script> 
+     window.dataLayer = window.dataLayer || []; 
+     function gtag(){dataLayer.push(arguments);} 
+     gtag('js', new Date()); 
+     gtag('config', 'G-Y1DWC69608'); 
+   </script> 
+    
+   <style> 
+     :root { 
+       --primary: #FFBF00; 
+       --dark: #000000; 
+       --light: #f8f9fa;  
+       --text-light: #f0f0f0; 
+       --gray: #cccccc;  
+       --dark-bg: #111111; 
+       --card-bg: #1A1A1A; 
+     } 
+     * { 
+       margin: 0; 
+       padding: 0; 
+       box-sizing: border-box; 
+       font-family: 'Roboto', sans-serif; 
+       scroll-behavior: smooth; 
+     } 
+     html, body { 
+       overflow-x: hidden; 
+     } 
+     /* FIX: Punto 4 - Bloqueo de scroll usando overflow: hidden en html y body */ 
+     html.no-scroll, body.no-scroll {  
+         overflow: hidden; 
+     } 
+     body { 
+       color: var(--text-light); 
+       background: var(--dark-bg); 
+       cursor: none; 
+     } 
+      
+     a, button, .service-card-stacked, input, select, textarea { 
+       cursor: none !important; 
+     } 
+           
+     #particle-canvas { 
+         position: fixed; 
+         top: 0; 
+         left: 0; 
+         width: 100%; 
+         height: 100%; 
+         z-index: -1; 
+     } 
+
+     .custom-cursor {  
+       position: fixed;  
+       left: 0;  
+       top: 0;  
+       pointer-events: none;  
+       z-index: 10001; 
+       opacity: 0;  
+       transition: opacity .3s;  
+     } 
+     .cursor-dot { width: 24px; height: 24px; background-color: transparent; border: 2px solid var(--primary); border-radius: 50%; transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); } 
+     .cursor-point { width: 6px; height: 6px; background-color: #ffffff; border-radius: 50%; z-index: 9998; } 
+     @media (pointer: fine) { .custom-cursor { opacity: 1; } } 
+     @media (pointer: coarse) { .custom-cursor { display: none; } body, a, button, input, select, textarea { cursor: auto !important; } } 
+
+     header{height:100vh;background:url('https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp') center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff; perspective: 1000px;} 
+     header::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.65);}   
+     .hero{position:relative;z-index:1;max-width:800px;padding:0 1rem;} 
+     .hero > * { opacity: 0; } 
+     .hero .isologo{ width: 120px; height: auto; margin: 0 auto 1rem auto; display: block; z-index: 10; position: relative; } 
+     .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem; perspective: 800px; transform-style: preserve-3d; display: flex; justify-content: center;} /* MOD: Punto 6 - Display flex para letras individuales */ 
+     .hero h1 span{color:var(--primary); letter-spacing: 2px;} 
+     .hero h1 .char { display: inline-block; will-change: transform, opacity; } /* NEW: Punto 6 - Estilo para cada letra */ 
+     .hero p{font-size:1.5rem;color:#e2e8f0;margin-bottom:2rem;line-height:1.4;font-family:'Bebas Neue', sans-serif; letter-spacing:1px;} 
+     .btn-primary{background:var(--primary);color:var(--dark);padding:.75rem 2rem;border-radius:50px;display:inline-block;transition: background-color .3s, color .3s, box-shadow .3s;font-weight:700;font-size:1.1rem;letter-spacing:1px; border: none; text-decoration: none;} 
+     .btn-primary:hover{background:#fff;color:var(--dark);transform:translateY(-3px) !important;box-shadow:0 10px 20px rgba(0,0,0,0.2);} 
+      
+     nav{position:fixed;top:0;left:0;width:100%;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;z-index:1000;transition: background-color .4s, padding .4s, backdrop-filter .4s; border-bottom: 1px solid rgba(255,255,255,0.1);} 
+     nav.nav-scrolled { background:rgba(0,0,0,.8); backdrop-filter:blur(8px); padding: 0.75rem 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);} 
+           
+     nav a.logo { display: inline-block; white-space: nowrap; font-family:'Bebas Neue', sans-serif;font-weight:700;letter-spacing:1px;font-size:1.5rem;color:#fff; text-decoration: none; } 
+     nav a.logo span {color: var(--primary);} 
+      
+     nav ul{list-style:none;font-weight:700; padding-left: 0; margin: 0;} 
+      
+     nav .nav-links-mobile {  
+       visibility: hidden;  
+       position: fixed;  
+       top: 0;  
+       left: 0;  
+       width: 100%;  
+       height: 100%;  
+       background-color: var(--dark-bg); /* Fondo negro sólido */ 
+       padding: 6rem 1.5rem 2rem;  
+       opacity: 0;  
+       display: flex;  
+       justify-content: center;  
+       align-items: center;  
+       z-index: 999;  
+     } 
+     nav .nav-links-mobile ul { display: flex; flex-direction: column; gap: 0; align-items: center; width: 100%; text-align: center; } 
+     nav .nav-links-mobile li { width: 100%; opacity: 0; } 
+     nav .nav-links-mobile a { display: flex; justify-content: center; align-items: center; width: 100%; padding: 1.5rem 1rem; font-size: 1.5rem; color: #fff; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1.5px; border-bottom: 1px solid rgba(255,255,255,0.1); transition: color .3s, background-color .3s; text-decoration: none; } 
+     nav .nav-links-mobile li:first-child a { border-top: 1px solid rgba(255,255,255,0.1); } 
+     nav .nav-links-mobile a:hover { background-color: rgba(255, 191, 0, 0.1); color: var(--primary); } 
+     .menu-item-number { font-size: 0.8rem; color: var(--primary); opacity: 0.7; margin-right: 1rem; font-family: 'Roboto', sans-serif; font-weight: 400; } 
+     .nav-links-desktop {display: none;} 
+     .nav-links-desktop a { padding-bottom: 5px; position: relative; color: #fff; text-decoration: none;} 
+     .nav-links-desktop a:hover { color: var(--primary); } 
+     .nav-links-desktop a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--primary); transform: scaleX(0); transform-origin: left; transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1); } 
+     .nav-links-desktop a:hover::after { transform: scaleX(1); } 
+     .menu-button {display: flex; flex-direction: column; justify-content: space-around; width: 24px; height: 24px; background: transparent; padding: 0; z-index: 1001; border: none;} 
+     .menu-button .bar {display: block; width: 24px; height: 3px; background-color: white; border-radius: 10px; transition: all 0.3s ease-in-out;} 
+     .menu-button.open .bar1 {transform: rotate(45deg) translate(5px, 6px);} 
+     .menu-button.open .bar2 {opacity: 0;} 
+     .menu-button.open .bar3 {transform: rotate(-45deg) translate(5px, -6px);} 
+
+     main { display: block; background-color: transparent; } 
+     section{padding:4.5rem 1.5rem;max-width:1200px;margin: 0 auto; background-color: transparent; position: relative; z-index: 1;} 
+      
+     #about { background-color: var(--dark-bg); }  
+
+     .section-full-width { max-width: none; padding-left: 0; padding-right: 0; } 
+
+     h2.section-title{font-family:'Bebas Neue', sans-serif;letter-spacing:1.5px;font-size:3rem;font-weight:700;margin-bottom:2rem;text-align:center; padding: 0 1.5rem;} 
+     h2.section-title span {color: var(--primary); letter-spacing: 2px;} 
+     .text-left { text-align: left !important; } 
+
+     .about{display:flex; align-items:center; gap:3rem; flex-wrap:wrap;} 
+     .about-img{flex:1;min-width:250px;text-align:center;} 
+     .about-img img{width:280px;height:280px;border-radius:50%;object-fit:cover;object-position: center top; border:8px solid var(--primary);box-shadow:0 10px 30px rgba(0,0,0,0.1);} 
+     .about-text{flex:2;} 
+     .about-text p{color:var(--text-light);line-height:1.8;margin-bottom:1rem;} 
+     .about-text .section-title { color: var(--light); } 
+      
+     #services-stacked { color: #fff; padding-top: 4.5rem; padding-bottom: 4.5rem; background-color: transparent; } 
+     #services-stacked > .section-title, #services-stacked > .subtitle { padding-left: 1.5rem; padding-right: 1.5rem; } 
+     #services-stacked .subtitle { text-align: center; max-width: 700px; margin: -1rem auto 2rem; color: #ccc; z-index: 2; position: relative; } 
+      
+     .horizontal-scroll-section { position: relative; } 
+     .horizontal-scroll-wrapper { position: sticky; top: 0; display: flex; align-items: center; height: 100vh; width: 100%; overflow: hidden; } 
+     .cards-container { display: flex; gap: clamp(2rem, 5vw, 4rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; } 
+      
+     .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; will-change: transform, opacity; transition: transform 0.3s ease, box-shadow 0.3s ease; } 
+      
+     /* MOD: Punto 3 - Animación Sutil de Hover para tarjetas - SIN box-shadow amarillento */ 
+     .service-card-stacked:hover { 
+         transform: translateY(-5px);  
+         /* box-shadow: 0px 8px 25px 3px rgba(255, 191, 0, 0.4); */ /* ELIMINADO */ 
+     } 
+      
+     .card-inner-content { background: var(--card-bg); width: 100%; height: 100%; border-radius: 18px; position: relative; z-index: 3; overflow: hidden; } 
+     .card-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform 0.5s ease; filter: brightness(0.7); } 
+     .card-content-initial { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 3; padding: 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; /* Alinea al final */ height: 100%; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%); } 
+     .card-content-initial h3 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 3.5vw, 2.8rem); line-height: 1.1; letter-spacing: 1px; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); color: white; margin-bottom: 0.75rem; } 
+     .card-content-initial h3 span { color: var(--primary); } 
+     .card-content-initial .short-desc { color: #e0e0e0; line-height: 1.5; margin-bottom: 1.5rem; min-height: 60px; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); } 
+     .btn-toggle-expand { background: none; border: none; color: var(--primary); font-weight: 700; font-size: 1rem; align-self: flex-start; transition: all .3s ease; padding: 0.5rem 0; } 
+     .btn-toggle-expand:hover { color: #fff; transform: translateX(5px); } 
+     .btn-toggle-expand::after { content: '→'; margin-left: 0.5rem; display: inline-block; transition: transform 0.3s ease; } 
+
+     .card-full-details { display: none; } 
+
+     .card-modal { 
+         position: fixed; 
+         top: 0; 
+         left: 0; 
+         width: 100%; 
+         height: 100%; 
+         z-index: 10000; 
+         display: flex; 
+         justify-content: center; 
+         align-items: center; 
+         opacity: 0; 
+         visibility: hidden; 
+         transition: opacity 0.4s ease, visibility 0s 0.4s; 
+     } 
+     .card-modal.is-visible { 
+         opacity: 1; 
+         visibility: visible; 
+         transition: opacity 0.4s ease; 
+     } 
+     .card-modal-content-wrapper { 
+         background-color: var(--card-bg); 
+         border-radius: 20px; 
+         box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); 
+         width: 90%; 
+         max-width: 1000px; 
+         height: 90%; 
+         max-height: 85vh; 
+         position: relative; 
+         display: flex; 
+         flex-direction: column; 
+         overflow: hidden; 
+         transform: scale(0.95); 
+         transition: transform 0.4s ease; 
+     } 
+     .card-modal.is-visible .card-modal-content-wrapper { 
+         transform: scale(1); 
+     } 
+     .card-modal-image { 
+         position: absolute; 
+         top: 0; 
+         left: 0; 
+         width: 100%; 
+         height: 100%; 
+         object-fit: cover; 
+         filter: brightness(0.4); 
+         z-index: 1; 
+     } 
+     .card-modal-text-content { 
+         position: relative; 
+         z-index: 2; 
+         padding: 2rem; 
+         display: flex; 
+         flex-direction: column; 
+         height: 100%; 
+         justify-content: space-between; 
+         color: var(--text-light); 
+     } 
+     .card-modal-text-content h3 { 
+         font-family: 'Bebas Neue', sans-serif; 
+         color: var(--primary); 
+         font-size: 2.5rem; 
+         margin-bottom: 1rem; 
+         flex-shrink: 0; 
+     } 
+     .card-modal-text-content .card-full-content-scroll { 
+         flex-grow: 1; 
+         overflow-y: auto; 
+         padding-right: 15px; 
+         line-height: 1.7; 
+         margin-bottom: 1rem; 
+     } 
+     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar { width: 8px; } 
+     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); } 
+     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 10px; } 
+     .card-modal-text-content .card-full-content-scroll ul { list-style: none; padding-left: 0; margin: 1rem 0; } 
+     .card-modal-text-content .card-full-content-scroll li { margin-bottom: 0.75rem; display: flex; align-items: flex-start; gap: 0.75rem; } 
+     .card-modal-text-content .card-highlight { font-weight: 700; color: #fff; background-color: rgba(255, 191, 0, 0.1); padding: 0.75rem; border-left: 3px solid var(--primary); margin: 1.5rem 0; font-style: italic; } 
+     .card-modal-text-content .card-alert { color: #ffda6a; font-size: 0.9rem; margin-top: 1rem; border-left: 3px solid #ffda6a; padding: 0.5rem 0.75rem; background-color: rgba(255, 218, 106, 0.05); } 
+     .card-footer-cta { 
+         display: flex; 
+         flex-direction: column; 
+         gap: 1rem; 
+         padding-top: 1.5rem; 
+         border-top: 1px solid rgba(255,255,255,0.1); 
+         align-items: center; 
+         flex-shrink: 0; 
+     } 
+     .btn-card { background: var(--primary); color: var(--dark); padding: 0.75rem 1.5rem; border-radius: 50px; display: inline-block; font-weight: 700; font-size: 1rem; text-align: center; transition: all .3s; width: 80%; max-width: 280px; text-decoration: none; } 
+     .btn-card:hover { background: #fff; color: var(--dark); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); } 
+     .btn-toggle-collapse { background: transparent; border: 1px solid #555; color: #aaa; border-radius: 50px; padding: 0.5rem 1rem; font-size: 1rem; margin-top: 0.5rem; transition: all .3s ease; } 
+     .btn-toggle-collapse:hover { background: #555; color: #fff; } 
+     .card-modal-close-btn { position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: #fff; font-size: 2rem; z-index: 3; line-height: 1; padding: 0.5rem; border-radius: 50%; transition: background-color 0.3s ease, transform 0.3s ease; } 
+     .card-modal-close-btn:hover { background-color: rgba(255, 255, 255, 0.1); transform: rotate(90deg); } 
+     #overlay-backdrop { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.7); z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.4s ease, visibility 0s 0.4s; } 
+     #overlay-backdrop.visible { opacity: 1; visibility: visible; transition: opacity 0.4s ease; } 
+
+     .content-after-sticky { background-color: transparent; position: relative; z-index: 1; } 
+      
+     #portfolio .section-title { color: #fff; } 
+     .portfolio-grid-wrapper { max-width: 1200px; margin: auto; padding: 0 1.5rem; } 
+     .portfolio-grid{margin-top:2rem;display:grid;grid-template-columns: 1fr; gap:1.5rem;} 
+     .portfolio-item{position:relative;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.1);} 
+     .portfolio-item::after {content:''; position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background .4s;} 
+     .portfolio-item:hover::after {background: rgba(0,0,0,0.5);} 
+     .portfolio-item img{width:100%;height:250px;object-fit:cover;display:block;transition:transform .4s cubic-bezier(0.2, 1, 0.2, 1);} 
+     .portfolio-item:hover img{transform:scale(1.05);} 
+     .portfolio-item .portfolio-content {position:absolute;bottom:0;left:0;width:100%;padding:1rem; z-index: 2; transform: translateY(calc(100% - 48px)); transition: transform .4s cubic-bezier(0.2, 1, 0.2, 1);} 
+     .portfolio-item:hover .portfolio-content {transform: translateY(0);} 
+     .portfolio-item .portfolio-content .project-title {display:block;color:#fff;font-size:1.25rem;font-family:'Bebas Neue', sans-serif;letter-spacing:1px;} 
+     .portfolio-item .portfolio-content .project-location { color: var(--primary); font-family: 'Bebas Neue', sans-serif; } 
+     .portfolio-item .portfolio-content .view-more {color: var(--primary); opacity: 0; transition: opacity .4s; font-weight: 700; margin-top: 0.25rem;} 
+     .portfolio-item:hover .portfolio-content .view-more {opacity: 1;} 
+
+     .ai-tools-wrapper { max-width: 1200px; margin: auto; padding: 0 1.5rem; } 
+     #ai-tools .subtitle { text-align:center;max-width:600px;margin:-1rem auto 2rem;color:#ccc;line-height:1.6; } 
+     .ai-button-wrapper { text-align: center; margin-top: 1rem; } 
+     .ai-coming-soon { text-align:center; margin-top: 5rem; padding-top: 2rem; } 
+     .ai-coming-soon h3 { font-family:'Bebas Neue', sans-serif; color:var(--primary); } 
+     .ai-coming-soon p { padding: 0 1rem; color: #aaa; } 
+
+     .contact-wrapper { max-width: 1100px; margin: auto; padding: 0 1.5rem; display: grid; grid-template-columns: 1fr; gap: 3rem; align-items: center; } 
+     .contact-info p { color: #ccc; line-height: 1.7; max-width: 450px; margin-bottom: 2rem; } 
+     .contact-info .section-title { color: var(--primary) !important; } 
+     .circulo-decorativo { width: 50px; height: 50px; border: 2px solid var(--primary); border-radius: 50%; margin-top: 40px; } 
+     .contact-form-wrapper form { display: flex; flex-direction: column; gap: 1rem; } 
+     /* Estilo de inputs de IA para que coincidan con el formulario de contacto */ 
+     .ai-tool-card textarea, .ai-tool-card input[type="text"], .ai-tool-card input[type="month"], .ai-tool-card input[type="number"], .ai-tool-card select { /* MOD: Añadido select para la calculadora IPC */ 
+         padding: 1rem; border:1px solid #333; border-radius:8px; font-size:1rem; width:100%; background-color: #1a1a1a; color: #fff; transition: border-color .3s, box-shadow .3s;  
+     } 
+     .ai-tool-card textarea:focus, .ai-tool-card input[type="text"]:focus, .ai-tool-card input[type="month"]:focus, .ai-tool-card input[type="number"]:focus, .ai-tool-card select:focus { /* MOD: Añadido select para la calculadora IPC */ 
+         outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 191, 0, 0.4);  
+     } 
+     .btn-enviar-mensaje { background:var(--primary); color:var(--dark); padding:.9rem 2rem; border-radius:50px; display:inline-block; transition: background-color .3s, box-shadow .3s; font-weight:700; font-size:1.1rem; letter-spacing:1px; width:100%; text-align: center; border: none; } 
+     .btn-enviar-mensaje:hover { background-color: #fff; box-shadow:0 10px 20px rgba(0,0,0,0.2); } 
+
+     #property-details { display: none; flex-direction: column; gap: 1rem; } 
+     .ai-tool-card { background-color: #1a1a1a; padding: 2rem; border-radius: 10px; margin-top: 2rem; border: 1px solid #333;} 
+     .ai-tool-card h3 { color: var(--primary); font-size: 1.75rem; margin-bottom: 1rem; text-align: center; font-family: 'Bebas Neue', sans-serif; } 
+     .ai-tool-card p { color: #ccc; margin-bottom: 1rem; text-align: center; } 
+     .ai-tool-card textarea { background-color: #222; color: #fff; border-radius: 6px; padding: 1rem; width: 100%; min-height: 120px; transition: border-color .3s, box-shadow .3s; border: 1px solid #333; } 
+     .ai-tool-card button { background-color: var(--primary); color: var(--dark); padding: .75rem 1.5rem; border-radius: 50px; transition: all .3s; font-weight: 700; border: none; } 
+     .ai-tool-card button:hover { background-color: #fff; } 
+     .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: pre-wrap; line-height: 1.7; color: #e0e0e0; } 
+     .loader { width: 24px; height: 24px; border: 3px solid #FFF; border-bottom-color: transparent; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; margin-top: 1rem; display: none; } 
+     @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } 
+      
+     .whatsapp-float { position: fixed; width: 60px; height: 60px; bottom: 20px; right: 20px; background-color: #25d366; color: #FFF; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 6px rgba(0,0,0,0.25); z-index: 1000; display: flex; align-items: center; justify-content: center; transition: transform 0.3s; animation: pulse 2.5s infinite 2s; } 
+     .whatsapp-float:hover { transform: scale(1.1); animation: none; } 
+     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); } 70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); } } 
+
+     footer{background: transparent; color:#94a3b8;padding:3rem 1.5rem;text-align:center;font-size:1rem; position: relative; z-index: 1;} 
+     footer p { margin: 0; } 
+     footer a{color: var(--primary); opacity: 0.8; transition: opacity .3s; text-decoration: none;} 
+     footer a:hover{opacity: 1;} 
+
+     @media (min-width: 1024px) { 
+       .portfolio-grid { grid-template-columns: repeat(2, 1fr); } 
+       .contact-wrapper { grid-template-columns: 1fr 1fr; } 
+       .menu-button { display: none; } 
+       .nav-links-desktop { display: flex; } 
+       .nav-links-desktop ul { display:flex; flex-direction: row; gap: 2rem;} 
+       /* MOD: Punto 3 - object-position para imágenes específicas en desktop */ 
+       #services-stacked article[data-card-id="tarjeta2"] .card-image, 
+       #services-stacked article[data-card-id="tarjeta5"] .card-image, 
+       #services-stacked article[data-card-id="tarjeta7"] .card-image { 
+         object-position: center top; 
+       } 
+     } 
+
+     @media (max-width: 768px) { 
+         /* MOD: Punto 5 - Reset de estilos para apilar verticalmente */ 
+         .horizontal-scroll-wrapper { 
+             position: static; /* Deshabilita sticky */ 
+             height: auto; /* Permite altura dinámica */ 
+             overflow: visible; /* Elimina overflow oculto */ 
+             display: block; /* Vuelve a block para apilamiento natural */ 
+         } 
+         .cards-container { 
+             flex-direction: column; 
+             align-items: center; 
+             width: 100%; 
+             padding: 0 1.5rem; /* Ajuste de padding para móvil */ 
+             gap: 2rem; /* Espacio entre tarjetas apiladas */ 
+         } 
+         .service-card-stacked { 
+             width: 100%; 
+             max-width: 400px; /* Limita el ancho de la tarjeta en móvil para que no sea muy grande */ 
+             margin-left: auto; /* Centra la tarjeta */ 
+             margin-right: auto; /* Centra la tarjeta */ 
+             transform: none !important; /* Asegura que no haya transformaciones de escala o Y */ 
+             opacity: 1 !important; /* Asegura que sean visibles */ 
+         } 
+         .horizontal-scroll-section { 
+             height: auto !important; /* Deshabilita la altura fija del scroll horizontal */ 
+             padding-bottom: 4.5rem; /* Asegura espacio después de las tarjetas apiladas */ 
+         } 
+          
+         .card-modal-content-wrapper { width: 95%; height: 85%; } 
+         .card-modal-text-content { padding: 1.5rem; } 
+         .card-modal-text-content h3 { font-size: 2rem; } 
+         .btn-card { width: 100%; } 
+         h2.section-title { font-size: 2.5rem; } 
+     } 
+   </style> 
+ </head> 
+ <body> 
+   <canvas id="particle-canvas"></canvas> 
+   <div id="cursor-regular" class="custom-cursor"><div class="cursor-dot"></div></div> 
+   <div id="cursor-point" class="custom-cursor"><div class="cursor-point"></div></div> 
+
+   <div id="overlay-backdrop"></div> 
+    
+   <nav> 
+     <a class="logo" href="#top">GRINGO<span>ESTATE</span></a> 
+     <div class="nav-links-desktop"> 
+       <ul> 
+         <li><a href="#about">Sobre Mí</a></li> 
+         <li><a href="#services-stacked">Servicios</a></li> 
+         <li><a href="#portfolio">Proyectos</a></li> 
+         <li><a href="#ai-tools">Herramientas IA ✨</a></li> 
+         <li><a href="#contact">Contacto</a></li> 
+       </ul> 
+     </div> 
+     <div class="nav-links-mobile" id="mobile-menu"> 
+       <ul> 
+         <li><a href="#about"><span class="menu-item-number">01</span>Sobre Mí</a></li> 
+         <li><a href="#services-stacked"><span class="menu-item-number">02</span>Servicios</a></li> 
+         <li><a href="#portfolio"><span class="menu-item-number">03</span>Proyectos</a></li> 
+         <li><a href="#ai-tools"><span class="menu-item-number">04</span>Herramientas IA ✨</a></li> 
+         <li><a href="#contact"><span class="menu-item-number">05</span>Contacto</a></li> 
+       </ul> 
+     </div> 
+     <button class="menu-button" id="menu-toggle" aria-label="Abrir o cerrar menú de navegación"> 
+         <span class="bar bar1"></span> 
+         <span class="bar bar2"></span> 
+         <span class="bar bar3"></span> 
+     </button> 
+   </nav> 
+
+   <header id="top"> 
+     <div class="hero"> 
+         <picture> 
+             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp"> 
+             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" alt="Isologo de GringoEstate" class="isologo hero-el" width="120" height="120"> 
+         </picture> 
+                 <h1 class="hero-el" id="hero-title"> 
+             <span class="char">G</span><span class="char">R</span><span class="char">I</span><span class="char">N</span><span class="char">G</span><span class="char">O</span> 
+             <span class="char"><span>E</span></span><span class="char">S</span><span class="char">T</span><span class="char">A</span><span class="char">T</span><span class="char">E</span> 
+         </h1> 
+         <p class="hero-el">LA POSTA INMOBILIARIA. SIN CORBATA.</p> 
+         <a href="#contact" class="btn-primary hero-el">AGENDÁ UNA LLAMADA</a> 
+     </div> 
+   </header> 
+
+   <main> 
+     <section id="about" class="about"> 
+       <div class="about-img"> 
+         <picture> 
+             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/franco-perfil.webp" type="image/webp"> 
+             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/franco-perfil.webp" alt="Retrato de Franco Garbini, fundador de GringoEstate" loading="lazy" width="280" height="280"> 
+         </picture> 
+       </div> 
+       <div class="about-text"> 
+           <h2 class="section-title text-left">SOY FRANCO GARBINI</h2> 
+           <p><strong>Deportista, entusiasta de la tecnología y apasionado del mundo inmobiliario.</strong> Hace 4 años renuncié a la seguridad del mundo corporativo (Banco Galicia) para subalquilar mi primer monoambiente. <br>Una apuesta personal...</p> 
+           <p>Hoy, esa apuesta se transformó en un <strong>sistema de negocios</strong>: socio en <strong>Baigun R&N</strong>, fundador de <strong>AMBBI</strong> (<strong>+500 reviews 5⭐️</strong>) y responsable de la comercialización de <strong>edificios completos</strong>. Combino datos, tecnología y un equipo ágil para entregar resultados reales, sin traje ni corbata.</p> 
+       </div> 
+     </section> 
+
+     <section id="services-stacked" class="section-full-width"> 
+         <h2 class="section-title">NUESTROS <span>SERVICIOS</span></h2> 
+         <p class="subtitle"> 
+             Descubrí cómo GringoEstate transforma el Real Estate con soluciones innovadoras y un enfoque directo. 
+         </p> 
+         <div class="horizontal-scroll-section"> 
+             <div class="horizontal-scroll-wrapper"> 
+                 <div class="cards-container"> 
+                      
+                     <article class="service-card-stacked" data-card-id="tarjeta1"> 
+                       <div class="card-inner-content"> 
+                         <picture> 
+                             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta1.webp" type="image/webp"> 
+                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta1.webp" alt="Tasación profesional de una propiedad" class="card-image" loading="lazy"> 
+                         </picture> 
+                         <div class="card-content-initial"><h3>QUIERO TASAR <span>MI PROPIEDAD</span></h3><p class="short-desc">Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><button class="btn-toggle-expand">Ver más</button></div> 
+                         <div class="card-full-details"><div class="card-full-details-content"><h3>QUIERO TASAR MI PROPIEDAD</h3><div class="card-full-content-scroll"><p>Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><ul><li>✅ En 48 horas hábiles.</li><li>✅ Se entrega una carpeta formal con análisis de mercado.</li><li>✅ Documentación respaldatoria clara.</li></ul><p class="card-highlight">El punto de partida para con información poder tomar la mejor decisión.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Solicitar Tasación</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div> 
+                       </div> 
+                     </article> 
+
+                     <article class="service-card-stacked" data-card-id="tarjeta2"> 
+                       <div class="card-inner-content"> 
+                         <picture> 
+                             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta2.webp" type="image/webp"> 
+                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta2.webp" alt="Vender una propiedad con GringoEstate" class="card-image" loading="lazy"> 
+                         </picture> 
+                         <div class="card-content-initial"><h3>¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3><p class="short-desc">Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><button class="btn-toggle-expand">Ver más</button></div> 
+                         <div class="card-full-details"><div class="card-full-details-content"><h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3><div class="card-full-content-scroll"><p>Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><h4>Nuestra estrategia 360° incluye:</h4><ul><li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li><li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li><li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li><li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li></ul><p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Vender mi propiedad">Vender mi propiedad</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div> 
+                       </div> 
+                     </article> 
+
+                     <article class="service-card-stacked" data-card-id="tarjeta3"> 
+                       <div class="card-inner-content"> 
+                         <picture> 
+                             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta3.webp" type="image/webp"> 
+                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta3.webp" alt="Interior de un apartamento de alquiler temporario" class="card-image" loading="lazy"> 
+                         </picture> 
+                         <div class="card-content-initial"><h3>POTENCIÁ TU <span>ALQUILER TEMPORARIO</span></h3><p class="short-desc">Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><button class="btn-toggle-expand">Ver más</button></div> 
+                         <div class="card-full-details"><div class="card-full-details-content"><h3>POTENCIÁ TU ALQUILER TEMPORARIO</h3><div class="card-full-content-scroll"><p>Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><h4>Nuestro servicio "llave en mano" incluye:</h4><ul><li>✅ Asesoría de home staging gratuita y puesta a punto.</li><li>✅ Ejecución de amoblamiento a través de nuestro equipo de arquitectura y red de proveedores.</li><li>✅ Publicación profesional en todas las plataformas para un máximo impacto.</li><li>✅ Gestión integral (sistemas, anfitrión, limpieza) para maximizar tus ingresos y darte tranquilidad.</li></ul><p class="card-alert">⚠️ Únicamente tomamos propiedades modernas con opción de self check-in. Para otras unidades, ofrecemos nuestro servicio de alquiler flex o tradicional.</p><p class="card-highlight">Delegá la gestión, disfrutá los resultados.</p></div><div class="card-footer-cta"><a href="https://www.ambbi.com.ar/" target="_blank" rel="noopener noreferrer" class="btn-card">Conocer AMBBI</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div> 
+                       </div> 
+                     </article> 
+                      
+                     <article class="service-card-stacked" data-card-id="tarjeta4"> 
+                       <div class="card-inner-content"> 
+                         <picture> 
+                             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta4.webp" type="image/webp"> 
+                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta4.webp" alt="Llaves de una propiedad siendo entregadas" class="card-image" loading="lazy"> 
+                         </picture> 
+                         <div class="card-content-initial"><h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3><p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><button class="btn-toggle-expand">Ver más</button></div> 
+                         <div class="card-full-details"><div class="card-full-details-content"><h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3><div class="card-full-content-scroll"><p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><h4>Alquiler Flex (1 a 12 meses):</h4><ul><li>✅ Ideal para propiedades amobladas.</li><li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li><li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li><li>✅ Administración integral de pagos y seguimiento del contrato.</li></ul><h4>Alquiler Tradicional (2 años):</h4><ul><li>✅ La opción clásica para una renta estable y predecible.</li><li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li></ul><p class="card-highlight">Tu propiedad, en buenas manos.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Gestión de Alquiler Flex y Tradicional">Consultar por Gestión</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div> 
+                       </div> 
+                     </article> 
+
+                     <article class="service-card-stacked" data-card-id="tarjeta5"> 
+                       <div class="card-inner-content"> 
+                         <picture> 
+                             <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta5.webp" type="image/webp"> 
+                             <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta5.webp" alt="Render de un edificio en construcción" class="card-image" loading="lazy"> 
+                         </picture> 
+                         <div class="card-content-initial"><h3>INVERTÍ <span>DESDE POZO</span></h3><p class="short-desc">Accedé a una cartera única de +26 emprendimientos en exclusiva y oportunidades off-market.</p><button class="btn-toggle-expand">Ver más</button></div> 
+                         <div class="card-full-details"><div class="card-full-details-content"><h3>INVERTÍ DESDE POZO</h3><div class="card-full-content-scroll"><p>Accedé a una cartera única de +26 emprendimientos en exclusiva y oportunidades off-market.</p><ul><li>✅ +26 desarrollos en exclusiva que no encontrarás en otro lado.</li><li>✅ Análisis de ROI y proyecciones claras para una decisión informada.</li><li>✅ Acompañamiento en todo el proceso, desde la firma hasta la entrega.</li></ul><p class="card-highlight">Invertí de forma inteligente en los mejores proyectos de la ciudad.</p></div><div class="card-footer-cta"><a href="https://www.baigunryn.com/emprendimientos/" target="_blank" rel="noopener noreferrer" class="btn-card">Ver Oportunidades</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div> 
+                       </div> 
+                     </article> 
+
+                     <article class="service-card-stacked" data-card-id="tarjeta6"> 
+                         <div class="card-inner-content"> 
+                             <picture> 
+                                 <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" type="image/webp"> 
+                                 <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" alt="Un desarrollador revisando planos en una obra" class="card-image" loading="lazy"> 
+                             </picture> 
+                             <div class="card-content-initial"><h3>¿SOS <span>DESARROLLADOR?</span></h3><p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p><button class="btn-toggle-expand">Ver más</button></div> 
+                             <div class="card-full-details"><div class="card-full-details-content"><h3>¿SOS DESARROLLADOR?</h3><div class="card-full-content-scroll"><p>Una alianza estratégica, no una inmobiliaria más.</p><ul><li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li><li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li><li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li></ul><p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Asesoría para Desarrolladores">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div> 
+                         </div> 
+                     </article> 
+                      
+                     <article class="service-card-stacked" data-card-id="tarjeta7"> 
+                         <div class="card-inner-content"> 
+                             <picture> 
+                                 <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta7.webp" type="image/webp"> 
+                                 <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta7.webp" alt="GringoEstate con clientas" class="card-image" loading="lazy"> 
+                             </picture> 
+                             <div class="card-content-initial"><h3>PERSONAL SHOPPER <span>INMOBILIARIO</span></h3><p class="short-desc">Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><button class="btn-toggle-expand">Ver más</button></div> 
+                             <div class="card-full-details"><div class="card-full-details-content"><h3>PERSONAL SHOPPER INMOBILIARIO</h3><div class="card-full-content-scroll"><p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><ul><li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li><li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li><li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li></ul><p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p><p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta. Asesorate con profesionales y delegá lo tedioso.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Personal Shopper Inmobiliario">Quiero este Servicio</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div> 
+                         </div> 
+                     </article> 
+
+                     <article class="service-card-stacked" data-card-id="tarjeta8"> 
+                         <div class="card-inner-content"> 
+                             <picture> 
+                                 <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta8.webp" type="image/webp"> 
+                                 <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta8.webp" alt="Local comercial de GringoEstate" class="card-image" loading="lazy"> 
+                             </picture> 
+                             <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><button class="btn-toggle-expand">Ver más</button></div> 
+                             <div class="card-full-details"><div class="card-full-details-content"><h3>LOCALES COMERCIALES Y OFICINAS</h3><div class="card-full-content-scroll"><p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><ul><li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li><li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li><li>✅ Asesoramiento integral en contratos comerciales y negociación.</li></ul><p class="card-highlight">Llevá tu negocio al siguiente nivel.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Locales Comerciales y Oficinas">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div> 
+                         </div> 
+                     </article> 
+
+                 </div> 
+             </div> 
+         </div> 
+     </section> 
+      
+     <div class="content-after-sticky"> 
+         <section id="portfolio" class="section-full-width"> 
+             <div class="portfolio-grid-wrapper"> 
+                 <h2 class="section-title">PROYECTOS <span>DESTACADOS</span></h2> 
+                 <div class="portfolio-grid"> 
+                     <div class="portfolio-item"> 
+                         <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-ambar.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-ambar.webp" alt="Fachada del proyecto Ámbar en Recoleta" loading="lazy" width="600" height="400"/></picture> 
+                         <div class="portfolio-content"> 
+                             <span class="project-title">Ámbar · <span class="project-location">Recoleta (15 Unidades)</span></span> 
+                             <div class="view-more">Ver más →</div> 
+                         </div> 
+                     </div> 
+                     <div class="portfolio-item"> 
+                         <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-charlone.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-charlone.webp" alt="Render de la Torre Charlone en Colegiales" loading="lazy" width="600" height="400"/></picture> 
+                         <div class="portfolio-content"> 
+                             <span class="project-title">Torre Charlone · <span class="project-location">Colegiales</span></span> 
+                             <div class="view-more">Ver más →</div> 
+                         </div> 
+                     </div> 
+                     <div class="portfolio-item"> 
+                         <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-nunez.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-nunez.webp" alt="Exterior del proyecto Casona en Núñez" loading="lazy" width="600" height="400"/></picture> 
+                         <div class="portfolio-content"> 
+                             <span class="project-title">Casona · <span class="project-location">Núñez</span></span> 
+                             <div class="view-more">Ver más →</div> 
+                         </div> 
+                     </div> 
+                     <div class="portfolio-item"> 
+                         <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-palermo.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-palermo.webp" alt="Render del proyecto Concepción Live en Palermo" loading="lazy" width="600" height="400"/></picture> 
+                         <div class="portfolio-content"> 
+                             <span class="project-title">Concepción Live · <span class="project-location">Palermo</span></span> 
+                             <div class="view-more">Ver más →</div> 
+                         </div> 
+                     </div> 
+                 </div> 
+             </div> 
+         </section> 
+          
+         <section id="ai-tools" class="section-full-width"> 
+             <h2 class="section-title" style="color:#fff;">HERRAMIENTAS CON <span>IA ✨</span></h2> 
+             <p class="subtitle"> 
+                 Potenciá tus proyectos con estas herramientas exclusivas, diseñadas para darte una ventaja en el mercado. 
+             </p> 
+             <div class="ai-tools-wrapper"> 
+                 <div class="ai-tool-card"> 
+                     <h3>Generador de Descripciones de Propiedades</h3> 
+                     <p>Ingresá los datos clave de tu propiedad y creá una descripción profesional y atractiva en segundos.</p> 
+                     <textarea id="property-input" placeholder="Ej: 3 ambientes en Palermo, 75m2, balcón con vista abierta, muy luminoso, piso alto, cerca del subte D..."></textarea> 
+                     <div class="ai-button-wrapper"> 
+                         <button id="generate-description-btn">Generar Descripción ✨</button> 
+                         <div id="loader-description" class="loader"></div> 
+                     </div> 
+                     <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div> 
+                 </div> 
+                 <div class="ai-tool-card"> 
+                                         <h3>Calculadora de Alquiler (IPC)</h3> 
+                     <p>Calculá el próximo ajuste de tu contrato de alquiler.</p> 
+                     <input type="number" id="alquiler-original-input" placeholder="Monto Original del Alquiler ($)" required> 
+                     <input type="month" id="fecha-inicio-input" placeholder="Fecha de Inicio del Contrato" required> 
+                     <select id="periodo-indexacion-select" required> 
+                         <option value="" disabled selected>Período de Indexación</option> 
+                         <option value="3">Trimestral (3 meses)</option> 
+                         <option value="4">Cuatrimestral (4 meses)</option> 
+                         <option value="6">Semestral (6 meses)</option> 
+                     </select> 
+                     <div class="ai-button-wrapper"> 
+                         <button id="calcular-alquiler-btn">Calcular Próximo Alquiler ✨</button> 
+                         <div id="loader-alquiler" class="loader"></div> 
+                     </div> 
+                     <div id="alquiler-result" class="ai-result">El monto actualizado aparecerá aquí...</div> 
+                     <p class="ai-alert" style="text-align: center; margin-top: 1rem;">⚠️ Los datos del IPC se obtienen de fuentes oficiales y pueden tener un pequeño retraso en la última actualización.</p> 
+                 </div> 
+                 <div class="ai-coming-soon"> 
+                     <h3>MÁS HERRAMIENTAS EN CONSTRUCCIÓN...</h3> 
+                     <p> 
+                         El arsenal de GringoEstate seguirá creciendo. Pronto integraremos un <strong>Asistente para Redactar Contratos</strong> y otras herramientas para que tomes las mejores decisiones. 
+                     </p> 
+                 </div> 
+             </div> 
+         </section> 
+
+         <section id="contact" class="section-full-width"> 
+             <div class="contact-wrapper"> 
+                 <div class="contact-info"> 
+                     <h2 class="section-title text-left">HABLEMOS</h2> 
+                     <p>Contame tu proyecto o propiedad y descubramos juntos cómo maximizar su potencial. Agendemos una llamada sin compromiso.</p> 
+                     <div class="circulo-decorativo"></div> 
+                 </div> 
+                 <div class="contact-form-wrapper"> 
+                     <form id="contact-form" action="https://formspree.io/f/mldnnkev" method="POST"> 
+                         <input type="text" name="name" placeholder="Tu Nombre" required> 
+                         <input type="email" name="email" placeholder="Tu Email" required> 
+                         <input type="tel" name="phone" placeholder="Tu Celular" required> 
+                         <select name="interest" id="interest-select" required> 
+                             <option value="" disabled selected>Estoy interesado/a en...</option> 
+                             <option value="Tasar mi propiedad">Tasar mi propiedad</option> 
+                             <option value="Vender mi propiedad">Vender mi propiedad</option>                             <option value="Potenciar mi Alquiler Temporario">Potenciar mi Alquiler Temporario</option> 
+                             <option value="Gestión de Alquiler Flex y Tradicional">Gestión de Alquiler Flex y Tradicional</option> 
+                             <option value="Invertir desde pozo">Invertir desde pozo</option> 
+                             <option value="Locales Comerciales y Oficinas">Locales Comerciales y Oficinas</option> 
+                             <option value="Asesoría para Desarrolladores">Asesoría para Desarrolladores</option> 
+                             <option value="Personal Shopper Inmobiliario">Personal Shopper Inmobiliario</option> 
+                             <option value="Otro">Otro</option> 
+                         </select> 
+                         <div id="property-details"> 
+                             <input type="text" name="property_address" placeholder="Dirección de la propiedad"> 
+                             <input type="text" name="property_zone" placeholder="Zona / Barrio"> 
+                             <input type="text" name="property_rooms" placeholder="Ambientes"> 
+                             <input type="text" name="property_size" placeholder="Superficie (m²)"> 
+                         </div> 
+                         <textarea name="message" rows="4" placeholder="Contame un poco sobre tu proyecto..." required></textarea> 
+                         <button type="submit" class="btn-enviar-mensaje">Enviar Mensaje</button> 
+                     </form> 
+                 </div> 
+             </div> 
+         </section> 
+     </div> 
+   </main> 
+    
+   <footer> 
+     <p>© 2025 Franco Garbini · GringoEstate · Todos los derechos reservados.</p> 
+     <p style="margin-top:1rem;"> 
+       <a href="https://www.linkedin.com/company/gringoestate/" target="_blank" rel="noopener noreferrer">LinkedIn</a>  •   
+       <a href="https://twitter.com/Gringoestate" target="_blank" rel="noopener noreferrer">Twitter (X)</a>  •   
+       <a href="https://instagram.com/Gringoestate" target="_blank" rel="noopener noreferrer">Instagram</a> 
+     </p> 
+   </footer> 
+
+   <a href="https://wa.me/5491156106169" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp"> 
+     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width:28px; height:28px; fill:white;"><path d="M380.9 97.1C339.4 55.6 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.8 0-67.6-9.5-97.8-26.7l-7-4.1-72.5 19 19.3-71.1-4.5-7.4c-18.3-30.7-27.9-66.2-27.9-102.3 0-108.6 88.4-197 197-197s197 88.4 197 197-88.4 197-197 197zm83.7-118.2c-3.7-1.9-22.1-10.9-25.6-12.1-3.4-1.2-5.9-1.9-8.4 1.9-2.5 3.7-9.7 12.1-11.9 14.5-2.2 2.5-4.5 2.8-8.2 1-3.7-1.9-15.7-5.8-30-18.5-11.1-9.6-18.7-21.6-20.9-25.3-2.2-3.7-0.2-5.9 1.7-7.7 1.7-1.5 3.7-3.7 5.5-5.5 1.8-1.8 2.5-3.7 3.7-6.2 1.2-2.5 0.6-4.8-0.3-6.7-0.9-1.9-8.4-20.1-11.5-27.5-3.1-7.4-6.2-6.3-8.4-6.3-2.2 0-4.8 0-7.4 0-2.5 0-6.7 1.2-10.3 5.9-3.7 4.8-14.1 13.8-14.1 33.5 0 19.8 14.4 38.9 16.4 41.4 2 2.5 28.2 42.8 68.2 60.1 9.7 4.1 17.3 6.6 23.1 8.8 13.3 5.1 25.6 4.3 35.1 2.6 10.8-1.9 22.1-9 25.2-17.6 3.1-8.6 3.1-16 2.2-17.6-0.9-1.5-3.4-2.5-7.1-4.5z"/></svg> 
+   </a> 
+
+   <div id="card-modal" class="card-modal"> 
+     <div class="card-modal-content-wrapper"> 
+       <button class="card-modal-close-btn">×</button> 
+       <img src="" alt="Imagen de fondo del servicio" class="card-modal-image"> 
+       <div class="card-modal-text-content"> 
+       </div> 
+     </div> 
+   </div> 
+
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script> 
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script> 
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Flip.min.js"></script> 
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script> 
+
+   <script> 
+   document.addEventListener('DOMContentLoaded', () => { 
+
+     gsap.registerPlugin(ScrollTrigger, Flip); 
+     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches; 
+
+     // --- Cursor Logic --- 
+     if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) { 
+         const cursorRegular = document.getElementById('cursor-regular'); 
+         const cursorPoint = document.getElementById('cursor-point'); 
+          
+         window.addEventListener('mousemove', e => { 
+             gsap.to(cursorRegular, { x: e.clientX, y: e.clientY, duration: 0.2, ease: 'power2.out', xPercent: -50, yPercent: -50 }); 
+             gsap.to(cursorPoint, { x: e.clientX, y: e.clientY, duration: 0.4, ease: 'power2.out', xPercent: -50, yPercent: -50 }); 
+         }); 
+
+         const interactiveElements = document.querySelectorAll('a, button, .service-card-stacked'); 
+         interactiveElements.forEach(el => { 
+             el.addEventListener('mouseenter', () => { 
+                 gsap.to(cursorRegular, { scale: 0, opacity: 0, duration: 0.2 }); 
+                 gsap.to(cursorPoint, { scale: 1, opacity: 1, duration: 0.2 }); 
+             }); 
+             el.addEventListener('mouseleave', () => { 
+                 gsap.to(cursorRegular, { scale: 1, opacity: 1, duration: 0.2 }); 
+                 gsap.to(cursorPoint, { scale: 0, opacity: 0, duration: 0.2 }); 
+             }); 
+         }); 
+     } 
+
+     // --- Hero Animations --- 
+     if (!prefersReducedMotion) { 
+         gsap.set(".hero-el", {y: 30, opacity: 0}); 
+         gsap.to(".hero-el", {  
+             opacity: 1,  
+             y: 0,  
+             duration: 1,  
+             stagger: 0.2,  
+             ease: "power3.out",  
+             delay: 0.2, 
+             onComplete: () => { 
+                 // FIX: Punto 1 - Eliminada la línea redundante que causaba el bug del logo. 
+                 // gsap.set('.hero .isologo', { autoAlpha: 1 }); // ELIMINADO 
+             } 
+         }); 
+
+         // NEW: Punto 6 - Animación de entrada para cada letra del título del hero 
+         const heroTitleChars = document.querySelectorAll('#hero-title .char'); 
+         if (heroTitleChars.length > 0) { 
+             gsap.set(heroTitleChars, { y: 50, opacity: 0 }); 
+             gsap.to(heroTitleChars, { 
+                 y: 0, 
+                 opacity: 1, 
+                 stagger: 0.05, 
+                 duration: 0.8, 
+                 ease: "power3.out", 
+                 delay: 0.8 // Retraso para que aparezca después de los otros elementos del hero 
+             }); 
+         } 
+
+         const animateOnScroll = (selector, triggerSelector) => { 
+              gsap.from(selector, { 
+                  opacity: 0, 
+                  y: 50, 
+                  duration: 1, 
+                  ease: 'power3.out', 
+                  stagger: 0.15, 
+                  scrollTrigger: { 
+                      trigger: triggerSelector || selector, 
+                      start: "top 85%", 
+                      toggleActions: "play none none none" 
+                  } 
+              }); 
+         } 
+         animateOnScroll(".about-text > *", ".about"); 
+         animateOnScroll(".about-img", ".about"); 
+         animateOnScroll(".portfolio-item", ".portfolio-grid"); 
+         animateOnScroll(".ai-tool-card", "#ai-tools"); 
+         animateOnScroll(".contact-info > *", ".contact-wrapper"); 
+         animateOnScroll(".contact-form-wrapper", ".contact-wrapper"); 
+     } 
+
+     // --- Navbar Scroll Effect --- 
+     const nav = document.querySelector('nav'); 
+     if(nav) { 
+         ScrollTrigger.create({ 
+             start: 'top -80', 
+             end: 99999, 
+             toggleClass: { className: 'nav-scrolled', targets: nav } 
+         }); 
+     } 
+
+     // --- Hero Title 3D Animation on Hover (MOD: Punto 6 - Efecto onda) --- 
+     const heroTitle = document.getElementById('hero-title'); 
+     if (heroTitle && !prefersReducedMotion) { 
+         const chars = heroTitle.querySelectorAll('.char'); 
+         heroTitle.addEventListener('mouseenter', () => { 
+             chars.forEach((char, i) => { 
+                 gsap.to(char, { 
+                     duration: 0.8, 
+                     rotationX: 15,  
+                     rotationY: 10, 
+                     scale: 1.05, // Aumenta un poco el tamaño 
+                     y: -5, // Sube un poco las letras 
+                     ease: 'power2.out', 
+                     delay: i * 0.05 // Efecto de onda 
+                 }); 
+             }); 
+         }); 
+
+         heroTitle.addEventListener('mouseleave', () => { 
+             chars.forEach((char, i) => { 
+                 gsap.to(char, { 
+                     duration: 0.8, 
+                     rotationX: 0, 
+                     rotationY: 0, 
+                     scale: 1, 
+                     y: 0, 
+                     ease: 'power2.out', 
+                     delay: i * 0.02 // Efecto de onda de retorno 
+                 }); 
+             }); 
+         }); 
+     } 
+
+     // --- Mobile Menu Toggle --- 
+     const menuToggle = document.getElementById('menu-toggle'); 
+     const mobileMenu = document.getElementById('mobile-menu'); 
+      
+     // MOD: Punto 4 - Eliminación de scrollPosition y uso de html.classList.add/remove('no-scroll') 
+     const toggleScrollLock = (lock) => { 
+         const html = document.documentElement; 
+         const body = document.body; 
+         if (lock) { 
+             html.classList.add('no-scroll'); 
+             body.classList.add('no-scroll'); 
+         } else { 
+             html.classList.remove('no-scroll'); 
+             body.classList.remove('no-scroll'); 
+         } 
+     }; 
+
+     if(menuToggle && mobileMenu) { 
+         gsap.set(mobileMenu, { autoAlpha: 0 }); 
+         const mobileMenuTimeline = gsap.timeline({ paused: true, reversed: true }) 
+             .to(mobileMenu, { autoAlpha: 1, duration: 0.3, ease: 'power2.out', onStart: () => toggleScrollLock(true), onReverseComplete: () => toggleScrollLock(false) }) 
+             .fromTo(mobileMenu.querySelectorAll('li'), { x: -30, opacity: 0 }, { x: 0, opacity: 1, stagger: 0.08, duration: 0.4, ease: 'power2.out' }, "-=0.2"); 
+
+         const toggleMenu = () => { 
+             menuToggle.classList.toggle('open'); 
+             mobileMenuTimeline.reversed() ? mobileMenuTimeline.play() : mobileMenuTimeline.reverse(); 
+         }; 
+
+         menuToggle.addEventListener('click', toggleMenu); 
+         mobileMenu.querySelectorAll('a').forEach(link => { 
+             if (link.getAttribute('href').startsWith('#')) { 
+                 link.addEventListener('click', () => { 
+                     toggleMenu(); 
+                     // El scroll smooth ya está manejado por scroll-behavior: smooth en el CSS del body/html 
+                 }); 
+             } 
+         }); 
+     } 
+
+     // --- Modal Logic --- 
+     const overlayBackdrop = document.getElementById('overlay-backdrop'); 
+     const cardModal = document.getElementById('card-modal'); 
+     const cardModalImage = cardModal.querySelector('.card-modal-image'); 
+     const cardModalTextContent = cardModal.querySelector('.card-modal-text-content'); 
+     const interestSelect = document.getElementById('interest-select'); 
+     const propertyDetailsDiv = document.getElementById('property-details');  
+
+     // MOD: Punto 4 - Refactorización de scrollManager para usar html.classList.add/remove('no-scroll') 
+     const scrollManager = { 
+         lockCount: 0, 
+         lock() {  
+             if (this.lockCount === 0) { 
+                 document.documentElement.classList.add('no-scroll'); 
+                 document.body.classList.add('no-scroll'); 
+             } 
+             this.lockCount++; 
+         }, 
+         unlock() {  
+             this.lockCount--; 
+             if (this.lockCount <= 0) { 
+                 this.lockCount = 0; 
+                 document.documentElement.classList.remove('no-scroll'); 
+                 document.body.classList.remove('no-scroll'); 
+             } 
+         } 
+     }; 
+      
+     let horizontalScrollInstance = null;  
+
+     function openCardModal(card) { 
+         const imageSrc = card.querySelector('.card-image').src; 
+         const fullDetailsContent = card.querySelector('.card-full-details-content').innerHTML; 
+
+         cardModalImage.src = imageSrc; 
+         cardModalTextContent.innerHTML = fullDetailsContent; 
+
+         cardModal.classList.add('is-visible'); 
+         overlayBackdrop.classList.add('visible'); 
+         scrollManager.lock();  
+
+         if (horizontalScrollInstance) { 
+             horizontalScrollInstance.disable(); 
+         } 
+     } 
+
+     function closeCardModal() { 
+         cardModal.classList.remove('is-visible'); 
+         overlayBackdrop.classList.remove('visible'); 
+         scrollManager.unlock();  
+
+         if (horizontalScrollInstance) { 
+             horizontalScrollInstance.enable(); 
+         } 
+     } 
+
+     document.querySelectorAll('.service-card-stacked').forEach(card => { 
+         card.addEventListener('click', e => { 
+             if (e.target.closest('a[target="_blank"]') || e.target.closest('a[href="#contact"]')) { 
+                 if (e.target.closest('a[href="#contact"]')) { 
+                     const interest = e.target.getAttribute('data-interest'); 
+                     if (interest && interestSelect) { 
+                         interestSelect.value = interest; 
+                         interestSelect.dispatchEvent(new Event('change')); 
+                     } 
+                 } 
+                 return;  
+             } 
+             e.preventDefault();  
+             openCardModal(card); 
+         }); 
+     }); 
+
+     cardModal.addEventListener('click', (e) => { 
+         if (e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse')) { 
+             closeCardModal(); 
+         } else if (e.target === overlayBackdrop || e.target === cardModal) {  
+             closeCardModal(); 
+         } else if (e.target.closest('a[href="#contact"]')) {  
+             const interest = e.target.getAttribute('data-interest'); 
+             if (interest && interestSelect) { 
+                 interestSelect.value = interest; 
+                 interestSelect.dispatchEvent(new Event('change')); 
+             } 
+             closeCardModal();  
+         } 
+     }); 
+
+     // --- Horizontal Scroll Animation Setup (Optimized for Performance) --- 
+     function setupHorizontalScroll() { 
+         if (horizontalScrollInstance) { 
+             horizontalScrollInstance.kill(); 
+             horizontalScrollInstance = null; // Reset instance 
+         } 
+
+         const horizontalSection = document.querySelector('.horizontal-scroll-section'); 
+         const wrapper = document.querySelector('.horizontal-scroll-wrapper'); 
+         const container = document.querySelector('.cards-container'); 
+         const cards = gsap.utils.toArray('.service-card-stacked'); 
+
+         // Responsive handling: if screen is too small, stack cards vertically instead of horizontal scroll 
+         if (window.innerWidth < 1024) { // MOD: Punto 5 - Ajustado a 1024px para la transición responsive 
+             // Reset to default vertical layout - CSS Media Query will handle most of this 
+             gsap.set(wrapper, {clearProps: "position,height,overflow"}); 
+             gsap.set(container, {clearProps: "x,display,flexDirection,alignItems,width,padding"}); 
+             gsap.set(cards, {clearProps: "scale,opacity,transform,width,margin"}); 
+             horizontalSection.style.height = 'auto'; // Remove fixed height 
+             cards.forEach(card => card.classList.remove('is-active')); // Remove active state 
+
+             return;  
+         } 
+
+         // Setup for horizontal scroll on larger screens 
+         gsap.set(wrapper, { position: 'sticky', top: 0, height: '100vh', overflow: 'hidden'}); 
+         gsap.set(container, { display: 'flex', flexDirection: 'row' });  
+          
+         const scrollWidth = container.scrollWidth - window.innerWidth; 
+         gsap.set(horizontalSection, { height: `${scrollWidth + window.innerHeight}px` });  
+
+         horizontalScrollInstance = gsap.to(container, { 
+             x: () => -scrollWidth, 
+             ease: "none", 
+             scrollTrigger: { 
+                 trigger: horizontalSection, 
+                 start: "top top", 
+                 end: () => `+=${scrollWidth}`, 
+                 pin: wrapper, 
+                 scrub: 0.2, 
+                 invalidateOnRefresh: true, 
+                 // MOD: Punto 3 - Efecto de Foco en Scroll 
+                 onUpdate: self => { 
+                     const containerX = container.getBoundingClientRect().left; 
+                     const viewportCenter = window.innerWidth / 2; 
+
+                     cards.forEach(card => { 
+                         const cardRect = card.getBoundingClientRect(); 
+                         const cardCenter = cardRect.left + cardRect.width / 2; 
+                         const distanceToCenter = Math.abs(cardCenter - viewportCenter); 
+                         const maxDistance = window.innerWidth * 0.4; // Ajusta este valor según el rango de foco deseado 
+                          
+                         let scale = 1; 
+                         if (distanceToCenter < maxDistance) { 
+                             scale = 1 + (0.05 * (1 - (distanceToCenter / maxDistance))); // Escala de 1 a 1.05 
+                         } 
+                         gsap.to(card, { scale: scale, duration: 0.1, overwrite: true, ease: "power1.out" }); 
+                     }); 
+                 } 
+             } 
+         }); 
+     } 
+
+     // --- IA Tool Form Logic --- 
+     if (interestSelect && propertyDetailsDiv) { 
+         interestSelect.addEventListener('change', function() { 
+             // MOD: Añadido "Vender mi propiedad" para mostrar los detalles 
+             const showDetails = this.value === 'Tasar mi propiedad' || this.value === 'Vender mi propiedad'; 
+             gsap.to(propertyDetailsDiv, { 
+                 height: showDetails ? 'auto' : 0, 
+                 opacity: showDetails ? 1 : 0, 
+                 paddingTop: showDetails ? '1rem' : 0, 
+                 paddingBottom: showDetails ? '1rem' : 0, 
+                 display: showDetails ? 'flex' : 'none',  
+                 duration: 0.4, 
+                 ease: 'power2.out', 
+             }); 
+         }); 
+     } 
+
+     // --- Particle Animation Initialization --- 
+     function initParticleAnimation() { 
+         if (prefersReducedMotion) return;  
+
+         const canvas = document.getElementById('particle-canvas'); 
+         if (!canvas) return;  
+
+         const scene = new THREE.Scene(); 
+         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); 
+         const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true }); 
+         renderer.setSize(window.innerWidth, window.innerHeight); 
+         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); 
+
+         const particleCount = 5000; 
+         const positions = new Float32Array(particleCount * 3); 
+         for (let i = 0; i < particleCount * 3; i++) { 
+             positions[i] = (Math.random() - 0.5) * 10; 
+         } 
+
+         const particlesGeometry = new THREE.BufferGeometry(); 
+         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3)); 
+          
+         const particlesMaterial = new THREE.PointsMaterial({ 
+             color: 0xffbf00,  
+             size: 0.015, 
+             transparent: true, 
+             blending: THREE.AdditiveBlending,  
+             depthWrite: false,  
+             opacity: 0.7 
+         }); 
+
+         const particles = new THREE.Points(particlesGeometry, particlesMaterial); 
+         scene.add(particles); 
+
+         camera.position.z = 5; 
+
+         const clock = new THREE.Clock(); 
+
+         const animate = () => { 
+             const elapsedTime = clock.getElapsedTime(); 
+             particles.rotation.y = elapsedTime * 0.05; 
+             particles.rotation.x = elapsedTime * 0.02; 
+              
+             renderer.render(scene, camera); 
+             window.requestAnimationFrame(animate); 
+         }; 
+
+         animate(); 
+
+         window.addEventListener('resize', () => { 
+             camera.aspect = window.innerWidth / window.innerHeight; 
+             camera.updateProjectionMatrix(); 
+             renderer.setSize(window.innerWidth, window.innerHeight); 
+             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); 
+         }); 
+     } 
+      
+     initParticleAnimation(); 
+     setupHorizontalScroll(); 
+     window.addEventListener('resize', gsap.utils.debounce(() => { 
+         setupHorizontalScroll();  
+         ScrollTrigger.refresh(true); 
+     }, 250)); 
+
+     // --- IA Tool Event Listeners --- 
+     const generateDescriptionBtn = document.getElementById('generate-description-btn'); 
+     const propertyInput = document.getElementById('property-input'); 
+     const descriptionResult = document.getElementById('description-result'); 
+     const loaderDescription = document.getElementById('loader-description'); 
+
+     // Calculadora de Alquiler IPC 
+     const alquilerOriginalInput = document.getElementById('alquiler-original-input'); 
+     const fechaInicioInput = document.getElementById('fecha-inicio-input'); 
+     // MOD: Punto 2 - Eliminado fechaActualInput, añadido periodoIndexacionSelect 
+     const periodoIndexacionSelect = document.getElementById('periodo-indexacion-select'); 
+     const calcularAlquilerBtn = document.getElementById('calcular-alquiler-btn'); 
+     const alquilerResult = document.getElementById('alquiler-result'); 
+     const loaderAlquiler = document.getElementById('loader-alquiler'); 
+      
+     const IPC_API_URL = "https://datos.gob.ar/series/api/series?ids=148.3_INIVELNAL_DICI_M_26&format=json";  
+
+     async function getIpcData() { 
+         try { 
+             const response = await fetch(IPC_API_URL); 
+             if (!response.ok) { 
+                 throw new Error(`HTTP error! status: ${response.status}`); 
+             } 
+             const data = await response.json(); 
+             return data.data.map(item => ({ 
+                 fecha: item.fecha.substring(0, 7),  
+                 valor: parseFloat(item.valor) 
+             })); 
+         } catch (error) { 
+             console.error("Error al obtener datos del IPC:", error); 
+             return null;  
+         } 
+     } 
+
+     // MOD: Punto 2 - Función para calcular la fecha de ajuste 
+     function calcularFechaAjuste(fechaInicioStr, meses) { 
+         const [anio, mes] = fechaInicioStr.split('-').map(Number); 
+         let nuevaFecha = new Date(anio, mes - 1 + meses, 1); // Sumar meses a la fecha de inicio 
+         
+         // Asegurarse de que el mes sea correcto si se pasa de diciembre 
+         const nuevoAnio = nuevaFecha.getFullYear(); 
+         const nuevoMes = (nuevaFecha.getMonth() + 1).toString().padStart(2, '0'); 
+         
+         return `${nuevoAnio}-${nuevoMes}`; 
+     } 
+
+     async function calcularNuevoAlquiler() { 
+         const montoOriginal = parseFloat(alquilerOriginalInput.value); 
+         const fechaInicioStr = fechaInicioInput.value;  
+         const periodoMeses = parseInt(periodoIndexacionSelect.value); // NEW: Obtener el período 
+
+         if (isNaN(montoOriginal) || !fechaInicioStr || !periodoMeses) { 
+             alquilerResult.textContent = 'Por favor, completa todos los campos.'; 
+             alquilerResult.style.color = '#ff6b6b'; 
+             return; 
+         } 
+         
+         const fechaAjusteStr = calcularFechaAjuste(fechaInicioStr, periodoMeses); // NEW: Calcular fecha de ajuste 
+
+         loaderAlquiler.style.display = 'inline-block'; 
+         alquilerResult.textContent = 'Calculando...'; 
+         alquilerResult.style.color = '#e0e0e0'; 
+
+         const ipcData = await getIpcData(); 
+
+         if (!ipcData) { 
+             alquilerResult.textContent = 'Error al obtener datos del IPC. Intenta más tarde.'; 
+             alquilerResult.style.color = '#ff6b6b'; 
+             loaderAlquiler.style.display = 'none'; 
+             return; 
+         } 
+
+         const ipcApertura = ipcData.find(item => item.fecha === fechaInicioStr); 
+         const ipcCierre = ipcData.find(item => item.fecha === fechaAjusteStr); // MOD: Usar fecha de ajuste 
+
+         if (!ipcApertura || !ipcCierre) { 
+             alquilerResult.textContent = `No se encontraron datos del IPC para las fechas solicitadas. Fecha inicio: ${fechaInicioStr}, Fecha ajuste: ${fechaAjusteStr}. Verifica las fechas o la disponibilidad de datos.`; 
+             alquilerResult.style.color = '#ff6b6b'; 
+             loaderAlquiler.style.display = 'none'; 
+             return; 
+         } 
+
+         const factorAjuste = ipcCierre.valor / ipcApertura.valor; 
+         const nuevoMonto = montoOriginal * factorAjuste; 
+
+         alquilerResult.textContent = `Próximo ajuste (${fechaAjusteStr}): $ ${nuevoMonto.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`; 
+         alquilerResult.style.color = '#e0e0e0';  
+         loaderAlquiler.style.display = 'none'; 
+     } 
+
+     if (calcularAlquilerBtn) { 
+         calcularAlquilerBtn.addEventListener('click', calcularNuevoAlquiler); 
+     } 
+
+
+     // --- Gemini API Call Logic (Generador de Descripciones) --- 
+     async function callGeminiAPI(prompt, resultElement, loaderElement) { 
+         loaderElement.style.display = 'inline-block'; 
+         resultElement.textContent = 'Generando...'; 
+         resultElement.style.color = '#e0e0e0'; 
+
+         // NEW: Se simula una clave API segura para el ejemplo. En producción, NUNCA se expone aquí. 
+         // Deberías usar un backend o una función serverless para proteger tu API Key. 
+         const apiKey = "YOUR_SECURE_GEMINI_API_KEY"; // <<<<<<<<<<<<< REEMPLAZAR CON TU CLAVE API (SEGURA EN BACKEND) 
+
+         if (!apiKey || apiKey.includes("YOUR_SECURE_GEMINI_API_KEY") || apiKey.length < 10) {  
+             resultElement.textContent = 'Error: Clave API no configurada o inválida. Por favor, inserta tu clave API de Google Gemini (preferiblemente desde un backend seguro).'; 
+             resultElement.style.color = '#ff6b6b';  
+             loaderElement.style.display = 'none'; 
+             return; 
+         } 
+
+         const payload = {  
+             contents: [{ parts: [{ text: prompt }] }]  
+         }; 
+         // NEW: Si tienes un backend para esto, la URL sería la de tu endpoint de backend, no la de Google. 
+         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`; 
+
+         try { 
+             const response = await fetch(apiUrl, { 
+                 method: 'POST', 
+                 headers: { 'Content-Type': 'application/json' }, 
+                 body: JSON.stringify(payload) 
+             }); 
+
+             if (!response.ok) { 
+                 const errorData = await response.json(); 
+                 throw new Error(`API error: ${response.status} ${response.statusText} - ${JSON.stringify(errorData)}`); 
+             } 
+
+             const result = await response.json(); 
+
+             if (result.candidates && result.candidates.length > 0 && 
+                 result.candidates[0].content && result.candidates[0].content.parts && 
+                 result.candidates[0].content.parts.length > 0) { 
+                  
+                 const text = result.candidates[0].content.parts[0].text; 
+                 resultElement.textContent = text; 
+             } else { 
+                 resultElement.textContent = 'Error: La respuesta de la IA no tiene el formato esperado.'; 
+                 resultElement.style.color = '#ff6b6b'; 
+                 console.error('Unexpected API response structure:', result); 
+             } 
+         } catch (error) { 
+             resultElement.textContent = 'Error al conectar con la IA. Revisa la consola del navegador o tu clave API.'; 
+             resultElement.style.color = '#ff6b6b'; 
+             console.error('Error calling Gemini API:', error); 
+         } finally { 
+             loaderElement.style.display = 'none'; 
+         } 
+     } 
+
+     if (generateDescriptionBtn) { 
+         generateDescriptionBtn.addEventListener('click', () => { 
+             const prompt = `Actúa como un copywriter inmobiliario experto. Genera una descripción profesional, atractiva y persuasiva para una propiedad con las siguientes características: ${propertyInput.value}. El tono debe ser directo, moderno y confiable, como "sin corbata". Estructura el texto con un título llamativo, un párrafo introductorio, una lista de 3-4 puntos clave (usando emojis como ✅) y un párrafo de cierre que invite a la acción.`; 
+             callGeminiAPI(prompt, descriptionResult, loaderDescription); 
+         }); 
+     } 
+
+   }); // End of DOMContentLoaded 
+   </script> 
+
+ </body> 
+ </html>
