@@ -45,7 +45,7 @@
       --gray: #cccccc; 
       --dark-bg: #111111;
       --card-bg: #1A1A1A;
-      --menu-width: 300px; /* Ancho del menú para usar en la animación */
+      --menu-width: 300px;
     }
     * {
       margin: 0;
@@ -65,7 +65,6 @@
         border-radius: 10px;
     }
 
-    /* ---- INICIO SOLUCIÓN MENÚ ROBUSTO ---- */
     html, body {
       overflow-x: hidden;
     }
@@ -95,7 +94,6 @@
         z-index: 1000;
         display: flex;
         align-items: center;
-        /* El menú está oculto fuera de la pantalla y se revela cuando #page-wrapper se mueve */
     }
 
     .nav-links-mobile ul { 
@@ -116,10 +114,9 @@
         height: 24px; 
         background: transparent; 
         padding: 0; 
-        z-index: 1002; /* El más alto para estar sobre todo */
+        z-index: 1002;
         border: none;
     }
-    /* ---- FIN SOLUCIÓN MENÚ ROBUSTO ---- */
 
     html.no-scroll {
         overflow: hidden;
@@ -214,7 +211,7 @@
         position: fixed;
         inset: 0;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 1001; /* Debajo del botón, sobre la página */
+        z-index: 1001;
         opacity: 0;
         visibility: hidden;
         transition: opacity 0.3s ease;
@@ -501,12 +498,29 @@
     footer a{color: var(--primary); opacity: 0.8; transition: opacity .3s; text-decoration: none;}
     footer a:hover{opacity: 1;}
 
+    /* ---- INICIO CORRECCIÓN DISPLAY MENÚ ---- */
     @media (min-width: 1024px) {
       .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
       .contact-wrapper { grid-template-columns: 1fr 1fr; }
-      .menu-button { display: none !important; } /* Ocultar en desktop */
+      
+      .menu-button, .nav-links-mobile, .menu-overlay { 
+          display: none !important; 
+      }
       .nav-links-desktop { display: flex; }
       .nav-links-desktop ul { display:flex; flex-direction: row; gap: 2rem;}
+      
+      /* Asegurarse que el wrapper no se mueva en desktop */
+      body.menu-open #page-wrapper {
+        transform: none;
+      }
+      body.menu-open {
+        overflow: auto;
+      }
+    }
+    /* ---- FIN CORRECCIÓN DISPLAY MENÚ ---- */
+
+    @media (max-width: 1023px) {
+        .nav-links-desktop { display: none; }
     }
 
     @media (max-width: 768px) {
@@ -841,6 +855,17 @@
     gsap.registerPlugin(ScrollTrigger);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    // --- INICIO DE LA CORRECCIÓN DE DEBOUNCE ---
+    function debounce(func, wait) {
+      let timeout;
+      return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+      };
+    }
+    // --- FIN DE LA CORRECCIÓN DE DEBOUNCE ---
+
     // --- Cursor Logic ---
     if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
         const cursorRegular = document.getElementById('cursor-regular');
@@ -902,7 +927,7 @@
     const nav = document.querySelector('nav');
     if(nav) {
         ScrollTrigger.create({
-            trigger: '#page-wrapper', // El trigger ahora es el wrapper
+            trigger: '#page-wrapper',
             start: 'top top-=-80',
             end: 99999,
             onUpdate: self => {
@@ -1114,7 +1139,9 @@
     // --- Initializations ---
     initParticleAnimation();
     setupHorizontalScroll();
-    window.addEventListener('resize', gsap.utils.debounce(() => {
+    
+    // --- CORRECCIÓN DE DEBOUNCE ---
+    window.addEventListener('resize', debounce(() => {
         setupHorizontalScroll();
         ScrollTrigger.refresh(true);
     }, 250));
