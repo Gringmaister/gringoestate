@@ -74,7 +74,7 @@
       cursor: none;
     }
 
-    /* ---- INICIO CORRECCIÓN MENÚ MÓVIL ---- */
+    /* ---- Mobile Menu ---- */
     body.no-scroll {
       overflow: hidden;
     }
@@ -99,13 +99,13 @@
       height: 100%;
       background-color: var(--dark-bg);
       z-index: 1000;
-      transform: translateX(100%); /* Oculto por defecto */
+      transform: translateX(100%);
       transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
       display: flex;
       align-items: center;
     }
     .nav-links-mobile.is-active {
-      transform: translateX(0); /* Visible */
+      transform: translateX(0);
     }
     .nav-links-mobile ul {
       width: 100%;
@@ -153,7 +153,6 @@
         list-style: none;
       }
     }
-    /* ---- FIN CORRECCIÓN MENÚ MÓVIL ---- */
     
     a, button, .service-card-stacked, input, select, textarea {
       cursor: none !important;
@@ -354,7 +353,6 @@
 
     .card-modal-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
     
-    /* ---- INICIO CORRECCIÓN ALINEACIÓN MODAL ---- */
     .card-modal-text-content { 
       position: relative; 
       z-index: 3; 
@@ -362,21 +360,20 @@
       display: flex; 
       flex-direction: column; 
       height: 100%; 
-      /* Se quita justify-content para que el contenido se alinee con el siguiente elemento */
-      color: var(--text-light); 
+      color: var(--text-light);
+      overflow: hidden;
     }
     
-    .card-modal-text-content h3 { 
-      margin-top: auto; /* Empuja el título y todo lo que sigue hacia abajo */
-      font-family: 'Bebas Neue', sans-serif; 
-      color: var(--primary); 
-      font-size: 2.5rem; 
-      margin-bottom: 1rem; 
-      flex-shrink: 0; 
+    .modal-content-inner-wrapper {
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        max-height: 100%;
+        min-height: 0;
     }
-    /* ---- FIN CORRECCIÓN ALINEACIÓN MODAL ---- */
 
-    .card-modal-text-content .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; line-height: 1.7; margin-bottom: 1rem; }
+    .card-modal-text-content h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; flex-shrink: 0; }
+    .card-modal-text-content .card-full-content-scroll { overflow-y: auto; padding-right: 15px; line-height: 1.7; margin-bottom: 1rem; }
     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar { width: 8px; }
     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 10px; }
@@ -399,7 +396,7 @@
         width: 80%; 
         max-width: 280px; 
         text-decoration: none; 
-        border: none; /* Añadido para botones */
+        border: none;
     }
     .btn-card:hover { background: #fff; color: var(--dark); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
     .btn-toggle-collapse { background: transparent; border: 1px solid #555; color: #aaa; border-radius: 50px; padding: 0.5rem 1rem; font-size: 1rem; margin-top: 0.5rem; transition: all .3s ease; }
@@ -890,13 +887,14 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Flip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
 
-    gsap.registerPlugin(ScrollTrigger);
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     function debounce(func, wait) {
@@ -1044,7 +1042,13 @@
         const fullDetailsContent = card.querySelector('.card-full-details-content').innerHTML;
 
         cardModalImage.src = imageSrc;
-        cardModalTextContent.innerHTML = fullDetailsContent;
+        cardModalTextContent.innerHTML = ''; 
+        
+        const contentWrapper = document.createElement('div');
+        contentWrapper.className = 'modal-content-inner-wrapper';
+        contentWrapper.innerHTML = fullDetailsContent;
+        
+        cardModalTextContent.appendChild(contentWrapper);
 
         cardModal.classList.add('is-visible');
         document.body.classList.add('no-scroll');
@@ -1073,40 +1077,34 @@
         });
     });
 
-    // --- INICIO CORRECCIÓN LÓGICA DE BOTONES DEL MODAL ---
     cardModal.addEventListener('click', (e) => {
-        // Busca un botón de acción con el atributo 'data-interest'
         const actionButton = e.target.closest('button.btn-card[data-interest]');
-        // Busca un enlace externo normal
         const externalLink = e.target.closest('a.btn-card');
 
         if (actionButton) {
-            // Es un botón de acción (ej. "Solicitar Tasación")
             const interest = actionButton.getAttribute('data-interest');
             if (interest && interestSelect) {
                 interestSelect.value = interest;
                 interestSelect.dispatchEvent(new Event('change'));
             }
             closeCardModal();
-            // Pequeño delay para asegurar que el modal se cierra antes de hacer scroll
-            setTimeout(() => {
-                document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
-            }, 100);
+            
+            // Use GSAP to scroll for reliability with ScrollTrigger
+            gsap.to(window, {
+                duration: 1, 
+                scrollTo: { y: "#contact", offsetY: 70 }, // offsetY to account for sticky nav
+                ease: "power2.inOut"
+            });
         
         } else if (externalLink) {
-            // Es un enlace normal (ej. a un sitio externo), lo dejamos pasar
-            // y cerramos el modal para una mejor experiencia de usuario.
             closeCardModal();
-            return; // Permite que el enlace funcione
+            return;
 
         } else if (e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse') || e.target === cardModal) {
-            // Es el botón de cerrar o el fondo del modal
             e.preventDefault();
             closeCardModal();
         }
     });
-    // --- FIN CORRECCIÓN LÓGICA DE BOTONES DEL MODAL ---
-
 
     // --- Contact Form Logic ---
     interestSelect.addEventListener('change', () => {
@@ -1117,7 +1115,7 @@
         }
     });
 
-    // --- INICIO CORRECCIÓN SCROLL HORIZONTAL ---
+    // --- Horizontal Scroll Correction ---
     function setupHorizontalScroll() {
         const section = document.querySelector('.horizontal-scroll-section');
         if (!section) return;
@@ -1125,18 +1123,20 @@
         const wrapper = section.querySelector('.horizontal-scroll-wrapper');
         const container = section.querySelector('.cards-container');
         
-        // Destruye cualquier instancia anterior para empezar de cero
+        // Kill the main instance if it exists
         if (horizontalScrollInstance) {
             horizontalScrollInstance.kill();
             horizontalScrollInstance = null;
         }
+        // Also kill any other ScrollTriggers on these elements to be safe
+        ScrollTrigger.getAll().forEach(trigger => {
+            if (trigger.trigger === section || trigger.trigger === wrapper || trigger.trigger === container) {
+                trigger.kill();
+            }
+        });
 
-        // Lógica para móvil (cuando el scroll horizontal no se aplica)
         if (window.innerWidth < 768 || prefersReducedMotion) {
-            // Limpia cualquier estilo inline que GSAP haya podido dejar
             gsap.set([section, wrapper, container], { clearProps: 'all' });
-
-            // Aplica estilos para que se vea como una lista vertical normal
             section.style.height = 'auto';
             wrapper.style.position = 'relative';
             wrapper.style.height = 'auto';
@@ -1149,12 +1149,10 @@
             container.style.gap = '1.5rem';
             gsap.utils.toArray('.service-card-stacked').forEach(card => card.style.width = '100%');
             
-            // Refresca ScrollTrigger para que recalcule todo con la nueva configuración
             ScrollTrigger.refresh();
             return;
         }
 
-        // Lógica para el scroll horizontal en escritorio
         gsap.set(wrapper, { position: 'sticky', top: 0, height: '100vh', width: '100%', overflow: 'hidden' });
         gsap.set(container, { display: 'flex', flexDirection: 'row' });
 
@@ -1174,7 +1172,6 @@
             }
         });
     }
-    // --- FIN CORRECCIÓN SCROLL HORIZONTAL ---
     
     // --- Particle Animation ---
     function initParticleAnimation() {
@@ -1253,20 +1250,24 @@
     async function getIpcData() {
         if (ipcDataCache) return ipcDataCache;
         try {
-            // Llamamos al asistente seguro en Netlify
             const response = await fetch('/.netlify/functions/get-ipc-data');
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                 const errorBody = await response.text();
+                throw new Error(`Error en la respuesta del servidor: ${response.status} ${response.statusText}. Cuerpo: ${errorBody}`);
             }
             const data = await response.json();
+            if(!data.data) {
+                 throw new Error("El formato de datos del IPC no es el esperado.");
+            }
             ipcDataCache = data.data.reduce((acc, item) => {
-                acc[item.fecha.substring(0, 7)] = parseFloat(item.valor);
+                acc[item[0].substring(0, 7)] = item[1];
                 return acc;
             }, {});
             return ipcDataCache;
         } catch (error) {
-            console.error("Error al obtener datos del IPC:", error);
+            console.error("Error al obtener y procesar datos del IPC:", error);
+            alquilerResult.textContent = 'No se pudieron obtener los datos del IPC. Intenta más tarde.';
+            alquilerResult.style.color = '#ff6b6b';
             return null;
         }
     }
@@ -1278,7 +1279,7 @@
 
         if (isNaN(montoOriginal) || !fechaInicioStr || isNaN(periodo)) {
             alquilerResult.textContent = 'Por favor, completa todos los campos correctamente.';
-            alquilerResult.style.color = '#ff6b6b';
+            alquilerResult.style.color = '#ffda6a';
             return;
         }
 
@@ -1289,8 +1290,6 @@
         const ipcData = await getIpcData();
 
         if (!ipcData) {
-            alquilerResult.textContent = 'Error al obtener datos del IPC. Intenta más tarde.';
-            alquilerResult.style.color = '#ff6b6b';
             loaderAlquiler.style.display = 'none';
             return;
         }
@@ -1310,13 +1309,19 @@
 
             if (fechaActual > hoy) break;
 
-            const fechaAnteriorStr = `${fechaAnterior.getFullYear()}-${String(fechaAnterior.getMonth() + 1).padStart(2, '0')}`;
-            const fechaActualStr = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth() + 1).padStart(2, '0')}`;
+            // El IPC se publica con 2 meses de retraso. Usamos el índice de 2 meses antes.
+            let fechaIndiceAnterior = new Date(fechaAnterior);
+            fechaIndiceAnterior.setMonth(fechaIndiceAnterior.getMonth() - 2);
+            let fechaIndiceActual = new Date(fechaActual);
+            fechaIndiceActual.setMonth(fechaIndiceActual.getMonth() - 2);
+
+            const fechaAnteriorStr = `${fechaIndiceAnterior.getFullYear()}-${String(fechaIndiceAnterior.getMonth() + 1).padStart(2, '0')}`;
+            const fechaActualStr = `${fechaIndiceActual.getFullYear()}-${String(fechaIndiceActual.getMonth() + 1).padStart(2, '0')}`;
             
             const ipcAnterior = ipcData[fechaAnteriorStr];
             const ipcActual = ipcData[fechaActualStr];
 
-            if (!ipcAnterior || !ipcActual) {
+            if (ipcAnterior === undefined || ipcActual === undefined) {
                 alquilerResult.textContent = `No se encontraron datos del IPC para el período que finaliza en ${fechaActual.toLocaleString('es-AR', { month: 'long', year: 'numeric' })}. El último valor calculado es de la fecha anterior.`;
                 alquilerResult.style.color = '#ffda6a';
                 loaderAlquiler.style.display = 'none';
@@ -1342,21 +1347,10 @@
         resultElement.textContent = 'Generando...';
         resultElement.style.color = '#e0e0e0';
 
-        // --- INICIO CORRECCIÓN DE SEGURIDAD API KEY ---
-        // ⚠️ ALERTA DE SEGURIDAD: La API Key NUNCA debe estar aquí.
-        // 1. Ve a tu panel de Netlify.
-        // 2. En "Site settings" > "Build & deploy" > "Environment", crea una variable
-        //    de entorno llamada GEMINI_API_KEY y pega tu clave allí.
-        // 3. Crea una Netlify Function (ej. /netlify/functions/generate-description.js)
-        //    que lea esta variable de entorno y haga la llamada a la API de Google.
-        // 4. Esta función del frontend debe llamar a tu nueva Netlify Function, no a Google directamente.
-
         const payload = { 
-            contents: [{ parts: [{ text: prompt }] }] 
+            prompt: prompt
         };
-        // URL de ejemplo de cómo llamarías a tu nueva función de Netlify.
         const apiUrl = `/.netlify/functions/generate-description`; 
-        // --- FIN CORRECCIÓN DE SEGURIDAD API KEY ---
 
         try {
             const response = await fetch(apiUrl, {
@@ -1365,30 +1359,25 @@
                 body: JSON.stringify(payload)
             });
 
-            const result = await response.json();
-
             if (!response.ok) {
-                console.error("Error en la respuesta de la API:", result);
-                throw new Error(`API error: ${response.status} ${response.statusText} - ${JSON.stringify(result.error)}`);
+                const errorData = await response.json();
+                console.error("Error from API function:", errorData);
+                throw new Error(`API error: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`);
             }
             
-            // La respuesta de tu función Netlify podría tener un formato diferente.
-            // Ajústalo según cómo diseñes tu función.
-            // Este es un ejemplo asumiendo que tu función devuelve un objeto { text: "..." }
+            const result = await response.json();
+
             if (result.text) {
                 resultElement.textContent = result.text;
-            } else if (result.candidates && result.candidates.length > 0) { // Fallback por si la respuesta viene directa
-                const text = result.candidates[0].content.parts[0].text;
-                resultElement.textContent = text;
             } else {
                 resultElement.textContent = 'Error: La respuesta de la IA no tiene el formato esperado.';
                 resultElement.style.color = '#ff6b6b';
-                console.error('Unexpected API response. Result:', result);
+                console.error('Unexpected API response format. Result:', result);
             }
         } catch (error) {
             resultElement.textContent = 'Error al conectar con la IA. Revisa la consola del navegador.';
             resultElement.style.color = '#ff6b6b';
-            console.error('Error llamando a la API de Gemini:', error);
+            console.error('Error calling the backend function:', error);
         } finally {
             loaderElement.style.display = 'none';
         }
@@ -1396,6 +1385,11 @@
 
     if (generateDescriptionBtn) {
         generateDescriptionBtn.addEventListener('click', () => {
+            if (!propertyInput.value) {
+                descriptionResult.textContent = 'Por favor, ingresá las características de la propiedad.';
+                descriptionResult.style.color = '#ffda6a';
+                return;
+            }
             const prompt = `Actúa como un copywriter inmobiliario experto. Genera una descripción profesional, atractiva y persuasiva para una propiedad con las siguientes características: ${propertyInput.value}. El tono debe ser directo, moderno y confiable, como "sin corbata". Estructura el texto con un título llamativo, un párrafo introductorio, una lista de 3-4 puntos clave (usando emojis como ✅) y un párrafo de cierre que invite a la acción.`;
             callGeminiAPI(prompt, descriptionResult, loaderDescription);
         });
