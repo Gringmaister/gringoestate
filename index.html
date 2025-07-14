@@ -45,7 +45,6 @@
       --gray: #cccccc; 
       --dark-bg: #111111;
       --card-bg: #1A1A1A;
-      --menu-width: 300px;
     }
     * {
       margin: 0;
@@ -69,63 +68,92 @@
       overflow-x: hidden;
     }
     
-    body.menu-open {
-        overflow: hidden;
-    }
-
-    #page-wrapper {
-        position: relative;
-        background-color: var(--dark-bg);
-        transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-        z-index: 1;
-    }
-    
-    body.menu-open #page-wrapper {
-        transform: translateX(calc(-1 * var(--menu-width)));
-    }
-
-    .nav-links-mobile {
-        position: fixed;
-        top: 0;
-        right: 0;
-        width: var(--menu-width);
-        height: 100%;
-        background-color: var(--dark-bg);
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-    }
-
-    .nav-links-mobile ul { 
-        width: 100%;
-        padding: 2rem 1.5rem;
-        text-align: center;
-        list-style: none;
-    }
-
-    .menu-button {
-        position: fixed;
-        top: 1rem;
-        right: 1.5rem;
-        display: flex; 
-        flex-direction: column; 
-        justify-content: space-around; 
-        width: 24px; 
-        height: 24px; 
-        background: transparent; 
-        padding: 0; 
-        z-index: 1002;
-        border: none;
-    }
-
-    html.no-scroll {
-        overflow: hidden;
-    }
     body {
       color: var(--text-light);
       background: var(--dark-bg);
       cursor: none;
     }
+
+    /* ---- INICIO CORRECCIÓN MENÚ MÓVIL ---- */
+    body.no-scroll {
+        overflow: hidden;
+    }
+    .menu-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease;
+    }
+    .menu-overlay.is-active {
+        opacity: 1;
+        visibility: visible;
+    }
+    .nav-links-mobile {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: clamp(280px, 80%, 350px);
+        height: 100%;
+        background-color: var(--dark-bg);
+        z-index: 1000;
+        transform: translateX(100%); /* Oculto por defecto */
+        transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        display: flex;
+        align-items: center;
+    }
+    .nav-links-mobile.is-active {
+        transform: translateX(0); /* Visible */
+    }
+    .nav-links-mobile ul {
+        width: 100%;
+        padding: 2rem 1.5rem;
+        list-style: none;
+        text-align: center;
+    }
+    .menu-button {
+        position: fixed; /* Lo hacemos fijo para que siempre esté en la misma posición */
+        top: 1rem;
+        right: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 24px;
+        height: 24px;
+        background: transparent;
+        padding: 0;
+        z-index: 1001; /* Siempre visible sobre el overlay */
+        border: none;
+    }
+    .menu-button .bar {
+        display: block;
+        width: 24px;
+        height: 3px;
+        background-color: white;
+        border-radius: 10px;
+        transition: all 0.3s ease-in-out;
+    }
+    .menu-button.open .bar1 { transform: rotate(45deg) translate(5px, 6px); }
+    .menu-button.open .bar2 { opacity: 0; }
+    .menu-button.open .bar3 { transform: rotate(-45deg) translate(5px, -6px); }
+    
+    @media (min-width: 1024px) {
+        .menu-button, .nav-links-mobile, .menu-overlay {
+            display: none !important;
+        }
+        .nav-links-desktop {
+            display: flex;
+        }
+        .nav-links-desktop ul {
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+            list-style: none;
+        }
+    }
+    /* ---- FIN CORRECCIÓN MENÚ MÓVIL ---- */
     
     a, button, .service-card-stacked, input, select, textarea {
       cursor: none !important;
@@ -187,7 +215,7 @@
         display:flex;
         justify-content:space-between;
         align-items:center;
-        z-index: 999;
+        z-index: 998;
         transition: background-color .4s, padding .4s, backdrop-filter .4s; 
         border-bottom: 1px solid rgba(255,255,255,0.1);
     }
@@ -207,32 +235,11 @@
     .nav-links-mobile a:hover { background-color: rgba(255, 191, 0, 0.1); color: var(--primary); }
     .menu-item-number { font-size: 0.8rem; color: var(--primary); opacity: 0.7; margin-right: 1rem; font-family: 'Roboto', sans-serif; font-weight: 400; }
     
-    .menu-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1001;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.3s ease;
-    }
-
-    body.menu-open .menu-overlay {
-        opacity: 1;
-        visibility: visible;
-    }
-
     .nav-links-desktop {display: none;}
-    .nav-links-desktop ul {list-style: none;}
     .nav-links-desktop a { padding-bottom: 5px; position: relative; color: #fff; text-decoration: none;}
     .nav-links-desktop a:hover { color: var(--primary); }
     .nav-links-desktop a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--primary); transform: scaleX(0); transform-origin: left; transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1); }
     .nav-links-desktop a:hover::after { transform: scaleX(1); }
-    
-    .menu-button .bar {display: block; width: 24px; height: 3px; background-color: white; border-radius: 10px; transition: all 0.3s ease-in-out;}
-    .menu-button.open .bar1 {transform: rotate(45deg) translate(5px, 6px);}
-    .menu-button.open .bar2 {opacity: 0;}
-    .menu-button.open .bar3 {transform: rotate(-45deg) translate(5px, -6px);}
 
     main { display: block; }
     section{padding:4.5rem 1.5rem;max-width:1200px;margin: 0 auto; position: relative; z-index: 1;}
@@ -498,27 +505,6 @@
     footer a{color: var(--primary); opacity: 0.8; transition: opacity .3s; text-decoration: none;}
     footer a:hover{opacity: 1;}
 
-    /* ---- INICIO CORRECCIÓN DISPLAY MENÚ ---- */
-    @media (min-width: 1024px) {
-      .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
-      .contact-wrapper { grid-template-columns: 1fr 1fr; }
-      
-      .menu-button, .nav-links-mobile, .menu-overlay { 
-          display: none !important; 
-      }
-      .nav-links-desktop { display: flex; }
-      .nav-links-desktop ul { display:flex; flex-direction: row; gap: 2rem;}
-      
-      /* Asegurarse que el wrapper no se mueva en desktop */
-      body.menu-open #page-wrapper {
-        transform: none;
-      }
-      body.menu-open {
-        overflow: auto;
-      }
-    }
-    /* ---- FIN CORRECCIÓN DISPLAY MENÚ ---- */
-
     @media (max-width: 1023px) {
         .nav-links-desktop { display: none; }
     }
@@ -540,6 +526,8 @@
   <canvas id="particle-canvas"></canvas>
   <div id="cursor-regular" class="custom-cursor"><div class="cursor-dot"></div></div>
   <div id="cursor-point" class="custom-cursor"><div class="cursor-point"></div></div>
+  
+  <!-- Estructura del Menú Móvil (simplificada) -->
   <div class="menu-overlay" id="menu-overlay"></div>
   <div class="nav-links-mobile" id="mobile-menu">
     <ul>
@@ -555,6 +543,7 @@
       <span class="bar bar2"></span>
       <span class="bar bar3"></span>
   </button>
+  
   <a href="https://wa.me/5491156106169" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width:28px; height:28px; fill:white;"><path d="M380.9 97.1C339.4 55.6 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.8 0-67.6-9.5-97.8-26.7l-7-4.1-72.5 19 19.3-71.1-4.5-7.4c-18.3-30.7-27.9-66.2-27.9-102.3 0-108.6 88.4-197 197-197s197 88.4 197 197-88.4 197-197 197zm83.7-118.2c-3.7-1.9-22.1-10.9-25.6-12.1-3.4-1.2-5.9-1.9-8.4 1.9-2.5 3.7-9.7 12.1-11.9 14.5-2.2 2.5-4.5 2.8-8.2 1-3.7-1.9-15.7-5.8-30-18.5-11.1-9.6-18.7-21.6-20.9-25.3-2.2-3.7-0.2-5.9 1.7-7.7 1.7-1.5 3.7-3.7 5.5-5.5 1.8-1.8 2.5-3.7 3.7-6.2 1.2-2.5 0.6-4.8-0.3-6.7-0.9-1.9-8.4-20.1-11.5-27.5-3.1-7.4-6.2-6.3-8.4-6.3-2.2 0-4.8 0-7.4 0-2.5 0-6.7 1.2-10.3 5.9-3.7 4.8-14.1 13.8-14.1 33.5 0 19.8 14.4 38.9 16.4 41.4 2 2.5 28.2 42.8 68.2 60.1 9.7 4.1 17.3 6.6 23.1 8.8 13.3 5.1 25.6 4.3 35.1 2.6 10.8-1.9 22.1-9 25.2-17.6 3.1-8.6 3.1-16 2.2-17.6-0.9-1.5-3.4-2.5-7.1-4.5z"/></svg>
   </a>
@@ -567,7 +556,7 @@
     </div>
   </div>
 
-  <!-- Contenedor principal que se deslizará -->
+  <!-- Contenedor principal de la página -->
   <div id="page-wrapper">
     <div id="overlay-backdrop"></div>
     
@@ -964,14 +953,20 @@
         });
     }
 
-    // --- Mobile Menu Logic (Robust Version) ---
+    // --- Mobile Menu Logic ---
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
     const menuOverlay = document.getElementById('menu-overlay');
 
     function toggleMenu() {
-        document.body.classList.toggle('menu-open');
-        menuToggle.classList.toggle('open');
+        const isActive = mobileMenu.classList.contains('is-active');
+
+        mobileMenu.classList.toggle('is-active', !isActive);
+        menuOverlay.classList.toggle('is-active', !isActive);
+        
+        menuToggle.classList.toggle('open', !isActive);
+        
+        document.body.classList.toggle('no-scroll', !isActive);
     }
 
     menuToggle.addEventListener('click', toggleMenu);
@@ -979,7 +974,7 @@
 
     mobileMenu.querySelectorAll('a[href^="#"]').forEach(link => {
         link.addEventListener('click', () => {
-            if (document.body.classList.contains('menu-open')) {
+            if (mobileMenu.classList.contains('is-active')) {
                 toggleMenu();
             }
         });
@@ -1002,8 +997,7 @@
         cardModalTextContent.innerHTML = fullDetailsContent;
 
         cardModal.classList.add('is-visible');
-        overlayBackdrop.classList.add('visible');
-        document.documentElement.classList.add('no-scroll');
+        document.body.classList.add('no-scroll');
 
         if (horizontalScrollInstance) {
             horizontalScrollInstance.disable();
@@ -1012,8 +1006,7 @@
 
     function closeCardModal() {
         cardModal.classList.remove('is-visible');
-        overlayBackdrop.classList.remove('visible');
-        document.documentElement.classList.remove('no-scroll');
+        document.body.classList.remove('no-scroll');
 
         if (horizontalScrollInstance) {
             horizontalScrollInstance.enable();
@@ -1022,14 +1015,11 @@
 
     document.querySelectorAll('.service-card-stacked').forEach(card => {
         card.addEventListener('click', e => {
-            if (e.target.closest('a[target="_blank"]') || e.target.closest('a[href="#contact"]')) {
-                if (e.target.closest('a[href="#contact"]')) {
-                    const interest = e.target.getAttribute('data-interest');
-                    if (interest && interestSelect) {
-                        interestSelect.value = interest;
-                    }
-                }
-                return; 
+            if (e.target.closest('a[target="_blank"]')) {
+                return;
+            }
+             if (e.target.closest('a.btn-card[href="#contact"]')) {
+                return;
             }
             e.preventDefault(); 
             openCardModal(card);
@@ -1037,10 +1027,25 @@
     });
 
     cardModal.addEventListener('click', (e) => {
-        if (e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse') || e.target === cardModal) {
+        const contactButton = e.target.closest('a.btn-card[href="#contact"]');
+
+        if (contactButton) {
+            e.preventDefault();
+
+            const interest = contactButton.getAttribute('data-interest');
+            if (interest && interestSelect) {
+                interestSelect.value = interest;
+                interestSelect.dispatchEvent(new Event('change'));
+            }
+
+            closeCardModal();
+
+            document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+
+        } else if (e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse') || e.target === cardModal) {
             e.preventDefault();
             closeCardModal();
-        } 
+        }
     });
 
     // --- Horizontal Scroll Animation Setup ---
@@ -1140,7 +1145,6 @@
     initParticleAnimation();
     setupHorizontalScroll();
     
-    // --- CORRECCIÓN DE DEBOUNCE ---
     window.addEventListener('resize', debounce(() => {
         setupHorizontalScroll();
         ScrollTrigger.refresh(true);
@@ -1159,14 +1163,17 @@
     const alquilerResult = document.getElementById('alquiler-result');
     const loaderAlquiler = document.getElementById('loader-alquiler');
     
-    const IPC_API_URL = "https://datos.gob.ar/series/api/series?ids=148.3_INIVELNAL_DICI_M_26&format=json&limit=5000"; 
     let ipcDataCache = null;
 
     async function getIpcData() {
         if (ipcDataCache) return ipcDataCache;
         try {
-            const response = await fetch(IPC_API_URL);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            // Llamamos a nuestro nuevo asistente seguro en Netlify
+            const response = await fetch('/.netlify/functions/get-ipc-data');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
             ipcDataCache = data.data.reduce((acc, item) => {
                 acc[item.fecha.substring(0, 7)] = parseFloat(item.valor);
@@ -1175,7 +1182,7 @@
             return ipcDataCache;
         } catch (error) {
             console.error("Error al obtener datos del IPC:", error);
-            return null; 
+            return null;
         }
     }
 
