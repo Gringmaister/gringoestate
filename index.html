@@ -1083,14 +1083,12 @@
         const externalLink = e.target.closest('a.btn-card');
 
         if (actionButton) {
-            // This is a button that triggers a scroll to #contact
             const interest = actionButton.getAttribute('data-interest');
             if (interest && interestSelect) {
                 interestSelect.value = interest;
                 interestSelect.dispatchEvent(new Event('change'));
             }
 
-            // We handle the closing manually to avoid race conditions
             cardModal.classList.remove('is-visible');
             document.body.classList.remove('no-scroll');
 
@@ -1099,7 +1097,6 @@
                 scrollTo: { y: "#contact", offsetY: 70 },
                 ease: "power2.inOut",
                 onComplete: () => {
-                    // Re-enable the horizontal scroll ONLY after the scroll is complete
                     if (horizontalScrollInstance) {
                         horizontalScrollInstance.enable();
                     }
@@ -1107,12 +1104,10 @@
             });
         
         } else if (externalLink) {
-            // This is a normal link to an external site
             closeCardModal();
             return;
 
         } else if (e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse') || e.target === cardModal) {
-            // This is for closing the modal
             e.preventDefault();
             closeCardModal();
         }
@@ -1127,7 +1122,7 @@
         }
     });
 
-    // --- HORIZONTAL SCROLL LOGIC (CORRECTED) ---
+    // --- HORIZONTAL SCROLL LOGIC (CORRECTED FOR MOBILE JUMP) ---
     function setupHorizontalScroll() {
         const section = document.querySelector('.horizontal-scroll-section');
         if (!section) return;
@@ -1135,20 +1130,19 @@
         const wrapper = section.querySelector('.horizontal-scroll-wrapper');
         const container = section.querySelector('.cards-container');
         
-        // Kill the main instance if it exists
         if (horizontalScrollInstance) {
             horizontalScrollInstance.kill();
             horizontalScrollInstance = null;
         }
-        // Also kill any other ScrollTriggers on these elements to be safe
         ScrollTrigger.getAll().forEach(trigger => {
             if (trigger.trigger === section || trigger.trigger === wrapper || trigger.trigger === container) {
                 trigger.kill();
             }
         });
 
-        if (window.innerWidth < 1024 || prefersReducedMotion) { // Changed to 1024 for better tablet support
+        if (window.innerWidth < 1024 || prefersReducedMotion) {
             gsap.set([section, wrapper, container], { clearProps: 'all' });
+            
             section.style.height = 'auto';
             wrapper.style.position = 'relative';
             wrapper.style.height = 'auto';
@@ -1161,7 +1155,7 @@
             container.style.gap = '1.5rem';
             gsap.utils.toArray('.service-card-stacked').forEach(card => card.style.width = '100%');
             
-            ScrollTrigger.refresh(true); // Recalculate all triggers
+            ScrollTrigger.refresh(true);
             return;
         }
 
@@ -1278,7 +1272,7 @@
             return ipcDataCache;
         } catch (error) {
             console.error("Error al obtener y procesar datos del IPC:", error);
-            alquilerResult.textContent = 'No se pudieron obtener los datos del IPC. Verifica que la función de Netlify esté funcionando.';
+            alquilerResult.textContent = 'No se pudieron obtener los datos del IPC. Verifica la consola del navegador para más detalles.';
             alquilerResult.style.color = '#ff6b6b';
             return null;
         }
@@ -1304,41 +1298,40 @@
 
         if (!ipcData) {
             loaderAlquiler.style.display = 'none';
-            return; // getIpcData ya muestra el error
+            return;
         }
 
         const [startYear, startMonth] = fechaInicioStr.split('-').map(Number);
-        let fechaActual = new Date(startYear, startMonth - 1, 1);
         let montoActual = montoOriginal;
         const hoy = new Date();
-        hoy.setDate(1);
+        hoy.setHours(0,0,0,0);
 
+        let fechaAjuste = new Date(startYear, startMonth - 1, 1);
         let ultimoMontoCalculado = montoOriginal;
-        let ultimaFechaCalculada = new Date(startYear, startMonth - 1, 1);
+        let ultimaFechaAjuste = new Date(startYear, startMonth - 1, 1);
+        let ajusteRealizado = false;
 
-        // Avanzamos por cada período hasta la fecha actual
         while (true) {
-            let proximaFechaAjuste = new Date(ultimaFechaCalculada);
-            proximaFechaAjuste.setMonth(proximaFechaAjuste.getMonth() + periodo);
+            fechaAjuste.setMonth(fechaAjuste.getMonth() + periodo);
 
-            if (proximaFechaAjuste > hoy) {
-                break; // Ya no hay más ajustes que hacer
+            if (fechaAjuste > hoy) {
+                break;
             }
 
-            let fechaIndiceBase = new Date(ultimaFechaCalculada);
-            fechaIndiceBase.setMonth(fechaIndiceBase.getMonth() - 1);
-            
-            let fechaIndiceNuevo = new Date(proximaFechaAjuste);
+            let fechaIndiceNuevo = new Date(fechaAjuste);
             fechaIndiceNuevo.setMonth(fechaIndiceNuevo.getMonth() - 1);
-
-            const indiceBaseStr = `${fechaIndiceBase.getFullYear()}-${String(fechaIndiceBase.getMonth() + 1).padStart(2, '0')}`;
-            const indiceNuevoStr = `${fechaIndiceNuevo.getFullYear()}-${String(fechaIndiceNuevo.getMonth() + 1).padStart(2, '0')}`;
             
-            const ipcBase = ipcData[indiceBaseStr];
+            let fechaIndiceBase = new Date(fechaIndiceNuevo);
+            fechaIndiceBase.setMonth(fechaIndiceBase.getMonth() - periodo);
+
+            const indiceNuevoStr = `${fechaIndiceNuevo.getFullYear()}-${String(fechaIndiceNuevo.getMonth() + 1).padStart(2, '0')}`;
+            const indiceBaseStr = `${fechaIndiceBase.getFullYear()}-${String(fechaIndiceBase.getMonth() + 1).padStart(2, '0')}`;
+
             const ipcNuevo = ipcData[indiceNuevoStr];
+            const ipcBase = ipcData[indiceBaseStr];
 
             if (ipcBase === undefined || ipcNuevo === undefined) {
-                alquilerResult.textContent = `No hay datos de IPC para el ajuste de ${proximaFechaAjuste.toLocaleString('es-AR', { month: 'long', year: 'numeric' })}. El cálculo se detiene aquí.`;
+                alquilerResult.textContent = `No hay datos de IPC para el ajuste de ${fechaAjuste.toLocaleString('es-AR', { month: 'long', year: 'numeric' })}. El cálculo se detiene aquí.`;
                 alquilerResult.style.color = '#ffda6a';
                 loaderAlquiler.style.display = 'none';
                 return;
@@ -1346,13 +1339,14 @@
 
             montoActual = montoActual * (ipcNuevo / ipcBase);
             ultimoMontoCalculado = montoActual;
-            ultimaFechaCalculada = proximaFechaAjuste;
+            ultimaFechaAjuste = fechaAjuste;
+            ajusteRealizado = true;
         }
         
-        if(ultimaFechaCalculada.getTime() === new Date(startYear, startMonth - 1, 1).getTime()){
+        if(!ajusteRealizado){
              alquilerResult.textContent = 'Aún no corresponde realizar un ajuste según el período seleccionado.';
         } else {
-             alquilerResult.textContent = `El alquiler actualizado a ${ultimaFechaCalculada.toLocaleString('es-AR', { month: 'long', year: 'numeric' })} es: $${ultimoMontoCalculado.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+             alquilerResult.textContent = `El alquiler actualizado a ${ultimaFechaAjuste.toLocaleString('es-AR', { month: 'long', year: 'numeric' })} es: $${ultimoMontoCalculado.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
         }
         alquilerResult.style.color = '#e0e0e0'; 
         loaderAlquiler.style.display = 'none';
