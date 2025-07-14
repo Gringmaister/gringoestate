@@ -4,17 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <!-- SEO & Metadata Optimizados -->
   <title>GringoEstate – Real Estate sin corbata</title>
   <meta name="description" content="Transformamos el Real Estate con soluciones innovadoras. Venta en 90 días, gestión de alquiler temporario, personal shopper inmobiliario y asesoría para desarrolladores.">
   <meta name="keywords" content="real estate, inmobiliaria, venta de propiedades, alquiler temporario, personal shopper inmobiliario, desarrollos, baigun, ambbi, franco garbini">
   <meta name="author" content="GringoEstate">
 
-  <!-- Favicon -->
   <link rel="icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp" sizes="any">
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp">
 
-  <!-- Open Graph para WhatsApp, Facebook, etc. -->
   <meta property="og:title" content="GringoEstate – Real Estate sin corbata">
   <meta property="og:description" content="Soy Franco Garbini y hago que el Real Estate en CABA sea más simple y rentable para vos. Esta es mi carta de presentación y mis servicios. ¿Tenés una idea? Agendá una llamada y la bajamos a tierra.">
   <meta property="og:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp">
@@ -22,18 +19,15 @@
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_AR">
 
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="GringoEstate – Real Estate sin corbata">
   <meta name="twitter:description" content="Soy Franco Garbini y hago que el Real Estate en CABA sea más simple y rentable para vos. Esta es mi carta de presentación y mis servicios. ¿Tenés una idea? Agendá una llamada y la bajamos a tierra.">
   <meta name="twitter:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp">
   
-  <!-- Preconnect a Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   
-  <!-- Google Tag Manager -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y1DWC69608"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -70,7 +64,6 @@
         border-radius: 10px;
     }
 
-    /* MODIFICACIÓN 1 (CSS): Regla de bloqueo de scroll simplificada para evitar el salto de página. */
     html.no-scroll {
         overflow: hidden;
     }
@@ -142,7 +135,7 @@
     
     nav ul{list-style:none;font-weight:700; padding-left: 0; margin: 0;}
 
-    /* MODIFICACIÓN 2 (CSS): Estilos para el nuevo menú lateral deslizable. */
+    /* ---- INICIO CORRECCIÓN MENÚ ---- */
     .nav-links-mobile {
         position: fixed;
         top: 0;
@@ -152,31 +145,38 @@
         height: 100%;
         background-color: var(--dark-bg);
         z-index: 1000;
-        transform: translateX(100%); /* Oculto a la derecha por defecto */
+        transform: translateX(100%);
         transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 6rem 1.5rem 2rem;
+        align-items: center; /* Centra la lista verticalmente */
     }
 
     .nav-links-mobile.is-active {
-        transform: translateX(0); /* Visible */
+        transform: translateX(0);
     }
-
-    nav .nav-links-mobile ul { display: flex; flex-direction: column; gap: 0; align-items: center; width: 100%; text-align: center; }
+    
+    /* Se mueve el padding al UL para que el fondo del DIV ocupe toda la altura */
+    nav .nav-links-mobile ul { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 0; 
+        width: 100%; 
+        text-align: center;
+        padding: 2rem 1.5rem;
+    }
+    /* ---- FIN CORRECCIÓN MENÚ ---- */
+    
     nav .nav-links-mobile li { width: 100%; }
     nav .nav-links-mobile a { display: flex; justify-content: center; align-items: center; width: 100%; padding: 1.5rem 1rem; font-size: 1.5rem; color: #fff; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1.5px; border-bottom: 1px solid rgba(255,255,255,0.1); transition: color .3s, background-color .3s; text-decoration: none; }
     nav .nav-links-mobile li:first-child a { border-top: 1px solid rgba(255,255,255,0.1); }
     nav .nav-links-mobile a:hover { background-color: rgba(255, 191, 0, 0.1); color: var(--primary); }
     .menu-item-number { font-size: 0.8rem; color: var(--primary); opacity: 0.7; margin-right: 1rem; font-family: 'Roboto', sans-serif; font-weight: 400; }
     
-    /* MODIFICACIÓN 2 (CSS): Estilos para el overlay del menú. */
     .menu-overlay {
         position: fixed;
         inset: 0;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 999; /* Debajo del menú, pero sobre el contenido */
+        z-index: 999;
         opacity: 0;
         visibility: hidden;
         transition: opacity 0.3s ease;
@@ -266,10 +266,41 @@
 
     .card-full-details { display: none; }
 
-    .card-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0s 0.4s; }
-    .card-modal.is-visible { opacity: 1; visibility: visible; transition: opacity 0.4s ease; }
-    .card-modal-content-wrapper { background-color: var(--card-bg); border-radius: 20px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); width: 90%; max-width: 1000px; height: 90%; max-height: 85vh; position: relative; display: flex; flex-direction: column; overflow: hidden; transform: scale(0.95); transition: transform 0.4s ease; }
-    .card-modal.is-visible .card-modal-content-wrapper { transform: scale(1); }
+    /* ---- INICIO CORRECCIÓN MODAL ---- */
+    .card-modal { 
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        width: 100%; 
+        height: 100%; 
+        z-index: 10000; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        opacity: 0; 
+        visibility: hidden; 
+        transition: none; /* Animación eliminada */
+    }
+    .card-modal.is-visible { 
+        opacity: 1; 
+        visibility: visible;
+        transition: none; /* Animación eliminada */
+    }
+    .card-modal-content-wrapper { 
+        background-color: var(--card-bg); 
+        border-radius: 20px; 
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); 
+        width: 90%; 
+        max-width: 1000px; 
+        height: 90%; 
+        max-height: 85vh; 
+        position: relative; 
+        display: flex; 
+        flex-direction: column; 
+        overflow: hidden; 
+        transform: scale(1); /* Sin animación de escala */
+        transition: none; /* Animación eliminada */
+    }
     
     .card-modal-content-wrapper::before {
       content: '';
@@ -299,11 +330,45 @@
     .btn-toggle-collapse { background: transparent; border: 1px solid #555; color: #aaa; border-radius: 50px; padding: 0.5rem 1rem; font-size: 1rem; margin-top: 0.5rem; transition: all .3s ease; }
     .btn-toggle-collapse:hover { background: #555; color: #fff; }
     
-    .card-modal-close-btn { position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: #fff; font-size: 2rem; z-index: 3; line-height: 1; padding: 0.5rem; border-radius: 50%; transition: background-color 0.3s ease, transform 0.3s ease; }
-    .card-modal-close-btn:hover { background-color: rgba(255, 255, 255, 0.1); transform: rotate(90deg); }
+    .card-modal-close-btn { 
+        position: absolute; 
+        top: 15px; 
+        right: 15px; 
+        background: rgba(0,0,0,0.3);
+        border: none; 
+        color: #fff; 
+        font-size: 2rem; 
+        z-index: 10; /* Aumentado para asegurar que esté por encima */
+        line-height: 1; 
+        border-radius: 50%; 
+        transition: background-color 0.3s ease, transform 0.3s ease;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .card-modal-close-btn:hover { 
+        background-color: rgba(255, 255, 255, 0.2); 
+        transform: rotate(90deg); 
+    }
     
-    #overlay-backdrop { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.7); z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.4s ease, visibility 0s 0.4s; }
-    #overlay-backdrop.visible { opacity: 1; visibility: visible; transition: opacity 0.4s ease; }
+    #overlay-backdrop { 
+        position: fixed; 
+        inset: 0; 
+        background-color: rgba(0, 0, 0, 0.7); 
+        z-index: 9999; 
+        opacity: 0; 
+        visibility: hidden; 
+        pointer-events: none; 
+        transition: none; /* Animación eliminada */
+    }
+    #overlay-backdrop.visible { 
+        opacity: 1; 
+        visibility: visible; 
+        transition: none; /* Animación eliminada */
+    }
+    /* ---- FIN CORRECCIÓN MODAL ---- */
 
     .content-after-sticky { background-color: transparent; position: relative; z-index: 1; }
     
@@ -424,7 +489,6 @@
   <div id="cursor-regular" class="custom-cursor"><div class="cursor-dot"></div></div>
   <div id="cursor-point" class="custom-cursor"><div class="cursor-point"></div></div>
 
-  <!-- MODIFICACIÓN 2 (HTML): Overlay para el menú móvil. -->
   <div class="menu-overlay" id="menu-overlay"></div>
 
   <div id="overlay-backdrop"></div>
@@ -440,7 +504,6 @@
         <li><a href="#contact">Contacto</a></li>
       </ul>
     </div>
-    <!-- El menú móvil ahora será un panel lateral. -->
     <div class="nav-links-mobile" id="mobile-menu">
       <ul>
         <li><a href="#about"><span class="menu-item-number">01</span>Sobre Mí</a></li>
@@ -833,7 +896,7 @@
         });
     }
 
-    // --- MODIFICACIÓN 1 (JS): Lógica de bloqueo de scroll simplificada. ---
+    // --- Scroll Lock Logic ---
     const scrollManager = {
         lock() {
             document.documentElement.classList.add('no-scroll');
@@ -843,9 +906,7 @@
         }
     };
 
-    // =======================================================================
-    //  MODIFICACIÓN 2 (JS): Nueva lógica para el menú lateral deslizable.
-    // =======================================================================
+    // --- Mobile Menu Logic ---
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
     const menuOverlay = document.getElementById('menu-overlay');
@@ -853,12 +914,10 @@
     function toggleMenu() {
         const isActive = mobileMenu.classList.contains('is-active');
 
-        // Alternar clases para mostrar/ocultar menú y overlay
         menuToggle.classList.toggle('open', !isActive);
         mobileMenu.classList.toggle('is-active', !isActive);
         menuOverlay.classList.toggle('is-active', !isActive);
 
-        // Bloquear/desbloquear el scroll de la página
         if (!isActive) {
             scrollManager.lock();
         } else {
@@ -866,13 +925,9 @@
         }
     }
 
-    // Evento para el botón de hamburguesa
     menuToggle.addEventListener('click', toggleMenu);
-
-    // Evento para el overlay (cierra el menú al hacer clic fuera)
     menuOverlay.addEventListener('click', toggleMenu);
 
-    // Evento para los enlaces del menú (cierra el menú al seleccionar una opción)
     mobileMenu.querySelectorAll('a[href^="#"]').forEach(link => {
         link.addEventListener('click', () => {
             if (mobileMenu.classList.contains('is-active')) {
@@ -881,9 +936,7 @@
         });
     });
 
-    // =======================================================================
-    //  LÓGICA DEL MODAL DE TARJETAS (Verificada y funcionando con el nuevo scrollManager)
-    // =======================================================================
+    // --- Card Modal Logic ---
     const overlayBackdrop = document.getElementById('overlay-backdrop');
     const cardModal = document.getElementById('card-modal');
     const cardModalImage = cardModal.querySelector('.card-modal-image');
@@ -934,17 +987,15 @@
         });
     });
 
-    // Listener de eventos unificado para el modal
+    // Listener de eventos unificado para el modal.
+    // Esta es la forma correcta de manejar eventos en elementos que pueden no existir
+    // al cargar la página (como el botón 'Cerrar' dentro del modal).
     cardModal.addEventListener('click', (e) => {
-        // Cierra si se hace clic en el botón de cerrar (X) o en el botón "Cerrar" de adentro
-        if (e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse')) {
+        // Cierra si se hace clic en el botón X, en el botón "Cerrar", o en el fondo.
+        if (e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse') || e.target === cardModal) {
             e.preventDefault();
             closeCardModal();
         } 
-        // Cierra si se hace clic en el fondo oscuro del modal
-        else if (e.target === cardModal) { 
-            closeCardModal();
-        }
     });
 
     // --- Horizontal Scroll Animation Setup ---
