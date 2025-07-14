@@ -45,6 +45,7 @@
       --gray: #cccccc; 
       --dark-bg: #111111;
       --card-bg: #1A1A1A;
+      --menu-width: 300px; /* Ancho del menú para usar en la animación */
     }
     * {
       margin: 0;
@@ -64,11 +65,66 @@
         border-radius: 10px;
     }
 
-    html.no-scroll {
-        overflow: hidden;
-    }
+    /* ---- INICIO SOLUCIÓN MENÚ ROBUSTO (Alternativa 1) ---- */
     html, body {
       overflow-x: hidden;
+    }
+    
+    /* Cuando el menú está abierto, bloqueamos el scroll en el body */
+    body.menu-open {
+        overflow: hidden;
+    }
+
+    /* Contenedor principal de la página que se deslizará */
+    #page-wrapper {
+        position: relative;
+        background-color: var(--dark-bg); /* Fondo para que no se vea transparente */
+        transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        z-index: 1;
+    }
+    
+    /* Cuando el menú está abierto, deslizamos el contenedor */
+    body.menu-open #page-wrapper {
+        transform: translateX(calc(-1 * var(--menu-width)));
+    }
+
+    /* El menú lateral ahora está fijo y se revela cuando la página se mueve */
+    .nav-links-mobile {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: var(--menu-width);
+        height: 100%;
+        background-color: var(--dark-bg);
+        z-index: 0; /* No necesita z-index alto, se revela por el movimiento */
+        display: flex;
+        align-items: center;
+    }
+
+    .nav-links-mobile ul { 
+        width: 100%;
+        padding: 2rem 1.5rem;
+        text-align: center;
+    }
+
+    .menu-button {
+        position: fixed; /* Fijo a la ventana para que no se mueva con el scroll */
+        top: 1rem;
+        right: 1.5rem;
+        display: flex; 
+        flex-direction: column; 
+        justify-content: space-around; 
+        width: 24px; 
+        height: 24px; 
+        background: transparent; 
+        padding: 0; 
+        z-index: 1001; /* Siempre visible */
+        border: none;
+    }
+    /* ---- FIN SOLUCIÓN MENÚ ROBUSTO ---- */
+
+    html.no-scroll {
+        overflow: hidden;
     }
     body {
       color: var(--text-light);
@@ -127,7 +183,6 @@
     .btn-primary{background:var(--primary);color:var(--dark);padding:.75rem 2rem;border-radius:50px;display:inline-block;transition: background-color .3s, color .3s, box-shadow .3s;font-weight:700;font-size:1.1rem;letter-spacing:1px; border: none; text-decoration: none;}
     .btn-primary:hover{background:#fff;color:var(--dark);transform:translateY(-3px) !important;box-shadow:0 10px 20px rgba(0,0,0,0.2);}
     
-    /* ---- INICIO CORRECCIÓN MENÚ ROBUSTO ---- */
     nav{
         position:fixed;
         top:0;
@@ -137,7 +192,7 @@
         display:flex;
         justify-content:space-between;
         align-items:center;
-        z-index: 999; /* Z-index ajustado para estar debajo del overlay y menú */
+        z-index: 999;
         transition: background-color .4s, padding .4s, backdrop-filter .4s; 
         border-bottom: 1px solid rgba(255,255,255,0.1);
     }
@@ -152,34 +207,6 @@
     nav a.logo span {color: var(--primary);}
     
     nav ul{list-style:none;font-weight:700; padding-left: 0; margin: 0;}
-
-    .nav-links-mobile {
-        position: fixed;
-        top: 0;
-        bottom: 0; /* Asegura altura completa */
-        right: 0;
-        width: 80%;
-        max-width: 350px;
-        background-color: var(--dark-bg);
-        z-index: 1002; /* El más alto para estar por encima de todo */
-        transform: translateX(100%);
-        transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-        display: flex;
-        align-items: center;
-    }
-
-    .nav-links-mobile.is-active {
-        transform: translateX(0);
-    }
-    
-    nav .nav-links-mobile ul { 
-        display: flex; 
-        flex-direction: column; 
-        gap: 0; 
-        width: 100%; 
-        text-align: center;
-        padding: 2rem 1.5rem;
-    }
     
     .nav-links-mobile li { width: 100%; }
     .nav-links-mobile a { display: flex; justify-content: center; align-items: center; width: 100%; padding: 1.5rem 1rem; font-size: 1.5rem; color: #fff; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1.5px; border-bottom: 1px solid rgba(255,255,255,0.1); transition: color .3s, background-color .3s; text-decoration: none; }
@@ -191,13 +218,13 @@
         position: fixed;
         inset: 0;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 1000; /* Debajo del menú pero sobre el contenido */
+        z-index: 1000;
         opacity: 0;
         visibility: hidden;
         transition: opacity 0.3s ease;
     }
 
-    .menu-overlay.is-active {
+    body.menu-open .menu-overlay {
         opacity: 1;
         visibility: visible;
     }
@@ -208,22 +235,10 @@
     .nav-links-desktop a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--primary); transform: scaleX(0); transform-origin: left; transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1); }
     .nav-links-desktop a:hover::after { transform: scaleX(1); }
     
-    .menu-button {
-        display: flex; 
-        flex-direction: column; 
-        justify-content: space-around; 
-        width: 24px; 
-        height: 24px; 
-        background: transparent; 
-        padding: 0; 
-        z-index: 1001; /* Sobre el overlay, pero debajo del menú */
-        border: none;
-    }
     .menu-button .bar {display: block; width: 24px; height: 3px; background-color: white; border-radius: 10px; transition: all 0.3s ease-in-out;}
     .menu-button.open .bar1 {transform: rotate(45deg) translate(5px, 6px);}
     .menu-button.open .bar2 {opacity: 0;}
     .menu-button.open .bar3 {transform: rotate(-45deg) translate(5px, -6px);}
-    /* ---- FIN CORRECCIÓN MENÚ ROBUSTO ---- */
 
     main { display: block; background-color: transparent; }
     section{padding:4.5rem 1.5rem;max-width:1200px;margin: 0 auto; background-color: transparent; position: relative; z-index: 1;}
@@ -514,7 +529,7 @@
   <div id="cursor-regular" class="custom-cursor"><div class="cursor-dot"></div></div>
   <div id="cursor-point" class="custom-cursor"><div class="cursor-point"></div></div>
 
-  <!-- INICIO CORRECCIÓN ESTRUCTURAL MENÚ: Movidos fuera del <nav> -->
+  <!-- Menú y Overlay fuera del wrapper para un posicionamiento correcto -->
   <div class="menu-overlay" id="menu-overlay"></div>
   <div class="nav-links-mobile" id="mobile-menu">
     <ul>
@@ -525,300 +540,295 @@
       <li><a href="#contact"><span class="menu-item-number">05</span>Contacto</a></li>
     </ul>
   </div>
-  <!-- FIN CORRECCIÓN ESTRUCTURAL MENÚ -->
-
-  <div id="overlay-backdrop"></div>
   
-  <nav>
-    <a class="logo" href="#top">GRINGO<span>ESTATE</span></a>
-    <div class="nav-links-desktop">
-      <ul>
-        <li><a href="#about">Sobre Mí</a></li>
-        <li><a href="#services-stacked">Servicios</a></li>
-        <li><a href="#portfolio">Proyectos</a></li>
-        <li><a href="#ai-tools">Herramientas IA ✨</a></li>
-        <li><a href="#contact">Contacto</a></li>
-      </ul>
-    </div>
-    <!-- El menú móvil ya no está aquí -->
-    <button class="menu-button" id="menu-toggle" aria-label="Abrir o cerrar menú de navegación">
-        <span class="bar bar1"></span>
-        <span class="bar bar2"></span>
-        <span class="bar bar3"></span>
-    </button>
-  </nav>
+  <!-- Botón del menú también fuera para que no se deslice con la página -->
+  <button class="menu-button" id="menu-toggle" aria-label="Abrir o cerrar menú de navegación">
+      <span class="bar bar1"></span>
+      <span class="bar bar2"></span>
+      <span class="bar bar3"></span>
+  </button>
 
-  <header id="top">
-    <div class="hero">
-        <picture class="isologo hero-el">
-            <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp">
-            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" alt="Isologo de GringoEstate" width="120" height="120">
-        </picture>
-        <h1 class="hero-el" id="hero-title">GRINGO<span>ESTATE</span></h1>
-        <p class="hero-el">LA POSTA INMOBILIARIA. SIN CORBATA.</p>
-        <a href="#contact" class="btn-primary hero-el">AGENDÁ UNA LLAMADA</a>
-    </div>
-  </header>
-
-  <main>
-    <section id="about" class="about">
-      <div class="about-img">
-        <picture>
-            <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/franco-perfil.webp" type="image/webp">
-            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/franco-perfil.webp" alt="Retrato de Franco Garbini, fundador de GringoEstate" loading="lazy" width="280" height="280">
-        </picture>
-      </div>
-      <div class="about-text">
-          <h2 class="section-title text-left">SOY FRANCO GARBINI</h2>
-          <p><strong>Deportista, entusiasta de la tecnología y apasionado del mundo inmobiliario.</strong> Hace 4 años renuncié a la seguridad del mundo corporativo (Banco Galicia) para subalquilar mi primer monoambiente. <br>Una apuesta personal...</p>
-          <p>Hoy, esa apuesta se transformó en un <strong>sistema de negocios</strong>: socio en <strong>Baigun R&N</strong>, fundador de <strong>AMBBI</strong> (<strong>+500 reviews 5⭐️</strong>) y responsable de la comercialización de <strong>edificios completos</strong>. Combino datos, tecnología y un equipo ágil para entregar resultados reales, sin traje ni corbata.</p>
-      </div>
-    </section>
-
-    <section id="services-stacked" class="section-full-width">
-        <h2 class="section-title">NUESTROS <span>SERVICIOS</span></h2>
-        <p class="subtitle">
-            Descubrí cómo GringoEstate transforma el Real Estate con soluciones innovadoras y un enfoque directo.
-        </p>
-        <div class="horizontal-scroll-section">
-            <div class="horizontal-scroll-wrapper">
-                <div class="cards-container">
-                    
-                    <article class="service-card-stacked" data-card-id="tarjeta1">
-                      <div class="card-inner-content">
-                        <picture>
-                            <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta1.webp" type="image/webp">
-                            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta1.webp" alt="Tasación profesional de una propiedad" class="card-image" loading="lazy">
-                        </picture>
-                        <div class="card-content-initial"><h3>QUIERO TASAR <span>MI PROPIEDAD</span></h3><p class="short-desc">Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><div class="card-full-details-content"><h3>QUIERO TASAR MI PROPIEDAD</h3><div class="card-full-content-scroll"><p>Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><ul><li>✅ En 48 horas hábiles.</li><li>✅ Se entrega una carpeta formal con análisis de mercado.</li><li>✅ Documentación respaldatoria clara.</li></ul><p class="card-highlight">El punto de partida para con información poder tomar la mejor decisión.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Solicitar Tasación</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                      </div>
-                    </article>
-
-                    <article class="service-card-stacked" data-card-id="tarjeta2">
-                      <div class="card-inner-content">
-                        <picture>
-                            <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta2.webp" type="image/webp">
-                            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta2.webp" alt="Vender una propiedad con GringoEstate" class="card-image" loading="lazy">
-                        </picture>
-                        <div class="card-content-initial"><h3>¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3><p class="short-desc">Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><div class="card-full-details-content"><h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3><div class="card-full-content-scroll"><p>Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><h4>Nuestra estrategia 360° incluye:</h4><ul><li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li><li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li><li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li><li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li></ul><p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Tasar mi propiedad</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                      </div>
-                    </article>
-
-                    <article class="service-card-stacked" data-card-id="tarjeta3">
-                      <div class="card-inner-content">
-                        <picture>
-                            <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta3.webp" type="image/webp">
-                            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta3.webp" alt="Interior de un apartamento de alquiler temporario" class="card-image" loading="lazy">
-                        </picture>
-                        <div class="card-content-initial"><h3>POTENCIÁ TU <span>ALQUILER TEMPORARIO</span></h3><p class="short-desc">Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><div class="card-full-details-content"><h3>POTENCIÁ TU ALQUILER TEMPORARIO</h3><div class="card-full-content-scroll"><p>Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><h4>Nuestro servicio "llave en mano" incluye:</h4><ul><li>✅ Asesoría de home staging gratuita y puesta a punto.</li><li>✅ Ejecución de amoblamiento a través de nuestro equipo de arquitectura y red de proveedores.</li><li>✅ Publicación profesional en todas las plataformas para un máximo impacto.</li><li>✅ Gestión integral (sistemas, anfitrión, limpieza) para maximizar tus ingresos y darte tranquilidad.</li></ul><p class="card-alert">⚠️ Únicamente tomamos propiedades modernas con opción de self check-in. Para otras unidades, ofrecemos nuestro servicio de alquiler flex o tradicional.</p><p class="card-highlight">Delegá la gestión, disfrutá los resultados.</p></div><div class="card-footer-cta"><a href="https://www.ambbi.com.ar/" target="_blank" rel="noopener noreferrer" class="btn-card">Conocer AMBBI</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                      </div>
-                    </article>
-                    
-                    <article class="service-card-stacked" data-card-id="tarjeta4">
-                      <div class="card-inner-content">
-                        <picture>
-                            <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta4.webp" type="image/webp">
-                            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta4.webp" alt="Llaves de una propiedad siendo entregadas" class="card-image" loading="lazy">
-                        </picture>
-                        <div class="card-content-initial"><h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3><p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><div class="card-full-details-content"><h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3><div class="card-full-content-scroll"><p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><h4>Alquiler Flex (1 a 12 meses):</h4><ul><li>✅ Ideal para propiedades amobladas.</li><li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li><li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li><li>✅ Administración integral de pagos y seguimiento del contrato.</li></ul><h4>Alquiler Tradicional (2 años):</h4><ul><li>✅ La opción clásica para una renta estable y predecible.</li><li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li></ul><p class="card-highlight">Tu propiedad, en buenas manos.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Gestión de Alquiler Flex y Tradicional">Consultar por Gestión</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                      </div>
-                    </article>
-
-                    <article class="service-card-stacked" data-card-id="tarjeta5">
-                      <div class="card-inner-content">
-                        <picture>
-                            <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta5.webp" type="image/webp">
-                            <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta5.webp" alt="Render de un edificio en construcción" class="card-image" loading="lazy">
-                        </picture>
-                        <div class="card-content-initial"><h3>INVERTÍ <span>DESDE POZO</span></h3><p class="short-desc">Accedé a una cartera única de +26 emprendimientos en exclusiva y oportunidades off-market.</p><button class="btn-toggle-expand">Ver más</button></div>
-                        <div class="card-full-details"><div class="card-full-details-content"><h3>INVERTÍ DESDE POZO</h3><div class="card-full-content-scroll"><p>Accedé a una cartera única de +26 emprendimientos en exclusiva y oportunidades off-market.</p><ul><li>✅ +26 desarrollos en exclusiva que no encontrarás en otro lado.</li><li>✅ Análisis de ROI y proyecciones claras para una decisión informada.</li><li>✅ Acompañamiento en todo el proceso, desde la firma hasta la entrega.</li></ul><p class="card-highlight">Invertí de forma inteligente en los mejores proyectos de la ciudad.</p></div><div class="card-footer-cta"><a href="https://www.baigunryn.com/emprendimientos/" target="_blank" rel="noopener noreferrer" class="btn-card">Ver Oportunidades</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                      </div>
-                    </article>
-
-                    <article class="service-card-stacked" data-card-id="tarjeta6">
-                        <div class="card-inner-content">
-                            <picture>
-                                <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" type="image/webp">
-                                <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" alt="Un desarrollador revisando planos en una obra" class="card-image" loading="lazy">
-                            </picture>
-                            <div class="card-content-initial"><h3>¿SOS <span>DESARROLLADOR?</span></h3><p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details"><div class="card-full-details-content"><h3>¿SOS DESARROLLADOR?</h3><div class="card-full-content-scroll"><p>Una alianza estratégica, no una inmobiliaria más.</p><ul><li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li><li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li><li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li></ul><p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Asesoría para Desarrolladores">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                        </div>
-                    </article>
-                    
-                    <article class="service-card-stacked" data-card-id="tarjeta7">
-                        <div class="card-inner-content">
-                            <picture>
-                                <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta7.webp" type="image/webp">
-                                <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta7.webp" alt="GringoEstate con clientas" class="card-image" loading="lazy">
-                            </picture>
-                            <div class="card-content-initial"><h3>PERSONAL SHOPPER <span>INMOBILIARIO</span></h3><p class="short-desc">Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details"><div class="card-full-details-content"><h3>PERSONAL SHOPPER INMOBILIARIO</h3><div class="card-full-content-scroll"><p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><ul><li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li><li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li><li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li></ul><p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p><p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta. Asesorate con profesionales y delegá lo tedioso.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Personal Shopper Inmobiliario">Quiero este Servicio</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                        </div>
-                    </article>
-
-                    <article class="service-card-stacked" data-card-id="tarjeta8">
-                        <div class="card-inner-content">
-                            <picture>
-                                <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta8.webp" type="image/webp">
-                                <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta8.webp" alt="Local comercial de GringoEstate" class="card-image" loading="lazy">
-                            </picture>
-                            <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><button class="btn-toggle-expand">Ver más</button></div>
-                            <div class="card-full-details"><div class="card-full-details-content"><h3>LOCALES COMERCIALES Y OFICINAS</h3><div class="card-full-content-scroll"><p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><ul><li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li><li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li><li>✅ Asesoramiento integral en contratos comerciales y negociación.</li></ul><p class="card-highlight">Llevá tu negocio al siguiente nivel.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Locales Comerciales y Oficinas">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
-                        </div>
-                    </article>
-
-                </div>
-            </div>
-        </div>
-    </section>
+  <!-- Contenedor principal que envuelve toda la página visible -->
+  <div id="page-wrapper">
+    <div id="overlay-backdrop"></div>
     
-    <div class="content-after-sticky">
-        <section id="portfolio" class="section-full-width">
-            <div class="portfolio-grid-wrapper">
-                <h2 class="section-title">PROYECTOS <span>DESTACADOS</span></h2>
-                <div class="portfolio-grid">
-                    <div class="portfolio-item">
-                        <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-ambar.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-ambar.webp" alt="Fachada del proyecto Ámbar en Recoleta" loading="lazy" width="600" height="400"/></picture>
-                        <div class="portfolio-content">
-                            <span class="project-title">Ámbar · <span class="project-location">Recoleta (15 Unidades)</span></span>
-                            <div class="view-more">Ver más →</div>
-                        </div>
-                    </div>
-                    <div class="portfolio-item">
-                        <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-charlone.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-charlone.webp" alt="Render de la Torre Charlone en Colegiales" loading="lazy" width="600" height="400"/></picture>
-                        <div class="portfolio-content">
-                            <span class="project-title">Torre Charlone · <span class="project-location">Colegiales</span></span>
-                            <div class="view-more">Ver más →</div>
-                        </div>
-                    </div>
-                    <div class="portfolio-item">
-                        <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-nunez.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-nunez.webp" alt="Exterior del proyecto Casona en Núñez" loading="lazy" width="600" height="400"/></picture>
-                        <div class="portfolio-content">
-                            <span class="project-title">Casona · <span class="project-location">Núñez</span></span>
-                            <div class="view-more">Ver más →</div>
-                        </div>
-                    </div>
-                    <div class="portfolio-item">
-                        <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-palermo.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-palermo.webp" alt="Render del proyecto Concepción Live en Palermo" loading="lazy" width="600" height="400"/></picture>
-                        <div class="portfolio-content">
-                            <span class="project-title">Concepción Live · <span class="project-location">Palermo</span></span>
-                            <div class="view-more">Ver más →</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <section id="ai-tools" class="section-full-width">
-            <h2 class="section-title" style="color:#fff;">HERRAMIENTAS CON <span>IA ✨</span></h2>
-            <p class="subtitle">
-                Potenciá tus proyectos con estas herramientas exclusivas, diseñadas para darte una ventaja en el mercado.
-            </p>
-            <div class="ai-tools-wrapper">
-                <div class="ai-tool-card">
-                  <form>
-                    <h3>Generador de Descripciones de Propiedades</h3>
-                    <p>Ingresá los datos clave de tu propiedad y creá una descripción profesional y atractiva en segundos.</p>
-                    <textarea id="property-input" placeholder="Ej: 3 ambientes en Palermo, 75m2, balcón con vista abierta, muy luminoso, piso alto, cerca del subte D..."></textarea>
-                    <div class="ai-button-wrapper">
-                        <button type="button" id="generate-description-btn">Generar Descripción ✨</button>
-                        <div id="loader-description" class="loader"></div>
-                    </div>
-                  </form>
-                    <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div>
-                </div>
-                <div class="ai-tool-card">
-                  <form>
-                    <h3>Calculadora de Actualización de Alquiler (IPC)</h3>
-                    <p>Calculá el valor actualizado de tu alquiler según el IPC. Ingresá los datos de tu contrato.</p>
-                    <input type="number" id="alquiler-original-input" placeholder="Monto Original del Alquiler ($)">
-                    <input type="month" id="fecha-inicio-input" placeholder="Fecha de Inicio del Contrato">
-                    <select id="periodo-indexacion-input">
-                        <option value="" disabled selected>Seleccioná el Período de Indexación</option>
-                        <option value="3">Trimestral (3 meses)</option>
-                        <option value="4">Cuatrimestral (4 meses)</option>
-                        <option value="6">Semestral (6 meses)</option>
-                    </select>
-                    <div class="ai-button-wrapper">
-                        <button type="button" id="calcular-alquiler-btn">Calcular Alquiler Actual ✨</button>
-                        <div id="loader-alquiler" class="loader"></div>
-                    </div>
-                  </form>
-                    <div id="alquiler-result" class="ai-result">El monto actualizado aparecerá aquí...</div>
-                    <p class="ai-alert" style="text-align: center; margin-top: 1rem;">⚠️ Los datos del IPC se obtienen de fuentes oficiales (datos.gob.ar) y pueden tener un retraso en la última actualización.</p>
-                </div>
-                <div class="ai-coming-soon">
-                    <h3>MÁS HERRAMIENTAS EN CONSTRUCCIÓN...</h3>
-                    <p>
-                        El arsenal de GringoEstate seguirá creciendo. Pronto integraremos un <strong>Asistente para Redactar Contratos</strong> y otras herramientas para que tomes las mejores decisiones.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <section id="contact" class="section-full-width">
-            <div class="contact-wrapper">
-                <div class="contact-info">
-                    <h2 class="section-title text-left">HABLEMOS</h2>
-                    <p>Contame tu proyecto o propiedad y descubramos juntos cómo maximizar su potencial. Agendemos una llamada sin compromiso.</p>
-                    <div class="circulo-decorativo"></div>
-                </div>
-                <div class="contact-form-wrapper">
-                    <form id="contact-form" action="https://formspree.io/f/mldnnkev" method="POST">
-                        <input type="text" name="name" placeholder="Tu Nombre" required>
-                        <input type="email" name="email" placeholder="Tu Email" required>
-                        <input type="tel" name="phone" placeholder="Tu Celular" required>
-                        <select name="interest" id="interest-select" required>
-                            <option value="" disabled selected>Estoy interesado/a en...</option>
-                            <option value="Tasar mi propiedad">Tasar mi propiedad</option>
-                            <option value="Potenciar mi Alquiler Temporario">Potenciar mi Alquiler Temporario</option>
-                            <option value="Gestión de Alquiler Flex y Tradicional">Gestión de Alquiler Flex y Tradicional</option>
-                            <option value="Invertir desde pozo">Invertir desde pozo</option>
-                            <option value="Locales Comerciales y Oficinas">Locales Comerciales y Oficinas</option>
-                            <option value="Asesoría para Desarrolladores">Asesoría para Desarrolladores</option>
-                            <option value="Personal Shopper Inmobiliario">Personal Shopper Inmobiliario</option>
-                            <option value="Otro">Otro</option>
-                        </select>
-                        <div id="property-details">
-                            <input type="text" name="property_address" placeholder="Dirección de la propiedad">
-                            <input type="text" name="property_zone" placeholder="Zona / Barrio">
-                            <input type="text" name="property_rooms" placeholder="Ambientes">
-                            <input type="text" name="property_size" placeholder="Superficie (m²)">
-                        </div>
-                        <textarea name="message" rows="4" placeholder="Contame un poco sobre tu proyecto..." required></textarea>
-                        <button type="submit" class="btn-enviar-mensaje">Enviar Mensaje</button>
-                    </form>
-                </div>
-            </div>
-        </section>
-    </div>
-  </main>
-  
-  <footer>
-    <p>© 2025 Franco Garbini · GringoEstate · Todos los derechos reservados.</p>
-    <p style="margin-top:1rem;">
-      <a href="https://www.linkedin.com/company/gringoestate/" target="_blank" rel="noopener noreferrer">LinkedIn</a>  •  
-      <a href="https://twitter.com/Gringoestate" target="_blank" rel="noopener noreferrer">Twitter (X)</a>  •  
-      <a href="https://instagram.com/Gringoestate" target="_blank" rel="noopener noreferrer">Instagram</a>
-    </p>
-  </footer>
-
-  <a href="https://wa.me/5491156106169" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width:28px; height:28px; fill:white;"><path d="M380.9 97.1C339.4 55.6 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.8 0-67.6-9.5-97.8-26.7l-7-4.1-72.5 19 19.3-71.1-4.5-7.4c-18.3-30.7-27.9-66.2-27.9-102.3 0-108.6 88.4-197 197-197s197 88.4 197 197-88.4 197-197 197zm83.7-118.2c-3.7-1.9-22.1-10.9-25.6-12.1-3.4-1.2-5.9-1.9-8.4 1.9-2.5 3.7-9.7 12.1-11.9 14.5-2.2 2.5-4.5 2.8-8.2 1-3.7-1.9-15.7-5.8-30-18.5-11.1-9.6-18.7-21.6-20.9-25.3-2.2-3.7-0.2-5.9 1.7-7.7 1.7-1.5 3.7-3.7 5.5-5.5 1.8-1.8 2.5-3.7 3.7-6.2 1.2-2.5 0.6-4.8-0.3-6.7-0.9-1.9-8.4-20.1-11.5-27.5-3.1-7.4-6.2-6.3-8.4-6.3-2.2 0-4.8 0-7.4 0-2.5 0-6.7 1.2-10.3 5.9-3.7 4.8-14.1 13.8-14.1 33.5 0 19.8 14.4 38.9 16.4 41.4 2 2.5 28.2 42.8 68.2 60.1 9.7 4.1 17.3 6.6 23.1 8.8 13.3 5.1 25.6 4.3 35.1 2.6 10.8-1.9 22.1-9 25.2-17.6 3.1-8.6 3.1-16 2.2-17.6-0.9-1.5-3.4-2.5-7.1-4.5z"/></svg>
-  </a>
-
-  <div id="card-modal" class="card-modal">
-    <div class="card-modal-content-wrapper">
-      <button class="card-modal-close-btn">×</button>
-      <img src="" alt="Imagen de fondo del servicio" class="card-modal-image">
-      <div class="card-modal-text-content">
+    <nav>
+      <a class="logo" href="#top">GRINGO<span>ESTATE</span></a>
+      <div class="nav-links-desktop">
+        <ul>
+          <li><a href="#about">Sobre Mí</a></li>
+          <li><a href="#services-stacked">Servicios</a></li>
+          <li><a href="#portfolio">Proyectos</a></li>
+          <li><a href="#ai-tools">Herramientas IA ✨</a></li>
+          <li><a href="#contact">Contacto</a></li>
+        </ul>
       </div>
-    </div>
+      <!-- El botón del menú ya no está dentro del nav -->
+    </nav>
+
+    <header id="top">
+      <div class="hero">
+          <picture class="isologo hero-el">
+              <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp">
+              <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" alt="Isologo de GringoEstate" width="120" height="120">
+          </picture>
+          <h1 class="hero-el" id="hero-title">GRINGO<span>ESTATE</span></h1>
+          <p class="hero-el">LA POSTA INMOBILIARIA. SIN CORBATA.</p>
+          <a href="#contact" class="btn-primary hero-el">AGENDÁ UNA LLAMADA</a>
+      </div>
+    </header>
+
+    <main>
+      <section id="about" class="about">
+        <div class="about-img">
+          <picture>
+              <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/franco-perfil.webp" type="image/webp">
+              <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/franco-perfil.webp" alt="Retrato de Franco Garbini, fundador de GringoEstate" loading="lazy" width="280" height="280">
+          </picture>
+        </div>
+        <div class="about-text">
+            <h2 class="section-title text-left">SOY FRANCO GARBINI</h2>
+            <p><strong>Deportista, entusiasta de la tecnología y apasionado del mundo inmobiliario.</strong> Hace 4 años renuncié a la seguridad del mundo corporativo (Banco Galicia) para subalquilar mi primer monoambiente. <br>Una apuesta personal...</p>
+            <p>Hoy, esa apuesta se transformó en un <strong>sistema de negocios</strong>: socio en <strong>Baigun R&N</strong>, fundador de <strong>AMBBI</strong> (<strong>+500 reviews 5⭐️</strong>) y responsable de la comercialización de <strong>edificios completos</strong>. Combino datos, tecnología y un equipo ágil para entregar resultados reales, sin traje ni corbata.</p>
+        </div>
+      </section>
+
+      <section id="services-stacked" class="section-full-width">
+          <h2 class="section-title">NUESTROS <span>SERVICIOS</span></h2>
+          <p class="subtitle">
+              Descubrí cómo GringoEstate transforma el Real Estate con soluciones innovadoras y un enfoque directo.
+          </p>
+          <div class="horizontal-scroll-section">
+              <div class="horizontal-scroll-wrapper">
+                  <div class="cards-container">
+                      
+                      <article class="service-card-stacked" data-card-id="tarjeta1">
+                        <div class="card-inner-content">
+                          <picture>
+                              <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta1.webp" type="image/webp">
+                              <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta1.webp" alt="Tasación profesional de una propiedad" class="card-image" loading="lazy">
+                          </picture>
+                          <div class="card-content-initial"><h3>QUIERO TASAR <span>MI PROPIEDAD</span></h3><p class="short-desc">Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><button class="btn-toggle-expand">Ver más</button></div>
+                          <div class="card-full-details"><div class="card-full-details-content"><h3>QUIERO TASAR MI PROPIEDAD</h3><div class="card-full-content-scroll"><p>Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><ul><li>✅ En 48 horas hábiles.</li><li>✅ Se entrega una carpeta formal con análisis de mercado.</li><li>✅ Documentación respaldatoria clara.</li></ul><p class="card-highlight">El punto de partida para con información poder tomar la mejor decisión.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Solicitar Tasación</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                        </div>
+                      </article>
+
+                      <article class="service-card-stacked" data-card-id="tarjeta2">
+                        <div class="card-inner-content">
+                          <picture>
+                              <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta2.webp" type="image/webp">
+                              <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta2.webp" alt="Vender una propiedad con GringoEstate" class="card-image" loading="lazy">
+                          </picture>
+                          <div class="card-content-initial"><h3>¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3><p class="short-desc">Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><button class="btn-toggle-expand">Ver más</button></div>
+                          <div class="card-full-details"><div class="card-full-details-content"><h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3><div class="card-full-content-scroll"><p>Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><h4>Nuestra estrategia 360° incluye:</h4><ul><li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li><li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li><li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li><li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li></ul><p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Tasar mi propiedad</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                        </div>
+                      </article>
+
+                      <article class="service-card-stacked" data-card-id="tarjeta3">
+                        <div class="card-inner-content">
+                          <picture>
+                              <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta3.webp" type="image/webp">
+                              <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta3.webp" alt="Interior de un apartamento de alquiler temporario" class="card-image" loading="lazy">
+                          </picture>
+                          <div class="card-content-initial"><h3>POTENCIÁ TU <span>ALQUILER TEMPORARIO</span></h3><p class="short-desc">Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><button class="btn-toggle-expand">Ver más</button></div>
+                          <div class="card-full-details"><div class="card-full-details-content"><h3>POTENCIÁ TU ALQUILER TEMPORARIO</h3><div class="card-full-content-scroll"><p>Con la experiencia de Ambbi (+500 estadías 5 estrellas y gestión activa de +20 propiedades), transformamos tu propiedad en un negocio de alta rentabilidad.</p><h4>Nuestro servicio "llave en mano" incluye:</h4><ul><li>✅ Asesoría de home staging gratuita y puesta a punto.</li><li>✅ Ejecución de amoblamiento a través de nuestro equipo de arquitectura y red de proveedores.</li><li>✅ Publicación profesional en todas las plataformas para un máximo impacto.</li><li>✅ Gestión integral (sistemas, anfitrión, limpieza) para maximizar tus ingresos y darte tranquilidad.</li></ul><p class="card-alert">⚠️ Únicamente tomamos propiedades modernas con opción de self check-in. Para otras unidades, ofrecemos nuestro servicio de alquiler flex o tradicional.</p><p class="card-highlight">Delegá la gestión, disfrutá los resultados.</p></div><div class="card-footer-cta"><a href="https://www.ambbi.com.ar/" target="_blank" rel="noopener noreferrer" class="btn-card">Conocer AMBBI</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                        </div>
+                      </article>
+                      
+                      <article class="service-card-stacked" data-card-id="tarjeta4">
+                        <div class="card-inner-content">
+                          <picture>
+                              <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta4.webp" type="image/webp">
+                              <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta4.webp" alt="Llaves de una propiedad siendo entregadas" class="card-image" loading="lazy">
+                          </picture>
+                          <div class="card-content-initial"><h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3><p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><button class="btn-toggle-expand">Ver más</button></div>
+                          <div class="card-full-details"><div class="card-full-details-content"><h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3><div class="card-full-content-scroll"><p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><h4>Alquiler Flex (1 a 12 meses):</h4><ul><li>✅ Ideal para propiedades amobladas.</li><li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li><li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li><li>✅ Administración integral de pagos y seguimiento del contrato.</li></ul><h4>Alquiler Tradicional (2 años):</h4><ul><li>✅ La opción clásica para una renta estable y predecible.</li><li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li></ul><p class="card-highlight">Tu propiedad, en buenas manos.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Gestión de Alquiler Flex y Tradicional">Consultar por Gestión</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                        </div>
+                      </article>
+
+                      <article class="service-card-stacked" data-card-id="tarjeta5">
+                        <div class="card-inner-content">
+                          <picture>
+                              <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta5.webp" type="image/webp">
+                              <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta5.webp" alt="Render de un edificio en construcción" class="card-image" loading="lazy">
+                          </picture>
+                          <div class="card-content-initial"><h3>INVERTÍ <span>DESDE POZO</span></h3><p class="short-desc">Accedé a una cartera única de +26 emprendimientos en exclusiva y oportunidades off-market.</p><button class="btn-toggle-expand">Ver más</button></div>
+                          <div class="card-full-details"><div class="card-full-details-content"><h3>INVERTÍ DESDE POZO</h3><div class="card-full-content-scroll"><p>Accedé a una cartera única de +26 emprendimientos en exclusiva y oportunidades off-market.</p><ul><li>✅ +26 desarrollos en exclusiva que no encontrarás en otro lado.</li><li>✅ Análisis de ROI y proyecciones claras para una decisión informada.</li><li>✅ Acompañamiento en todo el proceso, desde la firma hasta la entrega.</li></ul><p class="card-highlight">Invertí de forma inteligente en los mejores proyectos de la ciudad.</p></div><div class="card-footer-cta"><a href="https://www.baigunryn.com/emprendimientos/" target="_blank" rel="noopener noreferrer" class="btn-card">Ver Oportunidades</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                        </div>
+                      </article>
+
+                      <article class="service-card-stacked" data-card-id="tarjeta6">
+                          <div class="card-inner-content">
+                              <picture>
+                                  <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" type="image/webp">
+                                  <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" alt="Un desarrollador revisando planos en una obra" class="card-image" loading="lazy">
+                              </picture>
+                              <div class="card-content-initial"><h3>¿SOS <span>DESARROLLADOR?</span></h3><p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p><button class="btn-toggle-expand">Ver más</button></div>
+                              <div class="card-full-details"><div class="card-full-details-content"><h3>¿SOS DESARROLLADOR?</h3><div class="card-full-content-scroll"><p>Una alianza estratégica, no una inmobiliaria más.</p><ul><li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li><li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li><li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li></ul><p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Asesoría para Desarrolladores">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                          </div>
+                      </article>
+                      
+                      <article class="service-card-stacked" data-card-id="tarjeta7">
+                          <div class="card-inner-content">
+                              <picture>
+                                  <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta7.webp" type="image/webp">
+                                  <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta7.webp" alt="GringoEstate con clientas" class="card-image" loading="lazy">
+                              </picture>
+                              <div class="card-content-initial"><h3>PERSONAL SHOPPER <span>INMOBILIARIO</span></h3><p class="short-desc">Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><button class="btn-toggle-expand">Ver más</button></div>
+                              <div class="card-full-details"><div class="card-full-details-content"><h3>PERSONAL SHOPPER INMOBILIARIO</h3><div class="card-full-content-scroll"><p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><ul><li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li><li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li><li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li></ul><p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p><p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta. Asesorate con profesionales y delegá lo tedioso.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Personal Shopper Inmobiliario">Quiero este Servicio</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                          </div>
+                      </article>
+
+                      <article class="service-card-stacked" data-card-id="tarjeta8">
+                          <div class="card-inner-content">
+                              <picture>
+                                  <source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta8.webp" type="image/webp">
+                                  <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta8.webp" alt="Local comercial de GringoEstate" class="card-image" loading="lazy">
+                              </picture>
+                              <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><button class="btn-toggle-expand">Ver más</button></div>
+                              <div class="card-full-details"><div class="card-full-details-content"><h3>LOCALES COMERCIALES Y OFICINAS</h3><div class="card-full-content-scroll"><p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><ul><li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li><li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li><li>✅ Asesoramiento integral en contratos comerciales y negociación.</li></ul><p class="card-highlight">Llevá tu negocio al siguiente nivel.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Locales Comerciales y Oficinas">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                          </div>
+                      </article>
+
+                  </div>
+              </div>
+          </div>
+      </section>
+      
+      <div class="content-after-sticky">
+          <section id="portfolio" class="section-full-width">
+              <div class="portfolio-grid-wrapper">
+                  <h2 class="section-title">PROYECTOS <span>DESTACADOS</span></h2>
+                  <div class="portfolio-grid">
+                      <div class="portfolio-item">
+                          <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-ambar.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-ambar.webp" alt="Fachada del proyecto Ámbar en Recoleta" loading="lazy" width="600" height="400"/></picture>
+                          <div class="portfolio-content">
+                              <span class="project-title">Ámbar · <span class="project-location">Recoleta (15 Unidades)</span></span>
+                              <div class="view-more">Ver más →</div>
+                          </div>
+                      </div>
+                      <div class="portfolio-item">
+                          <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-charlone.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-charlone.webp" alt="Render de la Torre Charlone en Colegiales" loading="lazy" width="600" height="400"/></picture>
+                          <div class="portfolio-content">
+                              <span class="project-title">Torre Charlone · <span class="project-location">Colegiales</span></span>
+                              <div class="view-more">Ver más →</div>
+                          </div>
+                      </div>
+                      <div class="portfolio-item">
+                          <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-nunez.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-nunez.webp" alt="Exterior del proyecto Casona en Núñez" loading="lazy" width="600" height="400"/></picture>
+                          <div class="portfolio-content">
+                              <span class="project-title">Casona · <span class="project-location">Núñez</span></span>
+                              <div class="view-more">Ver más →</div>
+                          </div>
+                      </div>
+                      <div class="portfolio-item">
+                          <picture><source srcset="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-palermo.webp" type="image/webp"><img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/proyecto-palermo.webp" alt="Render del proyecto Concepción Live en Palermo" loading="lazy" width="600" height="400"/></picture>
+                          <div class="portfolio-content">
+                              <span class="project-title">Concepción Live · <span class="project-location">Palermo</span></span>
+                              <div class="view-more">Ver más →</div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </section>
+          
+          <section id="ai-tools" class="section-full-width">
+              <h2 class="section-title" style="color:#fff;">HERRAMIENTAS CON <span>IA ✨</span></h2>
+              <p class="subtitle">
+                  Potenciá tus proyectos con estas herramientas exclusivas, diseñadas para darte una ventaja en el mercado.
+              </p>
+              <div class="ai-tools-wrapper">
+                  <div class="ai-tool-card">
+                    <form>
+                      <h3>Generador de Descripciones de Propiedades</h3>
+                      <p>Ingresá los datos clave de tu propiedad y creá una descripción profesional y atractiva en segundos.</p>
+                      <textarea id="property-input" placeholder="Ej: 3 ambientes en Palermo, 75m2, balcón con vista abierta, muy luminoso, piso alto, cerca del subte D..."></textarea>
+                      <div class="ai-button-wrapper">
+                          <button type="button" id="generate-description-btn">Generar Descripción ✨</button>
+                          <div id="loader-description" class="loader"></div>
+                      </div>
+                    </form>
+                      <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div>
+                  </div>
+                  <div class="ai-tool-card">
+                    <form>
+                      <h3>Calculadora de Actualización de Alquiler (IPC)</h3>
+                      <p>Calculá el valor actualizado de tu alquiler según el IPC. Ingresá los datos de tu contrato.</p>
+                      <input type="number" id="alquiler-original-input" placeholder="Monto Original del Alquiler ($)">
+                      <input type="month" id="fecha-inicio-input" placeholder="Fecha de Inicio del Contrato">
+                      <select id="periodo-indexacion-input">
+                          <option value="" disabled selected>Seleccioná el Período de Indexación</option>
+                          <option value="3">Trimestral (3 meses)</option>
+                          <option value="4">Cuatrimestral (4 meses)</option>
+                          <option value="6">Semestral (6 meses)</option>
+                      </select>
+                      <div class="ai-button-wrapper">
+                          <button type="button" id="calcular-alquiler-btn">Calcular Alquiler Actual ✨</button>
+                          <div id="loader-alquiler" class="loader"></div>
+                      </div>
+                    </form>
+                      <div id="alquiler-result" class="ai-result">El monto actualizado aparecerá aquí...</div>
+                      <p class="ai-alert" style="text-align: center; margin-top: 1rem;">⚠️ Los datos del IPC se obtienen de fuentes oficiales (datos.gob.ar) y pueden tener un retraso en la última actualización.</p>
+                  </div>
+                  <div class="ai-coming-soon">
+                      <h3>MÁS HERRAMIENTAS EN CONSTRUCCIÓN...</h3>
+                      <p>
+                          El arsenal de GringoEstate seguirá creciendo. Pronto integraremos un <strong>Asistente para Redactar Contratos</strong> y otras herramientas para que tomes las mejores decisiones.
+                      </p>
+                  </div>
+              </div>
+          </section>
+
+          <section id="contact" class="section-full-width">
+              <div class="contact-wrapper">
+                  <div class="contact-info">
+                      <h2 class="section-title text-left">HABLEMOS</h2>
+                      <p>Contame tu proyecto o propiedad y descubramos juntos cómo maximizar su potencial. Agendemos una llamada sin compromiso.</p>
+                      <div class="circulo-decorativo"></div>
+                  </div>
+                  <div class="contact-form-wrapper">
+                      <form id="contact-form" action="https://formspree.io/f/mldnnkev" method="POST">
+                          <input type="text" name="name" placeholder="Tu Nombre" required>
+                          <input type="email" name="email" placeholder="Tu Email" required>
+                          <input type="tel" name="phone" placeholder="Tu Celular" required>
+                          <select name="interest" id="interest-select" required>
+                              <option value="" disabled selected>Estoy interesado/a en...</option>
+                              <option value="Tasar mi propiedad">Tasar mi propiedad</option>
+                              <option value="Potenciar mi Alquiler Temporario">Potenciar mi Alquiler Temporario</option>
+                              <option value="Gestión de Alquiler Flex y Tradicional">Gestión de Alquiler Flex y Tradicional</option>
+                              <option value="Invertir desde pozo">Invertir desde pozo</option>
+                              <option value="Locales Comerciales y Oficinas">Locales Comerciales y Oficinas</option>
+                              <option value="Asesoría para Desarrolladores">Asesoría para Desarrolladores</option>
+                              <option value="Personal Shopper Inmobiliario">Personal Shopper Inmobiliario</option>
+                              <option value="Otro">Otro</option>
+                          </select>
+                          <div id="property-details">
+                              <input type="text" name="property_address" placeholder="Dirección de la propiedad">
+                              <input type="text" name="property_zone" placeholder="Zona / Barrio">
+                              <input type="text" name="property_rooms" placeholder="Ambientes">
+                              <input type="text" name="property_size" placeholder="Superficie (m²)">
+                          </div>
+                          <textarea name="message" rows="4" placeholder="Contame un poco sobre tu proyecto..." required></textarea>
+                          <button type="submit" class="btn-enviar-mensaje">Enviar Mensaje</button>
+                      </form>
+                  </div>
+              </div>
+          </section>
+      </div>
+
+      <a href="https://wa.me/5491156106169" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width:28px; height:28px; fill:white;"><path d="M380.9 97.1C339.4 55.6 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.8 0-67.6-9.5-97.8-26.7l-7-4.1-72.5 19 19.3-71.1-4.5-7.4c-18.3-30.7-27.9-66.2-27.9-102.3 0-108.6 88.4-197 197-197s197 88.4 197 197-88.4 197-197 197zm83.7-118.2c-3.7-1.9-22.1-10.9-25.6-12.1-3.4-1.2-5.9-1.9-8.4 1.9-2.5 3.7-9.7 12.1-11.9 14.5-2.2 2.5-4.5 2.8-8.2 1-3.7-1.9-15.7-5.8-30-18.5-11.1-9.6-18.7-21.6-20.9-25.3-2.2-3.7-0.2-5.9 1.7-7.7 1.7-1.5 3.7-3.7 5.5-5.5 1.8-1.8 2.5-3.7 3.7-6.2 1.2-2.5 0.6-4.8-0.3-6.7-0.9-1.9-8.4-20.1-11.5-27.5-3.1-7.4-6.2-6.3-8.4-6.3-2.2 0-4.8 0-7.4 0-2.5 0-6.7 1.2-10.3 5.9-3.7 4.8-14.1 13.8-14.1 33.5 0 19.8 14.4 38.9 16.4 41.4 2 2.5 28.2 42.8 68.2 60.1 9.7 4.1 17.3 6.6 23.1 8.8 13.3 5.1 25.6 4.3 35.1 2.6 10.8-1.9 22.1-9 25.2-17.6 3.1-8.6 3.1-16 2.2-17.6-0.9-1.5-3.4-2.5-7.1-4.5z"/></svg>
+      </a>
+
+      <div id="card-modal" class="card-modal">
+        <div class="card-modal-content-wrapper">
+          <button class="card-modal-close-btn">×</button>
+          <img src="" alt="Imagen de fondo del servicio" class="card-modal-image">
+          <div class="card-modal-text-content">
+          </div>
+        </div>
+      </div>
+    </footer>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -924,33 +934,16 @@
         });
     }
 
-    // --- Scroll Lock Logic ---
-    const scrollManager = {
-        lock() {
-            document.documentElement.classList.add('no-scroll');
-        },
-        unlock() {
-            document.documentElement.classList.remove('no-scroll');
-        }
-    };
-
-    // --- Mobile Menu Logic ---
+    // --- Mobile Menu Logic (Robust Version) ---
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
     const menuOverlay = document.getElementById('menu-overlay');
 
     function toggleMenu() {
-        const isActive = mobileMenu.classList.contains('is-active');
-
-        menuToggle.classList.toggle('open', !isActive);
-        mobileMenu.classList.toggle('is-active', !isActive);
-        menuOverlay.classList.toggle('is-active', !isActive);
-
-        if (!isActive) {
-            scrollManager.lock();
-        } else {
-            scrollManager.unlock();
-        }
+        // En lugar de manejar clases en cada elemento,
+        // controlamos todo con una sola clase en el BODY.
+        document.body.classList.toggle('menu-open');
+        menuToggle.classList.toggle('open');
     }
 
     menuToggle.addEventListener('click', toggleMenu);
@@ -958,7 +951,7 @@
 
     mobileMenu.querySelectorAll('a[href^="#"]').forEach(link => {
         link.addEventListener('click', () => {
-            if (mobileMenu.classList.contains('is-active')) {
+            if (document.body.classList.contains('menu-open')) {
                 toggleMenu();
             }
         });
@@ -982,7 +975,7 @@
 
         cardModal.classList.add('is-visible');
         overlayBackdrop.classList.add('visible');
-        scrollManager.lock(); 
+        document.documentElement.classList.add('no-scroll');
 
         if (horizontalScrollInstance) {
             horizontalScrollInstance.disable();
@@ -992,7 +985,7 @@
     function closeCardModal() {
         cardModal.classList.remove('is-visible');
         overlayBackdrop.classList.remove('visible');
-        scrollManager.unlock(); 
+        document.documentElement.classList.remove('no-scroll');
 
         if (horizontalScrollInstance) {
             horizontalScrollInstance.enable();
