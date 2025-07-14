@@ -54,14 +54,14 @@
       scroll-behavior: smooth;
     }
     body::-webkit-scrollbar {
-        width: 8px;
+      width: 8px;
     }
     body::-webkit-scrollbar-track {
-        background: var(--dark-bg);
+      background: var(--dark-bg);
     }
     body::-webkit-scrollbar-thumb {
-        background-color: var(--primary);
-        border-radius: 10px;
+      background-color: var(--primary);
+      border-radius: 10px;
     }
 
     html, body {
@@ -76,82 +76,82 @@
 
     /* ---- INICIO CORRECCIÓN MENÚ MÓVIL ---- */
     body.no-scroll {
-        overflow: hidden;
+      overflow: hidden;
     }
     .menu-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 999;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.3s ease;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
     }
     .menu-overlay.is-active {
-        opacity: 1;
-        visibility: visible;
+      opacity: 1;
+      visibility: visible;
     }
     .nav-links-mobile {
-        position: fixed;
-        top: 0;
-        right: 0;
-        width: clamp(280px, 80%, 350px);
-        height: 100%;
-        background-color: var(--dark-bg);
-        z-index: 1000;
-        transform: translateX(100%); /* Oculto por defecto */
-        transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-        display: flex;
-        align-items: center;
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: clamp(280px, 80%, 350px);
+      height: 100%;
+      background-color: var(--dark-bg);
+      z-index: 1000;
+      transform: translateX(100%); /* Oculto por defecto */
+      transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      display: flex;
+      align-items: center;
     }
     .nav-links-mobile.is-active {
-        transform: translateX(0); /* Visible */
+      transform: translateX(0); /* Visible */
     }
     .nav-links-mobile ul {
-        width: 100%;
-        padding: 2rem 1.5rem;
-        list-style: none;
-        text-align: center;
+      width: 100%;
+      padding: 2rem 1.5rem;
+      list-style: none;
+      text-align: center;
     }
     .menu-button {
-        position: fixed;
-        top: 1rem;
-        right: 1.5rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-        width: 24px;
-        height: 24px;
-        background: transparent;
-        padding: 0;
-        z-index: 1001;
-        border: none;
+      position: fixed;
+      top: 1rem;
+      right: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      width: 24px;
+      height: 24px;
+      background: transparent;
+      padding: 0;
+      z-index: 1001;
+      border: none;
     }
     .menu-button .bar {
-        display: block;
-        width: 24px;
-        height: 3px;
-        background-color: white;
-        border-radius: 10px;
-        transition: all 0.3s ease-in-out;
+      display: block;
+      width: 24px;
+      height: 3px;
+      background-color: white;
+      border-radius: 10px;
+      transition: all 0.3s ease-in-out;
     }
     .menu-button.open .bar1 { transform: rotate(45deg) translate(5px, 6px); }
     .menu-button.open .bar2 { opacity: 0; }
     .menu-button.open .bar3 { transform: rotate(-45deg) translate(5px, -6px); }
     
     @media (min-width: 1024px) {
-        .menu-button, .nav-links-mobile, .menu-overlay {
-            display: none !important;
-        }
-        .nav-links-desktop {
-            display: flex;
-        }
-        .nav-links-desktop ul {
-            display: flex;
-            flex-direction: row;
-            gap: 2rem;
-            list-style: none;
-        }
+      .menu-button, .nav-links-mobile, .menu-overlay {
+        display: none !important;
+      }
+      .nav-links-desktop {
+        display: flex; /* INSTRUCCIÓN 1: Menú de escritorio visible */
+      }
+      .nav-links-desktop ul {
+        display: flex;
+        flex-direction: row;
+        gap: 2rem;
+        list-style: none;
+      }
     }
     /* ---- FIN CORRECCIÓN MENÚ MÓVIL ---- */
     
@@ -160,12 +160,12 @@
     }
     
     #particle-canvas {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
     }
 
     .custom-cursor { 
@@ -189,16 +189,16 @@
     .hero .hero-el { opacity: 0; }
     
     .hero .isologo{ 
-        width: 160px; 
-        height: auto; 
-        margin: 0 auto 1rem auto; 
-        display: block; 
-        z-index: 10; 
-        position: relative; 
+      width: 160px; 
+      height: auto; 
+      margin: 0 auto 1rem auto; 
+      display: block; 
+      z-index: 10; 
+      position: relative; 
     }
     .hero .isologo img {
-        width: 100%;
-        height: auto;
+      width: 100%;
+      height: auto;
     }
     .hero h1{font-family:'Bebas Neue', sans-serif;font-size:clamp(3.5rem,10vw,8rem);font-weight:800;margin-bottom:0.5rem; perspective: 800px; transform-style: preserve-3d;}
     .hero h1 span{color:var(--primary); letter-spacing: 2px;}
@@ -207,23 +207,24 @@
     .btn-primary:hover{background:#fff;color:var(--dark);transform:translateY(-3px) !important;box-shadow:0 10px 20px rgba(0,0,0,0.2);}
     
     nav{
-        position:fixed;
-        top:0;
-        left:0;
-        width:100%;
-        padding:1rem 1.5rem;
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        z-index: 998;
-        transition: background-color .4s, padding .4s, backdrop-filter .4s; 
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      padding:1rem 1.5rem;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      z-index: 998;
+      transition: background-color .4s, padding .4s, backdrop-filter .4s; 
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
+    /* INSTRUCCIÓN 2: Barra de navegación más clara y con desenfoque */
     nav.nav-scrolled { 
-        background:rgba(0,0,0,.8); 
-        backdrop-filter:blur(8px); 
-        padding: 0.75rem 1.5rem; 
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      background: rgba(17, 17, 17, 0.85); 
+      backdrop-filter: blur(10px); 
+      padding: 0.75rem 1.5rem; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     
     nav a.logo { display: inline-block; white-space: nowrap; font-family:'Bebas Neue', sans-serif;font-weight:700;letter-spacing:1px;font-size:1.5rem;color:#fff; text-decoration: none; }
@@ -235,7 +236,6 @@
     .nav-links-mobile a:hover { background-color: rgba(255, 191, 0, 0.1); color: var(--primary); }
     .menu-item-number { font-size: 0.8rem; color: var(--primary); opacity: 0.7; margin-right: 1rem; font-family: 'Roboto', sans-serif; font-weight: 400; }
     
-    .nav-links-desktop {display: none;}
     .nav-links-desktop a { padding-bottom: 5px; position: relative; color: #fff; text-decoration: none;}
     .nav-links-desktop a:hover { color: var(--primary); }
     .nav-links-desktop a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--primary); transform: scaleX(0); transform-origin: left; transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1); }
@@ -290,13 +290,13 @@
     }
     
     @media (min-width: 1024px) {
-        [data-card-id="tarjeta2"] .card-image,
-        [data-card-id="tarjeta5"] .card-image {
-            object-position: center 25%;
-        }
-        [data-card-id="tarjeta7"] .card-image {
-            object-position: center top;
-        }
+      [data-card-id="tarjeta2"] .card-image,
+      [data-card-id="tarjeta5"] .card-image {
+        object-position: center 25%;
+      }
+      [data-card-id="tarjeta7"] .card-image {
+        object-position: center top;
+      }
     }
 
     .card-content-initial { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 3; padding: 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; color: #fff; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%); }
@@ -310,38 +310,38 @@
     .card-full-details { display: none; }
 
     .card-modal { 
-        position: fixed; 
-        top: 0; 
-        left: 0; 
-        width: 100%; 
-        height: 100%; 
-        z-index: 10000; 
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-        opacity: 0; 
-        visibility: hidden; 
-        transition: none;
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      z-index: 10000; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      opacity: 0; 
+      visibility: hidden; 
+      transition: none;
     }
     .card-modal.is-visible { 
-        opacity: 1; 
-        visibility: visible;
-        transition: none;
+      opacity: 1; 
+      visibility: visible;
+      transition: none;
     }
     .card-modal-content-wrapper { 
-        background-color: var(--card-bg); 
-        border-radius: 20px; 
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); 
-        width: 90%; 
-        max-width: 1000px; 
-        height: 90%; 
-        max-height: 85vh; 
-        position: relative; 
-        display: flex; 
-        flex-direction: column; 
-        overflow: hidden; 
-        transform: scale(1);
-        transition: none;
+      background-color: var(--card-bg); 
+      border-radius: 20px; 
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); 
+      width: 90%; 
+      max-width: 1000px; 
+      height: 90%; 
+      max-height: 85vh; 
+      position: relative; 
+      display: flex; 
+      flex-direction: column; 
+      overflow: hidden; 
+      transform: scale(1);
+      transition: none;
     }
     
     .card-modal-content-wrapper::before {
@@ -373,42 +373,42 @@
     .btn-toggle-collapse:hover { background: #555; color: #fff; }
     
     .card-modal-close-btn { 
-        position: absolute; 
-        top: 15px; 
-        right: 15px; 
-        background: rgba(0,0,0,0.3);
-        border: none; 
-        color: #fff; 
-        font-size: 2rem; 
-        z-index: 10;
-        line-height: 1; 
-        border-radius: 50%; 
-        transition: background-color 0.3s ease, transform 0.3s ease;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      position: absolute; 
+      top: 15px; 
+      right: 15px; 
+      background: rgba(0,0,0,0.3);
+      border: none; 
+      color: #fff; 
+      font-size: 2rem; 
+      z-index: 10;
+      line-height: 1; 
+      border-radius: 50%; 
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .card-modal-close-btn:hover { 
-        background-color: rgba(255, 255, 255, 0.2); 
-        transform: rotate(90deg); 
+      background-color: rgba(255, 255, 255, 0.2); 
+      transform: rotate(90deg); 
     }
     
     #overlay-backdrop { 
-        position: fixed; 
-        inset: 0; 
-        background-color: rgba(0, 0, 0, 0.7); 
-        z-index: 9999; 
-        opacity: 0; 
-        visibility: hidden; 
-        pointer-events: none; 
-        transition: none;
+      position: fixed; 
+      inset: 0; 
+      background-color: rgba(0, 0, 0, 0.7); 
+      z-index: 9999; 
+      opacity: 0; 
+      visibility: hidden; 
+      pointer-events: none; 
+      transition: none;
     }
     #overlay-backdrop.visible { 
-        opacity: 1; 
-        visibility: visible; 
-        transition: none;
+      opacity: 1; 
+      visibility: visible; 
+      transition: none;
     }
 
     .content-after-sticky { position: relative; z-index: 1; }
@@ -417,10 +417,10 @@
     .portfolio-grid-wrapper { max-width: 1200px; margin: auto; padding: 0 1.5rem; }
     
     .portfolio-grid{
-        margin-top:2rem;
-        display:grid;
-        grid-template-columns: 1fr; 
-        gap:1.5rem;
+      margin-top:2rem;
+      display:grid;
+      grid-template-columns: 1fr; 
+      gap:1.5rem;
     }
 
     .portfolio-item{position:relative;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.1);}
@@ -443,13 +443,13 @@
     .ai-coming-soon p { padding: 0 1rem; color: #aaa; }
 
     .contact-wrapper { 
-        max-width: 1100px; 
-        margin: auto; 
-        padding: 0 1.5rem; 
-        display: grid; 
-        grid-template-columns: 1fr; 
-        gap: 3rem; 
-        align-items: center; 
+      max-width: 1100px; 
+      margin: auto; 
+      padding: 0 1.5rem; 
+      display: grid; 
+      grid-template-columns: 1fr; 
+      gap: 3rem; 
+      align-items: center; 
     }
     .contact-info p { color: #ccc; line-height: 1.7; max-width: 450px; margin-bottom: 2rem; }
     .contact-info .section-title { color: var(--primary) !important; }
@@ -462,15 +462,15 @@
     .ai-tool-card input,
     .ai-tool-card select,
     .ai-tool-card textarea {
-        background-color: #1a1a1a;
-        color: #fff;
-        border: 1px solid #444;
-        border-radius: 8px;
-        padding: 1rem;
-        font-size: 1rem;
-        transition: border-color .3s, box-shadow .3s;
-        -webkit-appearance: none;
-        appearance: none;
+      background-color: #1a1a1a;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 1rem;
+      transition: border-color .3s, box-shadow .3s;
+      -webkit-appearance: none;
+      appearance: none;
     }
     .contact-form-wrapper input:focus,
     .contact-form-wrapper select:focus,
@@ -478,31 +478,31 @@
     .ai-tool-card input:focus,
     .ai-tool-card select:focus,
     .ai-tool-card textarea:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: none;
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: none;
     }
     .btn-enviar-mensaje { 
-        background:var(--primary); 
-        color:var(--dark); 
-        padding:.9rem 2rem; 
-        border-radius:50px;
-        display:inline-block; 
-        transition: background-color .3s, box-shadow .3s; 
-        font-weight:700; 
-        font-size:1.1rem; 
-        letter-spacing:1px; 
-        width:100%; 
-        text-align: center; 
-        border: none; 
+      background:var(--primary); 
+      color:var(--dark); 
+      padding:.9rem 2rem; 
+      border-radius:50px;
+      display:inline-block; 
+      transition: background-color .3s, box-shadow .3s; 
+      font-weight:700; 
+      font-size:1.1rem; 
+      letter-spacing:1px; 
+      width:100%; 
+      text-align: center; 
+      border: none; 
     }
     .btn-enviar-mensaje:hover { background-color: #fff; box-shadow:0 10px 20px rgba(0,0,0,0.2); }
 
 
     #property-details { 
-        display: none; 
-        flex-direction: column; 
-        gap: 1rem; 
+      display: none; 
+      flex-direction: column; 
+      gap: 1rem; 
     }
     .ai-tool-card { background-color: #1a1a1a; padding: 2rem; border-radius: 10px; margin-top: 2rem; border: 1px solid #333;}
     .ai-tool-card h3 { color: var(--primary); font-size: 1.75rem; margin-bottom: 1rem; text-align: center; font-family: 'Bebas Neue', sans-serif; }
@@ -526,31 +526,30 @@
 
     @media (min-width: 1024px) {
       .portfolio-grid { 
-          grid-template-columns: repeat(2, 1fr); 
+        grid-template-columns: repeat(2, 1fr); 
       }
       .contact-wrapper { 
-          grid-template-columns: 1fr 1fr; 
+        grid-template-columns: 1fr 1fr; 
       }
     }
 
     @media (max-width: 1023px) {
-        .nav-links-desktop { display: none; }
+      .nav-links-desktop { display: none; }
     }
 
     @media (max-width: 768px) {
-        .cards-container { width: 100%; padding: 0 5vw; }
-        .service-card-stacked { width: 100%; }
-        
-        .card-modal-content-wrapper { width: 95%; height: 85%; }
-        .card-modal-text-content { padding: 1.5rem; }
-        .card-modal-text-content h3 { font-size: 2rem; }
-        .btn-card { width: 100%; }
-        h2.section-title { font-size: 2.5rem; }
+      .cards-container { width: 100%; padding: 0 5vw; }
+      .service-card-stacked { width: 100%; }
+      
+      .card-modal-content-wrapper { width: 95%; height: 85%; }
+      .card-modal-text-content { padding: 1.5rem; }
+      .card-modal-text-content h3 { font-size: 2rem; }
+      .btn-card { width: 100%; }
+      h2.section-title { font-size: 2.5rem; }
     }
   </style>
 </head>
 <body>
-  <!-- Elementos fijos que NO se deslizan con la página -->
   <canvas id="particle-canvas"></canvas>
   <div id="cursor-regular" class="custom-cursor"><div class="cursor-dot"></div></div>
   <div id="cursor-point" class="custom-cursor"><div class="cursor-point"></div></div>
@@ -581,7 +580,6 @@
     </div>
   </div>
 
-  <!-- Contenedor principal de la página -->
   <div id="page-wrapper">
     <div id="overlay-backdrop"></div>
     
@@ -905,12 +903,12 @@
     // --- Hero Animations ---
     gsap.set(".hero-el", {y: 30, opacity: 0});
     gsap.to(".hero-el", { 
-        opacity: 1, 
-        y: 0, 
-        duration: 1, 
-        stagger: 0.2, 
-        ease: "power3.out", 
-        delay: 0.2,
+      opacity: 1, 
+      y: 0, 
+      duration: 1, 
+      stagger: 0.2, 
+      ease: "power3.out", 
+      delay: 0.2,
     });
         
     const animateOnScroll = (selector, triggerSelector) => {
@@ -1036,12 +1034,16 @@
             horizontalScrollInstance.enable();
         }
     }
-
+    
+    // --- INSTRUCCIÓN 3: LÓGICA DE APERTURA DE TARJETAS CORREGIDA ---
     document.querySelectorAll('.service-card-stacked').forEach(card => {
         card.addEventListener('click', e => {
-            if (e.target.closest('a[target="_blank"]') || e.target.closest('a.btn-card')) {
+            // Si el elemento clickeado o uno de sus padres es un enlace (<a>), no hagas nada.
+            // Esto permite que los botones CTA y otros enlaces funcionen por su cuenta.
+            if (e.target.closest('a')) {
                 return;
             }
+            // Si no es un enlace, entonces abre el modal.
             e.preventDefault(); 
             openCardModal(card);
         });
