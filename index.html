@@ -144,7 +144,7 @@
         display: none !important;
       }
       .nav-links-desktop {
-        display: flex; /* INSTRUCCIÓN 1: Menú de escritorio visible */
+        display: flex;
       }
       .nav-links-desktop ul {
         display: flex;
@@ -219,7 +219,6 @@
       transition: background-color .4s, padding .4s, backdrop-filter .4s; 
       border-bottom: 1px solid rgba(255,255,255,0.1);
     }
-    /* INSTRUCCIÓN 2: Barra de navegación más clara y con desenfoque */
     nav.nav-scrolled { 
       background: rgba(17, 17, 17, 0.85); 
       backdrop-filter: blur(10px); 
@@ -355,9 +354,28 @@
 
     .card-modal-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
     
-    .card-modal-text-content { position: relative; z-index: 3; padding: 2rem; display: flex; flex-direction: column; height: 100%; justify-content: space-between; color: var(--text-light); }
+    /* ---- INICIO CORRECCIÓN ALINEACIÓN MODAL ---- */
+    .card-modal-text-content { 
+      position: relative; 
+      z-index: 3; 
+      padding: 2rem; 
+      display: flex; 
+      flex-direction: column; 
+      height: 100%; 
+      /* Se quita justify-content para que el contenido se alinee con el siguiente elemento */
+      color: var(--text-light); 
+    }
     
-    .card-modal-text-content h3 { font-family: 'Bebas Neue', sans-serif; color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem; flex-shrink: 0; }
+    .card-modal-text-content h3 { 
+      margin-top: auto; /* Empuja el título y todo lo que sigue hacia abajo */
+      font-family: 'Bebas Neue', sans-serif; 
+      color: var(--primary); 
+      font-size: 2.5rem; 
+      margin-bottom: 1rem; 
+      flex-shrink: 0; 
+    }
+    /* ---- FIN CORRECCIÓN ALINEACIÓN MODAL ---- */
+
     .card-modal-text-content .card-full-content-scroll { flex-grow: 1; overflow-y: auto; padding-right: 15px; line-height: 1.7; margin-bottom: 1rem; }
     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar { width: 8px; }
     .card-modal-text-content .card-full-content-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
@@ -367,7 +385,22 @@
     .card-modal-text-content .card-highlight { font-weight: 700; color: #fff; background-color: rgba(255, 191, 0, 0.1); padding: 0.75rem; border-left: 3px solid var(--primary); margin: 1.5rem 0; font-style: italic; }
     .card-modal-text-content .card-alert { color: #ffda6a; font-size: 0.9rem; margin-top: 1rem; border-left: 3px solid #ffda6a; padding: 0.5rem 0.75rem; background-color: rgba(255, 218, 106, 0.05); }
     .card-footer-cta { display: flex; flex-direction: column; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); align-items: center; flex-shrink: 0; }
-    .btn-card { background: var(--primary); color: var(--dark); padding: 0.75rem 1.5rem; border-radius: 50px; display: inline-block; font-weight: 700; font-size: 1rem; text-align: center; transition: all .3s; width: 80%; max-width: 280px; text-decoration: none; }
+    
+    .btn-card { 
+        background: var(--primary); 
+        color: var(--dark); 
+        padding: 0.75rem 1.5rem; 
+        border-radius: 50px; 
+        display: inline-block; 
+        font-weight: 700; 
+        font-size: 1rem; 
+        text-align: center; 
+        transition: all .3s; 
+        width: 80%; 
+        max-width: 280px; 
+        text-decoration: none; 
+        border: none; /* Añadido para botones */
+    }
     .btn-card:hover { background: #fff; color: var(--dark); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
     .btn-toggle-collapse { background: transparent; border: 1px solid #555; color: #aaa; border-radius: 50px; padding: 0.5rem 1rem; font-size: 1rem; margin-top: 0.5rem; transition: all .3s ease; }
     .btn-toggle-collapse:hover { background: #555; color: #fff; }
@@ -639,7 +672,7 @@
                               <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta1.webp" alt="Tasación profesional de una propiedad" class="card-image" loading="lazy">
                           </picture>
                           <div class="card-content-initial"><h3>QUIERO TASAR <span>MI PROPIEDAD</span></h3><p class="short-desc">Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><button class="btn-toggle-expand">Ver más</button></div>
-                          <div class="card-full-details"><div class="card-full-details-content"><h3>QUIERO TASAR MI PROPIEDAD</h3><div class="card-full-content-scroll"><p>Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><ul><li>✅ En 48 horas hábiles.</li><li>✅ Se entrega una carpeta formal con análisis de mercado.</li><li>✅ Documentación respaldatoria clara.</li></ul><p class="card-highlight">El punto de partida para con información poder tomar la mejor decisión.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Solicitar Tasación</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                          <div class="card-full-details"><div class="card-full-details-content"><h3>QUIERO TASAR MI PROPIEDAD</h3><div class="card-full-content-scroll"><p>Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita.</p><ul><li>✅ En 48 horas hábiles.</li><li>✅ Se entrega una carpeta formal con análisis de mercado.</li><li>✅ Documentación respaldatoria clara.</li></ul><p class="card-highlight">El punto de partida para con información poder tomar la mejor decisión.</p></div><div class="card-footer-cta"><button type="button" class="btn-card" data-interest="Tasar mi propiedad">Solicitar Tasación</button><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                         </div>
                       </article>
 
@@ -650,7 +683,7 @@
                               <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta2.webp" alt="Vender una propiedad con GringoEstate" class="card-image" loading="lazy">
                           </picture>
                           <div class="card-content-initial"><h3>¿POR QUÉ VENDER <span>CON GRINGOESTATE?</span></h3><p class="short-desc">Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><button class="btn-toggle-expand">Ver más</button></div>
-                          <div class="card-full-details"><div class="card-full-details-content"><h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3><div class="card-full-content-scroll"><p>Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><h4>Nuestra estrategia 360° incluye:</h4><ul><li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li><li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li><li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li><li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li></ul><p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Tasar mi propiedad">Tasar mi propiedad</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                          <div class="card-full-details"><div class="card-full-details-content"><h3>¿POR QUÉ VENDER CON GRINGOESTATE?</h3><div class="card-full-content-scroll"><p>Trabajo únicamente bajo exclusividad para darle a tu propiedad la atención y compromiso que merece: la vendemos en 90 días.</p><h4>Nuestra estrategia 360° incluye:</h4><ul><li>✅ Relevamiento Profesional Completo: Fotos de alta calidad, plano, tour virtual 360°, video y amoblamiento virtual (virtual staging).</li><li>✅ Anuncios Súper Destacados en todas las plataformas líderes.</li><li>✅ Reportes de Seguimiento periódicos para que conozcas el rendimiento de tu anuncio.</li><li>✅ Experiencia probada en negociación para defender el valor de tu activo.</li></ul><p class="card-highlight">No solo publicamos tu propiedad, nos comprometemos con su venta.</p></div><div class="card-footer-cta"><button type="button" class="btn-card" data-interest="Tasar mi propiedad">Tasar mi propiedad</button><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                         </div>
                       </article>
 
@@ -672,7 +705,7 @@
                               <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta4.webp" alt="Llaves de una propiedad siendo entregadas" class="card-image" loading="lazy">
                           </picture>
                           <div class="card-content-initial"><h3>GESTIÓN DE ALQUILER <span>FLEX Y TRADICIONAL</span></h3><p class="short-desc">Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><button class="btn-toggle-expand">Ver más</button></div>
-                          <div class="card-full-details"><div class="card-full-details-content"><h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3><div class="card-full-content-scroll"><p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><h4>Alquiler Flex (1 a 12 meses):</h4><ul><li>✅ Ideal para propiedades amobladas.</li><li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li><li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li><li>✅ Administración integral de pagos y seguimiento del contrato.</li></ul><h4>Alquiler Tradicional (2 años):</h4><ul><li>✅ La opción clásica para una renta estable y predecible.</li><li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li></ul><p class="card-highlight">Tu propiedad, en buenas manos.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Gestión de Alquiler Flex y Tradicional">Consultar por Gestión</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                          <div class="card-full-details"><div class="card-full-details-content"><h3>GESTIÓN DE ALQUILER FLEX Y TRADICIONAL</h3><div class="card-full-content-scroll"><p>Para propietarios que buscan una renta segura y sin complicaciones. Ofrecemos dos modalidades de alquiler a mediano y largo plazo.</p><h4>Alquiler Flex (1 a 12 meses):</h4><ul><li>✅ Ideal para propiedades amobladas.</li><li>✅ Captamos inquilinos corporativos, estudiantes o nómadas digitales.</li><li>✅ Contratos flexibles y mayor rentabilidad que el alquiler tradicional.</li><li>✅ Administración integral de pagos y seguimiento del contrato.</li></ul><h4>Alquiler Tradicional (2 años):</h4><ul><li>✅ La opción clásica para una renta estable y predecible.</li><li>✅ Búsqueda y selección rigurosa del inquilino ideal con las mejores garantías.</li></ul><p class="card-highlight">Tu propiedad, en buenas manos.</p></div><div class="card-footer-cta"><button type="button" class="btn-card" data-interest="Gestión de Alquiler Flex y Tradicional">Consultar por Gestión</button><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                         </div>
                       </article>
 
@@ -694,7 +727,7 @@
                                   <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta6.webp" alt="Un desarrollador revisando planos en una obra" class="card-image" loading="lazy">
                               </picture>
                               <div class="card-content-initial"><h3>¿SOS <span>DESARROLLADOR?</span></h3><p class="short-desc">Una alianza estratégica, no una inmobiliaria más.</p><button class="btn-toggle-expand">Ver más</button></div>
-                              <div class="card-full-details"><div class="card-full-details-content"><h3>¿SOS DESARROLLADOR?</h3><div class="card-full-content-scroll"><p>Una alianza estratégica, no una inmobiliaria más.</p><ul><li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li><li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li><li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li></ul><p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Asesoría para Desarrolladores">Hablemos de tu Proyecto</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                              <div class="card-full-details"><div class="card-full-details-content"><h3>¿SOS DESARROLLADOR?</h3><div class="card-full-content-scroll"><p>Una alianza estratégica, no una inmobiliaria más.</p><ul><li>✅ Respaldo y estructura de Baigun R&N, una de las 5 firmas con más trayectoria del país.</li><li>✅ Plan de Marketing Integral: No solo publicamos. Creamos contenido, gestionamos prensa y organizamos eventos para potenciar tu marca.</li><li>✅ Propuesta de Management AMBBI: Convertimos tus unidades vacías en flujo de caja inmediato. Nos encargamos de la renta temporaria para que tu proyecto se financie solo mientras se vende.</li></ul><p class="card-highlight">Nos encargamos de toda la comercialización para que vos te enfoques en lo que mejor sabés: construir.</p></div><div class="card-footer-cta"><button type="button" class="btn-card" data-interest="Asesoría para Desarrolladores">Hablemos de tu Proyecto</button><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                           </div>
                       </article>
                       
@@ -705,7 +738,7 @@
                                   <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta7.webp" alt="GringoEstate con clientas" class="card-image" loading="lazy">
                               </picture>
                               <div class="card-content-initial"><h3>PERSONAL SHOPPER <span>INMOBILIARIO</span></h3><p class="short-desc">Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><button class="btn-toggle-expand">Ver más</button></div>
-                              <div class="card-full-details"><div class="card-full-details-content"><h3>PERSONAL SHOPPER INMOBILIARIO</h3><div class="card-full-content-scroll"><p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><ul><li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li><li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li><li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li></ul><p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p><p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta. Asesorate con profesionales y delegá lo tedioso.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Personal Shopper Inmobiliario">Quiero este Servicio</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                              <div class="card-full-details"><div class="card-full-details-content"><h3>PERSONAL SHOPPER INMOBILIARIO</h3><div class="card-full-content-scroll"><p>Un servicio exclusivo para compradores que valoran su tiempo y buscan resultados, no solo visitas.</p><ul><li>✅ Con mi equipo, te acompañamos para definir los criterios de búsqueda exactos en base a tu presupuesto y objetivos.</li><li>✅ Buscamos, filtramos y te presentamos únicamente las mejores oportunidades (incluyendo propiedades off-market).</li><li>✅ Te asesoramos en la negociación para asegurar el mejor precio y condiciones.</li></ul><p class="card-alert">⚠️ Este servicio requiere un compromiso mutuo y trabajamos exclusivamente con clientes que nos eligen como su único representante.</p><p class="card-highlight">Asegurate de que una de las decisiones más importantes de tu vida, sea la correcta. Asesorate con profesionales y delegá lo tedioso.</p></div><div class="card-footer-cta"><button type="button" class="btn-card" data-interest="Personal Shopper Inmobiliario">Quiero este Servicio</button><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                           </div>
                       </article>
 
@@ -716,7 +749,7 @@
                                   <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta8.webp" alt="Local comercial de GringoEstate" class="card-image" loading="lazy">
                               </picture>
                               <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><button class="btn-toggle-expand">Ver más</button></div>
-                              <div class="card-full-details"><div class="card-full-details-content"><h3>LOCALES COMERCIALES Y OFICINAS</h3><div class="card-full-content-scroll"><p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><ul><li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li><li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li><li>✅ Asesoramiento integral en contratos comerciales y negociación.</li></ul><p class="card-highlight">Llevá tu negocio al siguiente nivel.</p></div><div class="card-footer-cta"><a href="#contact" class="btn-card" data-interest="Locales Comerciales y Oficinas">Encontrar mi Local</a><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                              <div class="card-full-details"><div class="card-full-details-content"><h3>LOCALES COMERCIALES Y OFICINAS</h3><div class="card-full-content-scroll"><p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><ul><li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li><li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li><li>✅ Asesoramiento integral en contratos comerciales y negociación.</li></ul><p class="card-highlight">Llevá tu negocio al siguiente nivel.</p></div><div class="card-footer-cta"><button type="button" class="btn-card" data-interest="Locales Comerciales y Oficinas">Encontrar mi Local</button><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                           </div>
                       </article>
 
@@ -866,7 +899,6 @@
     gsap.registerPlugin(ScrollTrigger);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // --- INICIO DE LA CORRECCIÓN DE DEBOUNCE ---
     function debounce(func, wait) {
       let timeout;
       return function(...args) {
@@ -875,7 +907,6 @@
         timeout = setTimeout(() => func.apply(context, args), wait);
       };
     }
-    // --- FIN DE LA CORRECCIÓN DE DEBOUNCE ---
 
     // --- Cursor Logic ---
     if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
@@ -982,12 +1013,9 @@
 
     function toggleMenu() {
         const isActive = mobileMenu.classList.contains('is-active');
-
         mobileMenu.classList.toggle('is-active', !isActive);
         menuOverlay.classList.toggle('is-active', !isActive);
-        
         menuToggle.classList.toggle('open', !isActive);
-        
         document.body.classList.toggle('no-scroll', !isActive);
     }
 
@@ -1035,41 +1063,50 @@
         }
     }
     
-    // --- INSTRUCCIÓN 3: LÓGICA DE APERTURA DE TARJETAS CORREGIDA ---
     document.querySelectorAll('.service-card-stacked').forEach(card => {
         card.addEventListener('click', e => {
-            // Si el elemento clickeado o uno de sus padres es un enlace (<a>), no hagas nada.
-            // Esto permite que los botones CTA y otros enlaces funcionen por su cuenta.
             if (e.target.closest('a')) {
                 return;
             }
-            // Si no es un enlace, entonces abre el modal.
             e.preventDefault(); 
             openCardModal(card);
         });
     });
 
+    // --- INICIO CORRECCIÓN LÓGICA DE BOTONES DEL MODAL ---
     cardModal.addEventListener('click', (e) => {
-        const contactButton = e.target.closest('a.btn-card[href="#contact"]');
+        // Busca un botón de acción con el atributo 'data-interest'
+        const actionButton = e.target.closest('button.btn-card[data-interest]');
+        // Busca un enlace externo normal
+        const externalLink = e.target.closest('a.btn-card');
 
-        if (contactButton) {
-            e.preventDefault();
-
-            const interest = contactButton.getAttribute('data-interest');
+        if (actionButton) {
+            // Es un botón de acción (ej. "Solicitar Tasación")
+            const interest = actionButton.getAttribute('data-interest');
             if (interest && interestSelect) {
                 interestSelect.value = interest;
                 interestSelect.dispatchEvent(new Event('change'));
             }
-
             closeCardModal();
-
-            document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+            // Pequeño delay para asegurar que el modal se cierra antes de hacer scroll
+            setTimeout(() => {
+                document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        
+        } else if (externalLink) {
+            // Es un enlace normal (ej. a un sitio externo), lo dejamos pasar
+            // y cerramos el modal para una mejor experiencia de usuario.
+            closeCardModal();
+            return; // Permite que el enlace funcione
 
         } else if (e.target.closest('.card-modal-close-btn') || e.target.closest('.btn-toggle-collapse') || e.target === cardModal) {
+            // Es el botón de cerrar o el fondo del modal
             e.preventDefault();
             closeCardModal();
         }
     });
+    // --- FIN CORRECCIÓN LÓGICA DE BOTONES DEL MODAL ---
+
 
     // --- Contact Form Logic ---
     interestSelect.addEventListener('change', () => {
@@ -1080,7 +1117,7 @@
         }
     });
 
-    // --- Horizontal Scroll Animation Setup ---
+    // --- INICIO CORRECCIÓN SCROLL HORIZONTAL ---
     function setupHorizontalScroll() {
         const section = document.querySelector('.horizontal-scroll-section');
         if (!section) return;
@@ -1088,15 +1125,22 @@
         const wrapper = section.querySelector('.horizontal-scroll-wrapper');
         const container = section.querySelector('.cards-container');
         
+        // Destruye cualquier instancia anterior para empezar de cero
         if (horizontalScrollInstance) {
             horizontalScrollInstance.kill();
             horizontalScrollInstance = null;
         }
 
+        // Lógica para móvil (cuando el scroll horizontal no se aplica)
         if (window.innerWidth < 768 || prefersReducedMotion) {
+            // Limpia cualquier estilo inline que GSAP haya podido dejar
             gsap.set([section, wrapper, container], { clearProps: 'all' });
+
+            // Aplica estilos para que se vea como una lista vertical normal
             section.style.height = 'auto';
+            wrapper.style.position = 'relative';
             wrapper.style.height = 'auto';
+            wrapper.style.overflow = 'visible';
             container.style.display = 'flex';
             container.style.flexDirection = 'column';
             container.style.alignItems = 'center';
@@ -1104,11 +1148,13 @@
             container.style.padding = '0 1.5rem';
             container.style.gap = '1.5rem';
             gsap.utils.toArray('.service-card-stacked').forEach(card => card.style.width = '100%');
+            
+            // Refresca ScrollTrigger para que recalcule todo con la nueva configuración
             ScrollTrigger.refresh();
             return;
         }
 
-        gsap.set([section, wrapper, container], { clearProps: 'all' });
+        // Lógica para el scroll horizontal en escritorio
         gsap.set(wrapper, { position: 'sticky', top: 0, height: '100vh', width: '100%', overflow: 'hidden' });
         gsap.set(container, { display: 'flex', flexDirection: 'row' });
 
@@ -1121,13 +1167,14 @@
             scrollTrigger: {
                 trigger: section,
                 start: 'top top',
-                end: () => `+=${scrollW}`, // Use a function for robust calculation
+                end: () => `+=${scrollW}`,
                 pin: wrapper,
                 scrub: true,
                 invalidateOnRefresh: true
             }
         });
     }
+    // --- FIN CORRECCIÓN SCROLL HORIZONTAL ---
     
     // --- Particle Animation ---
     function initParticleAnimation() {
@@ -1206,7 +1253,7 @@
     async function getIpcData() {
         if (ipcDataCache) return ipcDataCache;
         try {
-            // Llamamos a nuestro nuevo asistente seguro en Netlify
+            // Llamamos al asistente seguro en Netlify
             const response = await fetch('/.netlify/functions/get-ipc-data');
             if (!response.ok) {
                 const errorData = await response.json();
@@ -1290,18 +1337,26 @@
         calcularAlquilerBtn.addEventListener('click', calcularNuevoAlquiler);
     }
 
-
     async function callGeminiAPI(prompt, resultElement, loaderElement) {
         loaderElement.style.display = 'inline-block';
         resultElement.textContent = 'Generando...';
         resultElement.style.color = '#e0e0e0';
 
-        const apiKey = "AIzaSyAOnRG_V-xai3kBHTSYup1nTzByKfAxpnY"; 
+        // --- INICIO CORRECCIÓN DE SEGURIDAD API KEY ---
+        // ⚠️ ALERTA DE SEGURIDAD: La API Key NUNCA debe estar aquí.
+        // 1. Ve a tu panel de Netlify.
+        // 2. En "Site settings" > "Build & deploy" > "Environment", crea una variable
+        //    de entorno llamada GEMINI_API_KEY y pega tu clave allí.
+        // 3. Crea una Netlify Function (ej. /netlify/functions/generate-description.js)
+        //    que lea esta variable de entorno y haga la llamada a la API de Google.
+        // 4. Esta función del frontend debe llamar a tu nueva Netlify Function, no a Google directamente.
 
         const payload = { 
             contents: [{ parts: [{ text: prompt }] }] 
         };
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        // URL de ejemplo de cómo llamarías a tu nueva función de Netlify.
+        const apiUrl = `/.netlify/functions/generate-description`; 
+        // --- FIN CORRECCIÓN DE SEGURIDAD API KEY ---
 
         try {
             const response = await fetch(apiUrl, {
@@ -1316,11 +1371,13 @@
                 console.error("Error en la respuesta de la API:", result);
                 throw new Error(`API error: ${response.status} ${response.statusText} - ${JSON.stringify(result.error)}`);
             }
-
-            if (result.candidates && result.candidates.length > 0 &&
-                result.candidates[0].content && result.candidates[0].content.parts &&
-                result.candidates[0].content.parts.length > 0) {
-                
+            
+            // La respuesta de tu función Netlify podría tener un formato diferente.
+            // Ajústalo según cómo diseñes tu función.
+            // Este es un ejemplo asumiendo que tu función devuelve un objeto { text: "..." }
+            if (result.text) {
+                resultElement.textContent = result.text;
+            } else if (result.candidates && result.candidates.length > 0) { // Fallback por si la respuesta viene directa
                 const text = result.candidates[0].content.parts[0].text;
                 resultElement.textContent = text;
             } else {
