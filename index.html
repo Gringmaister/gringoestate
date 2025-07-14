@@ -1324,7 +1324,7 @@
             } else {
                 resultElement.textContent = 'Error: La respuesta de la IA no tiene el formato esperado.';
                 resultElement.style.color = '#ff6b6b';
-                console.error('Unexpected API response structure:', result);
+                console.error('Unexpected API response. Result:', result);
             }
         } catch (error) {
             resultElement.textContent = 'Error al conectar con la IA. Revisa la consola del navegador.';
