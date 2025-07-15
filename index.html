@@ -542,25 +542,27 @@
     .ai-tool-card textarea { min-height: 120px; }
     .ai-tool-card button { background-color: var(--primary); color: var(--dark); padding: .75rem 1.5rem; border-radius: 50px; transition: all .3s; font-weight: 700; border: none; }
     .ai-tool-card button:hover { background-color: #fff; }
-    .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: pre-wrap; line-height: 1.7; color: #e0e0e0; }
+    .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: pre-wrap; line-height: 1.7; color: #e0e0e0; text-align: center; }
     
-    /* --- NUEVO: Estilos para el historial de la calculadora --- */
-    .ai-result ul { list-style: none; padding: 0; }
+    .ai-result ul { list-style: none; padding: 0; text-align: left; }
     .ai-result li { 
         margin-bottom: 0.75rem; 
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
-        padding-bottom: 0.5rem;
+        gap: 1rem;
+        padding-bottom: 0.75rem;
         border-bottom: 1px solid #333;
     }
     .ai-result li:last-child {
         border-bottom: none;
     }
     .ai-result .date { color: var(--primary); font-weight: bold; text-transform: capitalize;}
-    .ai-result .amount { color: #fff; font-size: 1.1rem; }
-    .ai-result .percentage { color: var(--green); font-size: 0.9em; margin-left: 0.5rem; font-weight: bold; }
+    .ai-result .amount-group { text-align: right; }
+    .ai-result .amount { color: #fff; font-size: 1.1rem; display: block; }
+    .ai-result .percentage { color: var(--green); font-size: 0.9em; font-weight: bold; }
+    .ai-result .dolar-amount { color: var(--gray); font-size: 0.9em; display: block; }
     .ai-result .error-msg { color: #ffda6a; }
 
     .loader { width: 24px; height: 24px; border: 3px solid #FFF; border-bottom-color: transparent; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; margin-top: 1rem; display: none; }
@@ -767,7 +769,7 @@
                                   <img src="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/tarjeta8.webp" alt="Local comercial de GringoEstate" class="card-image" loading="lazy">
                               </picture>
                               <div class="card-content-initial"><h3>LOCALES COMERCIALES <span>Y OFICINAS</span></h3><p class="short-desc">Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><button class="btn-toggle-expand">Ver más</button></div>
-                              <div class="card-full-details"><div class="card-full-details-content"><h3>LOCALES COMERCIALES Y OFICINAS</h3><div class="card-full-content-scroll"><p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><ul><li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li><li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li><li>✅ Asesoramiento integral en contratos comerciales y negociación.</li></ul><p class="card-highlight">Llevá tu negocio al siguiente nivel.</p></div><div class="card-footer-cta"><button type="button" class="btn-card" data-interest="Locales Comerciales y Oficinas">Encontrar mi Local</button><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
+                              <div class="card-full-details"><div class="card-full-details-content"><h3>LOCALES COMERCIALES Y OFICinas</h3><div class="card-full-content-scroll"><p>Un servicio especializado para marcas, franquicias e inversores que buscan el punto estratégico para su negocio.</p><ul><li>✅ Respaldo de Baigun R&N, una de las pocas inmobiliarias con un área comercial exclusiva y una red de +50 marcas de primera línea adheridas (Coto, Carrefour, Cremolatti, etc.).</li><li>✅ Te ayudamos a encontrar la ubicación perfecta o al inquilino ideal para tu local.</li><li>✅ Asesoramiento integral en contratos comerciales y negociación.</li></ul><p class="card-highlight">Llevá tu negocio al siguiente nivel.</p></div><div class="card-footer-cta"><button type="button" class="btn-card" data-interest="Locales Comerciales y Oficinas">Encontrar mi Local</button><button class="btn-toggle-collapse">Cerrar</button></div></div></div>
                           </div>
                       </article>
 
@@ -849,7 +851,7 @@
                           </div>
                       </form>
                       <div id="alquiler-result" class="ai-result">El monto actualizado aparecerá aquí...</div>
-                      <p class="ai-alert" style="text-align: center; margin-top: 1rem;">⚠️ Los datos para el cálculo son provistos por una API pública y pueden no estar 100% actualizados.</p>
+                      <p class="ai-alert" style="text-align: center; margin-top: 1rem;">⚠️ Los datos para el cálculo son provistos por APIs públicas y pueden no estar 100% actualizados.</p>
                   </div>
                   <div class="ai-coming-soon">
                       <h3>MÁS HERRAMIENTAS EN CONSTRUCCIÓN...</h3>
@@ -1274,7 +1276,7 @@
     const alquilerResult = document.getElementById('alquiler-result');
     const loaderAlquiler = document.getElementById('loader-alquiler');
     
-    // --- LÓGICA DE CALCULADORA CON HISTORIAL Y PORCENTAJE ---
+    // --- LÓGICA DE CALCULADORA FINAL CON HISTORIAL Y DÓLARES ---
     async function calcularNuevoAlquilerConAPI() {
         const montoOriginal = parseFloat(alquilerOriginalInput.value);
         const fechaInicioStr = fechaInicioInput.value; 
@@ -1310,16 +1312,28 @@
                 throw new Error(result.error || 'Hubo un problema con el servidor.');
             }
             
-            if (result.historial && result.historial.length > 1) {
+            if (result.historial && result.historial.length > 0) {
                 let htmlResult = '<ul>';
                 result.historial.forEach(item => {
                     if(item.monto) {
                         const montoFormateado = item.monto.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-                        // --- NUEVO: Mostrar el porcentaje si es mayor a 0 ---
+                        
                         const porcentajeHtml = item.porcentaje > 0 
                             ? `<span class="percentage">(+${item.porcentaje.toFixed(2).replace('.', ',')}%)</span>` 
                             : '';
-                        htmlResult += `<li><span class="date">${item.fecha}:</span> <div><span class="amount">${montoFormateado}</span>${porcentajeHtml}</div></li>`;
+
+                        const dolarHtml = item.montoEnDolares
+                            ? `<span class="dolar-amount">USD ${item.montoEnDolares.toFixed(2).replace('.', ',')}</span>`
+                            : `<span class="dolar-amount"></span>`;
+
+                        htmlResult += `<li>
+                                        <span class="date">${item.fecha}:</span> 
+                                        <div class="amount-group">
+                                            <span class="amount">${montoFormateado} ${porcentajeHtml}</span>
+                                            ${dolarHtml}
+                                        </div>
+                                      </li>`;
+
                     } else if (item.error) {
                         htmlResult += `<li><span class="error-msg">${item.error}</span></li>`;
                     }
@@ -1327,10 +1341,8 @@
                 htmlResult += '</ul>';
                 alquilerResult.innerHTML = htmlResult;
                 alquilerResult.style.color = '#e0e0e0';
-            } else if (result.historial && result.historial.length <= 1) {
-                 alquilerResult.innerHTML = 'Aún no corresponde realizar un ajuste según el período y fecha seleccionados.';
-            }
-            else {
+
+            } else {
                 throw new Error('La respuesta no contiene un historial válido.');
             }
 
