@@ -135,13 +135,19 @@ exports.handler = async function(event, context) {
 
         // --- NUEVO: CÁLCULO DEL ANÁLISIS FINAL ---
         let analisis = null;
-        if (dolarData && historial.length > 1 && historial[0].montoEnDolares && historial[historial.length - 1].montoEnDolares) {
-            const dolarInicial = historial[0].montoEnDolares;
-            const dolarFinal = historial[historial.length - 1].montoEnDolares;
-            const variacionDolar = ((dolarFinal / dolarInicial) - 1) * 100;
+        if (historial.length > 1) {
+            const montoInicialPesos = historial[0].monto;
+            const montoFinalPesos = historial[historial.length - 1].monto;
+            const variacionPesos = ((montoFinalPesos / montoInicialPesos) - 1) * 100;
+
+            let variacionDolar = null;
+            if (dolarData && historial[0].montoEnDolares && historial[historial.length - 1].montoEnDolares) {
+                const dolarInicial = historial[0].montoEnDolares;
+                const dolarFinal = historial[historial.length - 1].montoEnDolares;
+                variacionDolar = ((dolarFinal / dolarInicial) - 1) * 100;
+            }
             analisis = {
-                dolarInicial: dolarInicial,
-                dolarFinal: dolarFinal,
+                variacionPesos: variacionPesos,
                 variacionDolar: variacionDolar
             };
         }
