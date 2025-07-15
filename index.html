@@ -45,6 +45,7 @@
       --gray: #cccccc; 
       --dark-bg: #111111;
       --card-bg: #1A1A1A;
+      --green: #25d366;
     }
     * {
       margin: 0;
@@ -542,10 +543,24 @@
     .ai-tool-card button { background-color: var(--primary); color: var(--dark); padding: .75rem 1.5rem; border-radius: 50px; transition: all .3s; font-weight: 700; border: none; }
     .ai-tool-card button:hover { background-color: #fff; }
     .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: pre-wrap; line-height: 1.7; color: #e0e0e0; }
+    
+    /* --- NUEVO: Estilos para el historial de la calculadora --- */
     .ai-result ul { list-style: none; padding: 0; }
-    .ai-result li { margin-bottom: 0.5rem; }
-    .ai-result .date { color: var(--primary); font-weight: bold; }
-    .ai-result .amount { color: #fff; }
+    .ai-result li { 
+        margin-bottom: 0.75rem; 
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #333;
+    }
+    .ai-result li:last-child {
+        border-bottom: none;
+    }
+    .ai-result .date { color: var(--primary); font-weight: bold; text-transform: capitalize;}
+    .ai-result .amount { color: #fff; font-size: 1.1rem; }
+    .ai-result .percentage { color: var(--green); font-size: 0.9em; margin-left: 0.5rem; font-weight: bold; }
     .ai-result .error-msg { color: #ffda6a; }
 
     .loader { width: 24px; height: 24px; border: 3px solid #FFF; border-bottom-color: transparent; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; margin-top: 1rem; display: none; }
@@ -1259,7 +1274,7 @@
     const alquilerResult = document.getElementById('alquiler-result');
     const loaderAlquiler = document.getElementById('loader-alquiler');
     
-    // --- LÓGICA DE CALCULADORA CON HISTORIAL ---
+    // --- LÓGICA DE CALCULADORA CON HISTORIAL Y PORCENTAJE ---
     async function calcularNuevoAlquilerConAPI() {
         const montoOriginal = parseFloat(alquilerOriginalInput.value);
         const fechaInicioStr = fechaInicioInput.value; 
@@ -1295,13 +1310,16 @@
                 throw new Error(result.error || 'Hubo un problema con el servidor.');
             }
             
-            // --- CORRECCIÓN CLAVE: Mostrar la lista del historial ---
-            if (result.historial && result.historial.length > 0) {
+            if (result.historial && result.historial.length > 1) {
                 let htmlResult = '<ul>';
                 result.historial.forEach(item => {
                     if(item.monto) {
                         const montoFormateado = item.monto.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-                        htmlResult += `<li><span class="date">${item.fecha}:</span> <span class="amount">${montoFormateado}</span></li>`;
+                        // --- NUEVO: Mostrar el porcentaje si es mayor a 0 ---
+                        const porcentajeHtml = item.porcentaje > 0 
+                            ? `<span class="percentage">(+${item.porcentaje.toFixed(2).replace('.', ',')}%)</span>` 
+                            : '';
+                        htmlResult += `<li><span class="date">${item.fecha}:</span> <div><span class="amount">${montoFormateado}</span>${porcentajeHtml}</div></li>`;
                     } else if (item.error) {
                         htmlResult += `<li><span class="error-msg">${item.error}</span></li>`;
                     }
@@ -1309,8 +1327,8 @@
                 htmlResult += '</ul>';
                 alquilerResult.innerHTML = htmlResult;
                 alquilerResult.style.color = '#e0e0e0';
-            } else if (result.historial.length <= 1) {
-                 alquilerResult.innerHTML = 'Aún no corresponde realizar un ajuste según el período seleccionado.';
+            } else if (result.historial && result.historial.length <= 1) {
+                 alquilerResult.innerHTML = 'Aún no corresponde realizar un ajuste según el período y fecha seleccionados.';
             }
             else {
                 throw new Error('La respuesta no contiene un historial válido.');
