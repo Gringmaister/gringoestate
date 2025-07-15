@@ -1,0 +1,11 @@
+# Archivo: netlify.toml
+
+[build]
+  # Directorio que contiene los archivos de tu web (tu index.html, etc.)
+  # Si tu index.html está en la raíz, usa "."
+  publish = "."
+
+[functions]
+  # Directorio donde Netlify debe buscar tus funciones para desplegarlas.
+  # Basado en tu código, esta es la ruta correcta.
+  directory = "netlify/functions/"
