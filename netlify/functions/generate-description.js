@@ -1,6 +1,5 @@
 // Archivo a actualizar: netlify/functions/generate-description.js
 
-// Importamos el SDK de Google
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 exports.handler = async function(event, context) {
@@ -9,16 +8,15 @@ exports.handler = async function(event, context) {
   }
 
   try {
-    // --- CORRECCIÓN CLAVE: Leemos la llave de las variables de entorno ---
     const geminiApiKey = process.env.GEMINI_API_KEY;
 
     if (!geminiApiKey) {
       throw new Error("La API Key de Gemini no está configurada en el servidor.");
     }
 
-    // Inicializamos el cliente de Google AI con la llave
     const genAI = new GoogleGenerativeAI(geminiApiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // --- CORRECCIÓN CLAVE: Usamos un modelo más moderno y específico ---
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
     const { prompt } = JSON.parse(event.body);
     if (!prompt) {
