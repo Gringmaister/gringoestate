@@ -1143,9 +1143,6 @@
         if (window.innerWidth < 1024 || prefersReducedMotion) {
             gsap.set([section, wrapper, container], { clearProps: 'all' });
             
-            // --- CAMBIO 1: FIX PARA EL SALTO DEL SCROLL EN MÓVIL ---
-            // Se resetea explícitamente la transformación 'x' que GSAP podría
-            // haber dejado "en memoria" de la vista de escritorio.
             gsap.set(container, { x: 0, transform: 'none' });
             
             section.style.height = 'auto';
@@ -1256,34 +1253,27 @@
     const alquilerResult = document.getElementById('alquiler-result');
     const loaderAlquiler = document.getElementById('loader-alquiler');
     
-    // --- CAMBIO 2: LÓGICA DE CALCULADORA ACTUALIZADA PARA USAR RAPIDAPI ---
-    // Se reemplaza toda la lógica anterior por una nueva función que llama
-    // a una Netlify Function. Esta nueva función actuará como intermediario
-    // seguro para conectar con la API de RapidAPI.
-    
+    // --- LÓGICA DE CALCULADORA CON MANEJO DE ERRORES MEJORADO ---
     async function calcularNuevoAlquilerConAPI() {
         const montoOriginal = parseFloat(alquilerOriginalInput.value);
         const fechaInicioStr = fechaInicioInput.value; 
         const periodo = parseInt(periodoIndexacionInput.value);
 
-        // 1. Validar las entradas del usuario
         if (isNaN(montoOriginal) || !fechaInicioStr || isNaN(periodo)) {
             alquilerResult.textContent = 'Por favor, completa todos los campos correctamente.';
             alquilerResult.style.color = '#ffda6a';
             return;
         }
 
-        // 2. Mostrar estado de carga
         loaderAlquiler.style.display = 'inline-block';
         calcularAlquilerBtn.disabled = true;
         alquilerResult.textContent = 'Calculando...';
         alquilerResult.style.color = '#e0e0e0';
 
         try {
-            // 3. Preparar y enviar la petición a nuestra nueva Netlify Function
             const payload = {
                 initialAmount: montoOriginal,
-                startDate: fechaInicioStr, // Formato YYYY-MM
+                startDate: fechaInicioStr,
                 months: periodo
             };
 
@@ -1296,27 +1286,26 @@
             const result = await response.json();
 
             if (!response.ok) {
-                // Si la Netlify function devuelve un error (ej: 500) o la API externa falla
+                // Si la función Netlify devuelve un error (ej: 500), usa el mensaje de error del JSON
                 throw new Error(result.error || 'Hubo un problema con el servidor.');
             }
             
-            // 4. Mostrar el resultado formateado que viene de la API
+            // --- CORRECCIÓN CLAVE: Mostrar resultado o el mensaje de error específico de la API ---
             if (result.newAmount) {
                 const montoFormateado = result.newAmount.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
                 alquilerResult.textContent = `El nuevo monto del alquiler es: ${montoFormateado}`;
                 alquilerResult.style.color = '#e0e0e0';
             } else {
-                // Si la API no devolvió lo esperado
-                throw new Error(result.error || 'La respuesta de la API no tuvo el formato esperado.');
+                // Si la API no devolvió 'newAmount', es porque devolvió un error.
+                // Lo mostramos directamente.
+                throw new Error(result.message || 'La respuesta de la API no tuvo el formato esperado.');
             }
 
         } catch (error) {
-            // 5. Manejar cualquier error que ocurra en el proceso
             alquilerResult.textContent = `Error: ${error.message}`;
             alquilerResult.style.color = '#ff6b6b';
             console.error("Error en el cálculo de alquiler:", error);
         } finally {
-            // 6. Limpiar el estado de carga, haya éxito o error
             loaderAlquiler.style.display = 'none';
             calcularAlquilerBtn.disabled = false;
         }
@@ -1325,8 +1314,6 @@
     if (calcularAlquilerBtn) {
         calcularAlquilerBtn.addEventListener('click', calcularNuevoAlquilerConAPI);
     }
-    // --- FIN DEL CAMBIO 2 ---
-
 
     async function callGeminiAPI(prompt, resultElement, loaderElement) {
       loaderElement.style.display = 'inline-block';
@@ -1345,23 +1332,19 @@
               body: JSON.stringify(payload)
           });
 
+          const result = await response.json();
+          
           if (!response.ok) {
-              const errorData = await response.json();
-              console.error("Error from API function:", errorData);
-              throw new Error(`API error: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`);
+              throw new Error(result.error || `Error del servidor: ${response.status}`);
           }
           
-          const result = await response.json();
-
           if (result.text) {
               resultElement.textContent = result.text;
           } else {
-              resultElement.textContent = 'Error: La respuesta de la IA no tiene el formato esperado.';
-              resultElement.style.color = '#ff6b6b';
-              console.error('Unexpected API response format. Result:', result);
+              throw new Error('La respuesta de la IA no tuvo el formato esperado.');
           }
       } catch (error) {
-          resultElement.textContent = 'Error al conectar con la IA. Revisa la consola del navegador.';
+          resultElement.textContent = `Error al conectar con la IA. ${error.message}`;
           resultElement.style.color = '#ff6b6b';
           console.error('Error calling the backend function:', error);
       } finally {
