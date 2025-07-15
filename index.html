@@ -572,6 +572,12 @@
         border-top: 1px solid #444;
         text-align: center;
     }
+    .ai-result .analysis-summary h4 {
+        font-family: 'Bebas Neue', sans-serif;
+        color: var(--primary);
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+    }
     .ai-result .analysis-summary p {
         margin-bottom: 0.5rem;
         font-size: 1rem;
@@ -1306,14 +1312,14 @@
         const periodo = parseInt(periodoIndexacionInput.value);
 
         if (isNaN(montoOriginal) || !fechaInicioStr || isNaN(periodo)) {
-            alquilerResult.innerHTML = '<p>Por favor, completa todos los campos correctamente.</p>';
+            alquilerResult.innerHTML = '<p style="text-align:center;">Por favor, completa todos los campos correctamente.</p>';
             alquilerResult.style.color = '#ffda6a';
             return;
         }
 
         loaderAlquiler.style.display = 'inline-block';
         calcularAlquilerBtn.disabled = true;
-        alquilerResult.innerHTML = '<p>Calculando historial...</p>';
+        alquilerResult.innerHTML = '<p style="text-align:center;">Consultando APIs y calculando historial...</p>';
         alquilerResult.style.color = '#e0e0e0';
 
         try {
@@ -1371,7 +1377,7 @@
             if (result.analisis) {
                 const variacionPesosHtml = `<span class="dolar-change positive">+${result.analisis.variacionPesos.toFixed(2).replace('.', ',')}%</span>`;
                 let variacionDolarHtml = 'No disponible';
-                let analisisTexto = 'Si tus ingresos son en pesos, tu alquiler se mantuvo relativamente estable frente a la inflación.';
+                let analisisTexto = 'Si tus ingresos son en pesos, el alquiler se mantuvo relativamente estable frente a la inflación.';
 
                 if (result.analisis.variacionDolar !== null) {
                     const variacionClass = result.analisis.variacionDolar >= 0 ? 'positive' : 'negative';
@@ -1388,10 +1394,10 @@
                 }
                 
                 htmlResult += `<div class="analysis-summary">
-                                <p><strong>Análisis del Contrato:</strong></p>
+                                <h4>Análisis del Contrato</h4>
                                 <p>Aumento total en Pesos: ${variacionPesosHtml}</p>
                                 <p>Variación en Dólares: ${variacionDolarHtml}</p>
-                                <p><em>${analisisTexto}</em></p>
+                                <p><em><strong>Conclusión:</strong> ${analisisTexto}</em></p>
                                </div>`;
             }
 
@@ -1399,7 +1405,7 @@
             alquilerResult.style.color = '#e0e0e0';
 
         } catch (error) {
-            alquilerResult.innerHTML = `<p>Error: ${error.message}</p>`;
+            alquilerResult.innerHTML = `<p style="text-align:center;">Error: ${error.message}</p>`;
             alquilerResult.style.color = '#ff6b6b';
             console.error("Error en el cálculo de alquiler:", error);
         } finally {
@@ -1436,7 +1442,10 @@
           }
           
           if (result.text) {
-              resultElement.textContent = result.text;
+              // --- CORRECCIÓN PARA FORMATEAR EL TEXTO DE GEMINI ---
+              resultElement.innerHTML = result.text.replace(/\n/g, '<br>');
+              resultElement.style.textAlign = 'left';
+              resultElement.style.whiteSpace = 'normal'; // Permite que el texto se ajuste
           } else {
               throw new Error('La respuesta de la IA no tuvo el formato esperado.');
           }
