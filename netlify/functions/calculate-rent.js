@@ -8,31 +8,46 @@ const DOLAR_API_URL = "https://api.bluelytics.com.ar/v2/historical";
 let ipcDataCache = null;
 let dolarDataCache = null;
 
+// --- FUNCIÓN MEJORADA: Ahora maneja el fallo de la API de Dólar ---
+async function getDolarData() {
+    // No reintentar si ya falló en esta sesión.
+    if (dolarDataCache === 'failed') return null; 
+    if (dolarDataCache) return dolarDataCache;
+    
+    try {
+        const response = await fetch(DOLAR_API_URL, { timeout: 5000 });
+        // Si la API falla, no lanzamos un error, simplemente devolvemos null.
+        if (!response.ok) {
+            console.error("Fallo en la API de Dólar. Se continuará sin datos del dólar.");
+            dolarDataCache = 'failed'; // Marcamos como fallida para no reintentar.
+            return null;
+        }
+        const data = await response.json();
+        dolarDataCache = data.reduce((acc, item) => {
+            acc[item.date] = item.value_sell;
+            return acc;
+        }, {});
+        return dolarDataCache;
+    } catch (error) {
+        console.error("Error al obtener datos del dólar:", error);
+        dolarDataCache = 'failed';
+        return null;
+    }
+}
+
+
 async function getIpcData() {
     if (ipcDataCache) return ipcDataCache;
     try {
-        const response = await fetch(IPC_API_URL);
-        if (!response.ok) throw new Error("Fallo en la API de IPC.");
+        const response = await fetch(IPC_API_URL, { timeout: 5000 });
+        if (!response.ok) throw new Error("Fallo en la API de IPC. No se puede continuar.");
         const data = await response.json();
+        if(!data.data) throw new Error("Formato de datos de IPC inesperado.");
         ipcDataCache = data.data.reduce((acc, item) => {
             acc[item[0].substring(0, 7)] = item[1];
             return acc;
         }, {});
         return ipcDataCache;
-    } catch (error) { throw error; }
-}
-
-async function getDolarData() {
-    if (dolarDataCache) return dolarDataCache;
-    try {
-        const response = await fetch(DOLAR_API_URL);
-        if (!response.ok) throw new Error("Fallo en la API de Dólar.");
-        const data = await response.json();
-        dolarDataCache = data.reduce((acc, item) => {
-            acc[item.date] = item.value_sell; // Usamos el valor de venta
-            return acc;
-        }, {});
-        return dolarDataCache;
     } catch (error) { throw error; }
 }
 
@@ -43,8 +58,12 @@ exports.handler = async function(event, context) {
     }
 
     try {
-        // Obtenemos los datos de ambas APIs en paralelo para más eficiencia
         const [ipcData, dolarData] = await Promise.all([getIpcData(), getDolarData()]);
+
+        // Si la API de IPC falla, es un error crítico.
+        if(!ipcData) {
+            throw new Error("No se pudieron obtener los datos del IPC para el cálculo.");
+        }
 
         const { initialAmount, startDate, months } = JSON.parse(event.body);
         const montoOriginal = parseFloat(initialAmount);
@@ -65,26 +84,29 @@ exports.handler = async function(event, context) {
 
         while (true) {
             if (fechaAjuste > hoy && historial.length > 0) {
-                break; // No calcular para fechas futuras si ya tenemos al menos un registro
+                break;
             }
 
-            // --- Lógica para buscar el valor del dólar ---
-            let fechaISO = `${fechaAjuste.getFullYear()}-${String(fechaAjuste.getMonth() + 1).padStart(2, '0')}-${String(fechaAjuste.getDate()).padStart(2, '0')}`;
-            let valorDolar = dolarData[fechaISO];
-            // Si no hay valor para ese día exacto, buscamos el del día anterior
-            let diasAtras = 1;
-            while(!valorDolar && diasAtras < 5) {
-                let fechaAnterior = new Date(fechaAjuste);
-                fechaAnterior.setDate(fechaAnterior.getDate() - diasAtras);
-                let fechaAnteriorISO = `${fechaAnterior.getFullYear()}-${String(fechaAnterior.getMonth() + 1).padStart(2, '0')}-${String(fechaAnterior.getDate()).padStart(2, '0')}`;
-                valorDolar = dolarData[fechaAnteriorISO];
-                diasAtras++;
+            let montoEnDolares = null;
+            // Solo intentamos calcular en dólares si la API del dólar funcionó
+            if (dolarData) {
+                let fechaISO = `${fechaAjuste.getFullYear()}-${String(fechaAjuste.getMonth() + 1).padStart(2, '0')}-${String(fechaAjuste.getDate()).padStart(2, '0')}`;
+                let valorDolar = dolarData[fechaISO];
+                let diasAtras = 1;
+                while(!valorDolar && diasAtras < 5) { // Busca hasta 5 días atrás
+                    let fechaAnterior = new Date(fechaAjuste);
+                    fechaAnterior.setDate(fechaAnterior.getDate() - diasAtras);
+                    let fechaAnteriorISO = `${fechaAnterior.getFullYear()}-${String(fechaAnterior.getMonth() + 1).padStart(2, '0')}-${String(fechaAnterior.getDate()).padStart(2, '0')}`;
+                    valorDolar = dolarData[fechaAnteriorISO];
+                    diasAtras++;
+                }
+                if(valorDolar) {
+                    montoEnDolares = montoActual / valorDolar;
+                }
             }
 
-            const montoEnDolares = valorDolar ? (montoActual / valorDolar) : null;
             let porcentajeAumento = 0;
             
-            // Si no es el primer registro, calculamos el aumento
             if (historial.length > 0) {
                 const fechaIndiceNuevo = new Date(fechaAjuste);
                 fechaIndiceNuevo.setMonth(fechaIndiceNuevo.getMonth() - 1);
@@ -111,10 +133,10 @@ exports.handler = async function(event, context) {
                 fecha: fechaAjuste.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' }),
                 monto: montoActual,
                 porcentaje: porcentajeAumento,
-                montoEnDolares: montoEnDolares
+                montoEnDolares: montoEnDolares // Será null si la API del dólar falló
             });
             
-            if (fechaAjuste > hoy) break; // Salir después de procesar el primer futuro
+            if (fechaAjuste > hoy) break;
             fechaAjuste.setMonth(fechaAjuste.getMonth() + periodo);
         }
 
