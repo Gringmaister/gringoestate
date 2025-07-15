@@ -46,6 +46,7 @@
       --dark-bg: #111111;
       --card-bg: #1A1A1A;
       --green: #25d366;
+      --red: #e74c3c;
     }
     * {
       margin: 0;
@@ -542,9 +543,10 @@
     .ai-tool-card textarea { min-height: 120px; }
     .ai-tool-card button { background-color: var(--primary); color: var(--dark); padding: .75rem 1.5rem; border-radius: 50px; transition: all .3s; font-weight: 700; border: none; }
     .ai-tool-card button:hover { background-color: #fff; }
-    .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: pre-wrap; line-height: 1.7; color: #e0e0e0; text-align: center; }
+    .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: pre-wrap; line-height: 1.7; color: #e0e0e0; }
     
-    .ai-result ul { list-style: none; padding: 0; text-align: left; display: inline-block; min-width: 300px; }
+    /* --- NUEVO: Estilos para el historial y el análisis --- */
+    .ai-result ul { list-style: none; padding: 0; margin-bottom: 1.5rem; }
     .ai-result li { 
         margin-bottom: 0.75rem; 
         display: flex;
@@ -564,6 +566,26 @@
     .ai-result .percentage { color: var(--green); font-size: 0.9em; font-weight: bold; }
     .ai-result .dolar-amount { color: var(--gray); font-size: 0.9em; display: block; }
     .ai-result .error-msg { color: #ffda6a; }
+    .ai-result .analysis-summary {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #444;
+        text-align: center;
+    }
+    .ai-result .analysis-summary p {
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+     .ai-result .analysis-summary .dolar-change {
+        font-weight: bold;
+     }
+     .ai-result .analysis-summary .dolar-change.positive {
+        color: var(--green);
+     }
+      .ai-result .analysis-summary .dolar-change.negative {
+        color: var(--red);
+     }
+
 
     .loader { width: 24px; height: 24px; border: 3px solid #FFF; border-bottom-color: transparent; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; margin-top: 1rem; display: none; }
     @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -1283,14 +1305,14 @@
         const periodo = parseInt(periodoIndexacionInput.value);
 
         if (isNaN(montoOriginal) || !fechaInicioStr || isNaN(periodo)) {
-            alquilerResult.innerHTML = 'Por favor, completa todos los campos correctamente.';
+            alquilerResult.innerHTML = '<p>Por favor, completa todos los campos correctamente.</p>';
             alquilerResult.style.color = '#ffda6a';
             return;
         }
 
         loaderAlquiler.style.display = 'inline-block';
         calcularAlquilerBtn.disabled = true;
-        alquilerResult.innerHTML = 'Calculando historial...';
+        alquilerResult.innerHTML = '<p>Calculando historial...</p>';
         alquilerResult.style.color = '#e0e0e0';
 
         try {
@@ -1312,8 +1334,10 @@
                 throw new Error(result.error || 'Hubo un problema con el servidor.');
             }
             
+            let htmlResult = '';
+
             if (result.historial && result.historial.length > 0) {
-                let htmlResult = '<ul>';
+                htmlResult += '<ul>';
                 result.historial.forEach(item => {
                     if(item.monto) {
                         const montoFormateado = item.monto.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
@@ -1324,7 +1348,7 @@
 
                         const dolarHtml = item.montoEnDolares
                             ? `<span class="dolar-amount">USD ${item.montoEnDolares.toFixed(2).replace('.', ',')}</span>`
-                            : `<span class="dolar-amount"></span>`; // Dejar vacío si no hay dato
+                            : `<span class="dolar-amount"></span>`;
 
                         htmlResult += `<li>
                                         <span class="date">${item.fecha}:</span> 
@@ -1339,15 +1363,25 @@
                     }
                 });
                 htmlResult += '</ul>';
-                alquilerResult.innerHTML = htmlResult;
-                alquilerResult.style.color = '#e0e0e0';
-
             } else {
                 throw new Error('La respuesta no contiene un historial válido.');
             }
 
+            // --- NUEVO: Añadir el bloque de análisis si existe ---
+            if (result.analisis) {
+                const variacionClass = result.analisis.variacionDolar >= 0 ? 'positive' : 'negative';
+                const signo = result.analisis.variacionDolar >= 0 ? '+' : '';
+                htmlResult += `<div class="analysis-summary">
+                                <p>Inicial: <strong>USD ${result.analisis.dolarInicial.toFixed(2).replace('.', ',')}</strong> → Final: <strong>USD ${result.analisis.dolarFinal.toFixed(2).replace('.', ',')}</strong></p>
+                                <p>Variación en USD: <span class="dolar-change ${variacionClass}">${signo}${result.analisis.variacionDolar.toFixed(2).replace('.', ',')}%</span></p>
+                               </div>`;
+            }
+
+            alquilerResult.innerHTML = htmlResult;
+            alquilerResult.style.color = '#e0e0e0';
+
         } catch (error) {
-            alquilerResult.innerHTML = `Error: ${error.message}`;
+            alquilerResult.innerHTML = `<p>Error: ${error.message}</p>`;
             alquilerResult.style.color = '#ff6b6b';
             console.error("Error en el cálculo de alquiler:", error);
         } finally {
@@ -1413,4 +1447,4 @@
   </script>
 
 </body>
-</html>
+</ht
