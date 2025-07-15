@@ -545,7 +545,6 @@
     .ai-tool-card button:hover { background-color: #fff; }
     .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: pre-wrap; line-height: 1.7; color: #e0e0e0; }
     
-    /* --- NUEVO: Estilos para el historial y el análisis --- */
     .ai-result ul { list-style: none; padding: 0; margin-bottom: 1.5rem; }
     .ai-result li { 
         margin-bottom: 0.75rem; 
@@ -1369,11 +1368,19 @@
 
             // --- NUEVO: Añadir el bloque de análisis si existe ---
             if (result.analisis) {
-                const variacionClass = result.analisis.variacionDolar >= 0 ? 'positive' : 'negative';
-                const signo = result.analisis.variacionDolar >= 0 ? '+' : '';
+                const variacionPesosHtml = `<span class="dolar-change positive">+${result.analisis.variacionPesos.toFixed(2).replace('.', ',')}%</span>`;
+                let variacionDolarHtml = 'No disponible';
+
+                if (result.analisis.variacionDolar !== null) {
+                    const variacionClass = result.analisis.variacionDolar >= 0 ? 'positive' : 'negative';
+                    const signo = result.analisis.variacionDolar >= 0 ? '+' : '';
+                    variacionDolarHtml = `<span class="dolar-change ${variacionClass}">${signo}${result.analisis.variacionDolar.toFixed(2).replace('.', ',')}%</span>`;
+                }
+                
                 htmlResult += `<div class="analysis-summary">
-                                <p>Inicial: <strong>USD ${result.analisis.dolarInicial.toFixed(2).replace('.', ',')}</strong> → Final: <strong>USD ${result.analisis.dolarFinal.toFixed(2).replace('.', ',')}</strong></p>
-                                <p>Variación en USD: <span class="dolar-change ${variacionClass}">${signo}${result.analisis.variacionDolar.toFixed(2).replace('.', ',')}%</span></p>
+                                <p><strong>Análisis del Contrato:</strong></p>
+                                <p>Aumento total en Pesos: ${variacionPesosHtml}</p>
+                                <p>Variación en Dólares: ${variacionDolarHtml}</p>
                                </div>`;
             }
 
