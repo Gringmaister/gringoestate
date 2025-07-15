@@ -1,25 +1,20 @@
 // Archivo a actualizar: netlify/functions/calculate-rent.js
 
-// URLs de las APIs públicas
 const IPC_API_URL = "https://apis.datos.gob.ar/series/api/series/?ids=148.3_INIVELNAL_DICI_M_26&limit=5000&format=json";
 const DOLAR_API_URL = "https://api.bluelytics.com.ar/v2/historical";
 
-// Variables para cachear los datos y no llamar a las APIs en cada ejecución
 let ipcDataCache = null;
 let dolarDataCache = null;
 
-// --- FUNCIÓN MEJORADA: Ahora maneja el fallo de la API de Dólar ---
 async function getDolarData() {
-    // No reintentar si ya falló en esta sesión.
     if (dolarDataCache === 'failed') return null; 
     if (dolarDataCache) return dolarDataCache;
     
     try {
-        const response = await fetch(DOLAR_API_URL, { timeout: 5000 });
-        // Si la API falla, no lanzamos un error, simplemente devolvemos null.
+        const response = await fetch(DOLAR_API_URL);
         if (!response.ok) {
             console.error("Fallo en la API de Dólar. Se continuará sin datos del dólar.");
-            dolarDataCache = 'failed'; // Marcamos como fallida para no reintentar.
+            dolarDataCache = 'failed';
             return null;
         }
         const data = await response.json();
@@ -39,7 +34,7 @@ async function getDolarData() {
 async function getIpcData() {
     if (ipcDataCache) return ipcDataCache;
     try {
-        const response = await fetch(IPC_API_URL, { timeout: 5000 });
+        const response = await fetch(IPC_API_URL);
         if (!response.ok) throw new Error("Fallo en la API de IPC. No se puede continuar.");
         const data = await response.json();
         if(!data.data) throw new Error("Formato de datos de IPC inesperado.");
@@ -60,7 +55,6 @@ exports.handler = async function(event, context) {
     try {
         const [ipcData, dolarData] = await Promise.all([getIpcData(), getDolarData()]);
 
-        // Si la API de IPC falla, es un error crítico.
         if(!ipcData) {
             throw new Error("No se pudieron obtener los datos del IPC para el cálculo.");
         }
@@ -88,12 +82,11 @@ exports.handler = async function(event, context) {
             }
 
             let montoEnDolares = null;
-            // Solo intentamos calcular en dólares si la API del dólar funcionó
             if (dolarData) {
                 let fechaISO = `${fechaAjuste.getFullYear()}-${String(fechaAjuste.getMonth() + 1).padStart(2, '0')}-${String(fechaAjuste.getDate()).padStart(2, '0')}`;
                 let valorDolar = dolarData[fechaISO];
                 let diasAtras = 1;
-                while(!valorDolar && diasAtras < 5) { // Busca hasta 5 días atrás
+                while(!valorDolar && diasAtras < 5) {
                     let fechaAnterior = new Date(fechaAjuste);
                     fechaAnterior.setDate(fechaAnterior.getDate() - diasAtras);
                     let fechaAnteriorISO = `${fechaAnterior.getFullYear()}-${String(fechaAnterior.getMonth() + 1).padStart(2, '0')}-${String(fechaAnterior.getDate()).padStart(2, '0')}`;
@@ -133,16 +126,29 @@ exports.handler = async function(event, context) {
                 fecha: fechaAjuste.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' }),
                 monto: montoActual,
                 porcentaje: porcentajeAumento,
-                montoEnDolares: montoEnDolares // Será null si la API del dólar falló
+                montoEnDolares: montoEnDolares
             });
             
             if (fechaAjuste > hoy) break;
             fechaAjuste.setMonth(fechaAjuste.getMonth() + periodo);
         }
 
+        // --- NUEVO: CÁLCULO DEL ANÁLISIS FINAL ---
+        let analisis = null;
+        if (dolarData && historial.length > 1 && historial[0].montoEnDolares && historial[historial.length - 1].montoEnDolares) {
+            const dolarInicial = historial[0].montoEnDolares;
+            const dolarFinal = historial[historial.length - 1].montoEnDolares;
+            const variacionDolar = ((dolarFinal / dolarInicial) - 1) * 100;
+            analisis = {
+                dolarInicial: dolarInicial,
+                dolarFinal: dolarFinal,
+                variacionDolar: variacionDolar
+            };
+        }
+
         return {
             statusCode: 200,
-            body: JSON.stringify({ historial: historial })
+            body: JSON.stringify({ historial: historial, analisis: analisis })
         };
 
     } catch (error) {
