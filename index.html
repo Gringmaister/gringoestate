@@ -542,6 +542,12 @@
     .ai-tool-card button { background-color: var(--primary); color: var(--dark); padding: .75rem 1.5rem; border-radius: 50px; transition: all .3s; font-weight: 700; border: none; }
     .ai-tool-card button:hover { background-color: #fff; }
     .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: pre-wrap; line-height: 1.7; color: #e0e0e0; }
+    .ai-result ul { list-style: none; padding: 0; }
+    .ai-result li { margin-bottom: 0.5rem; }
+    .ai-result .date { color: var(--primary); font-weight: bold; }
+    .ai-result .amount { color: #fff; }
+    .ai-result .error-msg { color: #ffda6a; }
+
     .loader { width: 24px; height: 24px; border: 3px solid #FFF; border-bottom-color: transparent; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; margin-top: 1rem; display: none; }
     @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     
@@ -1253,21 +1259,21 @@
     const alquilerResult = document.getElementById('alquiler-result');
     const loaderAlquiler = document.getElementById('loader-alquiler');
     
-    // --- LÓGICA DE CALCULADORA CON MANEJO DE ERRORES MEJORADO ---
+    // --- LÓGICA DE CALCULADORA CON HISTORIAL ---
     async function calcularNuevoAlquilerConAPI() {
         const montoOriginal = parseFloat(alquilerOriginalInput.value);
         const fechaInicioStr = fechaInicioInput.value; 
         const periodo = parseInt(periodoIndexacionInput.value);
 
         if (isNaN(montoOriginal) || !fechaInicioStr || isNaN(periodo)) {
-            alquilerResult.textContent = 'Por favor, completa todos los campos correctamente.';
+            alquilerResult.innerHTML = 'Por favor, completa todos los campos correctamente.';
             alquilerResult.style.color = '#ffda6a';
             return;
         }
 
         loaderAlquiler.style.display = 'inline-block';
         calcularAlquilerBtn.disabled = true;
-        alquilerResult.textContent = 'Calculando...';
+        alquilerResult.innerHTML = 'Calculando historial...';
         alquilerResult.style.color = '#e0e0e0';
 
         try {
@@ -1286,23 +1292,32 @@
             const result = await response.json();
 
             if (!response.ok) {
-                // Si la función Netlify devuelve un error (ej: 500), usa el mensaje de error del JSON
                 throw new Error(result.error || 'Hubo un problema con el servidor.');
             }
             
-            // --- CORRECCIÓN CLAVE: Mostrar resultado o el mensaje de error específico de la API ---
-            if (result.newAmount) {
-                const montoFormateado = result.newAmount.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-                alquilerResult.textContent = `El nuevo monto del alquiler es: ${montoFormateado}`;
+            // --- CORRECCIÓN CLAVE: Mostrar la lista del historial ---
+            if (result.historial && result.historial.length > 0) {
+                let htmlResult = '<ul>';
+                result.historial.forEach(item => {
+                    if(item.monto) {
+                        const montoFormateado = item.monto.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
+                        htmlResult += `<li><span class="date">${item.fecha}:</span> <span class="amount">${montoFormateado}</span></li>`;
+                    } else if (item.error) {
+                        htmlResult += `<li><span class="error-msg">${item.error}</span></li>`;
+                    }
+                });
+                htmlResult += '</ul>';
+                alquilerResult.innerHTML = htmlResult;
                 alquilerResult.style.color = '#e0e0e0';
-            } else {
-                // Si la API no devolvió 'newAmount', es porque devolvió un error.
-                // Lo mostramos directamente.
-                throw new Error(result.message || 'La respuesta de la API no tuvo el formato esperado.');
+            } else if (result.historial.length <= 1) {
+                 alquilerResult.innerHTML = 'Aún no corresponde realizar un ajuste según el período seleccionado.';
+            }
+            else {
+                throw new Error('La respuesta no contiene un historial válido.');
             }
 
         } catch (error) {
-            alquilerResult.textContent = `Error: ${error.message}`;
+            alquilerResult.innerHTML = `Error: ${error.message}`;
             alquilerResult.style.color = '#ff6b6b';
             console.error("Error en el cálculo de alquiler:", error);
         } finally {
