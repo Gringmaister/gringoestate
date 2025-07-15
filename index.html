@@ -799,36 +799,36 @@
               </p>
               <div class="ai-tools-wrapper">
                   <div class="ai-tool-card">
-                    <form>
-                      <h3>Generador de Descripciones de Propiedades</h3>
-                      <p>Ingresá los datos clave de tu propiedad y creá una descripción profesional y atractiva en segundos.</p>
-                      <textarea id="property-input" placeholder="Ej: 3 ambientes en Palermo, 75m2, balcón con vista abierta, muy luminoso, piso alto, cerca del subte D..."></textarea>
-                      <div class="ai-button-wrapper">
-                          <button type="button" id="generate-description-btn">Generar Descripción ✨</button>
-                          <div id="loader-description" class="loader"></div>
-                      </div>
-                    </form>
+                      <form>
+                          <h3>Generador de Descripciones de Propiedades</h3>
+                          <p>Ingresá los datos clave de tu propiedad y creá una descripción profesional y atractiva en segundos.</p>
+                          <textarea id="property-input" placeholder="Ej: 3 ambientes en Palermo, 75m2, balcón con vista abierta, muy luminoso, piso alto, cerca del subte D..."></textarea>
+                          <div class="ai-button-wrapper">
+                              <button type="button" id="generate-description-btn">Generar Descripción ✨</button>
+                              <div id="loader-description" class="loader"></div>
+                          </div>
+                      </form>
                       <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div>
                   </div>
                   <div class="ai-tool-card">
-                    <form>
-                      <h3>Calculadora de Actualización de Alquiler (IPC)</h3>
-                      <p>Calculá el valor actualizado de tu alquiler según el IPC. Ingresá los datos de tu contrato.</p>
-                      <input type="number" id="alquiler-original-input" placeholder="Monto Original del Alquiler ($)">
-                      <input type="month" id="fecha-inicio-input" placeholder="Fecha de Inicio del Contrato">
-                      <select id="periodo-indexacion-input">
-                          <option value="" disabled selected>Seleccioná el Período de Indexación</option>
-                          <option value="3">Trimestral (3 meses)</option>
-                          <option value="4">Cuatrimestral (4 meses)</option>
-                          <option value="6">Semestral (6 meses)</option>
-                      </select>
-                      <div class="ai-button-wrapper">
-                          <button type="button" id="calcular-alquiler-btn">Calcular Alquiler Actual ✨</button>
-                          <div id="loader-alquiler" class="loader"></div>
-                      </div>
-                    </form>
+                      <form>
+                          <h3>Calculadora de Actualización de Alquiler (IPC)</h3>
+                          <p>Calculá el valor actualizado de tu alquiler según el IPC. Ingresá los datos de tu contrato.</p>
+                          <input type="number" id="alquiler-original-input" placeholder="Monto Original del Alquiler ($)">
+                          <input type="month" id="fecha-inicio-input" placeholder="Fecha de Inicio del Contrato">
+                          <select id="periodo-indexacion-input">
+                              <option value="" disabled selected>Seleccioná el Período de Indexación</option>
+                              <option value="3">Trimestral (3 meses)</option>
+                              <option value="4">Cuatrimestral (4 meses)</option>
+                              <option value="6">Semestral (6 meses)</option>
+                          </select>
+                          <div class="ai-button-wrapper">
+                              <button type="button" id="calcular-alquiler-btn">Calcular Alquiler Actual ✨</button>
+                              <div id="loader-alquiler" class="loader"></div>
+                          </div>
+                      </form>
                       <div id="alquiler-result" class="ai-result">El monto actualizado aparecerá aquí...</div>
-                      <p class="ai-alert" style="text-align: center; margin-top: 1rem;">⚠️ Los datos del IPC se obtienen de fuentes oficiales (datos.gob.ar) y pueden tener un retraso en la última actualización.</p>
+                      <p class="ai-alert" style="text-align: center; margin-top: 1rem;">⚠️ Los datos para el cálculo son provistos por una API pública y pueden no estar 100% actualizados.</p>
                   </div>
                   <div class="ai-coming-soon">
                       <h3>MÁS HERRAMIENTAS EN CONSTRUCCIÓN...</h3>
@@ -1143,6 +1143,11 @@
         if (window.innerWidth < 1024 || prefersReducedMotion) {
             gsap.set([section, wrapper, container], { clearProps: 'all' });
             
+            // --- CAMBIO 1: FIX PARA EL SALTO DEL SCROLL EN MÓVIL ---
+            // Se resetea explícitamente la transformación 'x' que GSAP podría
+            // haber dejado "en memoria" de la vista de escritorio.
+            gsap.set(container, { x: 0, transform: 'none' });
+            
             section.style.height = 'auto';
             wrapper.style.position = 'relative';
             wrapper.style.height = 'auto';
@@ -1251,151 +1256,117 @@
     const alquilerResult = document.getElementById('alquiler-result');
     const loaderAlquiler = document.getElementById('loader-alquiler');
     
-    let ipcDataCache = null;
-
-    async function getIpcData() {
-        if (ipcDataCache) return ipcDataCache;
-        try {
-            const response = await fetch('/.netlify/functions/get-ipc-data');
-            if (!response.ok) {
-                 const errorBody = await response.text();
-                throw new Error(`Error en la respuesta del servidor: ${response.status} ${response.statusText}. Cuerpo: ${errorBody}`);
-            }
-            const data = await response.json();
-            if(!data.data) {
-                 throw new Error("El formato de datos del IPC no es el esperado.");
-            }
-            ipcDataCache = data.data.reduce((acc, item) => {
-                acc[item[0].substring(0, 7)] = item[1];
-                return acc;
-            }, {});
-            return ipcDataCache;
-        } catch (error) {
-            console.error("Error al obtener y procesar datos del IPC:", error);
-            alquilerResult.textContent = 'No se pudieron obtener los datos del IPC. Verifica la consola del navegador para más detalles.';
-            alquilerResult.style.color = '#ff6b6b';
-            return null;
-        }
-    }
-
-    // --- IPC CALCULATOR LOGIC (CORRECTED) ---
-    async function calcularNuevoAlquiler() {
+    // --- CAMBIO 2: LÓGICA DE CALCULADORA ACTUALIZADA PARA USAR RAPIDAPI ---
+    // Se reemplaza toda la lógica anterior por una nueva función que llama
+    // a una Netlify Function. Esta nueva función actuará como intermediario
+    // seguro para conectar con la API de RapidAPI.
+    
+    async function calcularNuevoAlquilerConAPI() {
         const montoOriginal = parseFloat(alquilerOriginalInput.value);
         const fechaInicioStr = fechaInicioInput.value; 
         const periodo = parseInt(periodoIndexacionInput.value);
 
+        // 1. Validar las entradas del usuario
         if (isNaN(montoOriginal) || !fechaInicioStr || isNaN(periodo)) {
             alquilerResult.textContent = 'Por favor, completa todos los campos correctamente.';
             alquilerResult.style.color = '#ffda6a';
             return;
         }
 
+        // 2. Mostrar estado de carga
         loaderAlquiler.style.display = 'inline-block';
-        alquilerResult.textContent = 'Consultando índices...';
+        calcularAlquilerBtn.disabled = true;
+        alquilerResult.textContent = 'Calculando...';
         alquilerResult.style.color = '#e0e0e0';
 
-        const ipcData = await getIpcData();
-
-        if (!ipcData) {
-            loaderAlquiler.style.display = 'none';
-            return;
-        }
-
-        const [startYear, startMonth] = fechaInicioStr.split('-').map(Number);
-        let montoActual = montoOriginal;
-        const hoy = new Date();
-        hoy.setHours(0,0,0,0);
-
-        let fechaAjuste = new Date(startYear, startMonth - 1, 1);
-        let ultimoMontoCalculado = montoOriginal;
-        let ultimaFechaAjuste = new Date(startYear, startMonth - 1, 1);
-        let ajusteRealizado = false;
-
-        while (true) {
-            fechaAjuste.setMonth(fechaAjuste.getMonth() + periodo);
-
-            if (fechaAjuste > hoy) {
-                break;
-            }
-
-            let fechaIndiceNuevo = new Date(fechaAjuste);
-            fechaIndiceNuevo.setMonth(fechaIndiceNuevo.getMonth() - 1);
-            
-            let fechaIndiceBase = new Date(fechaIndiceNuevo);
-            fechaIndiceBase.setMonth(fechaIndiceBase.getMonth() - periodo);
-
-            const indiceNuevoStr = `${fechaIndiceNuevo.getFullYear()}-${String(fechaIndiceNuevo.getMonth() + 1).padStart(2, '0')}`;
-            const indiceBaseStr = `${fechaIndiceBase.getFullYear()}-${String(fechaIndiceBase.getMonth() + 1).padStart(2, '0')}`;
-
-            const ipcNuevo = ipcData[indiceNuevoStr];
-            const ipcBase = ipcData[indiceBaseStr];
-
-            if (ipcBase === undefined || ipcNuevo === undefined) {
-                alquilerResult.textContent = `No hay datos de IPC para el ajuste de ${fechaAjuste.toLocaleString('es-AR', { month: 'long', year: 'numeric' })}. El cálculo se detiene aquí.`;
-                alquilerResult.style.color = '#ffda6a';
-                loaderAlquiler.style.display = 'none';
-                return;
-            }
-
-            montoActual = montoActual * (ipcNuevo / ipcBase);
-            ultimoMontoCalculado = montoActual;
-            ultimaFechaAjuste = fechaAjuste;
-            ajusteRealizado = true;
-        }
-        
-        if(!ajusteRealizado){
-             alquilerResult.textContent = 'Aún no corresponde realizar un ajuste según el período seleccionado.';
-        } else {
-             alquilerResult.textContent = `El alquiler actualizado a ${ultimaFechaAjuste.toLocaleString('es-AR', { month: 'long', year: 'numeric' })} es: $${ultimoMontoCalculado.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
-        }
-        alquilerResult.style.color = '#e0e0e0'; 
-        loaderAlquiler.style.display = 'none';
-    }
-
-
-    if (calcularAlquilerBtn) {
-        calcularAlquilerBtn.addEventListener('click', calcularNuevoAlquiler);
-    }
-
-    async function callGeminiAPI(prompt, resultElement, loaderElement) {
-        loaderElement.style.display = 'inline-block';
-        resultElement.textContent = 'Generando...';
-        resultElement.style.color = '#e0e0e0';
-
-        const payload = { 
-            prompt: prompt
-        };
-        const apiUrl = `/.netlify/functions/generate-description`; 
-
         try {
-            const response = await fetch(apiUrl, {
+            // 3. Preparar y enviar la petición a nuestra nueva Netlify Function
+            const payload = {
+                initialAmount: montoOriginal,
+                startDate: fechaInicioStr, // Formato YYYY-MM
+                months: periodo
+            };
+
+            const response = await fetch('/.netlify/functions/calculate-rent', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error("Error from API function:", errorData);
-                throw new Error(`API error: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`);
-            }
-            
             const result = await response.json();
 
-            if (result.text) {
-                resultElement.textContent = result.text;
-            } else {
-                resultElement.textContent = 'Error: La respuesta de la IA no tiene el formato esperado.';
-                resultElement.style.color = '#ff6b6b';
-                console.error('Unexpected API response format. Result:', result);
+            if (!response.ok) {
+                // Si la Netlify function devuelve un error (ej: 500) o la API externa falla
+                throw new Error(result.error || 'Hubo un problema con el servidor.');
             }
+            
+            // 4. Mostrar el resultado formateado que viene de la API
+            if (result.newAmount) {
+                const montoFormateado = result.newAmount.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
+                alquilerResult.textContent = `El nuevo monto del alquiler es: ${montoFormateado}`;
+                alquilerResult.style.color = '#e0e0e0';
+            } else {
+                // Si la API no devolvió lo esperado
+                throw new Error(result.error || 'La respuesta de la API no tuvo el formato esperado.');
+            }
+
         } catch (error) {
-            resultElement.textContent = 'Error al conectar con la IA. Revisa la consola del navegador.';
-            resultElement.style.color = '#ff6b6b';
-            console.error('Error calling the backend function:', error);
+            // 5. Manejar cualquier error que ocurra en el proceso
+            alquilerResult.textContent = `Error: ${error.message}`;
+            alquilerResult.style.color = '#ff6b6b';
+            console.error("Error en el cálculo de alquiler:", error);
         } finally {
-            loaderElement.style.display = 'none';
+            // 6. Limpiar el estado de carga, haya éxito o error
+            loaderAlquiler.style.display = 'none';
+            calcularAlquilerBtn.disabled = false;
         }
+    }
+
+    if (calcularAlquilerBtn) {
+        calcularAlquilerBtn.addEventListener('click', calcularNuevoAlquilerConAPI);
+    }
+    // --- FIN DEL CAMBIO 2 ---
+
+
+    async function callGeminiAPI(prompt, resultElement, loaderElement) {
+      loaderElement.style.display = 'inline-block';
+      resultElement.textContent = 'Generando...';
+      resultElement.style.color = '#e0e0e0';
+
+      const payload = { 
+          prompt: prompt
+      };
+      const apiUrl = `/.netlify/functions/generate-description`; 
+
+      try {
+          const response = await fetch(apiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+              const errorData = await response.json();
+              console.error("Error from API function:", errorData);
+              throw new Error(`API error: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`);
+          }
+          
+          const result = await response.json();
+
+          if (result.text) {
+              resultElement.textContent = result.text;
+          } else {
+              resultElement.textContent = 'Error: La respuesta de la IA no tiene el formato esperado.';
+              resultElement.style.color = '#ff6b6b';
+              console.error('Unexpected API response format. Result:', result);
+          }
+      } catch (error) {
+          resultElement.textContent = 'Error al conectar con la IA. Revisa la consola del navegador.';
+          resultElement.style.color = '#ff6b6b';
+          console.error('Error calling the backend function:', error);
+      } finally {
+          loaderElement.style.display = 'none';
+      }
     }
 
     if (generateDescriptionBtn) {
