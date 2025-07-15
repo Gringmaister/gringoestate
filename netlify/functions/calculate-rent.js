@@ -9,21 +9,16 @@ exports.handler = async function(event, context) {
     const { initialAmount, startDate, months } = JSON.parse(event.body);
 
     if (!initialAmount || !startDate || !months) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Faltan parámetros en la petición.' })
-      };
+      return { statusCode: 400, body: JSON.stringify({ error: 'Faltan parámetros.' }) };
     }
     
-    // La API espera el formato YYYY-MM-DD, así que agregamos el día 01
     const fullDate = `${startDate}-01`;
-
     const rapidApiKey = process.env.RAPIDAPI_KEY;
+
     if (!rapidApiKey) {
-      throw new Error("La API Key de RapidAPI no está configurada en el servidor.");
+      throw new Error("La API Key de RapidAPI no está configurada.");
     }
 
-    // --- CORRECCIÓN CLAVE: Usamos POST y enviamos los datos en el 'body' ---
     const options = {
       method: 'POST',
       headers: {
@@ -34,16 +29,18 @@ exports.handler = async function(event, context) {
       body: JSON.stringify({
         amount: initialAmount,
         date: fullDate,
-        months: months,
-        rate: 'ipc' // La API requiere este campo
+        months: parseInt(months), // Aseguramos que sea un número
+        rate: 'ipc'
       })
     };
 
     const apiResponse = await fetch('https://arquilerapi1.p.rapidapi.com/calculate', options);
     const data = await apiResponse.json();
 
-    if (!apiResponse.ok) {
-      throw new Error(data.message || 'Error en la API externa.');
+    // --- CORRECCIÓN CLAVE: Mejor manejo de errores de la API externa ---
+    if (!apiResponse.ok || data.error) {
+      // Si la API externa devuelve un error, lo pasamos al frontend.
+      throw new Error(data.message || data.error || 'Error en la API de cálculo.');
     }
 
     return {
