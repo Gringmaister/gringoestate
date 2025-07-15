@@ -1,43 +1,20 @@
 // Archivo a actualizar: netlify/functions/calculate-rent.js
 
+// URLs de las APIs públicas
 const IPC_API_URL = "https://apis.datos.gob.ar/series/api/series/?ids=148.3_INIVELNAL_DICI_M_26&limit=5000&format=json";
-const DOLAR_API_URL_BLUELYTICS = "https://api.bluelytics.com.ar/v2/historical";
+const DOLAR_API_URL_BLUELYTICS = "https://api.bluelytics.com.ar/v2/historical"; // Mejor para datos históricos
+const DOLAR_API_URL_DOLARAPI = "https://dolarapi.com/v1/dolares/blue"; // Fallback para valor actual
 
+// Variables para cachear los datos
 let ipcDataCache = null;
 let dolarDataCache = null;
 
-async function getDolarData() {
-    if (dolarDataCache === 'failed') return null; 
-    if (dolarDataCache) return dolarDataCache;
-    
-    try {
-        const response = await fetch(DOLAR_API_URL_BLUELYTICS);
-        if (response.ok) {
-            const data = await response.json();
-            console.log("Éxito al obtener datos de Bluelytics.");
-            dolarDataCache = data.reduce((acc, item) => {
-                acc[item.date] = item.value_sell;
-                return acc;
-            }, {});
-            return dolarDataCache;
-        } else {
-            // Si la respuesta no es OK, lanzamos un error con el status
-            throw new Error(`Respuesta no exitosa de Bluelytics: ${response.status} ${response.statusText}`);
-        }
-    } catch (error) {
-        // --- MEJORA CLAVE: Mostramos el error técnico completo ---
-        console.error("Fallo detallado de la API de Dólar:", error);
-        dolarDataCache = 'failed';
-        return null;
-    }
-}
-
-
+// Obtiene el historial del IPC
 async function getIpcData() {
     if (ipcDataCache) return ipcDataCache;
     try {
         const response = await fetch(IPC_API_URL);
-        if (!response.ok) throw new Error("Fallo en la API de IPC. No se puede continuar.");
+        if (!response.ok) throw new Error("Fallo en la API de IPC.");
         const data = await response.json();
         if(!data.data) throw new Error("Formato de datos de IPC inesperado.");
         ipcDataCache = data.data.reduce((acc, item) => {
@@ -48,9 +25,47 @@ async function getIpcData() {
     } catch (error) { throw error; }
 }
 
+// --- NUEVO: Sistema de Fallback para obtener el Dólar ---
+async function getDolarData() {
+    // No reintentar si ya falló en esta sesión.
+    if (dolarDataCache === 'failed') return null; 
+    if (dolarDataCache) return dolarDataCache;
+    
+    // 1. Intento con Bluelytics (preferido por su data histórica)
+    try {
+        const response = await fetch(DOLAR_API_URL_BLUELYTICS);
+        if (response.ok) {
+            const data = await response.json();
+            console.log("Éxito al obtener datos de Bluelytics.");
+            dolarDataCache = data.reduce((acc, item) => {
+                acc[item.date] = item.value_sell;
+                return acc;
+            }, {});
+            return dolarDataCache;
+        }
+    } catch (e) { console.error("Bluelytics falló, se continuará sin datos del dólar."); }
+
+    // 2. Si Bluelytics falla, marcamos como fallida y devolvemos null.
+    dolarDataCache = 'failed';
+    return null;
+}
+
+// Función auxiliar para buscar el dólar en una fecha o días anteriores
+function findDolarValue(date, data) {
+    if (!data) return null;
+    let diasAtras = 0;
+    while(diasAtras < 7) { // Busca hasta 7 días atrás por si es fin de semana o feriado
+        let d = new Date(date);
+        d.setDate(d.getDate() - diasAtras);
+        let fechaISO = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        if(data[fechaISO]) return data[fechaISO];
+        diasAtras++;
+    }
+    return null;
+}
+
 
 exports.handler = async function(event, context) {
-    // ... (El resto de la función queda exactamente igual)
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
     }
@@ -78,19 +93,6 @@ exports.handler = async function(event, context) {
 
         const historial = [];
         let fechaAjuste = new Date(startYear, startMonth - 1, 1);
-
-        const findDolarValue = (date, data) => {
-            if (!data) return null;
-            let diasAtras = 0;
-            while(diasAtras < 7) {
-                let d = new Date(date);
-                d.setDate(d.getDate() - diasAtras);
-                let fechaISO = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                if(data[fechaISO]) return data[fechaISO];
-                diasAtras++;
-            }
-            return null;
-        }
 
         while (true) {
             if (fechaAjuste > hoy && historial.length > 0) break;
@@ -128,6 +130,7 @@ exports.handler = async function(event, context) {
             fechaAjuste.setMonth(fechaAjuste.getMonth() + periodo);
         }
 
+        // --- CÁLCULO DEL ANÁLISIS FINAL MEJORADO ---
         let analisis = null;
         if (historial.length > 1) {
             const montoInicialPesos = historial[0].monto;
