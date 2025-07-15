@@ -1,51 +1,41 @@
-// Este es el código que se ejecuta de forma segura en los servidores de Netlify.
-// No es visible para los usuarios.
+// Archivo a actualizar: netlify/functions/generate-description.js
+
+// Importamos el SDK de Google
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 exports.handler = async function(event, context) {
-  // 1. Obtiene el texto que el usuario escribió en la web.
-  const { prompt } = JSON.parse(event.body);
-
-  // 2. Obtiene tu clave secreta de API de forma segura desde la configuración de Netlify.
-  const apiKey = process.env.GEMINI_API_KEY;
-
-  // Verifica que todo lo necesario esté presente.
-  if (!prompt || !apiKey) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'Faltan datos para la consulta.' })
-    };
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
 
-  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
   try {
-    // 3. Tu servidor (Netlify) llama a la API de Google, incluyendo la clave secreta.
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
-      }),
-    });
+    // --- CORRECCIÓN CLAVE: Leemos la llave de las variables de entorno ---
+    const geminiApiKey = process.env.GEMINI_API_KEY;
 
-    const result = await response.json();
-
-    if (!response.ok) {
-        // Si Google devuelve un error, lo capturamos.
-        throw new Error(result.error ? result.error.message : 'Error en la API de Gemini');
+    if (!geminiApiKey) {
+      throw new Error("La API Key de Gemini no está configurada en el servidor.");
     }
 
-    // 4. Tu servidor envía la respuesta exitosa de vuelta a tu página web.
+    // Inicializamos el cliente de Google AI con la llave
+    const genAI = new GoogleGenerativeAI(geminiApiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    const { prompt } = JSON.parse(event.body);
+    if (!prompt) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'No se recibió ningún prompt.' }) };
+    }
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
     return {
       statusCode: 200,
-      body: JSON.stringify(result)
+      body: JSON.stringify({ text: text })
     };
 
   } catch (error) {
-    // Si algo falla en nuestro asistente, también lo manejamos.
-    console.error('Error en la función serverless:', error);
+    console.error("Error en la función de Gemini:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: error.message })
