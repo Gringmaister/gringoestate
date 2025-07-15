@@ -544,7 +544,7 @@
     .ai-tool-card button:hover { background-color: #fff; }
     .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: pre-wrap; line-height: 1.7; color: #e0e0e0; text-align: center; }
     
-    .ai-result ul { list-style: none; padding: 0; text-align: left; }
+    .ai-result ul { list-style: none; padding: 0; text-align: left; display: inline-block; min-width: 300px; }
     .ai-result li { 
         margin-bottom: 0.75rem; 
         display: flex;
@@ -1324,7 +1324,7 @@
 
                         const dolarHtml = item.montoEnDolares
                             ? `<span class="dolar-amount">USD ${item.montoEnDolares.toFixed(2).replace('.', ',')}</span>`
-                            : `<span class="dolar-amount"></span>`;
+                            : `<span class="dolar-amount"></span>`; // Dejar vacío si no hay dato
 
                         htmlResult += `<li>
                                         <span class="date">${item.fecha}:</span> 
