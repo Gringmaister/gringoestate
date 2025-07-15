@@ -1,0 +1,8 @@
+{
+  "name": "gringoestate-functions",
+  "version": "1.0.0",
+  "description": "Dependencias para las Netlify Functions de GringoEstate",
+  "dependencies": {
+    "@google/generative-ai": "^0.14.1"
+  }
+}
