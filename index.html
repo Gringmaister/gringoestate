@@ -543,8 +543,9 @@
     .ai-tool-card textarea { min-height: 120px; }
     .ai-tool-card button { background-color: var(--primary); color: var(--dark); padding: .75rem 1.5rem; border-radius: 50px; transition: all .3s; font-weight: 700; border: none; }
     .ai-tool-card button:hover { background-color: #fff; }
-    .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: pre-wrap; line-height: 1.7; color: #e0e0e0; }
+    .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: normal; line-height: 1.7; color: #e0e0e0; }
     
+    /* --- NUEVO: Estilos para el historial y el análisis --- */
     .ai-result ul { list-style: none; padding: 0; margin-bottom: 1.5rem; }
     .ai-result li { 
         margin-bottom: 0.75rem; 
@@ -574,6 +575,7 @@
     .ai-result .analysis-summary p {
         margin-bottom: 0.5rem;
         font-size: 1rem;
+        line-height: 1.6;
     }
      .ai-result .analysis-summary .dolar-change {
         font-weight: bold;
@@ -1366,21 +1368,30 @@
                 throw new Error('La respuesta no contiene un historial válido.');
             }
 
-            // --- NUEVO: Añadir el bloque de análisis si existe ---
             if (result.analisis) {
                 const variacionPesosHtml = `<span class="dolar-change positive">+${result.analisis.variacionPesos.toFixed(2).replace('.', ',')}%</span>`;
                 let variacionDolarHtml = 'No disponible';
+                let analisisTexto = 'Si tus ingresos son en pesos, tu alquiler se mantuvo relativamente estable frente a la inflación.';
 
                 if (result.analisis.variacionDolar !== null) {
                     const variacionClass = result.analisis.variacionDolar >= 0 ? 'positive' : 'negative';
                     const signo = result.analisis.variacionDolar >= 0 ? '+' : '';
                     variacionDolarHtml = `<span class="dolar-change ${variacionClass}">${signo}${result.analisis.variacionDolar.toFixed(2).replace('.', ',')}%</span>`;
+                    
+                    if(result.analisis.variacionDolar < -10) {
+                        analisisTexto = 'Si tus ingresos son en dólares, tu alquiler se licuó significativamente. ¡Una gran noticia para el inquilino!';
+                    } else if (result.analisis.variacionDolar > 10) {
+                         analisisTexto = 'Si tus ingresos son en dólares, el alquiler aumentó. El propietario logró mantener o mejorar su rentabilidad en moneda dura.';
+                    } else {
+                         analisisTexto = 'El valor en dólares se mantuvo relativamente estable. Un escenario equilibrado para ambas partes.';
+                    }
                 }
                 
                 htmlResult += `<div class="analysis-summary">
                                 <p><strong>Análisis del Contrato:</strong></p>
                                 <p>Aumento total en Pesos: ${variacionPesosHtml}</p>
                                 <p>Variación en Dólares: ${variacionDolarHtml}</p>
+                                <p><em>${analisisTexto}</em></p>
                                </div>`;
             }
 
