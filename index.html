@@ -546,21 +546,20 @@
     .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: normal; line-height: 1.7; color: #e0e0e0; }
     
     /* --- NUEVO: Estilos para el historial y el análisis --- */
-    .ai-result ul { list-style: none; padding: 0; margin-bottom: 1.5rem; }
+    .ai-result ul { list-style: none; padding: 0; margin-bottom: 1.5rem; display: table; width: 100%; border-collapse: separate; border-spacing: 0 0.75rem;}
     .ai-result li { 
-        margin-bottom: 0.75rem; 
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1rem;
+        display: table-row;
+    }
+    .ai-result .date, .ai-result .amount-group {
+        display: table-cell;
+        vertical-align: middle;
         padding-bottom: 0.75rem;
         border-bottom: 1px solid #333;
     }
-    .ai-result li:last-child {
+    .ai-result li:last-child .date, .ai-result li:last-child .amount-group {
         border-bottom: none;
     }
-    .ai-result .date { color: var(--primary); font-weight: bold; text-transform: capitalize;}
+    .ai-result .date { color: var(--primary); font-weight: bold; text-transform: capitalize; text-align: left;}
     .ai-result .amount-group { text-align: right; }
     .ai-result .amount { color: #fff; font-size: 1.1rem; display: block; }
     .ai-result .percentage { color: var(--green); font-size: 0.9em; font-weight: bold; }
@@ -577,6 +576,7 @@
         color: var(--primary);
         font-size: 1.25rem;
         margin-bottom: 1rem;
+        letter-spacing: 1px;
     }
     .ai-result .analysis-summary p {
         margin-bottom: 0.5rem;
@@ -1377,7 +1377,7 @@
             if (result.analisis) {
                 const variacionPesosHtml = `<span class="dolar-change positive">+${result.analisis.variacionPesos.toFixed(2).replace('.', ',')}%</span>`;
                 let variacionDolarHtml = 'No disponible';
-                let analisisTexto = 'Si tus ingresos son en pesos, el alquiler se mantuvo relativamente estable frente a la inflación.';
+                let analisisTexto = 'Si tus ingresos son en pesos, tu alquiler se mantuvo relativamente estable frente a la inflación.';
 
                 if (result.analisis.variacionDolar !== null) {
                     const variacionClass = result.analisis.variacionDolar >= 0 ? 'positive' : 'negative';
