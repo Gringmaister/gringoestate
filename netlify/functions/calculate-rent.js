@@ -1,12 +1,10 @@
 // Archivo a actualizar: netlify/functions/calculate-rent.js
 
-// URLs de las APIs públicas en orden de prioridad
+// URLs de las APIs públicas
 const IPC_API_URL = "https://apis.datos.gob.ar/series/api/series/?ids=148.3_INIVELNAL_DICI_M_26&limit=5000&format=json";
-const DOLAR_API_URL_BLUELYTICS = "https://api.bluelytics.com.ar/v2/historical"; // Mejor para datos históricos
-const DOLAR_API_URL_DOLARAPI = "https://dolarapi.com/v1/dolares/blue"; // Fallback para valor actual
-const DOLAR_API_URL_CRIPTOYA = "https://criptoya.com/api/dolar"; // Fallback para valor actual
+const DOLAR_API_URL_BLUELYTICS = "https://api.bluelytics.com.ar/v2/historical";
 
-// Variables para cachear los datos
+// Variables para cachear los datos y no llamar a las APIs en cada ejecución
 let ipcDataCache = null;
 let dolarDataCache = null;
 
@@ -28,8 +26,10 @@ async function getIpcData() {
 
 // --- NUEVO: Sistema de Fallback para obtener el Dólar ---
 async function getDolarData() {
+    // No reintentar si ya falló en esta sesión.
+    if (dolarDataCache === 'failed') return null; 
     if (dolarDataCache) return dolarDataCache;
-
+    
     // 1. Intento con Bluelytics (preferido por su data histórica)
     try {
         const response = await fetch(DOLAR_API_URL_BLUELYTICS);
@@ -42,13 +42,10 @@ async function getDolarData() {
             }, {});
             return dolarDataCache;
         }
-    } catch (e) { console.error("Bluelytics falló, intentando siguiente..."); }
+    } catch (e) { console.error("Bluelytics falló. Se continuará sin datos del dólar."); }
 
-    // 2. Si Bluelytics falla, creamos un cache vacío para no reintentar y devolvemos null.
-    // Las otras APIs solo dan el valor actual, no sirven para el cálculo histórico.
-    // La lógica del frontend se encargará de mostrar el cálculo solo en pesos.
-    console.warn("No se pudo obtener el historial del dólar. El cálculo se realizará solo en pesos.");
-    dolarDataCache = null;
+    // 2. Si Bluelytics falla, marcamos como fallida y devolvemos null.
+    dolarDataCache = 'failed';
     return null;
 }
 
