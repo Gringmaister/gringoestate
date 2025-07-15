@@ -1,13 +1,12 @@
 // Archivo a actualizar: netlify/functions/calculate-rent.js
 
-// URLs de las APIs públicas
+// URLs de las APIs públicas en orden de prioridad
 const IPC_API_URL = "https://apis.datos.gob.ar/series/api/series/?ids=148.3_INIVELNAL_DICI_M_26&limit=5000&format=json";
-const DOLAR_API_URL_BLUELYTICS = "https://api.bluelytics.com.ar/v2/historical";
-const DOLAR_API_URL_DOLARAPI = "https://dolarapi.com/v1/dolares/blue";
-const DOLAR_API_URL_CRIPTOYA = "https://criptoya.com/api/dolar";
+const DOLAR_API_URL_BLUELYTICS = "https://api.bluelytics.com.ar/v2/historical"; // Mejor para datos históricos
+const DOLAR_API_URL_DOLARAPI = "https://dolarapi.com/v1/dolares/blue"; // Fallback para valor actual
+const DOLAR_API_URL_CRIPTOYA = "https://criptoya.com/api/dolar"; // Fallback para valor actual
 
-
-// --- FUNCIONES PARA OBTENER DATOS ---
+// Variables para cachear los datos
 let ipcDataCache = null;
 let dolarDataCache = null;
 
@@ -28,52 +27,36 @@ async function getIpcData() {
 }
 
 // --- NUEVO: Sistema de Fallback para obtener el Dólar ---
-// Intenta obtener el valor del dólar de una fecha específica desde 3 fuentes.
-async function getDolarValueForDate(date) {
-    if (dolarDataCache) {
-        let valor = findDolarValue(date, dolarDataCache);
-        if (valor) return valor;
-    }
-    
-    // 1. Intento con Bluelytics (mejor para datos históricos)
+async function getDolarData() {
+    if (dolarDataCache) return dolarDataCache;
+
+    // 1. Intento con Bluelytics (preferido por su data histórica)
     try {
         const response = await fetch(DOLAR_API_URL_BLUELYTICS);
         if (response.ok) {
             const data = await response.json();
+            console.log("Éxito al obtener datos de Bluelytics.");
             dolarDataCache = data.reduce((acc, item) => {
                 acc[item.date] = item.value_sell;
                 return acc;
             }, {});
-            let valor = findDolarValue(date, dolarDataCache);
-            if (valor) return valor;
+            return dolarDataCache;
         }
     } catch (e) { console.error("Bluelytics falló, intentando siguiente..."); }
 
-    // 2. Si falla, intento con CriptoYa para la fecha actual (no tiene buen histórico)
-    try {
-        const response = await fetch(DOLAR_API_URL_CRIPTOYA);
-        if (response.ok) {
-            const data = await response.json();
-            return data.blue; // Devuelve el valor actual si las otras fallan
-        }
-    } catch (e) { console.error("CriptoYa falló, intentando siguiente..."); }
-    
-    // 3. Último intento con DolarAPI para la fecha actual
-    try {
-        const response = await fetch(DOLAR_API_URL_DOLARAPI);
-        if (response.ok) {
-            const data = await response.json();
-            return data.venta;
-        }
-    } catch (e) { console.error("DolarAPI falló."); }
-
-    return null; // Si todas fallan
+    // 2. Si Bluelytics falla, creamos un cache vacío para no reintentar y devolvemos null.
+    // Las otras APIs solo dan el valor actual, no sirven para el cálculo histórico.
+    // La lógica del frontend se encargará de mostrar el cálculo solo en pesos.
+    console.warn("No se pudo obtener el historial del dólar. El cálculo se realizará solo en pesos.");
+    dolarDataCache = null;
+    return null;
 }
 
 // Función auxiliar para buscar el dólar en una fecha o días anteriores
 function findDolarValue(date, data) {
+    if (!data) return null;
     let diasAtras = 0;
-    while(diasAtras < 7) {
+    while(diasAtras < 7) { // Busca hasta 7 días atrás por si es fin de semana o feriado
         let d = new Date(date);
         d.setDate(d.getDate() - diasAtras);
         let fechaISO = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -90,8 +73,11 @@ exports.handler = async function(event, context) {
     }
 
     try {
-        const ipcData = await getIpcData();
-        if(!ipcData) throw new Error("No se pudieron obtener los datos del IPC.");
+        const [ipcData, dolarData] = await Promise.all([getIpcData(), getDolarData()]);
+
+        if(!ipcData) {
+            throw new Error("No se pudieron obtener los datos del IPC para el cálculo.");
+        }
 
         const { initialAmount, startDate, months } = JSON.parse(event.body);
         const montoOriginal = parseFloat(initialAmount);
@@ -113,12 +99,11 @@ exports.handler = async function(event, context) {
         while (true) {
             if (fechaAjuste > hoy && historial.length > 0) break;
 
-            const valorDolar = await getDolarValueForDate(fechaAjuste);
+            const valorDolar = findDolarValue(fechaAjuste, dolarData);
             const montoEnDolares = valorDolar ? (montoActual / valorDolar) : null;
             
             let porcentajeAumento = 0;
             if (historial.length > 0) {
-                // Lógica de cálculo de IPC
                 const fechaIndiceNuevo = new Date(fechaAjuste);
                 fechaIndiceNuevo.setMonth(fechaIndiceNuevo.getMonth() - 1);
                 const fechaIndiceBase = new Date(fechaIndiceNuevo);
@@ -149,7 +134,7 @@ exports.handler = async function(event, context) {
 
         // --- CÁLCULO DEL ANÁLISIS FINAL MEJORADO ---
         let analisis = null;
-        if (historial.length > 0) {
+        if (historial.length > 1) {
             const montoInicialPesos = historial[0].monto;
             const montoFinalPesos = historial[historial.length - 1].monto;
             const variacionPesos = ((montoFinalPesos / montoInicialPesos) - 1) * 100;
