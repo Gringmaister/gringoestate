@@ -1,8 +1,8 @@
-// Archivo a actualizar: netlify/functions/calculate-rent.js
-// VERSIÓN DE DEBUG: Lanza un error visible si las APIs de dólar fallan.
+// Archivo final: netlify/functions/calculate-rent.js
 
+// --- URLs de las APIs (CORREGIDA) ---
 const IPC_API_URL = "https://apis.datos.gob.ar/series/api/series/?ids=148.3_INIVELNAL_DICI_M_26&limit=5000&format=json";
-const DOLAR_API_URL_BLUELYTICS = "https://api.bluelytics.com.ar/v2/historical";
+const DOLAR_API_URL_BLUELYTICS = "https://api.bluelytics.com.ar/v2/evolution.json"; // URL CORREGIDA
 const DOLAR_API_URL_DOLARAPI = "https://dolarapi.com/v1/dolares/blue/";
 const DOLAR_API_URL_CRIPTOYA = "https://criptoya.com/api/dolar";
 
@@ -13,51 +13,58 @@ async function getIpcData() {
     if (ipcDataCache) return ipcDataCache;
     try {
         const response = await fetch(IPC_API_URL);
-        if (!response.ok) throw new Error(`Fallo en la API de IPC (datos.gob.ar). Código: ${response.status}`);
+        if (!response.ok) return null;
         const data = await response.json();
-        if(!data.data) throw new Error("Formato de datos de IPC inesperado.");
+        if(!data.data) return null;
         ipcDataCache = data.data.reduce((acc, item) => {
             acc[item[0].substring(0, 7)] = item[1];
             return acc;
         }, {});
         return ipcDataCache;
-    } catch (error) { throw error; }
+    } catch (error) { return null; }
 }
 
+// --- LÓGICA DE OBTENCIÓN DE DÓLAR CORREGIDA ---
 async function getDolarData() {
     if (dolarDataCache) return dolarDataCache;
     try {
         const response = await fetch(DOLAR_API_URL_BLUELYTICS);
         if (response.ok) {
             const data = await response.json();
-            dolarDataCache = data.reduce((acc, item) => {
-                acc[item.date] = item.value_sell;
-                return acc;
-            }, {});
+            // El nuevo endpoint devuelve una lista con 'oficial' y 'blue', debemos filtrar
+            dolarDataCache = data
+                .filter(item => item.type === 'blue')
+                .reduce((acc, item) => {
+                    // El nuevo campo de fecha se llama 'day' en lugar de 'date'
+                    acc[item.day] = item.value_sell;
+                    return acc;
+                }, {});
             return dolarDataCache;
         }
-    } catch (e) {
-        // No hacer nada, se usará el fallback
-    }
+    } catch (e) { /* Falla silenciosa para pasar al siguiente fallback */ }
     dolarDataCache = null;
     return null;
 }
 
 async function getDolarValueForDate(date) {
+    const fechaISO = date.toISOString().split('T')[0];
+
+    // 1. Intento con el cache de Bluelytics (evolution.json)
     if (dolarDataCache) {
         for(let i = 0; i < 7; i++) {
             let d = new Date(date);
             d.setDate(d.getDate() - i);
-            let fechaISO = d.toISOString().split('T')[0];
-            if(dolarDataCache[fechaISO]) return dolarDataCache[fechaISO];
+            let dISO = d.toISOString().split('T')[0];
+            if(dolarDataCache[dISO]) return dolarDataCache[dISO];
         }
     }
 
+    // 2. Fallback: DolarAPI
     for (let i = 0; i < 7; i++) {
         let d = new Date(date);
         d.setDate(d.getDate() - i);
-        const fechaISO = d.toISOString().split('T')[0];
-        const url = DOLAR_API_URL_DOLARAPI + fechaISO;
+        const dISO = d.toISOString().split('T')[0];
+        const url = DOLAR_API_URL_DOLARAPI + dISO;
         try {
             const response = await fetch(url);
             if (response.ok) {
@@ -67,6 +74,7 @@ async function getDolarValueForDate(date) {
         } catch (error) { /* Seguir intentando */ }
     }
 
+    // 3. Último recurso: CriptoYa (valor actual)
     try {
         const response = await fetch(DOLAR_API_URL_CRIPTOYA);
         if(response.ok) {
@@ -75,11 +83,8 @@ async function getDolarValueForDate(date) {
         }
     } catch(e) { /* Falló el último recurso */ }
 
-    // ***** MODIFICACIÓN CLAVE *****
-    // Si llegamos aquí, todas las APIs fallaron. En lugar de devolver null, lanzamos un error.
-    throw new Error('Todas las APIs de Dólar (Bluelytics, DolarAPI, CriptoYa) fallaron. No se pudo obtener la cotización.');
+    return null; // Devuelve null si todo falla
 }
-
 
 exports.handler = async function(event, context) {
     if (event.httpMethod !== 'POST') {
@@ -87,23 +92,17 @@ exports.handler = async function(event, context) {
     }
 
     try {
-        const { initialAmount, startDate, months } = JSON.parse(event.body);
-        
-        // Validaciones iniciales
-        if (!initialAmount || !startDate || !months) {
-            return { statusCode: 400, body: JSON.stringify({ error: 'Faltan parámetros: initialAmount, startDate y months son requeridos.' }) };
-        }
-        
         const [ipcData, _] = await Promise.all([getIpcData(), getDolarData()]);
 
         if(!ipcData) {
             throw new Error("No se pudieron obtener los datos del IPC para el cálculo.");
         }
 
+        const { initialAmount, startDate, months } = JSON.parse(event.body);
         const montoOriginal = parseFloat(initialAmount);
         const periodo = parseInt(months);
         const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
-        
+
         let montoActual = montoOriginal;
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0);
@@ -115,7 +114,7 @@ exports.handler = async function(event, context) {
             if (fechaAjuste > hoy && historial.length > 0) break;
 
             const valorDolar = await getDolarValueForDate(fechaAjuste);
-            
+
             let porcentajeAumento = 0;
             if (historial.length > 0) {
                 const fechaIndiceNuevo = new Date(fechaAjuste);
@@ -126,7 +125,7 @@ exports.handler = async function(event, context) {
                 const indiceBaseStr = `${fechaIndiceBase.getFullYear()}-${String(fechaIndiceBase.getMonth() + 1).padStart(2, '0')}`;
                 const ipcNuevo = ipcData[indiceNuevoStr];
                 const ipcBase = ipcData[indiceBaseStr];
-                
+
                 if (ipcBase === undefined || ipcNuevo === undefined) {
                     historial.push({ error: `No hay datos de IPC para el ajuste de ${fechaAjuste.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })}.` });
                     break;
@@ -141,7 +140,7 @@ exports.handler = async function(event, context) {
                 porcentaje: porcentajeAumento,
                 montoEnDolares: valorDolar ? (montoActual / valorDolar) : null
             });
-            
+
             if (fechaAjuste > hoy) break;
             fechaAjuste.setMonth(fechaAjuste.getMonth() + periodo);
         }
@@ -171,7 +170,6 @@ exports.handler = async function(event, context) {
         };
 
     } catch (error) {
-        // Si algo falla (incluyendo nuestro nuevo error de las APIs de dólar), se enviará este mensaje.
         return {
             statusCode: 500,
             body: JSON.stringify({ error: error.message })
