@@ -12,9 +12,10 @@
   <link rel="icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp" sizes="any">
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp">
 
+  <!-- META TAGS CORREGIDAS PARA WHATSAPP/SOCIALES -->
   <meta property="og:title" content="GringoEstate – Real Estate sin corbata">
   <meta property="og:description" content="Soy Franco Garbini y hago que el Real Estate en CABA sea más simple y rentable para vos. Esta es mi carta de presentación y mis servicios. ¿Tenés una idea? Agendá una llamada y la bajamos a tierra.">
-  <meta property="og:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp">
+  <meta property="og:image" content="https://www.gringo.estate/images/gringoestate-og-image.jpg">
   <meta property="og:url" content="https://www.gringo.estate">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_AR">
@@ -22,7 +23,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="GringoEstate – Real Estate sin corbata">
   <meta name="twitter:description" content="Soy Franco Garbini y hago que el Real Estate en CABA sea más simple y rentable para vos. Esta es mi carta de presentación y mis servicios. ¿Tenés una idea? Agendá una llamada y la bajamos a tierra.">
-  <meta name="twitter:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp">
+  <meta name="twitter:image" content="https://www.gringo.estate/images/gringoestate-og-image.jpg">
   
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -53,7 +54,7 @@
       padding: 0;
       box-sizing: border-box;
       font-family: 'Roboto', sans-serif;
-      scroll-behavior: smooth;
+      /* CORRECCIÓN: Se eliminó scroll-behavior: smooth; para evitar conflictos con GSAP */
     }
     body::-webkit-scrollbar {
       width: 8px;
@@ -617,12 +618,21 @@
 
     @media (max-width: 1023px) {
       .nav-links-desktop { display: none; }
+      
+      /* Estilos para que las tarjetas se vean como una columna en móvil */
+      .horizontal-scroll-section { height: auto !important; }
+      .horizontal-scroll-wrapper { position: relative !important; height: auto !important; overflow: visible !important; }
+      .cards-container { 
+        flex-direction: column; 
+        align-items: center;
+        width: 100%;
+        padding: 0 1.5rem;
+        gap: 1.5rem;
+      }
+      .service-card-stacked { width: 100% !important; max-width: 500px; }
     }
 
     @media (max-width: 768px) {
-      .cards-container { width: 100%; padding: 0 5vw; }
-      .service-card-stacked { width: 100%; }
-      
       .card-modal-content-wrapper { width: 95%; height: 85%; }
       .card-modal-text-content { padding: 1.5rem; }
       .card-modal-text-content h3 { font-size: 2rem; }
@@ -949,15 +959,6 @@
     gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    function debounce(func, wait) {
-      let timeout;
-      return function(...args) {
-        const context = this;
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(context, args), wait);
-      };
-    }
-
     // --- Cursor Logic ---
     if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
         const cursorRegular = document.getElementById('cursor-regular');
@@ -1105,18 +1106,24 @@
         cardModal.classList.add('is-visible');
         document.body.classList.add('no-scroll');
 
-        if (horizontalScrollInstance) {
-            horizontalScrollInstance.disable();
-        }
+        // Deshabilitar el scroll horizontal de GSAP mientras el modal está abierto
+        ScrollTrigger.getAll().forEach(trigger => {
+            if (trigger.pin && trigger.pin.classList.contains('horizontal-scroll-wrapper')) {
+                trigger.disable();
+            }
+        });
     }
 
     function closeCardModal() {
         cardModal.classList.remove('is-visible');
         document.body.classList.remove('no-scroll');
-
-        if (horizontalScrollInstance) {
-            horizontalScrollInstance.enable();
-        }
+        
+        // Rehabilitar el scroll horizontal de GSAP
+        ScrollTrigger.getAll().forEach(trigger => {
+            if (trigger.pin && trigger.pin.classList.contains('horizontal-scroll-wrapper')) {
+                trigger.enable();
+            }
+        });
     }
     
     document.querySelectorAll('.service-card-stacked').forEach(card => {
@@ -1129,7 +1136,6 @@
         });
     });
 
-    // --- CTA MODAL BUTTON LOGIC (CORRECTED) ---
     cardModal.addEventListener('click', (e) => {
         const actionButton = e.target.closest('button.btn-card[data-interest]');
         const externalLink = e.target.closest('a.btn-card');
@@ -1140,19 +1146,11 @@
                 interestSelect.value = interest;
                 interestSelect.dispatchEvent(new Event('change'));
             }
-
-            cardModal.classList.remove('is-visible');
-            document.body.classList.remove('no-scroll');
-
+            closeCardModal();
             gsap.to(window, {
                 duration: 1, 
                 scrollTo: { y: "#contact", offsetY: 70 },
                 ease: "power2.inOut",
-                onComplete: () => {
-                    if (horizontalScrollInstance) {
-                        horizontalScrollInstance.enable();
-                    }
-                }
             });
         
         } else if (externalLink) {
@@ -1174,66 +1172,41 @@
         }
     });
 
-    // --- HORIZONTAL SCROLL LOGIC (CORRECTED FOR MOBILE JUMP) ---
-    function setupHorizontalScroll() {
-        const section = document.querySelector('.horizontal-scroll-section');
-        if (!section) return;
-
-        const wrapper = section.querySelector('.horizontal-scroll-wrapper');
-        const container = section.querySelector('.cards-container');
+    // --- CORRECCIÓN: NUEVA LÓGICA DE SCROLL HORIZONTAL CON MATCHMEDIA ---
+    if (!prefersReducedMotion) {
+      ScrollTrigger.matchMedia({
         
-        if (horizontalScrollInstance) {
-            horizontalScrollInstance.kill();
-            horizontalScrollInstance = null;
-        }
-        ScrollTrigger.getAll().forEach(trigger => {
-            if (trigger.trigger === section || trigger.trigger === wrapper || trigger.trigger === container) {
-                trigger.kill();
-            }
-        });
+        // Lógica para Escritorio (viewport >= 1024px)
+        "(min-width: 1024px)": function() {
+          const section = document.querySelector('.horizontal-scroll-section');
+          if (!section) return;
 
-        if (window.innerWidth < 1024 || prefersReducedMotion) {
-            gsap.set([section, wrapper, container], { clearProps: 'all' });
-            
-            gsap.set(container, { x: 0, transform: 'none' });
-            
-            section.style.height = 'auto';
-            wrapper.style.position = 'relative';
-            wrapper.style.height = 'auto';
-            wrapper.style.overflow = 'visible';
-            container.style.display = 'flex';
-            container.style.flexDirection = 'column';
-            container.style.alignItems = 'center';
-            container.style.width = '100%';
-            container.style.padding = '0 1.5rem';
-            container.style.gap = '1.5rem';
-            gsap.utils.toArray('.service-card-stacked').forEach(card => card.style.width = '100%');
-            
-            ScrollTrigger.refresh(true);
-            return;
-        }
-
-        // Desktop logic
-        gsap.set(wrapper, { position: 'sticky', top: 0, height: '100vh', width: '100%', overflow: 'hidden' });
-        gsap.set(container, { display: 'flex', flexDirection: 'row' });
-
-        const scrollW = container.scrollWidth - window.innerWidth;
-        section.style.height = `${scrollW + window.innerHeight}px`;
-
-        horizontalScrollInstance = gsap.to(container, {
-            x: -scrollW,
+          const wrapper = section.querySelector('.horizontal-scroll-wrapper');
+          const container = section.querySelector('.cards-container');
+          
+          let scrollTween = gsap.to(container, {
+            x: () => -(container.scrollWidth - wrapper.clientWidth),
             ease: 'none',
             scrollTrigger: {
-                trigger: section,
-                start: 'top top',
-                end: () => `+=${scrollW}`,
-                pin: wrapper,
-                scrub: true,
-                invalidateOnRefresh: true
+              trigger: section,
+              pin: wrapper,
+              scrub: true,
+              end: () => `+=${container.scrollWidth - wrapper.clientWidth}`,
+              invalidateOnRefresh: true
             }
-        });
+          });
+
+          // Función de limpieza: se ejecuta cuando la media query deja de aplicar
+          return function() {
+            scrollTween.kill();
+          };
+        },
+
+        // En móvil, no se crea ninguna animación, por lo que no hay nada que matar.
+        // Los estilos CSS se encargan de mostrar las tarjetas en columna.
+      });
     }
-    
+
     // --- Particle Animation ---
     function initParticleAnimation() {
         if (prefersReducedMotion || !document.getElementById('particle-canvas')) return; 
@@ -1286,12 +1259,7 @@
 
     // --- Initializations ---
     initParticleAnimation();
-    setupHorizontalScroll();
     
-    window.addEventListener('resize', debounce(() => {
-        setupHorizontalScroll();
-    }, 250));
-
     // --- IA Tool Event Listeners ---
     const generateDescriptionBtn = document.getElementById('generate-description-btn');
     const propertyInput = document.getElementById('property-input');
@@ -1323,9 +1291,10 @@
         alquilerResult.style.color = '#e0e0e0';
 
         try {
+            // --- CORRECCIÓN: Se agrega '-01' para crear una fecha completa (YYYY-MM-DD) ---
             const payload = {
                 initialAmount: montoOriginal,
-                startDate: fechaInicioStr,
+                startDate: fechaInicioStr + '-01',
                 months: periodo
             };
 
@@ -1394,11 +1363,11 @@
                 }
                 
                 htmlResult += `<div class="analysis-summary">
-                                <h4>Análisis del Contrato</h4>
-                                <p>Aumento total en Pesos: ${variacionPesosHtml}</p>
-                                <p>Variación en Dólares: ${variacionDolarHtml}</p>
-                                <p><em><strong>Conclusión:</strong> ${analisisTexto}</em></p>
-                               </div>`;
+                                    <h4>Análisis del Contrato</h4>
+                                    <p>Aumento total en Pesos: ${variacionPesosHtml}</p>
+                                    <p>Variación en Dólares: ${variacionDolarHtml}</p>
+                                    <p><em><strong>Conclusión:</strong> ${analisisTexto}</em></p>
+                                   </div>`;
             }
 
             alquilerResult.innerHTML = htmlResult;
@@ -1442,10 +1411,9 @@
           }
           
           if (result.text) {
-              // --- CORRECCIÓN PARA FORMATEAR EL TEXTO DE GEMINI ---
               resultElement.innerHTML = result.text.replace(/\n/g, '<br>');
               resultElement.style.textAlign = 'left';
-              resultElement.style.whiteSpace = 'normal'; // Permite que el texto se ajuste
+              resultElement.style.whiteSpace = 'normal';
           } else {
               throw new Error('La respuesta de la IA no tuvo el formato esperado.');
           }
@@ -1474,4 +1442,4 @@
   </script>
 
 </body>
-</ht
+</html>
