@@ -12,10 +12,9 @@
   <link rel="icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp" type="image/webp" sizes="any">
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/isologo.webp">
 
-  <!-- META TAGS CORREGIDAS PARA WHATSAPP/SOCIALES -->
   <meta property="og:title" content="GringoEstate – Real Estate sin corbata">
   <meta property="og:description" content="Soy Franco Garbini y hago que el Real Estate en CABA sea más simple y rentable para vos. Esta es mi carta de presentación y mis servicios. ¿Tenés una idea? Agendá una llamada y la bajamos a tierra.">
-  <meta property="og:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/gringoestate-og-image.jpg">
+  <meta property="og:image" content="https://www.gringo.estate/images/gringoestate-og-image.jpg">
   <meta property="og:url" content="https://www.gringo.estate">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_AR">
@@ -23,7 +22,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="GringoEstate – Real Estate sin corbata">
   <meta name="twitter:description" content="Soy Franco Garbini y hago que el Real Estate en CABA sea más simple y rentable para vos. Esta es mi carta de presentación y mis servicios. ¿Tenés una idea? Agendá una llamada y la bajamos a tierra.">
-  <meta name="twitter:image" content="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/gringoestate-og-image.jpg">
+  <meta name="twitter:image" content="https://www.gringo.estate/images/gringoestate-og-image.jpg">
   
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -48,7 +47,6 @@
       --card-bg: #1A1A1A;
       --green: #25d366;
       --red: #e74c3c;
-      --blue: #3498db;
     }
     * {
       margin: 0;
@@ -77,6 +75,7 @@
       cursor: none;
     }
 
+    /* ---- Mobile Menu ---- */
     body.no-scroll {
       overflow: hidden;
     }
@@ -545,6 +544,76 @@
     .ai-tool-card button:hover { background-color: #fff; }
     .ai-result { background-color: var(--dark); border: 1px solid #333; border-radius: 6px; padding: 1.5rem; margin-top: 1rem; min-height: 100px; white-space: normal; line-height: 1.7; color: #e0e0e0; }
     
+    .ai-result ul { list-style: none; padding: 0; margin-bottom: 1.5rem; display: table; width: 100%; border-collapse: separate; border-spacing: 0 0.75rem;}
+    .ai-result li { 
+        display: table-row;
+    }
+    .ai-result .date, .ai-result .amount-group {
+        display: table-cell;
+        vertical-align: middle;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #333;
+    }
+    .ai-result li:last-child .date, .ai-result li:last-child .amount-group {
+        border-bottom: none;
+    }
+    .ai-result .date { color: var(--primary); font-weight: bold; text-transform: capitalize; text-align: left;}
+    .ai-result .amount-group { text-align: right; }
+    .ai-result .amount { color: #fff; font-size: 1.1rem; display: block; }
+    .ai-result .percentage { color: var(--green); font-size: 0.9em; font-weight: bold; }
+    .ai-result .dolar-amount { color: var(--gray); font-size: 0.9em; display: block; }
+    .ai-result .error-msg { color: #ffda6a; }
+    
+    /* --- NUEVOS ESTILOS PARA EL ANÁLISIS --- */
+    .analysis-summary {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #444;
+        text-align: center;
+    }
+    .analysis-summary h4 {
+        font-family: 'Bebas Neue', sans-serif;
+        color: var(--primary);
+        font-size: 1.5rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        letter-spacing: 1px;
+    }
+    .analysis-summary .analysis-split {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #444;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    .analysis-summary .analysis-split h4 {
+        font-size: 1.25rem;
+        margin-top: 0;
+    }
+    .analysis-summary p {
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+        text-align: left;
+    }
+    @media (min-width: 768px) {
+        .analysis-summary .analysis-split {
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: flex-start;
+            text-align: left;
+        }
+        .analysis-summary .analysis-split > div {
+            flex-basis: 45%;
+        }
+        .analysis-summary p {
+            text-align: center;
+        }
+    }
+
+
     .loader { width: 24px; height: 24px; border: 3px solid #FFF; border-bottom-color: transparent; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; margin-top: 1rem; display: none; }
     @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     
@@ -588,115 +657,6 @@
       .btn-card { width: 100%; }
       h2.section-title { font-size: 2.5rem; }
     }
-
-    /* --- INICIO: NUEVOS ESTILOS PARA LA CALCULADORA MEJORADA --- */
-    
-    #calculator-results-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2rem;
-      width: 100%;
-      margin-top: 2rem;
-    }
-
-    #chart-container {
-      width: 100%;
-      max-width: 900px;
-      background-color: var(--dark);
-      border: 1px solid #333;
-      border-radius: 8px;
-      padding: 1rem;
-    }
-
-    .detailed-analysis-container {
-      width: 100%;
-      max-width: 900px;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .analysis-metrics {
-      background-color: var(--dark);
-      border: 1px solid #333;
-      border-radius: 8px;
-      padding: 1.5rem;
-      text-align: center;
-    }
-    .analysis-metrics h4 {
-      font-family: 'Bebas Neue', sans-serif;
-      color: var(--primary);
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
-    .analysis-metrics p {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-    }
-    .analysis-metrics strong {
-      font-weight: 700;
-    }
-    .positive { color: var(--green); }
-    .negative { color: var(--red); }
-    .neutral { color: var(--blue); }
-
-    .analysis-conclusions {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    @media (min-width: 768px) {
-      .analysis-conclusions {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    .conclusion-card {
-      background-color: var(--dark);
-      border: 1px solid #333;
-      border-left: 4px solid var(--primary);
-      border-radius: 8px;
-      padding: 1.5rem;
-    }
-    .conclusion-card h5 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.25rem;
-      margin-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .conclusion-card p {
-      line-height: 1.7;
-      color: #ccc;
-    }
-    .conclusion-card.propietario h5 { color: var(--green); }
-    .conclusion-card.propietario { border-left-color: var(--green); }
-    .conclusion-card.inquilino h5 { color: var(--blue); }
-    .conclusion-card.inquilino { border-left-color: var(--blue); }
-
-    .ai-result ul { list-style: none; padding: 0; margin-bottom: 1.5rem; display: table; width: 100%; border-collapse: separate; border-spacing: 0 0.75rem;}
-    .ai-result li { 
-        display: table-row;
-    }
-    .ai-result .date, .ai-result .amount-group {
-        display: table-cell;
-        vertical-align: middle;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid #333;
-    }
-    .ai-result li:last-child .date, .ai-result li:last-child .amount-group {
-        border-bottom: none;
-    }
-    .ai-result .date { color: var(--primary); font-weight: bold; text-transform: capitalize; text-align: left;}
-    .ai-result .amount-group { text-align: right; }
-    .ai-result .amount { color: #fff; font-size: 1.1rem; display: block; }
-    .ai-result .percentage { color: var(--green); font-size: 0.9em; font-weight: bold; }
-    .ai-result .dolar-amount { color: var(--gray); font-size: 0.9em; display: block; }
-    .ai-result .error-msg { color: #ffda6a; }
-    /* --- FIN: NUEVOS ESTILOS --- */
   </style>
 </head>
 <body>
@@ -931,11 +891,11 @@
                       <div id="description-result" class="ai-result">El texto generado aparecerá aquí...</div>
                   </div>
                   <div class="ai-tool-card">
-                      <form id="rent-calculator-form">
+                      <form>
                           <h3>Calculadora de Actualización de Alquiler (IPC)</h3>
                           <p>Calculá el valor actualizado de tu alquiler según el IPC. Ingresá los datos de tu contrato.</p>
                           <input type="number" id="alquiler-original-input" placeholder="Monto Original del Alquiler ($)">
-                          <input type="month" id="fecha-inicio-input">
+                          <input type="month" id="fecha-inicio-input" placeholder="Fecha de Inicio del Contrato">
                           <select id="periodo-indexacion-input">
                               <option value="" disabled selected>Seleccioná el Período de Indexación</option>
                               <option value="3">Trimestral (3 meses)</option>
@@ -947,16 +907,7 @@
                               <div id="loader-alquiler" class="loader"></div>
                           </div>
                       </form>
-                      <!-- INICIO: Contenedor de resultados rediseñado -->
-                      <div id="calculator-results-wrapper">
-                          <!-- El gráfico se insertará aquí -->
-                          <div id="chart-container" style="display: none;">
-                              <canvas id="rent-evolution-chart"></canvas>
-                          </div>
-                          <!-- El historial y análisis se insertarán aquí -->
-                          <div id="alquiler-result" class="ai-result" style="display: none;"></div>
-                      </div>
-                      <!-- FIN: Contenedor de resultados rediseñado -->
+                      <div id="alquiler-result" class="ai-result">El monto actualizado aparecerá aquí...</div>
                       <p class="ai-alert" style="text-align: center; margin-top: 1rem;">⚠️ Los datos para el cálculo son provistos por APIs públicas y pueden no estar 100% actualizados.</p>
                   </div>
                   <div class="ai-coming-soon">
@@ -1019,8 +970,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Flip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <!-- NUEVO: CDN de Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -1237,8 +1186,10 @@
         }
     });
 
+    // --- LÓGICA DE SCROLL HORIZONTAL CON MATCHMEDIA ---
     if (!prefersReducedMotion) {
       ScrollTrigger.matchMedia({
+        
         "(min-width: 1024px)": function() {
           const section = document.querySelector('.horizontal-scroll-section');
           if (!section) return;
@@ -1324,17 +1275,12 @@
     const descriptionResult = document.getElementById('description-result');
     const loaderDescription = document.getElementById('loader-description');
 
-    const calcularAlquilerBtn = document.getElementById('calcular-alquiler-btn');
     const alquilerOriginalInput = document.getElementById('alquiler-original-input');
     const fechaInicioInput = document.getElementById('fecha-inicio-input');
     const periodoIndexacionInput = document.getElementById('periodo-indexacion-input');
-    
-    const resultsWrapper = document.getElementById('calculator-results-wrapper');
-    const chartContainer = document.getElementById('chart-container');
-    const alquilerResultDiv = document.getElementById('alquiler-result');
+    const calcularAlquilerBtn = document.getElementById('calcular-alquiler-btn');
+    const alquilerResult = document.getElementById('alquiler-result');
     const loaderAlquiler = document.getElementById('loader-alquiler');
-    
-    let rentChartInstance = null;
     
     async function calcularNuevoAlquilerConAPI() {
         const montoOriginal = parseFloat(alquilerOriginalInput.value);
@@ -1342,21 +1288,15 @@
         const periodo = parseInt(periodoIndexacionInput.value);
 
         if (isNaN(montoOriginal) || !fechaInicioStr || isNaN(periodo)) {
-            alquilerResultDiv.innerHTML = '<p style="text-align:center;">Por favor, completa todos los campos correctamente.</p>';
-            alquilerResultDiv.style.color = '#ffda6a';
-            alquilerResultDiv.style.display = 'block';
-            chartContainer.style.display = 'none';
+            alquilerResult.innerHTML = '<p style="text-align:center;">Por favor, completa todos los campos correctamente.</p>';
+            alquilerResult.style.color = '#ffda6a';
             return;
         }
 
         loaderAlquiler.style.display = 'inline-block';
         calcularAlquilerBtn.disabled = true;
-        alquilerResultDiv.innerHTML = '<p style="text-align:center;">Consultando APIs y calculando... esto puede tardar un momento.</p>';
-        alquilerResultDiv.style.display = 'block';
-        chartContainer.style.display = 'none';
-        if (rentChartInstance) {
-            rentChartInstance.destroy();
-        }
+        alquilerResult.innerHTML = '<p style="text-align:center;">Consultando APIs y calculando historial...</p>';
+        alquilerResult.style.color = '#e0e0e0';
 
         try {
             const payload = {
@@ -1373,137 +1313,61 @@
 
             const result = await response.json();
 
-            if (!response.ok) throw new Error(result.error || 'Hubo un problema con el servidor.');
+            if (!response.ok) {
+                throw new Error(result.error || 'Hubo un problema con el servidor.');
+            }
             
-            alquilerResultDiv.innerHTML = ''; // Limpiar el contenedor
-            let historialHtml = '';
+            let htmlResult = '';
+
             if (result.historial && result.historial.length > 0) {
-                historialHtml += '<ul>';
+                htmlResult += '<ul>';
                 result.historial.forEach(item => {
                     if(item.monto) {
                         const montoFormateado = item.monto.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-                        const porcentajeHtml = item.porcentaje > 0 ? `<span class="percentage">(+${item.porcentaje.toFixed(2).replace('.', ',')}%)</span>` : '';
-                        const dolarHtml = item.montoEnDolares ? `<span class="dolar-amount">USD ${item.montoEnDolares.toFixed(2).replace('.', ',')}</span>` : `<span class="dolar-amount"></span>`;
-                        historialHtml += `<li><span class="date">${item.fecha}:</span><div class="amount-group"><span class="amount">${montoFormateado} ${porcentajeHtml}</span>${dolarHtml}</div></li>`;
+                        
+                        const porcentajeHtml = item.porcentaje > 0 
+                            ? `<span class="percentage">(+${item.porcentaje.toFixed(2).replace('.', ',')}%)</span>` 
+                            : '';
+
+                        const dolarHtml = item.montoEnDolares
+                            ? `<span class="dolar-amount">USD ${item.montoEnDolares.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`
+                            : `<span class="dolar-amount"></span>`;
+
+                        htmlResult += `<li>
+                                        <span class="date">${item.fecha}:</span> 
+                                        <div class="amount-group">
+                                            <span class="amount">${montoFormateado} ${porcentajeHtml}</span>
+                                            ${dolarHtml}
+                                        </div>
+                                      </li>`;
+
                     } else if (item.error) {
-                        historialHtml += `<li><span class="error-msg">${item.error}</span></li>`;
+                        htmlResult += `<li><span class="error-msg">${item.error}</span></li>`;
                     }
                 });
-                historialHtml += '</ul>';
+                htmlResult += '</ul>';
             } else {
                 throw new Error('La respuesta no contiene un historial válido.');
             }
 
-            let analysisHtml = '<div class="detailed-analysis-container">';
-            if (result.detailedAnalysis) {
-                const { aumentoTotalPesos, inflacionTotalPeriodo, variacionDolar } = result.detailedAnalysis;
-                const diferenciaInflacion = aumentoTotalPesos - inflacionTotalPeriodo;
-                
-                analysisHtml += `
-                    <div class="analysis-metrics">
-                        <h4>Métricas Clave del Período</h4>
-                        <p>Aumento del Alquiler: <strong class="positive">+${aumentoTotalPesos.toFixed(2).replace('.', ',')}%</strong></p>
-                        <p>Inflación Acumulada (IPC): <strong class="negative">${inflacionTotalPeriodo.toFixed(2).replace('.', ',')}%</strong></p>
-                        <p>Variación en Dólares: <strong class="${variacionDolar >= 0 ? 'positive' : 'negative'}">${variacionDolar !== null ? (variacionDolar >= 0 ? '+' : '') + variacionDolar.toFixed(2).replace('.', ',') + '%' : 'N/D'}</strong></p>
-                    </div>
-                `;
-                
-                let conclusionInquilino = 'El aumento de tu alquiler fue menor que la inflación. En términos de poder de compra, ¡tu alquiler se abarató!';
-                let conclusionPropietario = 'Tu alquiler perdió valor frente a la inflación en pesos, lo que afectó tu rentabilidad real.';
-
-                if (diferenciaInflacion > 2) { // Un pequeño margen
-                    conclusionInquilino = 'El aumento de tu alquiler superó a la inflación. En términos reales, se encareció.';
-                    conclusionPropietario = '¡Excelente! Tu alquiler le ganó a la inflación, aumentando tu rentabilidad real en pesos.';
-                }
-
-                analysisHtml += `
-                    <div class="analysis-conclusions">
-                        <div class="conclusion-card inquilino">
-                            <h5><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>Para el Inquilino</h5>
-                            <p>${conclusionInquilino}</p>
-                        </div>
-                        <div class="conclusion-card propietario">
-                            <h5><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l10-10a1 1 0 0 0 0-1.41L12 2z"/><path d="M7 7h.01"/></svg>Para el Propietario</h5>
-                            <p>${conclusionPropietario}</p>
-                        </div>
-                    </div>
-                `;
+            // --- LÓGICA PARA MOSTRAR EL NUEVO ANÁLISIS ---
+            if (result.analisis) {
+                htmlResult += `<div class="analysis-summary">
+                                    <h4>Análisis del Contrato</h4>
+                                    <p>${result.analisis.descripcionGeneral}</p>
+                                    <div class="analysis-split">
+                                        <div>${result.analisis.analisisInquilino}</div>
+                                        <div>${result.analisis.analisisPropietario}</div>
+                                    </div>
+                               </div>`;
             }
-            analysisHtml += '</div>';
 
-            alquilerResultDiv.innerHTML = historialHtml + analysisHtml;
-            alquilerResultDiv.style.display = 'block';
-
-            if (result.chartData) {
-                chartContainer.style.display = 'block';
-                const ctx = document.getElementById('rent-evolution-chart').getContext('2d');
-                rentChartInstance = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: result.chartData.labels,
-                        datasets: [
-                            {
-                                label: 'Alquiler Ideal (vs IPC)',
-                                data: result.chartData.idealRentData,
-                                borderColor: 'rgba(255, 255, 255, 0.5)',
-                                borderWidth: 2,
-                                borderDash: [5, 5],
-                                fill: false,
-                                yAxisID: 'y-pesos',
-                                pointRadius: 0
-                            },
-                            {
-                                label: 'Alquiler Real ($)',
-                                data: result.chartData.actualRentData,
-                                borderColor: 'rgba(255, 191, 0, 1)',
-                                backgroundColor: 'rgba(255, 191, 0, 0.2)',
-                                borderWidth: 3,
-                                fill: true,
-                                yAxisID: 'y-pesos',
-                                pointRadius: 0
-                            },
-                            {
-                                label: 'Alquiler en Dólares (USD)',
-                                data: result.chartData.usdRentData,
-                                borderColor: 'rgba(52, 152, 219, 1)',
-                                borderWidth: 2,
-                                fill: false,
-                                yAxisID: 'y-dolares',
-                                pointRadius: 0,
-                                tension: 0.1
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { labels: { color: '#fff' } },
-                            tooltip: { mode: 'index', intersect: false }
-                        },
-                        scales: {
-                            x: { ticks: { color: '#ccc' }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                            'y-pesos': {
-                                type: 'linear',
-                                position: 'left',
-                                ticks: { color: '#FFBF00', callback: value => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value) },
-                                grid: { color: 'rgba(255,255,255,0.1)' }
-                            },
-                            'y-dolares': {
-                                type: 'linear',
-                                position: 'right',
-                                ticks: { color: '#3498db', callback: value => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value) },
-                                grid: { drawOnChartArea: false }
-                            }
-                        }
-                    }
-                });
-            }
+            alquilerResult.innerHTML = htmlResult;
+            alquilerResult.style.color = '#e0e0e0';
 
         } catch (error) {
-            alquilerResultDiv.innerHTML = `<p style="text-align:center;">Error: ${error.message}</p>`;
-            alquilerResultDiv.style.color = '#ff6b6b';
-            alquilerResultDiv.style.display = 'block';
+            alquilerResult.innerHTML = `<p style="text-align:center;">Error: ${error.message}</p>`;
+            alquilerResult.style.color = '#ff6b6b';
             console.error("Error en el cálculo de alquiler:", error);
         } finally {
             loaderAlquiler.style.display = 'none';
@@ -1514,7 +1378,7 @@
     if (calcularAlquilerBtn) {
         calcularAlquilerBtn.addEventListener('click', calcularNuevoAlquilerConAPI);
     }
-    
+
     async function callGeminiAPI(prompt, resultElement, loaderElement) {
       loaderElement.style.display = 'inline-block';
       resultElement.textContent = 'Generando...';
@@ -1566,7 +1430,7 @@
         });
     }
 
-  });
+  }); // End of DOMContentLoaded
   </script>
 
 </body>
