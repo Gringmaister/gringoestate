@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wispy Private Console — Gringo Estate</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#0d0d0d" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #ffbf00;
+      --bg: #0d0d0d;
+      --bg-soft: #151515;
+      --card: #1b1b1b;
+      --card-2: #202020;
+      --text: #f4f4f4;
+      --muted: #a8a8a8;
+      --border: rgba(255, 255, 255, 0.08);
+      --success: #3ddc84;
+      --danger: #ff6b6b;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(255, 191, 0, 0.12), transparent 30%),
+        linear-gradient(180deg, #080808 0%, #111111 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea { font: inherit; }
+
+    .shell {
+      width: min(1380px, calc(100% - 32px));
+      margin: 24px auto;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 20px;
+    }
+
+    .sidebar,
+    .panel,
+    .auth-card,
+    .module,
+    .quick-card,
+    .skill-card,
+    .timeline-card,
+    .composer-card,
+    .memory-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .sidebar {
+      border-radius: 24px;
+      padding: 24px 18px;
+      position: sticky;
+      top: 24px;
+      height: fit-content;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 8px 8px 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .brand img {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      object-fit: cover;
+      box-shadow: 0 10px 22px rgba(255, 191, 0, 0.15);
+    }
+
+    .brand h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 1.4px;
+      line-height: 0.95;
+    }
+
+    .brand h1 span { color: var(--primary); }
+    .brand p { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+
+    .nav-group { display: grid; gap: 8px; }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-radius: 16px;
+      padding: 14px 14px;
+      color: var(--muted);
+      transition: 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--text);
+      background: rgba(255, 191, 0, 0.08);
+      border-color: rgba(255, 191, 0, 0.18);
+    }
+
+    .nav-link strong { font-weight: 600; }
+    .nav-link small { color: var(--muted); }
+
+    .status-stack {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: grid;
+      gap: 12px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+    }
+
+    .status-pill strong { color: var(--text); font-size: 0.95rem; }
+    .status-pill .ok { color: var(--success); }
+
+    .main {
+      display: grid;
+      gap: 20px;
+    }
+
+    .auth-card {
+      border-radius: 28px;
+      padding: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      background:
+        linear-gradient(120deg, rgba(255,191,0,0.10), rgba(255,191,0,0.03)),
+        rgba(20,20,20,0.9);
+    }
+
+    .auth-copy h2,
+    .hero-copy h2,
+    .section-head h3,
+    .composer-card h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 1.1px;
+      font-weight: 400;
+    }
+
+    .auth-copy h2 { font-size: clamp(2rem, 4vw, 3rem); }
+    .auth-copy h2 span { color: var(--primary); }
+    .auth-copy p { margin-top: 10px; color: var(--muted); max-width: 720px; line-height: 1.6; }
+
+    .auth-form {
+      display: flex;
+      gap: 12px;
+      width: min(420px, 100%);
+    }
+
+    .auth-form input {
+      flex: 1;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.35);
+      color: var(--text);
+      outline: none;
+    }
+
+    .button {
+      border: none;
+      border-radius: 14px;
+      background: var(--primary);
+      color: #111;
+      padding: 14px 18px;
+      font-weight: 700;
+      transition: transform .2s ease, box-shadow .2s ease;
+      box-shadow: 0 10px 25px rgba(255,191,0,0.18);
+    }
+
+    .button:hover { transform: translateY(-1px); }
+    .button.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    .hero-panel {
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 20px;
+    }
+
+    .panel {
+      border-radius: 28px;
+      padding: 26px;
+    }
+
+    .hero-copy h2 {
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      line-height: 0.95;
+      margin-bottom: 16px;
+    }
+
+    .hero-copy h2 span { color: var(--primary); }
+    .hero-copy p {
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 720px;
+      font-size: 1rem;
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .hero-badge {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .hero-badge strong { color: var(--text); }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section-head h3 { font-size: 2rem; }
+    .section-head p { color: var(--muted); max-width: 680px; line-height: 1.6; }
+
+    .quick-grid,
+    .skills-grid,
+    .memory-grid,
+    .timeline-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .quick-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .skills-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .memory-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .timeline-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .quick-card,
+    .skill-card,
+    .timeline-card,
+    .memory-card,
+    .composer-card {
+      border-radius: 22px;
+      padding: 18px;
+    }
+
+    .quick-card h4,
+    .skill-card h4,
+    .timeline-card h4,
+    .memory-card h4,
+    .composer-card h3 {
+      font-size: 1.02rem;
+      margin-bottom: 8px;
+    }
+
+    .quick-card p,
+    .skill-card p,
+    .timeline-card p,
+    .memory-card p,
+    .composer-card p,
+    .composer-note {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .tag {
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 0.82rem;
+      color: var(--text);
+      background: rgba(255, 191, 0, 0.08);
+      border: 1px solid rgba(255, 191, 0, 0.16);
+    }
+
+    .composer-card textarea {
+      width: 100%;
+      min-height: 140px;
+      resize: vertical;
+      margin-top: 14px;
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.35);
+      color: var(--text);
+      outline: none;
+    }
+
+    .composer-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .composer-output {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      min-height: 92px;
+      white-space: pre-wrap;
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    .locked .private-only {
+      opacity: 0.28;
+      pointer-events: none;
+      filter: blur(3px);
+      user-select: none;
+    }
+
+    .auth-state,
+    .auth-error {
+      margin-top: 10px;
+      font-size: 0.92rem;
+    }
+
+    .auth-state { color: var(--success); }
+    .auth-error { color: var(--danger); }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      padding: 6px 0 30px;
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 1080px) {
+      .shell,
+      .hero-panel,
+      .quick-grid,
+      .skills-grid,
+      .memory-grid,
+      .timeline-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+
+      .auth-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .auth-form { width: 100%; }
+    }
+
+    @media (max-width: 720px) {
+      .shell { width: min(100% - 18px, 1380px); margin: 10px auto 22px; }
+      .sidebar, .panel, .auth-card, .quick-card, .skill-card, .timeline-card, .composer-card, .memory-card { border-radius: 20px; }
+      .auth-form { flex-direction: column; }
+      .button { width: 100%; }
+    }
+  </style>
+</head>
+<body class="locked">
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="/images/isologo.webp" alt="Wispy" />
+        <div>
+          <h1>WISPY <span>PRIVATE</span></h1>
+          <p>gringo.estate / private console</p>
+        </div>
+      </div>
+
+      <nav class="nav-group">
+        <a class="nav-link active" href="#overview"><span><strong>Overview</strong><br><small>estado general</small></span><small>01</small></a>
+        <a class="nav-link" href="#skills"><span><strong>Skills</strong><br><small>tooling operativo</small></span><small>02</small></a>
+        <a class="nav-link" href="#memory"><span><strong>Memory</strong><br><small>contexto y foco</small></span><small>03</small></a>
+        <a class="nav-link" href="#console"><span><strong>Console</strong><br><small>briefs y comandos</small></span><small>04</small></a>
+      </nav>
+
+      <div class="status-stack">
+        <div class="status-pill"><span>Panel</span><strong id="panelLockState">Privado</strong></div>
+        <div class="status-pill"><span>Sync</span><strong class="ok">Repo OK</strong></div>
+        <div class="status-pill"><span>Dominio</span><strong>gringo.estate</strong></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="auth-card" id="auth">
+        <div class="auth-copy">
+          <h2>Tu consola <span>Wispy</span> dentro de Gringo Estate.</h2>
+          <p>
+            Misma estética. Capa privada. Pensada para operar con skills, memoria, ejecución y foco.
+            Este primer MVP deja la base visual y el acceso privado para después conectar chat, audios y automatizaciones reales.
+          </p>
+          <div id="authState" class="auth-state" hidden>Acceso validado.</div>
+          <div id="authError" class="auth-error" hidden>Clave inválida.</div>
+        </div>
+        <form class="auth-form" id="authForm">
+          <input id="passcode" name="passcode" type="password" autocomplete="current-password" placeholder="Ingresá tu código privado" />
+          <button class="button" type="submit">Desbloquear</button>
+        </form>
+      </section>
+
+      <section class="hero-panel private-only" id="overview">
+        <article class="panel hero-copy">
+          <h2>WISPY, pero con la <span>estética premium</span> de Gringo Estate.</h2>
+          <p>
+            La idea no es sumar una pantalla más. Es construir tu capa operativa privada: un lugar para disparar workflows,
+            entrar a skills, ver memoria, bajar audios a tareas y concentrar ejecución sin depender del chat para todo.
+          </p>
+          <div class="hero-badges">
+            <div class="hero-badge"><strong>MVP</strong> panel privado + skills + consola</div>
+            <div class="hero-badge"><strong>Siguiente</strong> chat real con Wispy</div>
+            <div class="hero-badge"><strong>Después</strong> audios, memoria, automatizaciones</div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="section-head">
+            <div>
+              <h3>Quick access</h3>
+              <p>Atajos pensados para tus flujos reales, no para una demo genérica.</p>
+            </div>
+          </div>
+          <div class="quick-grid">
+            <div class="quick-card">
+              <h4>Inbox ejecutivo</h4>
+              <p>Centralizar audios, pedidos rápidos, decisiones y próximos pasos.</p>
+              <div class="tag-row"><span class="tag">audio</span><span class="tag">brief</span></div>
+            </div>
+            <div class="quick-card">
+              <h4>Modo oficina 10:00</h4>
+              <p>Brief diario Ambbi / Gringo / pendientes con formato carga cero.</p>
+              <div class="tag-row"><span class="tag">daily brief</span><span class="tag">agenda</span></div>
+            </div>
+            <div class="quick-card">
+              <h4>Operación inmobiliaria</h4>
+              <p>Acceso futuro a calculadora, copy AI, leads, unidades y panel interno.</p>
+              <div class="tag-row"><span class="tag">RE</span><span class="tag">pipeline</span></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="private-only" id="skills">
+        <div class="section-head">
+          <div>
+            <h3>Skills activas</h3>
+            <p>Una vista de alto nivel de las capacidades que más sentido tienen para tu flujo actual.</p>
+          </div>
+        </div>
+        <div class="skills-grid">
+          <article class="skill-card">
+            <h4>Voice note processor</h4>
+            <p>Transcribe audios, detecta tareas, decisiones y memoria útil para bajar fricción operativa.</p>
+            <div class="tag-row"><span class="tag">audio</span><span class="tag">transcripción</span><span class="tag">task extraction</span></div>
+          </article>
+          <article class="skill-card">
+            <h4>Healthcheck</h4>
+            <p>Chequea seguridad y postura operativa del host para que Wispy corra más sólido.</p>
+            <div class="tag-row"><span class="tag">host</span><span class="tag">security</span><span class="tag">audit</span></div>
+          </article>
+          <article class="skill-card">
+            <h4>Node connect</h4>
+            <p>Sirve para pairing y debugging cuando la conexión con nodos o apps se vuelve rara.</p>
+            <div class="tag-row"><span class="tag">device</span><span class="tag">gateway</span></div>
+          </article>
+          <article class="skill-card">
+            <h4>Panel roadmap</h4>
+            <p>Base para sumar chat real con Wispy, memoria viva, uploads y automatizaciones del dominio.</p>
+            <div class="tag-row"><span class="tag">panel</span><span class="tag">MVP</span><span class="tag">roadmap</span></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="private-only" id="memory">
+        <div class="section-head">
+          <div>
+            <h3>Operational memory</h3>
+            <p>Lo que este panel debería ayudarte a tener siempre visible: foco, prioridades y accesos rápidos.</p>
+          </div>
+        </div>
+        <div class="memory-grid">
+          <article class="memory-card">
+            <h4>Foco actual</h4>
+            <p>Gringo Estate como marca + Wispy como capa operativa privada dentro del mismo ecosistema visual.</p>
+          </article>
+          <article class="memory-card">
+            <h4>Estética</h4>
+            <p>Mismo lenguaje visual que la landing: negro, dorado, premium, simple y ejecutivo.</p>
+          </article>
+          <article class="memory-card">
+            <h4>Principio</h4>
+            <p>Carga cero: menos setup manual, más flujos preparados para ejecutar desde un solo lugar.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="private-only" id="console">
+        <div class="section-head">
+          <div>
+            <h3>Wispy console</h3>
+            <p>Mock operativo inicial para bajar briefs, pedidos y comandos frecuentes. Después lo conectamos con ejecución real.</p>
+          </div>
+        </div>
+        <div class="timeline-grid">
+          <article class="composer-card">
+            <h3>Brief / comando</h3>
+            <p>Usalo como launcher mental. Este MVP todavía no ejecuta server-side, pero ya organiza el flujo visual.</p>
+            <textarea id="composerInput" placeholder="Ej: armame el resumen del día, revisá skills nuevas de GitHub, o bajá este audio a tareas..."></textarea>
+            <div class="composer-actions">
+              <button class="button" id="summarizeBtn" type="button">Sintetizar pedido</button>
+              <button class="button secondary" id="clearBtn" type="button">Limpiar</button>
+            </div>
+            <div class="composer-output" id="composerOutput">Acá va a aparecer un brief limpio para ejecutar.</div>
+          </article>
+
+          <article class="timeline-card">
+            <h4>Siguiente iteración</h4>
+            <p>Conectar este panel a funciones reales de Wispy para que el input no sea solo visual sino operativo.</p>
+            <div class="tag-row"><span class="tag">chat</span><span class="tag">actions</span><span class="tag">memory</span></div>
+          </article>
+          <article class="timeline-card">
+            <h4>Auth real</h4>
+            <p>Este MVP usa una verificación liviana contra una función Netlify. Después la cerramos mejor con sesión fuerte.</p>
+            <div class="tag-row"><span class="tag">auth</span><span class="tag">private route</span></div>
+          </article>
+          <article class="timeline-card">
+            <h4>Módulos que siguen</h4>
+            <p>Audio inbox, memoria curada, tareas rápidas y comandos por contexto Ambbi / Gringo / personal.</p>
+            <div class="tag-row"><span class="tag">audio</span><span class="tag">tasks</span><span class="tag">ops</span></div>
+          </article>
+        </div>
+      </section>
+
+      <div class="footer-note">Wispy Private Console · build MVP for gringo.estate</div>
+    </main>
+  </div>
+
+  <script>
+    const authForm = document.getElementById('authForm');
+    const passcodeInput = document.getElementById('passcode');
+    const authState = document.getElementById('authState');
+    const authError = document.getElementById('authError');
+    const panelLockState = document.getElementById('panelLockState');
+    const body = document.body;
+
+    const composerInput = document.getElementById('composerInput');
+    const composerOutput = document.getElementById('composerOutput');
+    const summarizeBtn = document.getElementById('summarizeBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    const SESSION_KEY = 'wispy_private_console';
+
+    function unlockUi() {
+      body.classList.remove('locked');
+      panelLockState.textContent = 'Unlocked';
+      authState.hidden = false;
+      authError.hidden = true;
+    }
+
+    function lockUi() {
+      body.classList.add('locked');
+      panelLockState.textContent = 'Privado';
+      authState.hidden = true;
+    }
+
+    async function verifyExistingSession() {
+      const token = localStorage.getItem(SESSION_KEY);
+      if (!token) return;
+      try {
+        const response = await fetch('/.netlify/functions/wispy-panel-auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: 'verify', token })
+        });
+        const data = await response.json();
+        if (response.ok && data.ok) unlockUi();
+      } catch {
+        localStorage.removeItem(SESSION_KEY);
+      }
+    }
+
+    authForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      authError.hidden = true;
+      authState.hidden = true;
+      const passcode = passcodeInput.value.trim();
+      if (!passcode) return;
+
+      try {
+        const response = await fetch('/.netlify/functions/wispy-panel-auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: 'login', passcode })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          authError.hidden = false;
+          return;
+        }
+        localStorage.setItem(SESSION_KEY, data.token);
+        passcodeInput.value = '';
+        unlockUi();
+      } catch {
+        authError.textContent = 'No pude validar el acceso ahora.';
+        authError.hidden = false;
+      }
+    });
+
+    summarizeBtn.addEventListener('click', () => {
+      const raw = composerInput.value.trim();
+      if (!raw) {
+        composerOutput.textContent = 'Escribí una idea, pedido o audio-resumen y yo te lo bajo a brief.';
+        return;
+      }
+      const normalized = raw
+        .replace(/\s+/g, ' ')
+        .replace(/^./, (s) => s.toUpperCase());
+      composerOutput.textContent = [
+        'Resumen ejecutivo',
+        `- ${normalized}`,
+        '',
+        'Siguiente paso sugerido',
+        '- Transformarlo en acción concreta dentro del flujo Wispy.'
+      ].join('\n');
+    });
+
+    clearBtn.addEventListener('click', () => {
+      composerInput.value = '';
+      composerOutput.textContent = 'Acá va a aparecer un brief limpio para ejecutar.';
+    });
+
+    verifyExistingSession();
+    lockUi();
+  </script>
+</body>
+</html>
