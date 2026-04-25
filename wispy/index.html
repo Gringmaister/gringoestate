@@ -39,11 +39,11 @@
     button, input, textarea { font: inherit; }
 
     .shell {
-      width: min(1760px, calc(100vw - 36px));
-      margin: 18px auto;
+      width: min(1980px, calc(100vw - 10px));
+      margin: 5px auto;
       display: grid;
-      grid-template-columns: 320px minmax(0, 1fr);
-      gap: 22px;
+      grid-template-columns: 340px minmax(0, 1fr);
+      gap: 24px;
       align-items: start;
     }
 
@@ -66,8 +66,8 @@
       border-radius: 24px;
       padding: 24px 18px;
       position: sticky;
-      top: 18px;
-      height: calc(100vh - 36px);
+      top: 5px;
+      height: calc(100vh - 10px);
       overflow: auto;
     }
 
@@ -148,16 +148,31 @@
       min-width: 0;
     }
 
-    .auth-card {
-      border-radius: 28px;
-      padding: 26px;
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 3000;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 20px;
+      justify-content: center;
+      padding: 24px;
+      background: radial-gradient(circle at top, rgba(255,191,0,0.12), transparent 28%), rgba(5,5,5,0.82);
+      backdrop-filter: blur(12px);
+    }
+
+    .auth-overlay.hidden {
+      display: none;
+    }
+
+    .auth-card {
+      width: min(560px, 100%);
+      border-radius: 28px;
+      padding: 32px;
+      display: grid;
+      gap: 18px;
       background:
         linear-gradient(120deg, rgba(255,191,0,0.10), rgba(255,191,0,0.03)),
-        rgba(20,20,20,0.9);
+        rgba(20,20,20,0.96);
     }
 
     .auth-copy h2,
@@ -169,14 +184,14 @@
       font-weight: 400;
     }
 
-    .auth-copy h2 { font-size: clamp(2rem, 4vw, 3rem); }
+    .auth-copy h2 { font-size: clamp(2.25rem, 4vw, 3.2rem); }
     .auth-copy h2 span { color: var(--primary); }
     .auth-copy p { margin-top: 10px; color: var(--muted); max-width: 720px; line-height: 1.6; }
 
     .auth-form {
       display: flex;
       gap: 12px;
-      width: min(420px, 100%);
+      width: 100%;
     }
 
     .auth-form input {
@@ -210,8 +225,8 @@
 
     .hero-panel {
       display: grid;
-      grid-template-columns: minmax(0, 1.55fr) minmax(360px, 0.95fr);
-      gap: 22px;
+      grid-template-columns: minmax(0, 1.9fr) minmax(430px, 1fr);
+      gap: 24px;
       align-items: stretch;
     }
 
@@ -274,7 +289,7 @@
     .quick-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .skills-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .memory-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .timeline-grid { grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr)); }
+    .timeline-grid { grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr)); }
 
     .quick-card,
     .skill-card,
@@ -379,7 +394,7 @@
 
     @media (max-width: 1280px) {
       .shell {
-        width: min(100% - 24px, 1500px);
+        width: min(100% - 20px, 1500px);
         grid-template-columns: 292px minmax(0, 1fr);
       }
 
@@ -406,11 +421,6 @@
         height: auto;
       }
 
-      .auth-card {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
       .auth-form { width: 100%; }
     }
 
@@ -423,6 +433,20 @@
   </style>
 </head>
 <body class="locked">
+  <div class="auth-overlay" id="authOverlay">
+    <section class="auth-card" id="auth">
+      <div class="auth-copy">
+        <h2>Ingresá a <span>Wispy Private</span>.</h2>
+        <p>Acceso privado a tu command center de Gringo Estate. Entrás una vez y desaparece toda la capa de login.</p>
+        <div id="authState" class="auth-state" hidden>Acceso validado.</div>
+        <div id="authError" class="auth-error" hidden>Clave inválida.</div>
+      </div>
+      <form class="auth-form" id="authForm">
+        <input id="passcode" name="passcode" type="password" autocomplete="current-password" placeholder="Ingresá tu código privado" />
+        <button class="button" type="submit">Entrar</button>
+      </form>
+    </section>
+  </div>
   <div class="shell">
     <aside class="sidebar">
       <div class="brand">
@@ -448,22 +472,6 @@
     </aside>
 
     <main class="main">
-      <section class="auth-card" id="auth">
-        <div class="auth-copy">
-          <h2>Tu consola <span>Wispy</span> dentro de Gringo Estate.</h2>
-          <p>
-            Misma estética. Capa privada. Pensada para operar con skills, memoria, ejecución y foco.
-            Este primer MVP deja la base visual y el acceso privado para después conectar chat, audios y automatizaciones reales.
-          </p>
-          <div id="authState" class="auth-state" hidden>Acceso validado.</div>
-          <div id="authError" class="auth-error" hidden>Clave inválida.</div>
-        </div>
-        <form class="auth-form" id="authForm">
-          <input id="passcode" name="passcode" type="password" autocomplete="current-password" placeholder="Ingresá tu código privado" />
-          <button class="button" type="submit">Desbloquear</button>
-        </form>
-      </section>
-
       <section class="hero-panel private-only" id="overview">
         <article class="panel hero-copy">
           <h2>WISPY, pero con la <span>estética premium</span> de Gringo Estate.</h2>
@@ -602,6 +610,7 @@
 
   <script>
     const authForm = document.getElementById('authForm');
+    const authOverlay = document.getElementById('authOverlay');
     const passcodeInput = document.getElementById('passcode');
     const authState = document.getElementById('authState');
     const authError = document.getElementById('authError');
@@ -620,12 +629,14 @@
       panelLockState.textContent = 'Unlocked';
       authState.hidden = false;
       authError.hidden = true;
+      authOverlay.classList.add('hidden');
     }
 
     function lockUi() {
       body.classList.add('locked');
       panelLockState.textContent = 'Privado';
       authState.hidden = true;
+      authOverlay.classList.remove('hidden');
     }
 
     async function verifyExistingSession() {
