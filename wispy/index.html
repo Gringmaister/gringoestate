@@ -39,11 +39,12 @@
     button, input, textarea { font: inherit; }
 
     .shell {
-      width: min(1380px, calc(100% - 32px));
-      margin: 24px auto;
+      width: min(1760px, calc(100vw - 36px));
+      margin: 18px auto;
       display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 20px;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
     }
 
     .sidebar,
@@ -65,8 +66,9 @@
       border-radius: 24px;
       padding: 24px 18px;
       position: sticky;
-      top: 24px;
-      height: fit-content;
+      top: 18px;
+      height: calc(100vh - 36px);
+      overflow: auto;
     }
 
     .brand {
@@ -142,7 +144,8 @@
 
     .main {
       display: grid;
-      gap: 20px;
+      gap: 22px;
+      min-width: 0;
     }
 
     .auth-card {
@@ -207,8 +210,9 @@
 
     .hero-panel {
       display: grid;
-      grid-template-columns: 1.3fr 0.7fr;
-      gap: 20px;
+      grid-template-columns: minmax(0, 1.55fr) minmax(360px, 0.95fr);
+      gap: 22px;
+      align-items: stretch;
     }
 
     .panel {
@@ -264,13 +268,13 @@
     .memory-grid,
     .timeline-grid {
       display: grid;
-      gap: 16px;
+      gap: 18px;
     }
 
     .quick-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .skills-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .memory-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .timeline-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .timeline-grid { grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr)); }
 
     .quick-card,
     .skill-card,
@@ -278,7 +282,8 @@
     .memory-card,
     .composer-card {
       border-radius: 22px;
-      padding: 18px;
+      padding: 22px;
+      min-width: 0;
     }
 
     .quick-card h4,
@@ -372,9 +377,23 @@
       font-size: 0.92rem;
     }
 
+    @media (max-width: 1280px) {
+      .shell {
+        width: min(100% - 24px, 1500px);
+        grid-template-columns: 292px minmax(0, 1fr);
+      }
+
+      .hero-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .timeline-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
     @media (max-width: 1080px) {
       .shell,
-      .hero-panel,
       .quick-grid,
       .skills-grid,
       .memory-grid,
@@ -384,6 +403,7 @@
 
       .sidebar {
         position: static;
+        height: auto;
       }
 
       .auth-card {
