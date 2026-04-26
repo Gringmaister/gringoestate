@@ -1,0 +1,35 @@
+{
+  "items": [
+    {
+      "id": "inbox-1777185394003",
+      "title": "Test item",
+      "summary": "Resumen test",
+      "priority": "low",
+      "nextStep": "Nada",
+      "status": "done",
+      "source": "panel",
+      "createdAt": "2026-04-26T06:36:34.003Z",
+      "updatedAt": "2026-04-26T06:36:34.004Z"
+    },
+    {
+      "id": "seed-1",
+      "title": "Brief oficina 10:00",
+      "summary": "Preparar el resumen ejecutivo de Ambbi, Gringo Estate y pendientes.",
+      "priority": "now",
+      "nextStep": "Abrir launcher y sintetizar.",
+      "status": "open",
+      "source": "seed",
+      "createdAt": "2026-04-26T08:00:00.000Z"
+    },
+    {
+      "id": "seed-2",
+      "title": "Pipeline Gringo Estate",
+      "summary": "Ordenar oportunidades, trabas y próximo paso por lead.",
+      "priority": "medium",
+      "nextStep": "Armar brief comercial ejecutivo.",
+      "status": "open",
+      "source": "seed",
+      "createdAt": "2026-04-26T08:05:00.000Z"
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+const fs = require('fs');
+const path = require('path');
+
+const workspaceRoot = path.resolve(__dirname, '..', '..', '..');
+const dataDir = path.resolve(__dirname, '..', '..', 'data');
+const inboxPath = path.join(dataDir, 'wispy-inbox.json');
+const memoryPath = path.join(workspaceRoot, 'MEMORY.md');
+const userPath = path.join(workspaceRoot, 'USER.md');
+const soulPath = path.join(workspaceRoot, 'SOUL.md');
+const dailyMemoryDir = path.join(workspaceRoot, 'memory');
+
+function ensureDataDir() {
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+}
+
+function ensureInboxFile() {
+  ensureDataDir();
+  if (!fs.existsSync(inboxPath)) {
+    const seed = {
+      items: [
+        {
+          id: `seed-${Date.now()}`,
+          title: 'Brief oficina 10:00',
+          summary: 'Preparar el resumen ejecutivo de Ambbi, Gringo Estate y pendientes.',
+          priority: 'now',
+          nextStep: 'Abrir launcher y sintetizar.',
+          status: 'open',
+          createdAt: new Date().toISOString(),
+          source: 'seed'
+        }
+      ]
+    };
+    fs.writeFileSync(inboxPath, JSON.stringify(seed, null, 2));
+  }
+}
+
+function readJson(file, fallback) {
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJson(file, data) {
+  ensureDataDir();
+  fs.writeFileSync(file, JSON.stringify(data, null, 2));
+}
+
+function readText(file) {
+  try {
+    return fs.readFileSync(file, 'utf8');
+  } catch {
+    return '';
+  }
+}
+
+function extractBullets(sectionTitle, markdown, limit = 5) {
+  const escaped = sectionTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`^###\\s+${escaped}[\\s\\S]*?(?=^###\\s+|^##\\s+|\\Z)`, 'm');
+  const match = markdown.match(regex);
+  if (!match) return [];
+  return match[0]
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('*') || /^\d+\./.test(line))
+    .map((line) => line.replace(/^\*\s+/, '').replace(/^\d+\.\s+/, '').trim())
+    .slice(0, limit);
+}
+
+function extractPortfolio(memoryMd) {
+  const match = memoryMd.match(/Portfolio Actual:\*\*\s*([^\n]+)/i);
+  return match ? match[1].trim() : '17 a 18 departamentos en Uriburu 1070';
+}
+
+function extractPriorities(memoryMd, limit = 4) {
+  const match = memoryMd.match(/## 4\. PRIORIDADES ESTRATÉGICAS ACTIVAS([\s\S]*?)(?=## 5\.)/);
+  if (!match) return [];
+  return match[1]
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => /^\d+\./.test(line))
+    .map((line) => line.replace(/^\d+\.\s+/, '').trim())
+    .slice(0, limit);
+}
+
+function extractStaff(memoryMd, limit = 4) {
+  const section = memoryMd.match(/\*\*Áreas Operativas y Liderazgo:\*\*([\s\S]*?)(?=###|\n\n)/);
+  if (!section) return [];
+  return section[1]
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => /^\d+\./.test(line))
+    .map((line) => line.replace(/^\d+\.\s+/, '').replace(/\*\*/g, '').trim())
+    .slice(0, limit);
+}
+
+function getLatestDailyMemorySnippet(limit = 3) {
+  try {
+    const files = fs.readdirSync(dailyMemoryDir)
+      .filter((file) => /^\d{4}-\d{2}-\d{2}\.md$/.test(file))
+      .sort()
+      .reverse();
+    if (!files.length) return [];
+    const latest = fs.readFileSync(path.join(dailyMemoryDir, files[0]), 'utf8');
+    return latest
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith('- ') || line.startsWith('* '))
+      .map((line) => line.slice(2).trim())
+      .slice(0, limit);
+  } catch {
+    return [];
+  }
+}
+
+function getInbox() {
+  ensureInboxFile();
+  const payload = readJson(inboxPath, { items: [] });
+  return Array.isArray(payload.items) ? payload.items : [];
+}
+
+function saveInbox(items) {
+  writeJson(inboxPath, { items });
+}
+
+function getContextData() {
+  const memoryMd = readText(memoryPath);
+  const userMd = readText(userPath);
+  const soulMd = readText(soulPath);
+  return {
+    memoryMd,
+    userMd,
+    soulMd,
+    portfolio: extractPortfolio(memoryMd),
+    priorities: extractPriorities(memoryMd),
+    staff: extractStaff(memoryMd),
+    daily: getLatestDailyMemorySnippet(),
+    communication: extractBullets('COMUNICACIÓN Y "VIBE" ARGENTINO', memoryMd, 3)
+  };
+}
+
+module.exports = {
+  workspaceRoot,
+  inboxPath,
+  getInbox,
+  saveInbox,
+  getContextData,
+  readText
+};
