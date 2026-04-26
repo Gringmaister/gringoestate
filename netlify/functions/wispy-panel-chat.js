@@ -61,7 +61,7 @@ exports.handler = async function (event) {
 
     const { GoogleGenerativeAI } = require('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(geminiApiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const transcript = history
       .slice(-8)
@@ -76,15 +76,23 @@ exports.handler = async function (event) {
       'Wispy:'
     ].filter(Boolean).join('\n\n');
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text().trim();
+    try {
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text().trim();
 
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-      body: JSON.stringify({ ok: true, reply: text, mode: 'gemini' })
-    };
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+        body: JSON.stringify({ ok: true, reply: text, mode: 'gemini' })
+      };
+    } catch {
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+        body: JSON.stringify({ ok: true, reply: fallbackReply(message, context, inbox), mode: 'fallback' })
+      };
+    }
   } catch (error) {
     return {
       statusCode: 500,
