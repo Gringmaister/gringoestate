@@ -4,6 +4,7 @@ const path = require('path');
 const workspaceRoot = path.resolve(__dirname, '..', '..', '..');
 const dataDir = path.resolve(__dirname, '..', '..', 'data');
 const inboxPath = path.join(dataDir, 'wispy-inbox.json');
+const contextPath = path.join(dataDir, 'wispy-context.json');
 const memoryPath = path.join(workspaceRoot, 'MEMORY.md');
 const userPath = path.join(workspaceRoot, 'USER.md');
 const soulPath = path.join(workspaceRoot, 'SOUL.md');
@@ -125,6 +126,20 @@ function saveInbox(items) {
 }
 
 function getContextData() {
+  const seeded = readJson(contextPath, null);
+  if (seeded && seeded.portfolio) {
+    return {
+      memoryMd: '',
+      userMd: '',
+      soulMd: '',
+      portfolio: seeded.portfolio,
+      priorities: Array.isArray(seeded.priorities) ? seeded.priorities : [],
+      staff: Array.isArray(seeded.staff) ? seeded.staff : [],
+      daily: Array.isArray(seeded.daily) ? seeded.daily : [],
+      communication: Array.isArray(seeded.communication) ? seeded.communication : []
+    };
+  }
+
   const memoryMd = readText(memoryPath);
   const userMd = readText(userPath);
   const soulMd = readText(soulPath);

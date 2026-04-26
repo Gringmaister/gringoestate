@@ -260,7 +260,10 @@
     .verticals-grid,
     .memory-grid,
     .actions-grid,
-    .ops-grid {
+    .ops-grid,
+    .ops-board,
+    .ops-main,
+    .ops-side {
       display: grid;
       gap: 18px;
     }
@@ -270,7 +273,10 @@
     .verticals-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .memory-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .actions-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .ops-grid { grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.9fr); }
+    .ops-grid,
+    .ops-board { grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr); }
+    .ops-main { grid-template-columns: 1fr; }
+    .ops-side { grid-template-columns: 1fr; align-content: start; }
     .chat-grid { grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr); }
 
     .section-head {
@@ -293,6 +299,47 @@
       border-radius: var(--radius-lg);
       padding: 22px;
       min-width: 0;
+    }
+
+    .ops-shell {
+      border-radius: var(--radius-xl);
+      padding: 24px;
+    }
+
+    .mini-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 18px 0 22px;
+    }
+
+    .mini-metric {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+    }
+
+    .mini-metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .mini-metric strong { font-size: 1.35rem; }
+
+    .launcher-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .launcher-strip .ghost-button {
+      width: auto;
     }
 
     .chat-log {
@@ -534,6 +581,8 @@
       .shell { grid-template-columns: 292px minmax(0, 1fr); }
       .topbar,
       .ops-grid,
+      .ops-board,
+      .mini-metrics,
       .verticals-grid,
       .launchers-grid,
       .metrics-grid,
@@ -547,6 +596,10 @@
       .shell,
       .topbar,
       .ops-grid,
+      .ops-board,
+      .ops-main,
+      .ops-side,
+      .mini-metrics,
       .verticals-grid,
       .launchers-grid,
       .metrics-grid,
@@ -597,10 +650,8 @@
       </div>
 
       <nav class="nav-group">
-        <a class="nav-link active" href="#overview"><span><strong>Overview</strong><br><small>estado general</small></span><small>01</small></a>
-        <a class="nav-link" href="#launchers"><span><strong>Launchers</strong><br><small>acciones rápidas</small></span><small>02</small></a>
-        <a class="nav-link" href="#verticals"><span><strong>Verticales</strong><br><small>Ambbi / Gringo / Personal</small></span><small>03</small></a>
-        <a class="nav-link" href="#ops"><span><strong>Ops Console</strong><br><small>briefs y ejecución</small></span><small>04</small></a>
+        <a class="nav-link active" href="#overview"><span><strong>Overview</strong><br><small>métricas</small></span><small>01</small></a>
+        <a class="nav-link" href="#ops"><span><strong>Ops</strong><br><small>acción central</small></span><small>02</small></a>
       </nav>
 
       <div class="sidebar-title">Acciones rápidas</div>
@@ -625,224 +676,107 @@
     </aside>
 
     <main class="main">
-      <section class="topbar private-only" id="overview">
+      <section class="private-only" id="overview">
         <article class="panel hero-copy">
-          <h2>Un <span>command center</span> real, no una maqueta linda.</h2>
-          <p>La lógica ahora es clara: menos cards decorativas, más módulos que te ordenen el día, disparen flujos y te den contexto accionable para Ambbi, Gringo Estate y tu operación.</p>
-          <div class="hero-badges">
-            <div class="hero-badge"><strong>Dirección</strong> premium + ejecutiva</div>
-            <div class="hero-badge"><strong>UX</strong> clara, apretable y rápida</div>
-            <div class="hero-badge"><strong>Objetivo</strong> carga cero real</div>
+          <div class="row-between">
+            <div>
+              <h2>Métricas arriba. <span>Acción al centro.</span></h2>
+              <p>Sin info flotando. Sin bloques de relleno. Este panel tiene que servir para decidir y ejecutar.</p>
+            </div>
             <button class="ghost-button" id="refreshPanelBtn" type="button">Actualizar panel</button>
           </div>
-        </article>
-
-        <article class="panel hero-card">
-          <div>
-            <h3>Executive OS</h3>
-            <p>Base visual lista para crecer hacia inbox, memoria viva, launchers y ejecución operativa por vertical.</p>
-            <div class="tag-row">
-              <span class="tag">black / gold</span>
-              <span class="tag">clean</span>
-              <span class="tag">usable</span>
-              <span class="tag">premium</span>
-            </div>
-          </div>
-          <div class="stat-large">
-            <strong>04</strong>
-            <span>bloques operativos</span>
+          <div class="metrics-grid" id="metricsGrid">
+            <article class="metric-card">
+              <span class="metric-label">Snapshot</span>
+              <strong class="metric-value">Cargando</strong>
+              <p>Trayendo métricas...</p>
+              <div class="metric-foot"><span>panel</span><span>live</span></div>
+            </article>
           </div>
         </article>
-      </section>
-
-      <section class="private-only">
-        <div class="section-head">
-          <div>
-            <h3>Snapshot operativo</h3>
-            <p>Jerarquía rápida para arrancar el día y entender dónde entrar primero.</p>
-          </div>
-        </div>
-        <div class="metrics-grid" id="metricsGrid">
-          <article class="metric-card">
-            <span class="metric-label">Modo oficina</span>
-            <strong class="metric-value">Cargando</strong>
-            <p>Trayendo snapshot operativo...</p>
-            <div class="metric-foot"><span>panel</span><span>live</span></div>
-          </article>
-        </div>
-      </section>
-
-      <section class="private-only" id="launchers">
-        <div class="section-head">
-          <div>
-            <h3>Launchers reales</h3>
-            <p>Atajos diseñados para tu uso real. Cada botón ya baja un prompt limpio en consola.</p>
-          </div>
-        </div>
-        <div class="launchers-grid">
-          <article class="launcher-card">
-            <h4>Daily brief 10:00</h4>
-            <p>Preparar el informe corto con Ambbi, Gringo Estate y prioridades del día.</p>
-            <button class="ghost-button launcher-trigger" data-template="Armame el brief de oficina 10:00 con foco en Ambbi, Gringo, pendientes críticos y acción sugerida.">Cargar en consola</button>
-          </article>
-          <article class="launcher-card">
-            <h4>Bajar audio a tareas</h4>
-            <p>Transformar un audio en decisiones, tareas delegables y memoria útil.</p>
-            <button class="ghost-button launcher-trigger" data-template="Bajá este audio a 3 bloques: decisiones, tareas y memoria duradera.">Cargar en consola</button>
-          </article>
-          <article class="launcher-card">
-            <h4>Pipeline inmobiliario</h4>
-            <p>Resumen ejecutivo de leads, estado de oportunidades y próximos pasos.</p>
-            <button class="ghost-button launcher-trigger" data-template="Preparame un resumen ejecutivo del pipeline inmobiliario con estado, trabas y próximo paso por lead.">Cargar en consola</button>
-          </article>
-          <article class="launcher-card">
-            <h4>Copy / publicación</h4>
-            <p>Generar texto limpio para propiedad, whatsapp o publicación comercial.</p>
-            <button class="ghost-button launcher-trigger" data-template="Redactá copy premium y ejecutivo para una propiedad, listo para enviar o publicar.">Cargar en consola</button>
-          </article>
-        </div>
-      </section>
-
-      <section class="private-only" id="verticals">
-        <div class="section-head">
-          <div>
-            <h3>Verticales tuyas reales</h3>
-            <p>La arquitectura pasa de genérica a específica: tus negocios, tus rituales, tus flujos.</p>
-          </div>
-        </div>
-        <div class="verticals-grid">
-          <article class="vertical-card">
-            <div class="row-between"><h4>Ambbi</h4><span class="chip">ops</span></div>
-            <p>Check-ins, limpiezas, mantenimiento, administración y brief operativo por edificio.</p>
-            <div class="tag-row"><span class="tag">Uriburu</span><span class="tag">staff</span><span class="tag">incidencias</span></div>
-          </article>
-          <article class="vertical-card">
-            <div class="row-between"><h4>Gringo Estate</h4><span class="chip">broker</span></div>
-            <p>Leads, publicaciones, copy, seguimiento comercial y panel de oportunidades.</p>
-            <div class="tag-row"><span class="tag">pipeline</span><span class="tag">copy AI</span><span class="tag">leads</span></div>
-          </article>
-          <article class="vertical-card">
-            <div class="row-between"><h4>Personal / CEO</h4><span class="chip">focus</span></div>
-            <p>Agenda, recordatorios clave, prioridades del día y memoria ejecutiva personal.</p>
-            <div class="tag-row"><span class="tag">brief</span><span class="tag">agenda</span><span class="tag">prioridades</span></div>
-          </article>
-        </div>
       </section>
 
       <section class="private-only" id="ops">
-        <div class="section-head">
-          <div>
-            <h3>Ops console</h3>
-            <p>Zona de trabajo: lanzar pedidos, limpiarlos y convertirlos en brief accionable.</p>
-          </div>
-        </div>
-        <div class="ops-grid">
-          <article class="composer-card">
-            <h3>Brief / comando ejecutivo</h3>
-            <p>Usalo como launcher mental. No es chat decorativo: es la bandeja para ordenar ejecución.</p>
-            <textarea id="composerInput" placeholder="Ej: preparame el brief de oficina, bajá este audio a tareas, resumime el pipeline, armame un copy para una propiedad..."></textarea>
-            <div class="composer-actions">
-              <button class="button" id="summarizeBtn" type="button">Sintetizar pedido</button>
-              <button class="button secondary" id="saveInboxBtn" type="button">Guardar en inbox</button>
-              <button class="button secondary" id="clearBtn" type="button">Limpiar</button>
+        <article class="panel ops-shell">
+          <div class="section-head">
+            <div>
+              <h3>Ops</h3>
+              <p>Un único cuadrante para pedir, chatear, guardar y ejecutar.</p>
             </div>
-            <div class="composer-output" id="composerOutput">Acá va a aparecer el brief limpio para ejecutar.</div>
-          </article>
+          </div>
 
-          <div class="actions-grid">
-            <article class="action-card feed-card">
-              <h4>Inbox ejecutivo</h4>
-              <p>Cola viva para pedidos, audios y pendientes operativos.</p>
-              <div class="feed-list" id="inboxFeed">
-                <div class="feed-item">
-                  <div class="feed-meta"><strong>Cargando inbox...</strong><span class="chip">live</span></div>
-                  <p>Trayendo items del panel.</p>
+          <div class="launcher-strip">
+            <button class="ghost-button launcher-trigger" data-template="Armame el brief de oficina 10:00 con foco en Ambbi, Gringo, pendientes críticos y acción sugerida.">Daily brief 10:00</button>
+            <button class="ghost-button launcher-trigger" data-template="Bajá este audio a 3 bloques: decisiones, tareas y memoria duradera.">Procesar audio</button>
+            <button class="ghost-button launcher-trigger" data-template="Preparame un resumen ejecutivo del pipeline inmobiliario con estado, trabas y próximo paso por lead.">Pipeline RE</button>
+            <button class="ghost-button launcher-trigger" data-template="Redactá copy premium y ejecutivo para una propiedad, listo para enviar o publicar.">Copy / publicación</button>
+          </div>
+
+          <div class="ops-board">
+            <div class="ops-main">
+              <article class="composer-card">
+                <h3>Comando ejecutivo</h3>
+                <textarea id="composerInput" placeholder="Ej: preparame el brief de oficina, bajá este audio a tareas, resumime el pipeline, armame un copy para una propiedad..."></textarea>
+                <div class="composer-actions">
+                  <button class="button" id="summarizeBtn" type="button">Sintetizar pedido</button>
+                  <button class="button secondary" id="saveInboxBtn" type="button">Guardar en inbox</button>
+                  <button class="button secondary" id="clearBtn" type="button">Limpiar</button>
                 </div>
-              </div>
-            </article>
+                <div class="composer-output" id="composerOutput">Acá va a aparecer el brief limpio para ejecutar.</div>
+              </article>
 
-            <article class="action-card memory-card">
-              <h4>Memoria visible</h4>
-              <p>Siempre a mano: foco, prioridades y contexto estable del negocio.</p>
-              <div class="feed-list" id="memoryFeed">
-                <div class="feed-item">
-                  <div class="feed-meta"><strong>Cargando memoria...</strong><span class="chip">live</span></div>
+              <article class="composer-card">
+                <div class="row-between">
+                  <h3>Chat con Wispy</h3>
+                  <span class="chip" id="chatModePill">ready</span>
                 </div>
-              </div>
-            </article>
-
-            <article class="action-card">
-              <h4>Estado de acción</h4>
-              <p id="actionStatus">Todavía no corriste ninguna acción server-side desde este panel.</p>
-              <div class="tag-row"><span class="tag">server action</span><span class="tag">inbox</span><span class="tag">memoria</span></div>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="private-only" id="chat">
-        <div class="section-head">
-          <div>
-            <h3>Chat real con Wispy</h3>
-            <p>Asistente dentro del panel, con contexto real de Franco, Ambbi y Gringo Estate.</p>
-          </div>
-        </div>
-        <div class="ops-grid chat-grid">
-          <article class="composer-card">
-            <h3>Conversación ejecutiva</h3>
-            <p>Usalo para pensar, ordenar o pedir ejecución. El contexto sale del workspace real.</p>
-            <div class="chat-log" id="chatLog">
-              <div class="chat-bubble assistant"><strong>Wispy</strong>Listo para ayudarte desde el panel.</div>
+                <div class="chat-log" id="chatLog">
+                  <div class="chat-bubble assistant"><strong>Wispy</strong>Listo para ayudarte desde el panel.</div>
+                </div>
+                <textarea id="chatInput" class="chat-input" placeholder="Ej: qué priorizarías hoy, resumime Ambbi, armame próximos pasos o bajá esto a acción..."></textarea>
+                <div class="composer-actions">
+                  <button class="button" id="sendChatBtn" type="button">Enviar a Wispy</button>
+                  <button class="button secondary" id="clearChatBtn" type="button">Limpiar chat</button>
+                </div>
+              </article>
             </div>
-            <textarea id="chatInput" class="chat-input" placeholder="Ej: armame el brief de hoy, qué priorizarías en Ambbi, resumime el pipeline o bajá esto a próximos pasos..."></textarea>
-            <div class="composer-actions">
-              <button class="button" id="sendChatBtn" type="button">Enviar a Wispy</button>
-              <button class="button secondary" id="clearChatBtn" type="button">Limpiar chat</button>
-            </div>
-          </article>
 
-          <article class="action-card">
-            <h4>Contexto conectado</h4>
-            <p>Este chat ya toma data real del panel y del workspace para responder con más criterio.</p>
-            <div class="feed-list">
-              <div class="feed-item">
-                <div class="feed-meta"><strong>Fuente viva</strong><span class="chip">MEMORY</span></div>
-                <p>Prioridades activas, portfolio, staff y memoria diaria reciente.</p>
-              </div>
-              <div class="feed-item">
-                <div class="feed-meta"><strong>Uso ideal</strong><span class="chip">brief</span></div>
-                <p>Perfecto para ordenar foco, preparar mensajes y bajar ideas a acción.</p>
-              </div>
-              <div class="feed-item">
-                <div class="feed-meta"><strong>Estado</strong><span class="chip" id="chatModePill">ready</span></div>
-                <p id="chatStatus">Chat inicializado.</p>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
+            <div class="ops-side">
+              <article class="action-card">
+                <h4>Estado</h4>
+                <p id="actionStatus">Todavía no corriste ninguna acción server-side desde este panel.</p>
+                <div class="mini-metrics">
+                  <div class="mini-metric"><span>Panel</span><strong id="panelStateMini">OK</strong></div>
+                  <div class="mini-metric"><span>Chat</span><strong id="chatStatusMini">Ready</strong></div>
+                  <div class="mini-metric"><span>Inbox</span><strong id="inboxCountMini">0</strong></div>
+                  <div class="mini-metric"><span>Foco</span><strong id="focusCountMini">0</strong></div>
+                </div>
+              </article>
 
-      <section class="private-only">
-        <div class="section-head">
-          <div>
-            <h3>Principios del panel</h3>
-            <p>Lo que queda definido como estándar para seguir construyendo.</p>
+              <article class="action-card feed-card">
+                <div class="row-between">
+                  <h4>Inbox</h4>
+                  <span class="chip" id="chatStatus">operativo</span>
+                </div>
+                <div class="feed-list" id="inboxFeed">
+                  <div class="feed-item">
+                    <div class="feed-meta"><strong>Cargando inbox...</strong><span class="chip">live</span></div>
+                    <p>Trayendo items del panel.</p>
+                  </div>
+                </div>
+              </article>
+
+              <article class="action-card memory-card">
+                <h4>Foco</h4>
+                <div class="feed-list" id="memoryFeed">
+                  <div class="feed-item">
+                    <div class="feed-meta"><strong>Cargando foco...</strong><span class="chip">live</span></div>
+                  </div>
+                </div>
+              </article>
+            </div>
           </div>
-        </div>
-        <div class="memory-grid">
-          <article class="memory-card">
-            <h4>Menos landing, más sistema</h4>
-            <p>Se abandona la lógica de mock bonito. Esto ya apunta a ser consola operativa.</p>
-          </article>
-          <article class="memory-card">
-            <h4>Estética premium sobria</h4>
-            <p>Negro, dorado, vidrio leve, jerarquía clara y cero vibe retro gamer.</p>
-          </article>
-          <article class="memory-card">
-            <h4>Acción por encima del adorno</h4>
-            <p>Cada bloque nuevo debería justificar por qué acelera trabajo real.</p>
-          </article>
-        </div>
+        </article>
       </section>
 
       <div class="footer-note">Wispy Private Console · Gringo Estate executive dashboard</div>
@@ -875,6 +809,10 @@
     const clearChatBtn = document.getElementById('clearChatBtn');
     const chatStatus = document.getElementById('chatStatus');
     const chatModePill = document.getElementById('chatModePill');
+    const panelStateMini = document.getElementById('panelStateMini');
+    const chatStatusMini = document.getElementById('chatStatusMini');
+    const inboxCountMini = document.getElementById('inboxCountMini');
+    const focusCountMini = document.getElementById('focusCountMini');
 
     const SESSION_KEY = 'wispy_private_console';
     let chatHistory = [];
@@ -965,6 +903,7 @@
     }
 
     function renderInbox(items) {
+      inboxCountMini.textContent = String(items.length);
       inboxFeed.innerHTML = items.map((item) => `
         <div class="feed-item">
           <div class="feed-meta"><strong>${item.title}</strong><span class="chip">${item.priority}</span></div>
@@ -974,7 +913,7 @@
             <button class="ghost-button mark-done-btn" data-id="${item.id}">Marcar done</button>
           </div>
         </div>
-      `).join('');
+      `).join('') || '<div class="feed-item"><p>Sin pendientes abiertos.</p></div>';
 
       document.querySelectorAll('.mark-done-btn').forEach((button) => {
         button.addEventListener('click', async () => {
@@ -984,9 +923,10 @@
     }
 
     function renderMemory(items) {
+      focusCountMini.textContent = String(items.length);
       memoryFeed.innerHTML = items.map((item) => `
         <div class="feed-item">
-          <div class="feed-meta"><strong>${item.title}</strong><span class="chip">contexto</span></div>
+          <div class="feed-meta"><strong>${item.title}</strong><span class="chip">foco</span></div>
           <p>${item.body}</p>
         </div>
       `).join('');
@@ -1009,8 +949,10 @@
         renderMetrics(data.snapshot || []);
         renderInbox(data.inbox || []);
         renderMemory(data.memory || []);
+        panelStateMini.textContent = 'Sync';
         actionStatus.textContent = `Panel sincronizado · ${new Date(data.generatedAt).toLocaleString('es-AR')}`;
       } catch (error) {
+        panelStateMini.textContent = 'Error';
         actionStatus.textContent = 'No pude traer el estado vivo del panel ahora.';
       } finally {
         if (refreshPanelBtn) refreshPanelBtn.textContent = 'Actualizar panel';
@@ -1068,7 +1010,8 @@
       renderChatMessage('user', message);
       chatHistory.push({ role: 'user', content: message });
       chatInput.value = '';
-      chatStatus.textContent = 'Wispy está pensando...';
+      chatStatus.textContent = 'pensando';
+      chatStatusMini.textContent = 'Live';
       chatModePill.textContent = 'live';
 
       try {
@@ -1081,13 +1024,15 @@
         if (!response.ok || !data.ok) throw new Error(data.error || 'No pude hablar con Wispy');
         renderChatMessage('assistant', data.reply);
         chatHistory.push({ role: 'assistant', content: data.reply });
-        chatStatus.textContent = `Chat activo · modo ${data.mode}`;
+        chatStatus.textContent = data.mode;
+        chatStatusMini.textContent = data.mode;
         chatModePill.textContent = data.mode;
       } catch {
         const fallback = 'No pude pegarle al chat real ahora. Reintentá en un segundo.';
         renderChatMessage('assistant', fallback);
         chatHistory.push({ role: 'assistant', content: fallback });
-        chatStatus.textContent = 'Falló la llamada al chat.';
+        chatStatus.textContent = 'error';
+        chatStatusMini.textContent = 'Error';
         chatModePill.textContent = 'error';
       }
     }
@@ -1129,7 +1074,8 @@
     clearChatBtn.addEventListener('click', () => {
       chatHistory = [];
       chatLog.innerHTML = '<div class="chat-bubble assistant"><strong>Wispy</strong>Chat limpio. Cuando quieras, arrancamos de nuevo.</div>';
-      chatStatus.textContent = 'Chat limpio.';
+      chatStatus.textContent = 'ready';
+      chatStatusMini.textContent = 'Ready';
       chatModePill.textContent = 'ready';
       chatInput.value = '';
     });
