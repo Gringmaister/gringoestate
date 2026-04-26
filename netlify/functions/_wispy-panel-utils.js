@@ -1,23 +1,27 @@
 const fs = require('fs');
 const path = require('path');
 
+const runtimeRoot = process.env.LAMBDA_TASK_ROOT || process.cwd() || __dirname;
 const workspaceRoot = path.resolve(__dirname, '..', '..', '..');
-const dataDir = path.resolve(__dirname, '..', '..', 'data');
-const inboxPath = path.join(dataDir, 'wispy-inbox.json');
-const contextPath = path.join(dataDir, 'wispy-context.json');
+const seedDataDir = path.resolve(runtimeRoot, 'data');
+const writableDataDir = path.resolve('/tmp', 'wispy-panel-data');
+const inboxPath = path.join(writableDataDir, 'wispy-inbox.json');
+const seedInboxPath = path.join(seedDataDir, 'wispy-inbox.json');
+const contextPath = path.join(seedDataDir, 'wispy-context.json');
 const memoryPath = path.join(workspaceRoot, 'MEMORY.md');
 const userPath = path.join(workspaceRoot, 'USER.md');
 const soulPath = path.join(workspaceRoot, 'SOUL.md');
 const dailyMemoryDir = path.join(workspaceRoot, 'memory');
 
 function ensureDataDir() {
-  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  if (!fs.existsSync(writableDataDir)) fs.mkdirSync(writableDataDir, { recursive: true });
 }
 
 function ensureInboxFile() {
   ensureDataDir();
   if (!fs.existsSync(inboxPath)) {
-    const seed = {
+    const seeded = readJson(seedInboxPath, null);
+    const seed = seeded || {
       items: [
         {
           id: `seed-${Date.now()}`,
