@@ -27,23 +27,26 @@ exports.handler = async function () {
 
   const blockedFocus = countBlockedFocus(focus);
   const runtimeCards = runtimeTelemetry?.cards || null;
-  const gatewayOnline = runtimeTelemetry?.gateway?.online;
-  const activeSessions = runtimeTelemetry?.sessions?.activeCount;
+  const bridgePending = runtimeTelemetry?.pending === true;
+  const gatewayOnline = bridgePending ? null : runtimeTelemetry?.gateway?.online;
+  const activeSessions = bridgePending ? null : runtimeTelemetry?.sessions?.activeCount;
 
   const snapshot = [
     {
       label: 'Gateway',
-      value: runtimeCards?.gatewayValue || 'Online',
-      note: runtimeTelemetry?.gateway?.detail || 'Pulso principal visible desde Office.',
-      badge: gatewayOnline === false ? 'caído' : 'verde',
-      tone: gatewayOnline === false ? 'danger' : 'ok'
+      value: bridgePending ? 'Bridge pending' : (runtimeCards?.gatewayValue || 'Online'),
+      note: bridgePending ? 'Falta conectar el runtime bridge externo desde Netlify.' : (runtimeTelemetry?.gateway?.detail || 'Pulso principal visible desde Office.'),
+      badge: bridgePending ? 'bridge' : (gatewayOnline === false ? 'caído' : 'verde'),
+      tone: bridgePending ? 'warn' : (gatewayOnline === false ? 'danger' : 'ok')
     },
     {
       label: 'Sesiones activas',
-      value: String(activeSessions || 1),
-      note: runtimeTelemetry?.sessions?.current
-        ? `${runtimeTelemetry.sessions.current.model} · ${runtimeTelemetry.sessions.current.updatedAgo}`
-        : 'Main session operativa.',
+      value: String(activeSessions ?? 1),
+      note: bridgePending
+        ? 'Pendiente enlazar sesiones reales vía bridge.'
+        : (runtimeTelemetry?.sessions?.current
+          ? `${runtimeTelemetry.sessions.current.model} · ${runtimeTelemetry.sessions.current.updatedAgo}`
+          : 'Main session operativa.'),
       badge: 'live',
       tone: 'ok'
     },
@@ -67,11 +70,19 @@ exports.handler = async function () {
   const boards = Array.isArray(context.boards) ? context.boards : [];
   const liveLog = [
     ...(Array.isArray(context.liveLog) ? context.liveLog : []),
-    ...((runtimeTelemetry?.liveLogItems) || [])
+    ...((runtimeTelemetry?.liveLogItems) || []),
+    ...(bridgePending ? [{
+      title: 'Runtime bridge pendiente',
+      body: 'El deploy público ya tomó el panel nuevo, pero todavía falta unir Netlify con el bridge externo real.',
+      time: 'live',
+      tone: 'warn'
+    }] : [])
   ].slice(0, 8);
-  const runtime = runtimeTelemetry?.runtimeItems?.length
-    ? runtimeTelemetry.runtimeItems
-    : (Array.isArray(context.runtime) ? context.runtime : []);
+  const runtime = bridgePending
+    ? (Array.isArray(context.runtime) ? context.runtime : [])
+    : (runtimeTelemetry?.runtimeItems?.length
+      ? runtimeTelemetry.runtimeItems
+      : (Array.isArray(context.runtime) ? context.runtime : []));
 
   return {
     statusCode: 200,

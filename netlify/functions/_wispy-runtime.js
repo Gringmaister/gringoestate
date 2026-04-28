@@ -23,7 +23,9 @@ async function getBridgeRuntime() {
 async function getLocalRuntime() {
   try {
     const { collectRuntime } = require('../../runtime/collect-openclaw-runtime');
-    return await collectRuntime();
+    const runtime = await collectRuntime();
+    const hasRealSignals = Boolean(runtime?.gateway?.online || runtime?.sessions?.totalCount);
+    return hasRealSignals ? runtime : null;
   } catch {
     return null;
   }
@@ -34,12 +36,12 @@ async function getRuntimeTelemetry() {
     const bridged = await getBridgeRuntime();
     if (bridged) return { ...bridged, source: 'bridge' };
   } catch (error) {
-    return { error: error.message, source: 'bridge-error' };
+    return { error: error.message, source: 'bridge-error', pending: true };
   }
 
   const local = await getLocalRuntime();
   if (local) return local;
-  return null;
+  return { source: 'bridge-pending', pending: true };
 }
 
 module.exports = {
