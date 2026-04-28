@@ -13,6 +13,7 @@ const actionLogPath = path.join(writableDataDir, 'wispy-action-log.json');
 const bugJournalPath = path.join(writableDataDir, 'wispy-bug-journal.json');
 const seedInboxPath = path.join(seedDataDir, 'wispy-inbox.json');
 const contextPath = path.join(seedDataDir, 'wispy-context.json');
+const collaboratorStatePath = path.join(writableDataDir, 'wispy-collaborators.json');
 const memoryPath = path.join(workspaceRoot, 'MEMORY.md');
 const userPath = path.join(workspaceRoot, 'USER.md');
 const soulPath = path.join(workspaceRoot, 'SOUL.md');
@@ -182,6 +183,27 @@ function appendBug(entry) {
   return next;
 }
 
+function getCollaboratorState(seedCollaborators = []) {
+  const payload = readJson(collaboratorStatePath, null);
+  if (payload && Array.isArray(payload.items)) return payload.items;
+  if (Array.isArray(seedCollaborators) && seedCollaborators.length) {
+    writeJson(collaboratorStatePath, { items: seedCollaborators });
+    return seedCollaborators;
+  }
+  return [];
+}
+
+function saveCollaboratorState(items) {
+  writeJson(collaboratorStatePath, { items });
+}
+
+function updateCollaborator(name, patch = {}) {
+  const current = getCollaboratorState();
+  const updated = current.map((item) => item.name === name ? { ...item, ...patch } : item);
+  saveCollaboratorState(updated);
+  return updated;
+}
+
 function getContextData() {
   const seeded = readJson(contextPath, null);
   if (seeded && seeded.portfolio) {
@@ -193,7 +215,7 @@ function getContextData() {
       priorities: Array.isArray(seeded.priorities) ? seeded.priorities : [],
       focus: Array.isArray(seeded.focus) ? seeded.focus : [],
       staff: Array.isArray(seeded.staff) ? seeded.staff : [],
-      collaborators: Array.isArray(seeded.collaborators) ? seeded.collaborators : [],
+      collaborators: getCollaboratorState(Array.isArray(seeded.collaborators) ? seeded.collaborators : []),
       boards: Array.isArray(seeded.boards) ? seeded.boards : [],
       runtime: Array.isArray(seeded.runtime) ? seeded.runtime : [],
       liveLog: Array.isArray(seeded.liveLog) ? seeded.liveLog : [],
@@ -213,7 +235,7 @@ function getContextData() {
     priorities: extractPriorities(memoryMd),
     focus: [],
     staff: extractStaff(memoryMd),
-    collaborators: [],
+    collaborators: getCollaboratorState([]),
     boards: [],
     runtime: [],
     liveLog: [],
@@ -227,11 +249,15 @@ module.exports = {
   inboxPath,
   actionLogPath,
   bugJournalPath,
+  collaboratorStatePath,
   getInbox,
   saveInbox,
   getActionLog,
   saveActionLog,
   appendActionLog,
+  getCollaboratorState,
+  saveCollaboratorState,
+  updateCollaborator,
   getBugJournal,
   saveBugJournal,
   appendBug,

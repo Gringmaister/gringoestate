@@ -829,6 +829,26 @@
       `).join('') || '<div class="list-item"><strong>Sin notificaciones</strong><p>No hay alertas relevantes ahora.</p></div>';
     }
 
+    async function triggerFollowUp(name) {
+      composerOutput.textContent = `Preparando follow-up para ${name}...`;
+      actionModePill.textContent = 'follow-up';
+      try {
+        const response = await fetch('/.netlify/functions/wispy-panel-followup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, mode: 'trigger' })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.error || 'No pude registrar el follow-up');
+        composerOutput.textContent = `Follow-up ${name}\n\n${data.message}\n\n${data.note || ''}`;
+        actionModePill.textContent = 'follow-up-ok';
+        await loadPanelData();
+      } catch {
+        composerOutput.textContent = `No pude registrar el follow-up para ${name}.`;
+        actionModePill.textContent = 'follow-up-error';
+      }
+    }
+
     function renderCollaborators(items) {
       const collaborators = Array.isArray(items) ? items : [];
       collaboratorCountPill.textContent = String(collaborators.length);
@@ -843,8 +863,12 @@
           <p><span class="accent">Pendiente:</span> ${item.pending || 'sin pendiente'}</p>
           ${item.waitingHours !== null ? `<p><span class="accent">Espera:</span> ${Math.round(item.waitingHours)}h / SLA ${item.slaHours}h</p>` : ''}
           ${item.nextAction ? `<p><span class="accent">Próximo:</span> ${item.nextAction}</p>` : ''}
+          <div class="list-meta"><button class="ghost-button followup-btn" data-name="${item.name}">Follow-up</button></div>
         </div>
       `).join('') || '<div class="list-item"><strong>Sin colaboradores</strong></div>';
+      document.querySelectorAll('.followup-btn').forEach((button) => {
+        button.addEventListener('click', () => triggerFollowUp(button.dataset.name));
+      });
     }
 
     function renderBoards(items) {
