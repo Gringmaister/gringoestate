@@ -10,6 +10,26 @@ function countAudioLike(items = []) {
   return items.filter((item) => /audio|voice|nota/i.test(`${item.title} ${item.summary}`)).length;
 }
 
+function hoursBetween(now, isoString) {
+  const then = isoString ? new Date(isoString).getTime() : null;
+  if (!then || Number.isNaN(then)) return null;
+  return Math.max(0, (now - then) / (1000 * 60 * 60));
+}
+
+function enrichCollaborators(items = []) {
+  const now = Date.now();
+  return items.map((item) => {
+    const waitingHours = hoursBetween(now, item.waitingSinceAt);
+    const overdue = waitingHours !== null && Number.isFinite(item.slaHours) && waitingHours >= item.slaHours;
+    return {
+      ...item,
+      waitingHours,
+      overdue,
+      statusTone: overdue ? 'danger' : (item.statusTone || 'ok')
+    };
+  });
+}
+
 exports.handler = async function () {
   const now = new Date();
   const inbox = getInbox();
@@ -68,7 +88,7 @@ exports.handler = async function () {
     }
   ];
 
-  const collaborators = Array.isArray(context.collaborators) ? context.collaborators : [];
+  const collaborators = enrichCollaborators(Array.isArray(context.collaborators) ? context.collaborators : []);
   const boards = Array.isArray(trelloBoards) && trelloBoards.length
     ? trelloBoards
     : (Array.isArray(context.boards) ? context.boards : []);
@@ -108,6 +128,14 @@ exports.handler = async function () {
         body: `${board.today || 0} para hoy · ${board.blocked || 0} bloqueadas`,
         level: board.blocked > 0 ? 'warn' : 'ok'
       }))),
+    ...collaborators
+      .filter((item) => item.overdue)
+      .slice(0, 3)
+      .map((item) => ({
+        title: `${item.name} pasado de SLA`,
+        body: `${Math.round(item.waitingHours)}h esperando respuesta · ${item.pending}`,
+        level: 'danger'
+      })),
     ...actionLog.slice(0, 2).map((item) => ({
       title: item.title,
       body: item.body,

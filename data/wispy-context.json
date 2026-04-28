@@ -45,7 +45,11 @@
       "status": "esperando respuesta",
       "statusTone": "warn",
       "lastContact": "ayer",
-      "pending": "contratos y flujos administrativos"
+      "lastContactAt": "2026-04-27T09:30:00.000Z",
+      "waitingSinceAt": "2026-04-27T09:30:00.000Z",
+      "slaHours": 24,
+      "pending": "contratos y flujos administrativos",
+      "nextAction": "Mandar follow-up si no responde hoy"
     },
     {
       "name": "Augusto",
@@ -53,7 +57,11 @@
       "status": "activo",
       "statusTone": "ok",
       "lastContact": "hoy",
-      "pending": "alinear experiencia huésped / check-ins"
+      "lastContactAt": "2026-04-28T11:00:00.000Z",
+      "waitingSinceAt": null,
+      "slaHours": 12,
+      "pending": "alinear experiencia huésped / check-ins",
+      "nextAction": "Mantener seguimiento liviano"
     },
     {
       "name": "Marcelo",
@@ -61,7 +69,11 @@
       "status": "pendiente",
       "statusTone": "warn",
       "lastContact": "ayer",
-      "pending": "repaso de arreglos y puestas a punto"
+      "lastContactAt": "2026-04-27T07:00:00.000Z",
+      "waitingSinceAt": "2026-04-27T07:00:00.000Z",
+      "slaHours": 12,
+      "pending": "repaso de arreglos y puestas a punto",
+      "nextAction": "Escalar si no responde en próximas horas"
     },
     {
       "name": "Valentino",
@@ -69,7 +81,11 @@
       "status": "sin pendiente",
       "statusTone": "ok",
       "lastContact": "esta semana",
-      "pending": "sin bloqueo activo"
+      "lastContactAt": "2026-04-25T13:00:00.000Z",
+      "waitingSinceAt": null,
+      "slaHours": 24,
+      "pending": "sin bloqueo activo",
+      "nextAction": "Sin acción urgente"
     }
   ],
   "boards": [

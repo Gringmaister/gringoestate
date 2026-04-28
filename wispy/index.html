@@ -836,11 +836,13 @@
         <div class="list-item">
           <div class="list-meta">
             <strong>${item.name}</strong>
-            <span class="pill ${item.statusTone || ''}">${item.status || 'activo'}</span>
+            <span class="pill ${item.statusTone || ''}">${item.overdue ? 'sla vencido' : (item.status || 'activo')}</span>
           </div>
           <p>${item.role}</p>
           <p><span class="accent">Último contacto:</span> ${item.lastContact || 'sin dato'}</p>
           <p><span class="accent">Pendiente:</span> ${item.pending || 'sin pendiente'}</p>
+          ${item.waitingHours !== null ? `<p><span class="accent">Espera:</span> ${Math.round(item.waitingHours)}h / SLA ${item.slaHours}h</p>` : ''}
+          ${item.nextAction ? `<p><span class="accent">Próximo:</span> ${item.nextAction}</p>` : ''}
         </div>
       `).join('') || '<div class="list-item"><strong>Sin colaboradores</strong></div>';
     }
