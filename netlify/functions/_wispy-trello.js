@@ -55,9 +55,12 @@ function summarizeCards(name, cards = []) {
   return { name, pending, today, blocked };
 }
 
-async function trelloFetch(url) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Trello HTTP ${response.status}`);
+async function trelloFetch(url, options = {}) {
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    throw new Error(`Trello HTTP ${response.status}${text ? ` · ${text.slice(0, 120)}` : ''}`);
+  }
   return await response.json();
 }
 
@@ -96,6 +99,41 @@ async function getTrelloBoardsSnapshot() {
   return snapshots;
 }
 
+async function createTrelloCard({ area = 'inbox', title, desc = '', dryRun = false }) {
+  const dotenv = readDotEnv(envFile);
+  const key = getEnv('TRELLO_API_KEY', dotenv);
+  const token = getEnv('TRELLO_TOKEN', dotenv);
+  if (!key || !token) throw new Error('Trello credentials missing');
+
+  const listMap = {
+    inbox: getEnv('TRELLO_LIST_INBOX', dotenv),
+    maintenance: getEnv('TRELLO_LIST_MAINTENANCE', dotenv),
+    admin: getEnv('TRELLO_LIST_ADMIN', dotenv)
+  };
+  const idList = listMap[area] || listMap.inbox;
+  if (!idList) throw new Error(`No Trello list configured for area ${area}`);
+
+  const payload = { idList, name: title, desc };
+  if (dryRun) return { ok: true, dryRun: true, area, payload };
+
+  const params = new URLSearchParams({ ...payload, key, token }).toString();
+  const data = await trelloFetch('https://api.trello.com/1/cards', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params
+  });
+
+  return {
+    ok: true,
+    area,
+    id: data.id,
+    url: data.url,
+    name: data.name,
+    idList: data.idList
+  };
+}
+
 module.exports = {
-  getTrelloBoardsSnapshot
+  getTrelloBoardsSnapshot,
+  createTrelloCard
 };

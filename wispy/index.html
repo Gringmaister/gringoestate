@@ -564,6 +564,7 @@
 
             <div class="action-row">
               <button class="button" id="summarizeBtn" type="button">Ejecutar</button>
+              <button class="ghost-button" id="createTrelloBtn" type="button">Crear en Trello</button>
               <button class="ghost-button" id="saveInboxBtn" type="button">Guardar en inbox</button>
               <button class="ghost-button" id="sendChatBtn" type="button">Enviar a Wispy</button>
               <button class="ghost-button" id="clearBtn" type="button">Limpiar</button>
@@ -662,6 +663,7 @@
     const composerOutput = document.getElementById('composerOutput');
     const summarizeBtn = document.getElementById('summarizeBtn');
     const saveInboxBtn = document.getElementById('saveInboxBtn');
+    const createTrelloBtn = document.getElementById('createTrelloBtn');
     const clearBtn = document.getElementById('clearBtn');
     const launcherButtons = document.querySelectorAll('.launcher-trigger');
     const actionModePill = document.getElementById('actionModePill');
@@ -949,6 +951,33 @@
       }
     }
 
+    async function createTrelloCardFromOps() {
+      const raw = composerInput.value.trim();
+      if (!raw) {
+        composerOutput.textContent = 'Escribí primero la tarea que querés mandar a Trello.';
+        return;
+      }
+
+      composerOutput.textContent = 'Creando tarjeta en Trello...';
+      actionModePill.textContent = 'trello';
+
+      try {
+        const response = await fetch('/.netlify/functions/wispy-panel-action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: raw, mode: 'createCard' })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.error || 'No pude crear la card');
+        composerOutput.textContent = `${data.output}\n${data.card?.url ? `\n${data.card.url}` : ''}`;
+        actionModePill.textContent = 'trello-ok';
+        loadPanelData();
+      } catch {
+        composerOutput.textContent = 'No pude crear la tarjeta en Trello desde Ops.';
+        actionModePill.textContent = 'trello-error';
+      }
+    }
+
     async function sendChatMessage() {
       const message = (chatInput.value.trim() || composerInput.value.trim());
       if (!message) return;
@@ -1004,6 +1033,7 @@
     });
 
     saveInboxBtn.addEventListener('click', saveCurrentToInbox);
+    createTrelloBtn.addEventListener('click', createTrelloCardFromOps);
     sendChatBtn.addEventListener('click', sendChatMessage);
 
     clearBtn.addEventListener('click', () => {

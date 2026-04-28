@@ -9,6 +9,7 @@ const seedDataDir = fs.existsSync(path.join(projectRoot, 'data'))
   : path.resolve(runtimeRoot, 'data');
 const writableDataDir = path.resolve('/tmp', 'wispy-panel-data');
 const inboxPath = path.join(writableDataDir, 'wispy-inbox.json');
+const actionLogPath = path.join(writableDataDir, 'wispy-action-log.json');
 const seedInboxPath = path.join(seedDataDir, 'wispy-inbox.json');
 const contextPath = path.join(seedDataDir, 'wispy-context.json');
 const memoryPath = path.join(workspaceRoot, 'MEMORY.md');
@@ -132,6 +133,29 @@ function saveInbox(items) {
   writeJson(inboxPath, { items });
 }
 
+function getActionLog() {
+  const payload = readJson(actionLogPath, { items: [] });
+  return Array.isArray(payload.items) ? payload.items : [];
+}
+
+function saveActionLog(items) {
+  writeJson(actionLogPath, { items });
+}
+
+function appendActionLog(entry) {
+  const items = getActionLog();
+  const next = [
+    {
+      id: `log-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      ...entry
+    },
+    ...items
+  ].slice(0, 50);
+  saveActionLog(next);
+  return next;
+}
+
 function getContextData() {
   const seeded = readJson(contextPath, null);
   if (seeded && seeded.portfolio) {
@@ -175,8 +199,12 @@ function getContextData() {
 module.exports = {
   workspaceRoot,
   inboxPath,
+  actionLogPath,
   getInbox,
   saveInbox,
+  getActionLog,
+  saveActionLog,
+  appendActionLog,
   getContextData,
   readText
 };

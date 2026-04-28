@@ -1,4 +1,4 @@
-const { getInbox, getContextData } = require('./_wispy-panel-utils');
+const { getInbox, getContextData, getActionLog } = require('./_wispy-panel-utils');
 const { getRuntimeTelemetry } = require('./_wispy-runtime');
 const { getTrelloBoardsSnapshot } = require('./_wispy-trello');
 
@@ -72,7 +72,9 @@ exports.handler = async function () {
   const boards = Array.isArray(trelloBoards) && trelloBoards.length
     ? trelloBoards
     : (Array.isArray(context.boards) ? context.boards : []);
+  const actionLog = getActionLog();
   const liveLog = [
+    ...actionLog,
     ...(Array.isArray(context.liveLog) ? context.liveLog : []),
     ...((runtimeTelemetry?.liveLogItems) || []),
     ...(bridgePending ? [{
