@@ -3,29 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wispy Private Console — Gringo Estate</title>
+  <title>Wispy Office — Gringo Estate</title>
   <meta name="robots" content="noindex, nofollow" />
-  <meta name="theme-color" content="#0d0d0d" />
+  <meta name="theme-color" content="#0b0b0b" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --primary: #d4a640;
-      --primary-soft: rgba(212, 166, 64, 0.14);
-      --bg: #0a0a0a;
+      --gold: #d4a640;
+      --gold-soft: rgba(212, 166, 64, 0.12);
+      --bg: #070707;
       --bg-2: #111111;
       --card: rgba(255, 255, 255, 0.035);
-      --card-strong: rgba(255, 255, 255, 0.05);
-      --text: #f7f3ea;
-      --muted: #aaa39a;
+      --card-2: rgba(255, 255, 255, 0.05);
+      --text: #f5f1e8;
+      --muted: #9f988d;
       --border: rgba(255, 255, 255, 0.08);
-      --success: #4dde95;
+      --ok: #4dde95;
+      --warn: #ffbb55;
       --danger: #ff7b7b;
-      --shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
       --radius-xl: 28px;
       --radius-lg: 22px;
-      --radius-md: 18px;
+      --radius-md: 16px;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,461 +36,62 @@
       background:
         radial-gradient(circle at top right, rgba(212,166,64,0.14), transparent 26%),
         radial-gradient(circle at bottom left, rgba(212,166,64,0.08), transparent 24%),
-        linear-gradient(180deg, #060606 0%, #101010 100%);
+        linear-gradient(180deg, #050505 0%, #101010 100%);
       color: var(--text);
     }
 
+    button, input, textarea, select { font: inherit; }
     a { color: inherit; text-decoration: none; }
-    button, input, textarea { font: inherit; }
 
-    .shell {
-      width: calc(100vw - 10px);
-      max-width: 2200px;
-      margin: 5px auto;
-      display: grid;
-      grid-template-columns: 320px minmax(0, 1fr);
-      gap: 22px;
-      align-items: start;
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 4000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: radial-gradient(circle at top, rgba(212,166,64,0.12), transparent 28%), rgba(5,5,5,0.88);
+      backdrop-filter: blur(12px);
     }
+    .auth-overlay.hidden { display: none; }
 
-    .sidebar,
-    .panel,
     .auth-card,
-    .module,
-    .metric-card,
-    .launcher-card,
-    .vertical-card,
-    .feed-card,
-    .memory-card,
-    .composer-card,
-    .action-card {
+    .top-card,
+    .section-card,
+    .column-card,
+    .side-card,
+    .log-card,
+    .runtime-card {
       background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
       border: 1px solid var(--border);
       box-shadow: var(--shadow);
       backdrop-filter: blur(16px);
     }
 
-    .sidebar {
-      border-radius: var(--radius-xl);
-      padding: 22px 18px;
-      position: sticky;
-      top: 5px;
-      height: calc(100vh - 10px);
-      overflow: auto;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 8px 8px 24px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 24px;
-    }
-
-    .brand img {
-      width: 52px;
-      height: 52px;
-      border-radius: 16px;
-      object-fit: cover;
-      box-shadow: 0 10px 22px rgba(212,166,64,0.16);
-    }
-
-    .brand h1,
-    .auth-copy h2,
-    .hero-copy h2,
-    .section-head h3,
-    .composer-card h3,
-    .hero-card h3 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-weight: 400;
-      letter-spacing: 1.2px;
-    }
-
-    .brand h1 { font-size: 2rem; line-height: 0.95; }
-    .brand h1 span { color: var(--primary); }
-    .brand p { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
-
-    .nav-group,
-    .sidebar-block,
-    .status-stack { display: grid; gap: 10px; }
-
-    .nav-link,
-    .mini-action {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      border-radius: 16px;
-      padding: 14px;
-      color: var(--muted);
-      border: 1px solid transparent;
-      transition: 0.2s ease;
-    }
-
-    .nav-link:hover,
-    .nav-link.active,
-    .mini-action:hover {
-      color: var(--text);
-      background: var(--primary-soft);
-      border-color: rgba(212,166,64,0.22);
-    }
-
-    .sidebar-title {
-      margin-top: 22px;
-      margin-bottom: 6px;
-      color: var(--muted);
-      font-size: 0.8rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-
-    .status-pill {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 11px 14px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.03);
-      color: var(--muted);
-    }
-
-    .status-pill strong { color: var(--text); font-size: 0.95rem; }
-    .status-pill .ok { color: var(--success); }
-
-    .main { display: grid; gap: 22px; min-width: 0; }
-
-    .topbar {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 22px;
-    }
-
-    .panel { border-radius: var(--radius-xl); padding: 26px; }
-
-    .hero-copy h2 {
-      font-size: clamp(2.4rem, 5vw, 4.3rem);
-      line-height: 0.92;
-      margin-bottom: 14px;
-    }
-
-    .hero-copy h2 span,
-    .auth-copy h2 span,
-    .accent { color: var(--primary); }
-
-    .hero-copy p,
-    .auth-copy p,
-    .section-head p,
-    .metric-card p,
-    .launcher-card p,
-    .vertical-card p,
-    .feed-card p,
-    .memory-card p,
-    .composer-card p,
-    .action-card p {
-      color: var(--muted);
-      line-height: 1.65;
-      font-size: 0.95rem;
-    }
-
-    .hero-badges,
-    .tag-row,
-    .launcher-actions,
-    .composer-actions { display: flex; flex-wrap: wrap; gap: 10px; }
-
-    .hero-badges { margin-top: 18px; }
-
-    .hero-badge,
-    .tag,
-    .chip {
-      padding: 9px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(212,166,64,0.18);
-      background: rgba(255,255,255,0.03);
-      color: var(--text);
-      font-size: 0.82rem;
-    }
-
-    .hero-badge strong { color: var(--primary); }
-
-    .hero-card {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 240px;
-      gap: 18px;
-      align-items: center;
-      min-height: 100%;
-    }
-
-    .hero-card h3 { font-size: 2rem; }
-    .hero-card .stat-large {
-      padding: 18px;
-      border-radius: 22px;
-      background: linear-gradient(180deg, rgba(212,166,64,0.16), rgba(212,166,64,0.06));
-      border: 1px solid rgba(212,166,64,0.18);
-      text-align: center;
-    }
-    .stat-large strong {
-      display: block;
-      font-size: 3rem;
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-
-    .button {
-      border: none;
-      border-radius: 14px;
-      background: var(--primary);
-      color: #111;
-      padding: 13px 16px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform .2s ease, box-shadow .2s ease;
-      box-shadow: 0 10px 25px rgba(212,166,64,0.18);
-    }
-    .button:hover { transform: translateY(-1px); }
-    .button.secondary {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-      box-shadow: none;
-    }
-
-    .metrics-grid,
-    .launchers-grid,
-    .verticals-grid,
-    .memory-grid,
-    .actions-grid,
-    .ops-grid,
-    .ops-board,
-    .ops-main,
-    .ops-side {
-      display: grid;
-      gap: 18px;
-    }
-
-    .metrics-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .launchers-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .verticals-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .memory-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .actions-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .ops-grid,
-    .ops-board { grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr); }
-    .ops-main { grid-template-columns: 1fr; }
-    .ops-side { grid-template-columns: 1fr; align-content: start; }
-    .chat-grid { grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr); }
-
-    .section-head {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .section-head h3 { font-size: 2rem; }
-
-    .metric-card,
-    .launcher-card,
-    .vertical-card,
-    .feed-card,
-    .memory-card,
-    .composer-card,
-    .action-card {
-      border-radius: var(--radius-lg);
-      padding: 22px;
-      min-width: 0;
-    }
-
-    .ops-shell {
-      border-radius: var(--radius-xl);
-      padding: 24px;
-    }
-
-    .mini-metrics {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-      margin: 18px 0 22px;
-    }
-
-    .mini-metric {
-      padding: 14px 16px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-    }
-
-    .mini-metric span {
-      display: block;
-      color: var(--muted);
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 6px;
-    }
-
-    .mini-metric strong { font-size: 1.35rem; }
-
-    .launcher-strip {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    .launcher-strip .ghost-button {
-      width: auto;
-    }
-
-    .chat-log {
-      display: grid;
-      gap: 12px;
-      max-height: 420px;
-      overflow: auto;
-      margin-top: 14px;
-      padding-right: 4px;
-    }
-
-    .chat-bubble {
-      padding: 14px 16px;
-      border-radius: 18px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.03);
-      line-height: 1.6;
-      white-space: pre-wrap;
-    }
-
-    .chat-bubble.user {
-      background: rgba(212,166,64,0.10);
-      border-color: rgba(212,166,64,0.16);
-    }
-
-    .chat-bubble.assistant strong,
-    .chat-bubble.user strong { display: block; margin-bottom: 6px; }
-
-    .metric-card {
-      min-height: 150px;
-      display: grid;
-      gap: 12px;
-      align-content: start;
-    }
-    .metric-label { color: var(--muted); font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; }
-    .metric-value { font-size: 2rem; font-weight: 800; line-height: 1; }
-    .metric-foot { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 0.85rem; }
-
-    .launcher-card,
-    .vertical-card,
-    .action-card { display: grid; gap: 12px; }
-    .launcher-card h4,
-    .vertical-card h4,
-    .feed-card h4,
-    .memory-card h4,
-    .action-card h4,
-    .composer-card h3 { font-size: 1.05rem; }
-
-    .ghost-button {
-      border: 1px solid rgba(212,166,64,0.18);
-      color: var(--text);
-      background: rgba(212,166,64,0.08);
-      border-radius: 14px;
-      padding: 11px 14px;
-      font-weight: 700;
-      cursor: pointer;
-      width: fit-content;
-    }
-
-    .feed-list {
-      display: grid;
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    .feed-item {
-      padding: 14px 0;
-      border-top: 1px solid var(--border);
-      display: grid;
-      gap: 8px;
-    }
-    .feed-item:first-child { border-top: 0; padding-top: 0; }
-
-    .feed-meta,
-    .row-between {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .composer-card textarea,
-    .chat-input {
-      width: 100%;
-      min-height: 180px;
-      resize: vertical;
-      margin-top: 12px;
-      padding: 16px;
-      border-radius: 18px;
-      border: 1px solid var(--border);
-      background: rgba(0,0,0,0.35);
-      color: var(--text);
-      outline: none;
-    }
-
-    .chat-input {
-      min-height: 110px;
-    }
-
-    .composer-output {
-      margin-top: 16px;
-      padding: 16px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-      min-height: 110px;
-      white-space: pre-wrap;
-      line-height: 1.7;
-    }
-
-    .auth-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 3000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background: radial-gradient(circle at top, rgba(212,166,64,0.12), transparent 28%), rgba(5,5,5,0.84);
-      backdrop-filter: blur(12px);
-    }
-    .auth-overlay.hidden { display: none; }
-
     .auth-card {
-      width: min(1180px, 100%);
-      border-radius: 32px;
+      width: min(1160px, 100%);
+      border-radius: 30px;
       padding: 34px;
       display: grid;
-      grid-template-columns: minmax(320px, 0.9fr) minmax(360px, 1.1fr);
+      grid-template-columns: minmax(320px, 0.95fr) minmax(360px, 1.05fr);
       gap: 28px;
-      background: linear-gradient(120deg, rgba(212,166,64,0.10), rgba(212,166,64,0.03)), rgba(20,20,20,0.96);
+      background: linear-gradient(120deg, rgba(212,166,64,0.10), rgba(212,166,64,0.03)), rgba(18,18,18,0.96);
     }
 
-    .auth-visual,
-    .wispy-stage {
+    .auth-visual {
       position: relative;
+      min-height: 400px;
+      border-radius: 26px;
+      overflow: hidden;
+      border: 1px solid rgba(212,166,64,0.12);
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 400px;
-      border-radius: 28px;
-      overflow: hidden;
       background: radial-gradient(circle at center, rgba(212,166,64,0.18), transparent 42%), linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border: 1px solid rgba(212,166,64,0.12);
-      isolation: isolate;
     }
 
-    .auth-visual::before,
-    .wispy-stage::before {
+    .auth-visual::before {
       content: '';
       position: absolute;
       width: 360px;
@@ -500,20 +102,7 @@
       animation: pulseRing 4.5s ease-in-out infinite;
     }
 
-    .wispy-stage::after,
-    .auth-visual::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 38px 38px;
-      mask-image: radial-gradient(circle at center, black 35%, transparent 90%);
-      opacity: 0.4;
-      z-index: 0;
-    }
-
-    .wispy-avatar,
-    .wispy-stage img {
+    .auth-visual img {
       width: min(470px, 94%);
       position: relative;
       z-index: 2;
@@ -521,23 +110,41 @@
       animation: floatWispy 5.4s ease-in-out infinite;
     }
 
-    .sparkle-trail {
-      position: absolute;
-      right: 8%;
-      top: 8%;
-      width: 180px;
-      height: 260px;
-      background: radial-gradient(circle, rgba(212,166,64,0.92) 0, rgba(212,166,64,0.15) 18%, transparent 58%);
-      filter: blur(14px);
-      opacity: 0.9;
-      transform: rotate(15deg);
-      animation: sparkleTrail 6s linear infinite;
+    .auth-copy h2,
+    .brand h1,
+    .section-title h2,
+    .card-title h3,
+    .stack-title,
+    .runtime-head h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-weight: 400;
+      letter-spacing: 1.2px;
     }
 
     .auth-copy h2 { font-size: clamp(2.5rem, 4vw, 3.8rem); }
+    .auth-copy h2 span,
+    .accent,
+    .metric-value.ok,
+    .status-dot.ok,
+    .pill.ok { color: var(--gold); }
+    .auth-copy p,
+    .section-title p,
+    .metric-note,
+    .list-item p,
+    .runtime-card p,
+    .log-item p,
+    .text-muted {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
     .auth-form { display: flex; gap: 12px; width: 100%; margin-top: 18px; }
-    .auth-form input {
-      flex: 1;
+    .auth-form input,
+    .command-input,
+    .chat-input,
+    .select {
+      width: 100%;
       padding: 14px 16px;
       border-radius: 14px;
       border: 1px solid var(--border);
@@ -546,21 +153,284 @@
       outline: none;
     }
     .auth-state, .auth-error { margin-top: 10px; font-size: 0.92rem; }
-    .auth-state { color: var(--success); }
+    .auth-state { color: var(--ok); }
     .auth-error { color: var(--danger); }
+
+    .button,
+    .ghost-button,
+    .quick-action {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .button {
+      background: var(--gold);
+      color: #101010;
+      box-shadow: 0 10px 25px rgba(212,166,64,0.18);
+    }
+    .button:hover,
+    .ghost-button:hover,
+    .quick-action:hover { transform: translateY(-1px); }
+
+    .ghost-button,
+    .quick-action {
+      background: rgba(212,166,64,0.08);
+      color: var(--text);
+      border: 1px solid rgba(212,166,64,0.18);
+    }
+
+    .workspace {
+      width: min(100% - 14px, 1880px);
+      margin: 7px auto 20px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand img {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      object-fit: cover;
+      box-shadow: 0 10px 22px rgba(212,166,64,0.16);
+    }
+
+    .brand h1 { font-size: 2rem; line-height: 0.95; }
+    .brand h1 span { color: var(--gold); }
+    .brand p { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+
+    .top-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .top-card {
+      border-radius: 24px;
+      padding: 20px;
+      min-height: 132px;
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .metric-row,
+    .row-between,
+    .list-meta,
+    .runtime-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .metric-value { font-size: 2rem; font-weight: 800; line-height: 1; }
+
+    .status-dot,
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--text);
+    }
+    .pill.warn { color: var(--warn); }
+    .pill.danger { color: var(--danger); }
+    .status-dot::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      display: inline-block;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.65fr) minmax(300px, 0.75fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .section-card,
+    .side-card,
+    .log-card,
+    .runtime-card {
+      border-radius: 28px;
+      padding: 22px;
+    }
+
+    .section-title { margin-bottom: 16px; }
+    .section-title h2 { font-size: 2.4rem; line-height: 0.95; }
+
+    .ops-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr) minmax(300px, 0.8fr);
+      gap: 14px;
+    }
+
+    .column-card,
+    .stack-card {
+      border-radius: 22px;
+      padding: 18px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      min-width: 0;
+    }
+
+    .column-card {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      min-height: 620px;
+    }
+
+    .card-title h3 { font-size: 1.7rem; }
+    .stack-title { font-size: 1.45rem; }
+
+    .quick-actions-grid,
+    .shortcut-grid,
+    .action-row,
+    .ops-stats,
+    .side-stack,
+    .runtime-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .quick-actions-grid { grid-template-columns: 1fr 1fr; }
+
+    .ops-stat {
+      border-radius: 18px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+    }
+    .ops-stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+    .ops-stat strong { font-size: 1.2rem; }
+
+    .list-stack,
+    .log-list,
+    .runtime-list,
+    .chat-log {
+      display: grid;
+      gap: 10px;
+    }
+
+    .list-stack { max-height: 520px; overflow: auto; padding-right: 4px; }
+    .list-item,
+    .log-item,
+    .runtime-item,
+    .chat-bubble {
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .list-item strong,
+    .log-item strong,
+    .runtime-item strong,
+    .chat-bubble strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.98rem;
+    }
+
+    .list-item .list-meta,
+    .log-item .list-meta,
+    .runtime-item .list-meta { margin-bottom: 8px; }
+
+    .command-input,
+    .chat-input { min-height: 124px; resize: vertical; }
+
+    .action-row { grid-template-columns: 1fr 1fr; }
+
+    .chat-log {
+      max-height: 260px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .chat-bubble.user {
+      background: rgba(212,166,64,0.1);
+      border-color: rgba(212,166,64,0.18);
+    }
+
+    .output-box {
+      min-height: 110px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      padding: 16px;
+      white-space: pre-wrap;
+      line-height: 1.65;
+    }
+
+    .side-stack { align-content: start; }
+
+    .collab-line,
+    .board-line,
+    .runtime-line {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .log-grid,
+    .runtime-grid {
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      padding: 4px 0 8px;
+    }
 
     .locked .private-only {
       opacity: 0.28;
       pointer-events: none;
       filter: blur(3px);
       user-select: none;
-    }
-
-    .footer-note {
-      text-align: center;
-      color: var(--muted);
-      padding: 6px 0 30px;
-      font-size: 0.92rem;
     }
 
     @keyframes floatWispy {
@@ -571,51 +441,29 @@
       0%, 100% { transform: scale(1); opacity: 0.7; }
       50% { transform: scale(1.04); opacity: 1; }
     }
-    @keyframes sparkleTrail {
-      0% { transform: rotate(15deg) translateY(0px) scale(0.95); opacity: 0.6; }
-      50% { transform: rotate(8deg) translateY(-8px) scale(1); opacity: 1; }
-      100% { transform: rotate(15deg) translateY(0px) scale(0.95); opacity: 0.6; }
+
+    @media (max-width: 1480px) {
+      .top-grid { grid-template-columns: 1fr 1fr; }
+      .ops-grid,
+      .log-grid,
+      .runtime-grid { grid-template-columns: 1fr; }
     }
 
-    @media (max-width: 1380px) {
-      .shell { grid-template-columns: 292px minmax(0, 1fr); }
-      .topbar,
-      .ops-grid,
-      .ops-board,
-      .mini-metrics,
-      .verticals-grid,
-      .launchers-grid,
-      .metrics-grid,
-      .memory-grid,
-      .actions-grid,
-      .chat-grid { grid-template-columns: 1fr 1fr; }
-      .hero-card { grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 1080px) {
-      .shell,
-      .topbar,
-      .ops-grid,
-      .ops-board,
-      .ops-main,
-      .ops-side,
-      .mini-metrics,
-      .verticals-grid,
-      .launchers-grid,
-      .metrics-grid,
-      .memory-grid,
-      .actions-grid,
-      .chat-grid,
+    @media (max-width: 1120px) {
+      .main-grid,
+      .quick-actions-grid,
+      .action-row,
       .auth-card { grid-template-columns: 1fr; }
-      .sidebar { position: static; height: auto; }
       .auth-form { flex-direction: column; }
     }
 
-    @media (max-width: 720px) {
-      .shell { width: min(100% - 12px, 1380px); margin: 6px auto 18px; }
-      .sidebar, .panel, .auth-card, .metric-card, .launcher-card, .vertical-card, .feed-card, .memory-card, .composer-card, .action-card { border-radius: 20px; }
-      .button { width: 100%; }
-      .auth-visual, .wispy-stage { min-height: 300px; }
+    @media (max-width: 760px) {
+      .workspace { width: min(100% - 10px, 1880px); }
+      .top-grid { grid-template-columns: 1fr; }
+      .brand-row { align-items: flex-start; }
+      .button,
+      .ghost-button,
+      .quick-action { width: 100%; }
     }
   </style>
 </head>
@@ -623,12 +471,11 @@
   <div class="auth-overlay" id="authOverlay">
     <section class="auth-card" id="auth">
       <div class="auth-visual">
-        <div class="sparkle-trail"></div>
-        <img class="wispy-avatar" src="/images/wispy-avatar.jpg" alt="Wispy" />
+        <img src="/images/wispy-avatar.jpg" alt="Wispy" />
       </div>
       <div class="auth-copy">
-        <h2>Ingresá a <span>Wispy Private</span>.</h2>
-        <p>Tu capa operativa privada para Gringo Estate. Menos chat suelto, más command center ejecutivo.</p>
+        <h2>Ingresá a <span>Wispy Office</span>.</h2>
+        <p>Centro de comando operativo. Sin relleno. Solo pulso, foco y ejecución.</p>
         <div id="authState" class="auth-state" hidden>Acceso validado.</div>
         <div id="authError" class="auth-error" hidden>Clave inválida.</div>
         <form class="auth-form" id="authForm">
@@ -639,149 +486,147 @@
     </section>
   </div>
 
-  <div class="shell">
-    <aside class="sidebar">
+  <main class="workspace private-only">
+    <div class="brand-row">
       <div class="brand">
         <img src="/images/isologo.webp" alt="Wispy" />
         <div>
-          <h1>WISPY <span>PRIVATE</span></h1>
-          <p>gringo.estate / executive OS</p>
+          <h1>WISPY <span>OFFICE</span></h1>
+          <p>gringo.estate / centro de comando</p>
         </div>
       </div>
-
-      <nav class="nav-group">
-        <a class="nav-link active" href="#overview"><span><strong>Overview</strong><br><small>métricas</small></span><small>01</small></a>
-        <a class="nav-link" href="#ops"><span><strong>Ops</strong><br><small>acción central</small></span><small>02</small></a>
-      </nav>
-
-      <div class="sidebar-title">Acciones rápidas</div>
-      <div class="sidebar-block">
-        <button class="mini-action launcher-trigger" data-template="Armame el brief de oficina 10:00 con foco en Ambbi, Gringo y pendientes críticos.">
-          <span>Daily brief 10:00</span><small>⤴</small>
-        </button>
-        <button class="mini-action launcher-trigger" data-template="Bajá este audio a tareas, decisiones y memoria útil.">
-          <span>Procesar audio</span><small>⤴</small>
-        </button>
-        <button class="mini-action launcher-trigger" data-template="Preparame un resumen ejecutivo de leads, pipeline y próximos pasos.">
-          <span>Pipeline RE</span><small>⤴</small>
-        </button>
+      <div class="row-between">
+        <span class="pill" id="panelLockState">Privado</span>
+        <span class="pill" id="sessionUsagePill">usage —</span>
+        <button class="ghost-button" id="refreshPanelBtn" type="button">Actualizar</button>
       </div>
+    </div>
 
-      <div class="sidebar-title">Estado</div>
-      <div class="status-stack">
-        <div class="status-pill"><span>Panel</span><strong id="panelLockState">Privado</strong></div>
-        <div class="status-pill"><span>Modo</span><strong class="ok">Executive</strong></div>
-        <div class="status-pill"><span>Dominio</span><strong>gringo.estate</strong></div>
-      </div>
-    </aside>
+    <section class="top-grid" id="topGrid">
+      <article class="top-card">
+        <span class="metric-label">Gateway</span>
+        <div class="metric-row"><strong class="metric-value">Cargando</strong><span class="status-dot ok">sync</span></div>
+        <p class="metric-note">Trayendo estado del sistema.</p>
+      </article>
+    </section>
 
-    <main class="main">
-      <section class="private-only" id="overview">
-        <article class="panel hero-copy">
-          <div class="row-between">
+    <section class="main-grid">
+      <article class="section-card" id="ops">
+        <div class="section-title">
+          <h2>Ops</h2>
+          <p>Inbox, foco y acción en el mismo cuadrante.</p>
+        </div>
+
+        <div class="ops-grid">
+          <section class="column-card">
+            <div class="card-title row-between">
+              <h3>Inbox</h3>
+              <span class="pill" id="inboxCountPill">0 abiertos</span>
+            </div>
+            <div class="ops-stats">
+              <div class="ops-stat"><span>Sin procesar</span><strong id="inboxUnprocessed">0</strong></div>
+              <div class="ops-stat"><span>Audios / pedidos</span><strong id="inboxAudio">0</strong></div>
+            </div>
+            <div class="list-stack" id="inboxFeed"></div>
+          </section>
+
+          <section class="column-card">
+            <div class="card-title row-between">
+              <h3>Foco</h3>
+              <span class="pill warn" id="focusCountPill">0 activos</span>
+            </div>
+            <div class="ops-stats">
+              <div class="ops-stat"><span>Top priorities</span><strong id="focusTopCount">0</strong></div>
+              <div class="ops-stat"><span>Bloqueos</span><strong id="focusBlocked">0</strong></div>
+            </div>
+            <div class="list-stack" id="focusFeed"></div>
+          </section>
+
+          <section class="column-card">
+            <div class="card-title row-between">
+              <h3>Acción</h3>
+              <span class="pill ok" id="actionModePill">ready</span>
+            </div>
+
+            <div class="quick-actions-grid">
+              <button class="quick-action launcher-trigger" data-template="Creá una tarea clara con dueño, prioridad y próximo paso.">Crear tarea</button>
+              <button class="quick-action launcher-trigger" data-template="Redactá un follow-up corto, directo y ejecutivo para pedir respuesta hoy.">Mandar follow-up</button>
+              <button class="quick-action launcher-trigger" data-template="Abrí colaborador: resumime último contacto, pendiente y próximo mensaje recomendado.">Abrir colaborador</button>
+              <button class="quick-action launcher-trigger" data-template="Prepará este pedido para moverlo a Trello con título, descripción y checklist.">Mover a Trello</button>
+              <button class="quick-action launcher-trigger" data-template="Definí qué automatización conviene disparar y dejá el comando limpio.">Disparar automatización</button>
+              <button class="quick-action launcher-trigger" data-template="Armame el brief de oficina 10:00 con foco en Ambbi, Gringo y pendientes críticos.">Daily brief</button>
+            </div>
+
             <div>
-              <h2>Métricas arriba. <span>Acción al centro.</span></h2>
-              <p>Sin info flotando. Sin bloques de relleno. Este panel tiene que servir para decidir y ejecutar.</p>
+              <strong class="stack-title">Comando</strong>
+              <textarea id="composerInput" class="command-input" placeholder="Ej: procesá este audio, armame el daily brief, bajá esto a tareas, escribime un follow-up, ordename pipeline..."></textarea>
             </div>
-            <button class="ghost-button" id="refreshPanelBtn" type="button">Actualizar panel</button>
-          </div>
-          <div class="metrics-grid" id="metricsGrid">
-            <article class="metric-card">
-              <span class="metric-label">Snapshot</span>
-              <strong class="metric-value">Cargando</strong>
-              <p>Trayendo métricas...</p>
-              <div class="metric-foot"><span>panel</span><span>live</span></div>
-            </article>
-          </div>
-        </article>
-      </section>
 
-      <section class="private-only" id="ops">
-        <article class="panel ops-shell">
-          <div class="section-head">
+            <div class="action-row">
+              <button class="button" id="summarizeBtn" type="button">Ejecutar</button>
+              <button class="ghost-button" id="saveInboxBtn" type="button">Guardar en inbox</button>
+              <button class="ghost-button" id="sendChatBtn" type="button">Enviar a Wispy</button>
+              <button class="ghost-button" id="clearBtn" type="button">Limpiar</button>
+            </div>
+
             <div>
-              <h3>Ops</h3>
-              <p>Un único cuadrante para pedir, chatear, guardar y ejecutar.</p>
-            </div>
-          </div>
-
-          <div class="launcher-strip">
-            <button class="ghost-button launcher-trigger" data-template="Armame el brief de oficina 10:00 con foco en Ambbi, Gringo, pendientes críticos y acción sugerida.">Daily brief 10:00</button>
-            <button class="ghost-button launcher-trigger" data-template="Bajá este audio a 3 bloques: decisiones, tareas y memoria duradera.">Procesar audio</button>
-            <button class="ghost-button launcher-trigger" data-template="Preparame un resumen ejecutivo del pipeline inmobiliario con estado, trabas y próximo paso por lead.">Pipeline RE</button>
-            <button class="ghost-button launcher-trigger" data-template="Redactá copy premium y ejecutivo para una propiedad, listo para enviar o publicar.">Copy / publicación</button>
-          </div>
-
-          <div class="ops-board">
-            <div class="ops-main">
-              <article class="composer-card">
-                <h3>Comando ejecutivo</h3>
-                <textarea id="composerInput" placeholder="Ej: preparame el brief de oficina, bajá este audio a tareas, resumime el pipeline, armame un copy para una propiedad..."></textarea>
-                <div class="composer-actions">
-                  <button class="button" id="summarizeBtn" type="button">Sintetizar pedido</button>
-                  <button class="button secondary" id="saveInboxBtn" type="button">Guardar en inbox</button>
-                  <button class="button secondary" id="clearBtn" type="button">Limpiar</button>
-                </div>
-                <div class="composer-output" id="composerOutput">Acá va a aparecer el brief limpio para ejecutar.</div>
-              </article>
-
-              <article class="composer-card">
-                <div class="row-between">
-                  <h3>Chat con Wispy</h3>
-                  <span class="chip" id="chatModePill">ready</span>
-                </div>
-                <div class="chat-log" id="chatLog">
-                  <div class="chat-bubble assistant"><strong>Wispy</strong>Listo para ayudarte desde el panel.</div>
-                </div>
-                <textarea id="chatInput" class="chat-input" placeholder="Ej: qué priorizarías hoy, resumime Ambbi, armame próximos pasos o bajá esto a acción..."></textarea>
-                <div class="composer-actions">
-                  <button class="button" id="sendChatBtn" type="button">Enviar a Wispy</button>
-                  <button class="button secondary" id="clearChatBtn" type="button">Limpiar chat</button>
-                </div>
-              </article>
+              <strong class="stack-title">Salida</strong>
+              <div class="output-box" id="composerOutput">Acá va a caer la acción limpia para ejecutar.</div>
             </div>
 
-            <div class="ops-side">
-              <article class="action-card">
-                <h4>Estado</h4>
-                <p id="actionStatus">Todavía no corriste ninguna acción server-side desde este panel.</p>
-                <div class="mini-metrics">
-                  <div class="mini-metric"><span>Panel</span><strong id="panelStateMini">OK</strong></div>
-                  <div class="mini-metric"><span>Chat</span><strong id="chatStatusMini">Ready</strong></div>
-                  <div class="mini-metric"><span>Inbox</span><strong id="inboxCountMini">0</strong></div>
-                  <div class="mini-metric"><span>Foco</span><strong id="focusCountMini">0</strong></div>
-                </div>
-              </article>
-
-              <article class="action-card feed-card">
-                <div class="row-between">
-                  <h4>Inbox</h4>
-                  <span class="chip" id="chatStatus">operativo</span>
-                </div>
-                <div class="feed-list" id="inboxFeed">
-                  <div class="feed-item">
-                    <div class="feed-meta"><strong>Cargando inbox...</strong><span class="chip">live</span></div>
-                    <p>Trayendo items del panel.</p>
-                  </div>
-                </div>
-              </article>
-
-              <article class="action-card memory-card">
-                <h4>Foco</h4>
-                <div class="feed-list" id="memoryFeed">
-                  <div class="feed-item">
-                    <div class="feed-meta"><strong>Cargando foco...</strong><span class="chip">live</span></div>
-                  </div>
-                </div>
-              </article>
+            <div>
+              <div class="row-between">
+                <strong class="stack-title">Chat</strong>
+                <span class="pill" id="chatModePill">ready</span>
+              </div>
+              <div class="chat-log" id="chatLog">
+                <div class="chat-bubble assistant"><strong>Wispy</strong>Listo para operar.</div>
+              </div>
+              <textarea id="chatInput" class="chat-input" placeholder="Ej: qué priorizarías hoy, resumime Ambbi, armame próximos pasos o bajá esto a acción..."></textarea>
             </div>
-          </div>
-        </article>
-      </section>
+          </section>
+        </div>
+      </article>
 
-      <div class="footer-note">Wispy Private Console · Gringo Estate executive dashboard</div>
-    </main>
-  </div>
+      <aside class="side-stack">
+        <section class="side-card">
+          <div class="card-title row-between">
+            <h3>Colaboradores</h3>
+            <span class="pill" id="collaboratorCountPill">0</span>
+          </div>
+          <div class="list-stack" id="collaboratorsFeed"></div>
+        </section>
+
+        <section class="side-card">
+          <div class="card-title row-between">
+            <h3>Boards</h3>
+            <span class="pill" id="boardCountPill">0</span>
+          </div>
+          <div class="list-stack" id="boardsFeed"></div>
+        </section>
+      </aside>
+    </section>
+
+    <section class="log-grid">
+      <article class="log-card">
+        <div class="runtime-head">
+          <h3>Live Log</h3>
+          <span class="pill" id="logCountPill">0 eventos</span>
+        </div>
+        <div class="log-list" id="logFeed"></div>
+      </article>
+
+      <article class="runtime-card">
+        <div class="runtime-head">
+          <h3>Skills / Runtime</h3>
+          <span class="pill" id="runtimePill">sync</span>
+        </div>
+        <div class="runtime-list" id="runtimeFeed"></div>
+      </article>
+    </section>
+
+    <div class="footer-note">Wispy Office · command center operativo</div>
+  </main>
 
   <script>
     const authForm = document.getElementById('authForm');
@@ -790,7 +635,28 @@
     const authState = document.getElementById('authState');
     const authError = document.getElementById('authError');
     const panelLockState = document.getElementById('panelLockState');
+    const sessionUsagePill = document.getElementById('sessionUsagePill');
     const body = document.body;
+
+    const topGrid = document.getElementById('topGrid');
+    const refreshPanelBtn = document.getElementById('refreshPanelBtn');
+    const inboxFeed = document.getElementById('inboxFeed');
+    const focusFeed = document.getElementById('focusFeed');
+    const collaboratorsFeed = document.getElementById('collaboratorsFeed');
+    const boardsFeed = document.getElementById('boardsFeed');
+    const logFeed = document.getElementById('logFeed');
+    const runtimeFeed = document.getElementById('runtimeFeed');
+
+    const inboxCountPill = document.getElementById('inboxCountPill');
+    const inboxUnprocessed = document.getElementById('inboxUnprocessed');
+    const inboxAudio = document.getElementById('inboxAudio');
+    const focusCountPill = document.getElementById('focusCountPill');
+    const focusTopCount = document.getElementById('focusTopCount');
+    const focusBlocked = document.getElementById('focusBlocked');
+    const collaboratorCountPill = document.getElementById('collaboratorCountPill');
+    const boardCountPill = document.getElementById('boardCountPill');
+    const logCountPill = document.getElementById('logCountPill');
+    const runtimePill = document.getElementById('runtimePill');
 
     const composerInput = document.getElementById('composerInput');
     const composerOutput = document.getElementById('composerOutput');
@@ -798,21 +664,11 @@
     const saveInboxBtn = document.getElementById('saveInboxBtn');
     const clearBtn = document.getElementById('clearBtn');
     const launcherButtons = document.querySelectorAll('.launcher-trigger');
-    const refreshPanelBtn = document.getElementById('refreshPanelBtn');
-    const metricsGrid = document.getElementById('metricsGrid');
-    const inboxFeed = document.getElementById('inboxFeed');
-    const memoryFeed = document.getElementById('memoryFeed');
-    const actionStatus = document.getElementById('actionStatus');
+    const actionModePill = document.getElementById('actionModePill');
     const chatLog = document.getElementById('chatLog');
     const chatInput = document.getElementById('chatInput');
     const sendChatBtn = document.getElementById('sendChatBtn');
-    const clearChatBtn = document.getElementById('clearChatBtn');
-    const chatStatus = document.getElementById('chatStatus');
     const chatModePill = document.getElementById('chatModePill');
-    const panelStateMini = document.getElementById('panelStateMini');
-    const chatStatusMini = document.getElementById('chatStatusMini');
-    const inboxCountMini = document.getElementById('inboxCountMini');
-    const focusCountMini = document.getElementById('focusCountMini');
 
     const SESSION_KEY = 'wispy_private_console';
     let chatHistory = [];
@@ -875,45 +731,53 @@
       }
     });
 
+    function normalizeCount(value, fallback = 0) {
+      return Number.isFinite(Number(value)) ? Number(value) : fallback;
+    }
+
     function buildExecutiveBrief(raw) {
-      const normalized = raw.replace(/\s+/g, ' ').replace(/^./, (s) => s.toUpperCase());
+      const normalized = raw.replace(/\s+/g, ' ').trim();
       return [
-        'Resumen ejecutivo',
-        `- Pedido limpio: ${normalized}`,
-        '',
-        'Qué haría Wispy',
-        '- Separar objetivo, contexto y entregable.',
-        '- Detectar si esto va a Ambbi, Gringo Estate o agenda personal.',
-        '- Convertirlo en una acción concreta con siguiente paso.',
-        '',
-        'Siguiente paso sugerido',
-        '- Ejecutarlo o derivarlo al módulo / vertical correcto.'
+        'Brief ejecutivo',
+        `- Pedido: ${normalized}`,
+        '- Objetivo: resolver sin vueltas.',
+        '- Acción: bajar a tarea, follow-up o automatización.',
+        '- Próximo paso: ejecutar desde Ops o derivar al board correcto.'
       ].join('\n');
     }
 
-    function renderMetrics(snapshot) {
-      metricsGrid.innerHTML = snapshot.map((item) => `
-        <article class="metric-card">
+    function renderTop(snapshot) {
+      topGrid.innerHTML = snapshot.map((item) => `
+        <article class="top-card">
           <span class="metric-label">${item.label}</span>
-          <strong class="metric-value">${item.value}</strong>
-          <p>${item.note}</p>
-          <div class="metric-foot"><span>${item.footLeft}</span><span>${item.footRight}</span></div>
+          <div class="metric-row">
+            <strong class="metric-value ${item.tone || ''}">${item.value}</strong>
+            <span class="status-dot ${item.tone || 'ok'}">${item.badge || 'live'}</span>
+          </div>
+          <p class="metric-note">${item.note || ''}</p>
         </article>
       `).join('');
     }
 
-    function renderInbox(items) {
-      inboxCountMini.textContent = String(items.length);
-      inboxFeed.innerHTML = items.map((item) => `
-        <div class="feed-item">
-          <div class="feed-meta"><strong>${item.title}</strong><span class="chip">${item.priority}</span></div>
+    function renderInbox(items, meta = {}) {
+      const openItems = Array.isArray(items) ? items : [];
+      inboxCountPill.textContent = `${openItems.length} abiertos`;
+      inboxUnprocessed.textContent = String(normalizeCount(meta.unprocessed, openItems.length));
+      inboxAudio.textContent = String(normalizeCount(meta.audioLike, 0));
+      inboxFeed.innerHTML = openItems.map((item) => `
+        <div class="list-item">
+          <div class="list-meta">
+            <strong>${item.title}</strong>
+            <span class="pill ${item.priority === 'now' ? 'danger' : item.priority === 'high' ? 'warn' : ''}">${item.priority}</span>
+          </div>
           <p>${item.summary}</p>
           <p><span class="accent">Siguiente:</span> ${item.nextStep}</p>
-          <div class="tag-row">
-            <button class="ghost-button mark-done-btn" data-id="${item.id}">Marcar done</button>
+          <div class="list-meta">
+            <span class="text-muted">${item.source || 'panel'}</span>
+            <button class="ghost-button mark-done-btn" data-id="${item.id}">Done</button>
           </div>
         </div>
-      `).join('') || '<div class="feed-item"><p>Sin pendientes abiertos.</p></div>';
+      `).join('') || '<div class="list-item"><strong>Inbox vacío</strong><p>No hay pendientes abiertos.</p></div>';
 
       document.querySelectorAll('.mark-done-btn').forEach((button) => {
         button.addEventListener('click', async () => {
@@ -922,14 +786,79 @@
       });
     }
 
-    function renderMemory(items) {
-      focusCountMini.textContent = String(items.length);
-      memoryFeed.innerHTML = items.map((item) => `
-        <div class="feed-item">
-          <div class="feed-meta"><strong>${item.title}</strong><span class="chip">foco</span></div>
+    function renderFocus(items, meta = {}) {
+      const focusItems = Array.isArray(items) ? items : [];
+      focusCountPill.textContent = `${focusItems.length} activos`;
+      focusTopCount.textContent = String(normalizeCount(meta.topCount, focusItems.length));
+      focusBlocked.textContent = String(normalizeCount(meta.blocked, 0));
+      focusFeed.innerHTML = focusItems.map((item) => `
+        <div class="list-item">
+          <div class="list-meta">
+            <strong>${item.title}</strong>
+            <span class="pill ${item.status === 'blocked' ? 'danger' : item.status === 'pending' ? 'warn' : 'ok'}">${item.status || 'active'}</span>
+          </div>
+          <p>${item.body}</p>
+          ${item.nextStep ? `<p><span class="accent">Próximo:</span> ${item.nextStep}</p>` : ''}
+        </div>
+      `).join('') || '<div class="list-item"><strong>Sin foco cargado</strong><p>Agregá prioridades activas.</p></div>';
+    }
+
+    function renderCollaborators(items) {
+      const collaborators = Array.isArray(items) ? items : [];
+      collaboratorCountPill.textContent = String(collaborators.length);
+      collaboratorsFeed.innerHTML = collaborators.map((item) => `
+        <div class="list-item">
+          <div class="list-meta">
+            <strong>${item.name}</strong>
+            <span class="pill ${item.statusTone || ''}">${item.status || 'activo'}</span>
+          </div>
+          <p>${item.role}</p>
+          <p><span class="accent">Último contacto:</span> ${item.lastContact || 'sin dato'}</p>
+          <p><span class="accent">Pendiente:</span> ${item.pending || 'sin pendiente'}</p>
+        </div>
+      `).join('') || '<div class="list-item"><strong>Sin colaboradores</strong></div>';
+    }
+
+    function renderBoards(items) {
+      const boards = Array.isArray(items) ? items : [];
+      boardCountPill.textContent = String(boards.length);
+      boardsFeed.innerHTML = boards.map((item) => `
+        <div class="list-item">
+          <div class="list-meta">
+            <strong>${item.name}</strong>
+            <span class="pill">${item.pending} pendientes</span>
+          </div>
+          <p>Hoy: ${item.today} · Bloqueados: ${item.blocked}</p>
+        </div>
+      `).join('') || '<div class="list-item"><strong>Sin boards</strong></div>';
+    }
+
+    function renderLog(items) {
+      const logItems = Array.isArray(items) ? items : [];
+      logCountPill.textContent = `${logItems.length} eventos`;
+      logFeed.innerHTML = logItems.map((item) => `
+        <div class="log-item">
+          <div class="list-meta">
+            <strong>${item.title}</strong>
+            <span class="pill ${item.tone || ''}">${item.time || 'live'}</span>
+          </div>
           <p>${item.body}</p>
         </div>
-      `).join('');
+      `).join('') || '<div class="log-item"><strong>Sin eventos</strong></div>';
+    }
+
+    function renderRuntime(items, summary = {}) {
+      const runtimeItems = Array.isArray(items) ? items : [];
+      runtimePill.textContent = summary.status || 'sync';
+      runtimeFeed.innerHTML = runtimeItems.map((item) => `
+        <div class="runtime-item">
+          <div class="list-meta">
+            <strong>${item.title}</strong>
+            <span class="pill ${item.tone || ''}">${item.value}</span>
+          </div>
+          <p>${item.note}</p>
+        </div>
+      `).join('') || '<div class="runtime-item"><strong>Sin runtime</strong></div>';
     }
 
     function renderChatMessage(role, content) {
@@ -942,27 +871,35 @@
 
     async function loadPanelData() {
       try {
-        if (refreshPanelBtn) refreshPanelBtn.textContent = 'Actualizando...';
+        refreshPanelBtn.textContent = 'Actualizando...';
         const response = await fetch('/.netlify/functions/wispy-panel-data');
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.error || 'No pude cargar el panel');
-        renderMetrics(data.snapshot || []);
-        renderInbox(data.inbox || []);
-        renderMemory(data.memory || []);
-        panelStateMini.textContent = 'Sync';
-        actionStatus.textContent = `Panel sincronizado · ${new Date(data.generatedAt).toLocaleString('es-AR')}`;
-      } catch (error) {
-        panelStateMini.textContent = 'Error';
-        actionStatus.textContent = 'No pude traer el estado vivo del panel ahora.';
+        renderTop(data.snapshot || []);
+        renderInbox(data.inbox || [], data.inboxMeta || {});
+        renderFocus(data.focus || [], data.focusMeta || {});
+        renderCollaborators(data.collaborators || []);
+        renderBoards(data.boards || []);
+        renderLog(data.liveLog || []);
+        renderRuntime(data.runtime || [], data.runtimeSummary || {});
+        const currentSession = data.runtimeTelemetry?.sessions?.current;
+        sessionUsagePill.textContent = currentSession
+          ? `${currentSession.totalTokens} tok · ${currentSession.costTotal?.toFixed ? '$' + currentSession.costTotal.toFixed(2) : 'usage'}`
+          : 'usage —';
+        actionModePill.textContent = 'sync';
+      } catch {
+        actionModePill.textContent = 'error';
+        sessionUsagePill.textContent = 'usage error';
+        composerOutput.textContent = 'No pude traer el estado vivo del panel ahora.';
       } finally {
-        if (refreshPanelBtn) refreshPanelBtn.textContent = 'Actualizar panel';
+        refreshPanelBtn.textContent = 'Actualizar';
       }
     }
 
     async function saveCurrentToInbox() {
       const raw = composerInput.value.trim();
       if (!raw) {
-        actionStatus.textContent = 'Primero escribí algo para guardar en inbox.';
+        composerOutput.textContent = 'Primero escribí algo para guardar en inbox.';
         return;
       }
 
@@ -971,19 +908,24 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            title: raw.slice(0, 60),
+            title: raw.slice(0, 68),
             summary: raw,
             priority: 'medium',
-            nextStep: 'Revisar y ejecutar desde el panel',
-            source: 'composer'
+            nextStep: 'Revisar y ejecutar desde Ops',
+            source: 'ops'
           })
         });
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.error || 'No pude guardar en inbox');
-        renderInbox((data.items || []).filter((item) => item.status !== 'done').slice(0, 8));
-        actionStatus.textContent = 'Pedido guardado en inbox persistente.';
+        renderInbox((data.items || []).filter((item) => item.status !== 'done').slice(0, 8), {
+          unprocessed: (data.items || []).filter((item) => item.status !== 'done').length,
+          audioLike: (data.items || []).filter((item) => item.status !== 'done' && /audio|voice|nota/i.test(`${item.title} ${item.summary}`)).length
+        });
+        actionModePill.textContent = 'saved';
+        composerOutput.textContent = 'Guardado en inbox.';
       } catch {
-        actionStatus.textContent = 'No pude guardar el item en inbox.';
+        actionModePill.textContent = 'error';
+        composerOutput.textContent = 'No pude guardar el item en inbox.';
       }
     }
 
@@ -996,22 +938,24 @@
         });
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.error || 'No pude actualizar inbox');
-        renderInbox((data.items || []).filter((item) => item.status !== 'done').slice(0, 8));
-        actionStatus.textContent = 'Inbox actualizado.';
+        const openItems = (data.items || []).filter((item) => item.status !== 'done').slice(0, 8);
+        renderInbox(openItems, {
+          unprocessed: openItems.length,
+          audioLike: openItems.filter((item) => /audio|voice|nota/i.test(`${item.title} ${item.summary}`)).length
+        });
+        actionModePill.textContent = 'updated';
       } catch {
-        actionStatus.textContent = 'No pude actualizar el inbox.';
+        actionModePill.textContent = 'error';
       }
     }
 
     async function sendChatMessage() {
-      const message = chatInput.value.trim();
+      const message = (chatInput.value.trim() || composerInput.value.trim());
       if (!message) return;
 
       renderChatMessage('user', message);
       chatHistory.push({ role: 'user', content: message });
       chatInput.value = '';
-      chatStatus.textContent = 'pensando';
-      chatStatusMini.textContent = 'Live';
       chatModePill.textContent = 'live';
 
       try {
@@ -1024,15 +968,11 @@
         if (!response.ok || !data.ok) throw new Error(data.error || 'No pude hablar con Wispy');
         renderChatMessage('assistant', data.reply);
         chatHistory.push({ role: 'assistant', content: data.reply });
-        chatStatus.textContent = data.mode;
-        chatStatusMini.textContent = data.mode;
-        chatModePill.textContent = data.mode;
+        chatModePill.textContent = data.mode || 'live';
       } catch {
         const fallback = 'No pude pegarle al chat real ahora. Reintentá en un segundo.';
         renderChatMessage('assistant', fallback);
         chatHistory.push({ role: 'assistant', content: fallback });
-        chatStatus.textContent = 'error';
-        chatStatusMini.textContent = 'Error';
         chatModePill.textContent = 'error';
       }
     }
@@ -1040,12 +980,12 @@
     summarizeBtn.addEventListener('click', async () => {
       const raw = composerInput.value.trim();
       if (!raw) {
-        composerOutput.textContent = 'Escribí un pedido y te lo bajo a brief ejecutivo.';
+        composerOutput.textContent = 'Escribí un pedido y lo bajo a acción.';
         return;
       }
 
       composerOutput.textContent = 'Procesando acción...';
-      actionStatus.textContent = 'Ejecutando acción server-side...';
+      actionModePill.textContent = 'running';
 
       try {
         const response = await fetch('/.netlify/functions/wispy-panel-action', {
@@ -1056,34 +996,25 @@
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.error || 'No pude ejecutar la acción');
         composerOutput.textContent = data.output;
-        actionStatus.textContent = 'Acción ejecutada desde el panel.';
+        actionModePill.textContent = 'done';
       } catch {
         composerOutput.textContent = buildExecutiveBrief(raw);
-        actionStatus.textContent = 'Falló la acción server-side; usé fallback local.';
+        actionModePill.textContent = 'fallback';
       }
     });
 
     saveInboxBtn.addEventListener('click', saveCurrentToInbox);
+    sendChatBtn.addEventListener('click', sendChatMessage);
 
     clearBtn.addEventListener('click', () => {
       composerInput.value = '';
-      composerOutput.textContent = 'Acá va a aparecer el brief limpio para ejecutar.';
-    });
-
-    sendChatBtn.addEventListener('click', sendChatMessage);
-    clearChatBtn.addEventListener('click', () => {
-      chatHistory = [];
-      chatLog.innerHTML = '<div class="chat-bubble assistant"><strong>Wispy</strong>Chat limpio. Cuando quieras, arrancamos de nuevo.</div>';
-      chatStatus.textContent = 'ready';
-      chatStatusMini.textContent = 'Ready';
-      chatModePill.textContent = 'ready';
       chatInput.value = '';
+      composerOutput.textContent = 'Acá va a caer la acción limpia para ejecutar.';
+      actionModePill.textContent = 'ready';
     });
 
     chatInput.addEventListener('keydown', (event) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-        sendChatMessage();
-      }
+      if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') sendChatMessage();
     });
 
     launcherButtons.forEach((button) => {
@@ -1091,15 +1022,13 @@
         const template = button.dataset.template || '';
         composerInput.value = template;
         composerOutput.textContent = buildExecutiveBrief(template);
-        actionStatus.textContent = 'Launcher cargado en consola.';
+        actionModePill.textContent = 'loaded';
         composerInput.focus();
         composerInput.setSelectionRange(composerInput.value.length, composerInput.value.length);
       });
     });
 
-    if (refreshPanelBtn) {
-      refreshPanelBtn.addEventListener('click', loadPanelData);
-    }
+    refreshPanelBtn.addEventListener('click', loadPanelData);
 
     verifyExistingSession();
     lockUi();

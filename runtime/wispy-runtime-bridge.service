@@ -1,0 +1,19 @@
+[Unit]
+Description=Wispy Runtime Bridge
+After=network.target
+
+[Service]
+Type=simple
+User=franco
+WorkingDirectory=/home/franco/.openclaw/workspace/gringoestate
+Environment=WISPY_RUNTIME_HOST=127.0.0.1
+Environment=WISPY_RUNTIME_PORT=8787
+EnvironmentFile=/home/franco/.openclaw/workspace/gringoestate/.env.runtime-bridge
+ExecStart=/usr/bin/env node /home/franco/.openclaw/workspace/gringoestate/runtime/wispy-runtime-bridge.js
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

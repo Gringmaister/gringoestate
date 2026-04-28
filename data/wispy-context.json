@@ -3,13 +3,133 @@
   "priorities": [
     "Expansión de Ambbi con nuevos edificios y profesionalización de la gestión.",
     "Desarrollo de Gringo Estate como marca y operación comercial.",
-    "Avance de GringoPMS como sistema operativo interno."
+    "Avance de GringoPMS como sistema operativo interno.",
+    "Cerrar seguimiento comercial y operativo sin dejar pedidos sueltos."
+  ],
+  "focus": [
+    {
+      "title": "Captación de edificios",
+      "body": "Palestina, Azcuénaga y Jude siguen siendo la línea más importante para escalar Ambbi.",
+      "status": "active",
+      "nextStep": "Preparar follow-up comercial y estado por oportunidad."
+    },
+    {
+      "title": "Pipeline Gringo Estate",
+      "body": "Ordenar leads, trabas y próximo paso por propiedad o cliente.",
+      "status": "pending",
+      "nextStep": "Bajar a brief comercial ejecutivo."
+    },
+    {
+      "title": "GringoPMS",
+      "body": "Mantener avance operativo con Ariel y bajar definiciones concretas de producto.",
+      "status": "pending",
+      "nextStep": "Checklist de siguientes entregables."
+    },
+    {
+      "title": "Pendientes sin reply",
+      "body": "Hay que empujar seguimiento sobre pedidos abiertos para no perder timing.",
+      "status": "blocked",
+      "nextStep": "Mandar follow-ups hoy."
+    }
   ],
   "staff": [
     "Augusto — Anfitrionaje",
     "Pamela — Administración",
     "Sandra — Limpieza",
     "Marcelo — Mantenimiento"
+  ],
+  "collaborators": [
+    {
+      "name": "Pamela",
+      "role": "Administración",
+      "status": "esperando respuesta",
+      "statusTone": "warn",
+      "lastContact": "ayer",
+      "pending": "contratos y flujos administrativos"
+    },
+    {
+      "name": "Augusto",
+      "role": "Anfitrionaje",
+      "status": "activo",
+      "statusTone": "ok",
+      "lastContact": "hoy",
+      "pending": "alinear experiencia huésped / check-ins"
+    },
+    {
+      "name": "Marcelo",
+      "role": "Mantenimiento",
+      "status": "pendiente",
+      "statusTone": "warn",
+      "lastContact": "ayer",
+      "pending": "repaso de arreglos y puestas a punto"
+    },
+    {
+      "name": "Valentino",
+      "role": "Soporte / ejecución",
+      "status": "sin pendiente",
+      "statusTone": "ok",
+      "lastContact": "esta semana",
+      "pending": "sin bloqueo activo"
+    }
+  ],
+  "boards": [
+    { "name": "PERSONAL", "pending": 2, "today": 1, "blocked": 0 },
+    { "name": "AMBBI", "pending": 7, "today": 3, "blocked": 1 },
+    { "name": "MANTENIMIENTO", "pending": 4, "today": 2, "blocked": 1 },
+    { "name": "WISPY", "pending": 5, "today": 2, "blocked": 0 },
+    { "name": "GRINGO PMS", "pending": 6, "today": 2, "blocked": 2 }
+  ],
+  "runtime": [
+    {
+      "title": "Skills clave",
+      "value": "loaded",
+      "tone": "ok",
+      "note": "office-brief-1000, voice-note-processor, wispy-dashboard-builder"
+    },
+    {
+      "title": "Subagentes",
+      "value": "0 activos",
+      "tone": "ok",
+      "note": "Sin runs paralelos corriendo ahora."
+    },
+    {
+      "title": "Cron / automatizaciones",
+      "value": "operativo",
+      "tone": "ok",
+      "note": "Recordatorios y rutinas listos para disparar."
+    },
+    {
+      "title": "Memoria",
+      "value": "sync",
+      "tone": "ok",
+      "note": "MEMORY + notas diarias disponibles para contexto."
+    },
+    {
+      "title": "Gateway / Docker",
+      "value": "visible",
+      "tone": "warn",
+      "note": "Estado de gateway y runtime expuesto en top bar."
+    }
+  ],
+  "liveLog": [
+    {
+      "title": "Panel Office cargado",
+      "body": "Nuevo layout operativo con top bar, Ops dominante, sidebar compacta y runtime visible.",
+      "time": "ahora",
+      "tone": "ok"
+    },
+    {
+      "title": "Inbox persistente listo",
+      "body": "Los pedidos guardados desde Ops quedan disponibles para seguimiento y cierre.",
+      "time": "live",
+      "tone": "ok"
+    },
+    {
+      "title": "Chat Wispy disponible",
+      "body": "El panel puede disparar acciones y conversar directo con las functions privadas.",
+      "time": "live",
+      "tone": "ok"
+    }
   ],
   "communication": [
     "Tono ejecutivo local, directo y con voseo argentino.",

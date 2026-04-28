@@ -1,35 +1,44 @@
 {
   "items": [
     {
-      "id": "inbox-1777185394003",
-      "title": "Test item",
-      "summary": "Resumen test",
-      "priority": "low",
-      "nextStep": "Nada",
-      "status": "done",
-      "source": "panel",
-      "createdAt": "2026-04-26T06:36:34.003Z",
-      "updatedAt": "2026-04-26T06:36:34.004Z"
-    },
-    {
-      "id": "seed-1",
+      "id": "seed-brief-1000",
       "title": "Brief oficina 10:00",
-      "summary": "Preparar el resumen ejecutivo de Ambbi, Gringo Estate y pendientes.",
+      "summary": "Preparar el resumen ejecutivo de Ambbi, Gringo Estate y pendientes críticos.",
       "priority": "now",
-      "nextStep": "Abrir launcher y sintetizar.",
+      "nextStep": "Abrir Daily brief desde Acción y ejecutar.",
       "status": "open",
       "source": "seed",
-      "createdAt": "2026-04-26T08:00:00.000Z"
+      "createdAt": "2026-04-28T06:00:00.000Z"
     },
     {
-      "id": "seed-2",
+      "id": "seed-followup-collabs",
+      "title": "Follow-up colaboradores",
+      "summary": "Empujar respuestas pendientes de Pamela y Marcelo para no dejar bloqueos abiertos.",
+      "priority": "high",
+      "nextStep": "Redactar mensaje corto y mandarlo hoy.",
+      "status": "open",
+      "source": "seed",
+      "createdAt": "2026-04-28T06:05:00.000Z"
+    },
+    {
+      "id": "seed-pipeline-gringo",
       "title": "Pipeline Gringo Estate",
       "summary": "Ordenar oportunidades, trabas y próximo paso por lead.",
       "priority": "medium",
       "nextStep": "Armar brief comercial ejecutivo.",
       "status": "open",
       "source": "seed",
-      "createdAt": "2026-04-26T08:05:00.000Z"
+      "createdAt": "2026-04-28T06:10:00.000Z"
+    },
+    {
+      "id": "seed-audio-task",
+      "title": "Audio de Franco a procesar",
+      "summary": "Bajar nota de voz a decisiones, tareas y memoria útil.",
+      "priority": "high",
+      "nextStep": "Procesar audio desde Acción.",
+      "status": "open",
+      "source": "seed",
+      "createdAt": "2026-04-28T06:15:00.000Z"
     }
   ]
 }

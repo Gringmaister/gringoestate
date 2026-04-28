@@ -3,7 +3,10 @@ const path = require('path');
 
 const runtimeRoot = process.env.LAMBDA_TASK_ROOT || process.cwd() || __dirname;
 const workspaceRoot = path.resolve(__dirname, '..', '..', '..');
-const seedDataDir = path.resolve(runtimeRoot, 'data');
+const projectRoot = path.resolve(__dirname, '..', '..');
+const seedDataDir = fs.existsSync(path.join(projectRoot, 'data'))
+  ? path.join(projectRoot, 'data')
+  : path.resolve(runtimeRoot, 'data');
 const writableDataDir = path.resolve('/tmp', 'wispy-panel-data');
 const inboxPath = path.join(writableDataDir, 'wispy-inbox.json');
 const seedInboxPath = path.join(seedDataDir, 'wispy-inbox.json');
@@ -138,7 +141,12 @@ function getContextData() {
       soulMd: '',
       portfolio: seeded.portfolio,
       priorities: Array.isArray(seeded.priorities) ? seeded.priorities : [],
+      focus: Array.isArray(seeded.focus) ? seeded.focus : [],
       staff: Array.isArray(seeded.staff) ? seeded.staff : [],
+      collaborators: Array.isArray(seeded.collaborators) ? seeded.collaborators : [],
+      boards: Array.isArray(seeded.boards) ? seeded.boards : [],
+      runtime: Array.isArray(seeded.runtime) ? seeded.runtime : [],
+      liveLog: Array.isArray(seeded.liveLog) ? seeded.liveLog : [],
       daily: Array.isArray(seeded.daily) ? seeded.daily : [],
       communication: Array.isArray(seeded.communication) ? seeded.communication : []
     };
@@ -153,7 +161,12 @@ function getContextData() {
     soulMd,
     portfolio: extractPortfolio(memoryMd),
     priorities: extractPriorities(memoryMd),
+    focus: [],
     staff: extractStaff(memoryMd),
+    collaborators: [],
+    boards: [],
+    runtime: [],
+    liveLog: [],
     daily: getLatestDailyMemorySnippet(),
     communication: extractBullets('COMUNICACIÓN Y "VIBE" ARGENTINO', memoryMd, 3)
   };
