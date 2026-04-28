@@ -613,6 +613,14 @@
           </div>
           <div class="list-stack" id="boardsFeed"></div>
         </section>
+
+        <section class="side-card">
+          <div class="card-title row-between">
+            <h3>Módulos</h3>
+            <span class="pill" id="moduleCountPill">0</span>
+          </div>
+          <div class="list-stack" id="modulesFeed"></div>
+        </section>
       </aside>
     </section>
 
@@ -654,6 +662,7 @@
     const notificationsFeed = document.getElementById('notificationsFeed');
     const collaboratorsFeed = document.getElementById('collaboratorsFeed');
     const boardsFeed = document.getElementById('boardsFeed');
+    const modulesFeed = document.getElementById('modulesFeed');
     const logFeed = document.getElementById('logFeed');
     const runtimeFeed = document.getElementById('runtimeFeed');
 
@@ -666,6 +675,7 @@
     const notificationCountPill = document.getElementById('notificationCountPill');
     const collaboratorCountPill = document.getElementById('collaboratorCountPill');
     const boardCountPill = document.getElementById('boardCountPill');
+    const moduleCountPill = document.getElementById('moduleCountPill');
     const logCountPill = document.getElementById('logCountPill');
     const runtimePill = document.getElementById('runtimePill');
 
@@ -885,6 +895,19 @@
       `).join('') || '<div class="list-item"><strong>Sin boards</strong></div>';
     }
 
+    function renderModules(modules) {
+      const skills = Array.isArray(modules?.skills) ? modules.skills.slice(0, 5) : [];
+      const gpts = Array.isArray(modules?.gpts) ? modules.gpts.slice(0, 3) : [];
+      const subagents = Array.isArray(modules?.subagents) ? modules.subagents.slice(0, 3) : [];
+      const total = skills.length + gpts.length + subagents.length;
+      moduleCountPill.textContent = String(total);
+      modulesFeed.innerHTML = [
+        ...skills.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill">skill</span></div><p>${item.role || 'skill local'}</p></div>`),
+        ...gpts.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill ${item.status === 'planned' ? 'warn' : ''}">gpt</span></div><p>${item.role || ''}</p></div>`),
+        ...subagents.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill ${item.status === 'planned' ? 'warn' : ''}">subagent</span></div><p>${item.role || ''}</p></div>`)
+      ].join('') || '<div class="list-item"><strong>Sin módulos</strong></div>';
+    }
+
     function renderLog(items) {
       const logItems = Array.isArray(items) ? items : [];
       logCountPill.textContent = `${logItems.length} eventos`;
@@ -933,6 +956,7 @@
         renderNotifications(data.notifications || []);
         renderCollaborators(data.collaborators || []);
         renderBoards(data.boards || []);
+        renderModules(data.modules || {});
         renderLog(data.liveLog || []);
         renderRuntime(data.runtime || [], data.runtimeSummary || {});
         const currentSession = data.runtimeTelemetry?.sessions?.current;

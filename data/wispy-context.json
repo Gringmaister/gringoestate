@@ -95,6 +95,40 @@
     { "name": "WISPY", "pending": 5, "today": 2, "blocked": 0 },
     { "name": "GRINGO PMS", "pending": 6, "today": 2, "blocked": 2 }
   ],
+  "gpts": [
+    {
+      "name": "Broker Copy Premium",
+      "role": "copy comercial / listings / respuestas premium",
+      "status": "planned"
+    },
+    {
+      "name": "Follow-up Ejecutivo",
+      "role": "mensajes cortos, presión elegante, destrabe de pendientes",
+      "status": "planned"
+    },
+    {
+      "name": "Property Analyst",
+      "role": "análisis de propiedades, comparables, argumentos comerciales",
+      "status": "planned"
+    }
+  ],
+  "subagents": [
+    {
+      "name": "Ambbi Ops",
+      "role": "operación diaria, pendientes y coordinación",
+      "status": "planned"
+    },
+    {
+      "name": "Gringo Estate Comercial",
+      "role": "pipeline, leads, cierres y follow-ups",
+      "status": "planned"
+    },
+    {
+      "name": "Audio / Voice Notes",
+      "role": "procesamiento de audios y extracción accionable",
+      "status": "available"
+    }
+  ],
   "runtime": [
     {
       "title": "Skills clave",
