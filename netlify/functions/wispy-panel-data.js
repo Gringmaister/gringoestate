@@ -1,5 +1,6 @@
 const { getInbox, getContextData } = require('./_wispy-panel-utils');
 const { getRuntimeTelemetry } = require('./_wispy-runtime');
+const { getTrelloBoardsSnapshot } = require('./_wispy-trello');
 
 function countBlockedFocus(focus = []) {
   return focus.filter((item) => item.status === 'blocked').length;
@@ -14,6 +15,7 @@ exports.handler = async function () {
   const inbox = getInbox();
   const context = getContextData();
   const runtimeTelemetry = await getRuntimeTelemetry();
+  const trelloBoards = await getTrelloBoardsSnapshot().catch(() => null);
 
   const openInbox = inbox.filter((item) => item.status !== 'done');
   const focus = Array.isArray(context.focus) && context.focus.length
@@ -67,7 +69,9 @@ exports.handler = async function () {
   ];
 
   const collaborators = Array.isArray(context.collaborators) ? context.collaborators : [];
-  const boards = Array.isArray(context.boards) ? context.boards : [];
+  const boards = Array.isArray(trelloBoards) && trelloBoards.length
+    ? trelloBoards
+    : (Array.isArray(context.boards) ? context.boards : []);
   const liveLog = [
     ...(Array.isArray(context.liveLog) ? context.liveLog : []),
     ...((runtimeTelemetry?.liveLogItems) || []),
@@ -76,6 +80,12 @@ exports.handler = async function () {
       body: 'El deploy público ya tomó el panel nuevo, pero todavía falta unir Netlify con el bridge externo real.',
       time: 'live',
       tone: 'warn'
+    }] : []),
+    ...(Array.isArray(trelloBoards) && trelloBoards.length ? [{
+      title: 'Boards sync',
+      body: `Boards reales cargados: ${trelloBoards.map((board) => `${board.name} ${board.pending}`).join(' · ')}`,
+      time: 'live',
+      tone: 'ok'
     }] : [])
   ].slice(0, 8);
   const runtime = bridgePending
