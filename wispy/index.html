@@ -592,6 +592,14 @@
       <aside class="side-stack">
         <section class="side-card">
           <div class="card-title row-between">
+            <h3>Notificaciones</h3>
+            <span class="pill" id="notificationCountPill">0</span>
+          </div>
+          <div class="list-stack" id="notificationsFeed"></div>
+        </section>
+
+        <section class="side-card">
+          <div class="card-title row-between">
             <h3>Colaboradores</h3>
             <span class="pill" id="collaboratorCountPill">0</span>
           </div>
@@ -643,6 +651,7 @@
     const refreshPanelBtn = document.getElementById('refreshPanelBtn');
     const inboxFeed = document.getElementById('inboxFeed');
     const focusFeed = document.getElementById('focusFeed');
+    const notificationsFeed = document.getElementById('notificationsFeed');
     const collaboratorsFeed = document.getElementById('collaboratorsFeed');
     const boardsFeed = document.getElementById('boardsFeed');
     const logFeed = document.getElementById('logFeed');
@@ -654,6 +663,7 @@
     const focusCountPill = document.getElementById('focusCountPill');
     const focusTopCount = document.getElementById('focusTopCount');
     const focusBlocked = document.getElementById('focusBlocked');
+    const notificationCountPill = document.getElementById('notificationCountPill');
     const collaboratorCountPill = document.getElementById('collaboratorCountPill');
     const boardCountPill = document.getElementById('boardCountPill');
     const logCountPill = document.getElementById('logCountPill');
@@ -805,6 +815,20 @@
       `).join('') || '<div class="list-item"><strong>Sin foco cargado</strong><p>Agregá prioridades activas.</p></div>';
     }
 
+    function renderNotifications(items) {
+      const notifications = Array.isArray(items) ? items : [];
+      notificationCountPill.textContent = String(notifications.length);
+      notificationsFeed.innerHTML = notifications.map((item) => `
+        <div class="list-item">
+          <div class="list-meta">
+            <strong>${item.title}</strong>
+            <span class="pill ${item.level === 'danger' ? 'danger' : item.level === 'warn' ? 'warn' : ''}">${item.level || 'info'}</span>
+          </div>
+          <p>${item.body}</p>
+        </div>
+      `).join('') || '<div class="list-item"><strong>Sin notificaciones</strong><p>No hay alertas relevantes ahora.</p></div>';
+    }
+
     function renderCollaborators(items) {
       const collaborators = Array.isArray(items) ? items : [];
       collaboratorCountPill.textContent = String(collaborators.length);
@@ -880,6 +904,7 @@
         renderTop(data.snapshot || []);
         renderInbox(data.inbox || [], data.inboxMeta || {});
         renderFocus(data.focus || [], data.focusMeta || {});
+        renderNotifications(data.notifications || []);
         renderCollaborators(data.collaborators || []);
         renderBoards(data.boards || []);
         renderLog(data.liveLog || []);

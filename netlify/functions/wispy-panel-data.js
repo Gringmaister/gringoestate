@@ -73,23 +73,47 @@ exports.handler = async function () {
     ? trelloBoards
     : (Array.isArray(context.boards) ? context.boards : []);
   const actionLog = getActionLog();
+  const bridgeAlert = bridgePending ? [{
+    title: 'Runtime bridge pendiente',
+    body: 'El deploy público ya tomó el panel nuevo, pero todavía falta unir Netlify con el bridge externo real.',
+    time: 'live',
+    tone: 'warn'
+  }] : [];
+  const boardSyncLog = Array.isArray(trelloBoards) && trelloBoards.length ? [{
+    title: 'Boards sync',
+    body: `Boards reales cargados: ${trelloBoards.map((board) => `${board.name} ${board.pending}`).join(' · ')}`,
+    time: 'live',
+    tone: 'ok'
+  }] : [];
   const liveLog = [
     ...actionLog,
     ...(Array.isArray(context.liveLog) ? context.liveLog : []),
     ...((runtimeTelemetry?.liveLogItems) || []),
-    ...(bridgePending ? [{
-      title: 'Runtime bridge pendiente',
-      body: 'El deploy público ya tomó el panel nuevo, pero todavía falta unir Netlify con el bridge externo real.',
-      time: 'live',
-      tone: 'warn'
-    }] : []),
-    ...(Array.isArray(trelloBoards) && trelloBoards.length ? [{
-      title: 'Boards sync',
-      body: `Boards reales cargados: ${trelloBoards.map((board) => `${board.name} ${board.pending}`).join(' · ')}`,
-      time: 'live',
-      tone: 'ok'
-    }] : [])
+    ...bridgeAlert,
+    ...boardSyncLog
   ].slice(0, 8);
+
+  const notifications = [
+    ...(blockedFocus ? [{
+      title: 'Bloqueos activos',
+      body: `${blockedFocus} foco(s) bloqueados requieren seguimiento.`,
+      level: 'danger'
+    }] : []),
+    ...bridgeAlert.map((item) => ({ title: item.title, body: item.body, level: 'warn' })),
+    ...((Array.isArray(trelloBoards) ? trelloBoards : [])
+      .filter((board) => board.blocked > 0 || board.today > 0)
+      .slice(0, 3)
+      .map((board) => ({
+        title: `${board.name} requiere atención`,
+        body: `${board.today || 0} para hoy · ${board.blocked || 0} bloqueadas`,
+        level: board.blocked > 0 ? 'warn' : 'ok'
+      }))),
+    ...actionLog.slice(0, 2).map((item) => ({
+      title: item.title,
+      body: item.body,
+      level: item.tone === 'danger' ? 'danger' : 'ok'
+    }))
+  ].slice(0, 6);
   const runtime = bridgePending
     ? (Array.isArray(context.runtime) ? context.runtime : [])
     : (runtimeTelemetry?.runtimeItems?.length
@@ -119,6 +143,7 @@ exports.handler = async function () {
       collaborators,
       boards,
       liveLog,
+      notifications,
       runtime,
       runtimeSummary: {
         status: runtimeTelemetry?.source || 'seed'
