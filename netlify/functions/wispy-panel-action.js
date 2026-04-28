@@ -1,4 +1,4 @@
-const { appendActionLog } = require('./_wispy-panel-utils');
+const { appendActionLog, appendBug } = require('./_wispy-panel-utils');
 const { createTrelloCard } = require('./_wispy-trello');
 
 function detectArea(text) {
@@ -144,6 +144,13 @@ exports.handler = async function (event) {
       body: error.message,
       time: 'ahora',
       tone: 'danger'
+    });
+    appendBug({
+      title: 'Fallo en Wispy Ops',
+      flow: 'wispy-panel-action',
+      severity: 'high',
+      detail: error.message,
+      impact: 'No se pudo completar una acción desde Ops.'
     });
     return {
       statusCode: 500,

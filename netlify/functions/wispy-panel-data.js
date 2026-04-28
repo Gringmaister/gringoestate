@@ -1,4 +1,4 @@
-const { getInbox, getContextData, getActionLog } = require('./_wispy-panel-utils');
+const { getInbox, getContextData, getActionLog, getBugJournal, appendBug } = require('./_wispy-panel-utils');
 const { getRuntimeTelemetry } = require('./_wispy-runtime');
 const { getTrelloBoardsSnapshot } = require('./_wispy-trello');
 
@@ -27,6 +27,49 @@ function enrichCollaborators(items = []) {
       overdue,
       statusTone: overdue ? 'danger' : (item.statusTone || 'ok')
     };
+  });
+}
+
+function buildHealthChecks({ runtimeTelemetry, bridgePending, trelloBoards, collaborators, blockedFocus, bugJournal }) {
+  const checks = [];
+  checks.push({
+    name: 'Gateway runtime',
+    status: bridgePending ? 'warn' : (runtimeTelemetry?.gateway?.online ? 'ok' : 'danger'),
+    note: bridgePending ? 'Pendiente enlazar bridge externo.' : (runtimeTelemetry?.gateway?.online ? 'Gateway online.' : 'Gateway offline o sin respuesta.')
+  });
+  checks.push({
+    name: 'Boards sync',
+    status: Array.isArray(trelloBoards) && trelloBoards.length ? 'ok' : 'warn',
+    note: Array.isArray(trelloBoards) && trelloBoards.length ? `${trelloBoards.length} boards cargados.` : 'No cargó boards reales.'
+  });
+  checks.push({
+    name: 'Colaboradores SLA',
+    status: collaborators.some((item) => item.overdue) ? 'warn' : 'ok',
+    note: collaborators.some((item) => item.overdue) ? `${collaborators.filter((item) => item.overdue).length} colaborador(es) vencidos.` : 'Sin SLA vencidos ahora.'
+  });
+  checks.push({
+    name: 'Bloqueos de foco',
+    status: blockedFocus > 0 ? 'warn' : 'ok',
+    note: blockedFocus > 0 ? `${blockedFocus} foco(s) bloqueados.` : 'Sin bloqueos activos.'
+  });
+  checks.push({
+    name: 'Bug journal',
+    status: bugJournal.some((item) => item.status === 'open') ? 'warn' : 'ok',
+    note: bugJournal.some((item) => item.status === 'open') ? `${bugJournal.filter((item) => item.status === 'open').length} bug(s) abiertos.` : 'Sin bugs abiertos registrados.'
+  });
+  return checks;
+}
+
+function maybeAutoRecordBridgePending({ runtimeTelemetry, bugJournal }) {
+  if (runtimeTelemetry?.source !== 'bridge-pending') return;
+  const existing = bugJournal.find((item) => item.flow === 'runtime-bridge' && item.status === 'open');
+  if (existing) return;
+  appendBug({
+    title: 'Bridge externo pendiente',
+    flow: 'runtime-bridge',
+    severity: 'medium',
+    detail: 'Netlify todavía no está enlazado al runtime bridge externo.',
+    impact: 'El panel público no ve toda la telemetría real.'
   });
 }
 
@@ -93,6 +136,10 @@ exports.handler = async function () {
     ? trelloBoards
     : (Array.isArray(context.boards) ? context.boards : []);
   const actionLog = getActionLog();
+  let bugJournal = getBugJournal();
+  maybeAutoRecordBridgePending({ runtimeTelemetry, bugJournal });
+  bugJournal = getBugJournal();
+  const healthChecks = buildHealthChecks({ runtimeTelemetry, bridgePending, trelloBoards: boards, collaborators, blockedFocus, bugJournal });
   const bridgeAlert = bridgePending ? [{
     title: 'Runtime bridge pendiente',
     body: 'El deploy público ya tomó el panel nuevo, pero todavía falta unir Netlify con el bridge externo real.',
@@ -142,11 +189,26 @@ exports.handler = async function () {
       level: item.tone === 'danger' ? 'danger' : 'ok'
     }))
   ].slice(0, 6);
-  const runtime = bridgePending
+  const runtimeBase = bridgePending
     ? (Array.isArray(context.runtime) ? context.runtime : [])
     : (runtimeTelemetry?.runtimeItems?.length
       ? runtimeTelemetry.runtimeItems
       : (Array.isArray(context.runtime) ? context.runtime : []));
+  const runtime = [
+    {
+      title: 'Health checks',
+      value: `${healthChecks.filter((item) => item.status !== 'ok').length} issue(s)`,
+      tone: healthChecks.some((item) => item.status === 'danger') ? 'danger' : (healthChecks.some((item) => item.status === 'warn') ? 'warn' : 'ok'),
+      note: healthChecks.map((item) => `${item.name}: ${item.note}`).join(' · ')
+    },
+    {
+      title: 'Bug journal',
+      value: `${bugJournal.filter((item) => item.status === 'open').length} abiertos`,
+      tone: bugJournal.some((item) => item.status === 'open') ? 'warn' : 'ok',
+      note: bugJournal[0]?.title ? `${bugJournal[0].title} · ${bugJournal[0].detail || bugJournal[0].impact || ''}`.trim() : 'Sin bugs abiertos registrados.'
+    },
+    ...runtimeBase
+  ].slice(0, 7);
 
   return {
     statusCode: 200,
@@ -172,6 +234,8 @@ exports.handler = async function () {
       boards,
       liveLog,
       notifications,
+      healthChecks,
+      bugJournal: bugJournal.slice(0, 10),
       runtime,
       runtimeSummary: {
         status: runtimeTelemetry?.source || 'seed'
