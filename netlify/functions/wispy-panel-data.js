@@ -1,6 +1,6 @@
 const { getInbox, getContextData, getActionLog, getBugJournal, appendBug } = require('./_wispy-panel-utils');
 const { getRuntimeTelemetry } = require('./_wispy-runtime');
-const { getTrelloBoardsSnapshot } = require('./_wispy-trello');
+const { getTrelloBoardsSnapshot, getTrelloRecentActivity } = require('./_wispy-trello');
 const { getModuleRegistry } = require('./_wispy-modules');
 
 function countBlockedFocus(focus = []) {
@@ -80,6 +80,7 @@ exports.handler = async function () {
   const context = getContextData();
   const runtimeTelemetry = await getRuntimeTelemetry();
   const trelloBoards = await getTrelloBoardsSnapshot().catch(() => null);
+  const trelloActivity = await getTrelloRecentActivity(6).catch(() => []);
   const modules = getModuleRegistry();
 
   const openInbox = inbox.filter((item) => item.status !== 'done');
@@ -156,11 +157,12 @@ exports.handler = async function () {
   }] : [];
   const liveLog = [
     ...actionLog,
+    ...trelloActivity,
     ...(Array.isArray(context.liveLog) ? context.liveLog : []),
     ...((runtimeTelemetry?.liveLogItems) || []),
     ...bridgeAlert,
     ...boardSyncLog
-  ].slice(0, 8);
+  ].slice(0, 10);
 
   const notifications = [
     ...(blockedFocus ? [{

@@ -64,6 +64,16 @@ async function trelloFetch(url, options = {}) {
   return await response.json();
 }
 
+function getSelectedBoards(discovered) {
+  const boards = discovered?.boards || {};
+  return [
+    { key: 'gringoestate_personal', name: 'PERSONAL' },
+    { key: 'ambbi', name: 'AMBBI' },
+    { key: 'mantenimiento_workflow', name: 'MANTENIMIENTO' },
+    { key: 'gringo_pms_product', name: 'GRINGO PMS' }
+  ].filter((item) => boards[item.key]?.id).map((item) => ({ ...item, id: boards[item.key].id }));
+}
+
 async function getTrelloBoardsSnapshot() {
   const dotenv = readDotEnv(envFile);
   const key = getEnv('TRELLO_API_KEY', dotenv);
@@ -71,13 +81,7 @@ async function getTrelloBoardsSnapshot() {
   if (!key || !token) return null;
 
   const discovered = readJson(discoveredIdsPath, {});
-  const boards = discovered?.boards || {};
-  const selected = [
-    { key: 'gringoestate_personal', name: 'PERSONAL' },
-    { key: 'ambbi', name: 'AMBBI' },
-    { key: 'mantenimiento_workflow', name: 'MANTENIMIENTO' },
-    { key: 'gringo_pms_product', name: 'GRINGO PMS' }
-  ].filter((item) => boards[item.key]?.id);
+  const selected = getSelectedBoards(discovered);
 
   const baseParams = new URLSearchParams({
     key,
@@ -90,8 +94,7 @@ async function getTrelloBoardsSnapshot() {
 
   const snapshots = [];
   for (const board of selected) {
-    const boardId = boards[board.key].id;
-    const data = await trelloFetch(`https://api.trello.com/1/boards/${boardId}?${baseParams}`);
+    const data = await trelloFetch(`https://api.trello.com/1/boards/${board.id}?${baseParams}`);
     snapshots.push(summarizeCards(board.name, data.cards || []));
   }
 
@@ -133,7 +136,53 @@ async function createTrelloCard({ area = 'inbox', title, desc = '', dryRun = fal
   };
 }
 
+async function getTrelloRecentActivity(limit = 8) {
+  const dotenv = readDotEnv(envFile);
+  const key = getEnv('TRELLO_API_KEY', dotenv);
+  const token = getEnv('TRELLO_TOKEN', dotenv);
+  if (!key || !token) return [];
+
+  const discovered = readJson(discoveredIdsPath, {});
+  const selected = getSelectedBoards(discovered);
+  const params = new URLSearchParams({
+    key,
+    token,
+    cards: 'open',
+    card_fields: 'name,dateLastActivity,idList',
+    lists: 'open',
+    list_fields: 'name',
+    fields: 'name'
+  }).toString();
+
+  const events = [];
+  for (const board of selected) {
+    const data = await trelloFetch(`https://api.trello.com/1/boards/${board.id}?${params}`);
+    const lists = Object.fromEntries((data.lists || []).map((item) => [item.id, item.name]));
+    for (const card of (data.cards || []).slice(0, 50)) {
+      if (!card.dateLastActivity) continue;
+      events.push({
+        board: board.name,
+        title: card.name,
+        listName: lists[card.idList] || 'lista',
+        at: card.dateLastActivity
+      });
+    }
+  }
+
+  return events
+    .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+    .slice(0, limit)
+    .map((item) => ({
+      title: `Movimiento ${item.board}`,
+      body: `${item.title} · ${item.listName}`,
+      time: 'trello',
+      tone: 'ok',
+      at: item.at
+    }));
+}
+
 module.exports = {
   getTrelloBoardsSnapshot,
+  getTrelloRecentActivity,
   createTrelloCard
 };

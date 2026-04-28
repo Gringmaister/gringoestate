@@ -627,7 +627,7 @@
     <section class="log-grid">
       <article class="log-card">
         <div class="runtime-head">
-          <h3>Live Log</h3>
+          <h3>Consola Live</h3>
           <span class="pill" id="logCountPill">0 eventos</span>
         </div>
         <div class="log-list" id="logFeed"></div>
@@ -694,6 +694,7 @@
 
     const SESSION_KEY = 'wispy_private_console';
     let chatHistory = [];
+    let liveRefreshTimer = null;
 
     function unlockUi() {
       body.classList.remove('locked');
@@ -920,6 +921,7 @@
           <p>${item.body}</p>
         </div>
       `).join('') || '<div class="log-item"><strong>Sin eventos</strong></div>';
+      logFeed.scrollTop = 0;
     }
 
     function renderRuntime(items, summary = {}) {
@@ -1135,9 +1137,17 @@
 
     refreshPanelBtn.addEventListener('click', loadPanelData);
 
+    function startLiveRefresh() {
+      if (liveRefreshTimer) clearInterval(liveRefreshTimer);
+      liveRefreshTimer = setInterval(() => {
+        if (!document.hidden) loadPanelData();
+      }, 12000);
+    }
+
     verifyExistingSession();
     lockUi();
     loadPanelData();
+    startLiveRefresh();
   </script>
 </body>
 </html>
