@@ -1419,7 +1419,10 @@
 
       topGrid.classList.add('view-panel', 'view-home');
       heroDeck.classList.add('view-panel', 'view-home');
-      opsSection.classList.add('view-panel', 'view-home');
+      opsSection.classList.add('view-panel', 'view-ops', 'hidden');
+      collaboratorsSection.classList.add('view-panel', 'view-team', 'hidden');
+      pipelineSection.classList.add('view-panel', 'view-pipeline', 'hidden');
+      modulesSection.classList.add('view-panel', 'view-skills', 'hidden');
       runtimeSection.classList.add('view-panel', 'view-runtime', 'hidden');
 
       mainGrid.before(shell);
@@ -1439,17 +1442,9 @@
         button.classList.toggle('active', button.dataset.view === view);
       });
 
-      const homePanels = document.querySelectorAll('.view-home');
-      const runtimePanels = document.querySelectorAll('.view-runtime');
-      const showRuntime = view === 'runtime';
-
-      homePanels.forEach((panel) => panel.classList.toggle('hidden', showRuntime));
-      runtimePanels.forEach((panel) => panel.classList.toggle('hidden', !showRuntime));
-
-      if (view === 'ops') opsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      if (view === 'team') collaboratorsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      if (view === 'pipeline') pipelineSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      if (view === 'skills') modulesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.querySelectorAll('.view-panel').forEach((panel) => panel.classList.add('hidden'));
+      document.querySelectorAll(`.view-${view}`).forEach((panel) => panel.classList.remove('hidden'));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function unlockUi() {
