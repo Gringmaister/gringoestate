@@ -533,6 +533,23 @@
     .section-title h2 { font-size: 2.4rem; line-height: 0.95; color: #f3e3b7; }
     .section-title p { color: #b8ab94; }
 
+    .section-kicker,
+    .dual-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      color: #cfa75a;
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .dual-kicker {
+      margin-bottom: 6px;
+      font-size: 0.68rem;
+    }
+
     .ops-grid {
       display: grid;
       grid-template-columns: minmax(250px, 0.78fr) minmax(250px, 0.78fr) minmax(460px, 1.3fr);
@@ -585,6 +602,15 @@
 
     .card-title h3 { font-size: 1.7rem; }
     .stack-title { font-size: 1.45rem; }
+
+    .card-title-text {
+      display: grid;
+      gap: 2px;
+    }
+
+    .card-title-text h3 {
+      line-height: 0.96;
+    }
 
     .column-card.action-column {
       grid-template-rows: auto 1fr;
@@ -757,6 +783,25 @@
 
     .side-stack .list-stack {
       max-height: unset;
+    }
+
+    .module-highlight {
+      border-radius: 18px;
+      border: 1px solid rgba(212,166,64,0.18);
+      background: linear-gradient(180deg, rgba(212,166,64,0.08), rgba(255,255,255,0.02));
+      padding: 14px;
+    }
+
+    .module-highlight strong {
+      display: block;
+      color: #fff0cd;
+      margin-bottom: 6px;
+    }
+
+    .module-highlight p {
+      color: #b8ab94;
+      font-size: 0.9rem;
+      line-height: 1.55;
     }
 
     .chat-bubble.user {
@@ -980,14 +1025,18 @@
     <section class="main-grid">
       <article class="section-card" id="ops">
         <div class="section-title">
-          <h2>Ops</h2>
-          <p>Inbox, foco y acción en el mismo cuadrante.</p>
+          <div class="section-kicker">OPERACIONES / OPS CENTER</div>
+          <h2>Centro operativo para inbox, foco y acción.</h2>
+          <p>La capa ejecutiva donde bajás pendientes, prioridades y comandos a movimiento real.</p>
         </div>
 
         <div class="ops-grid">
-          <section class="column-card action-column">
+          <section class="column-card">
             <div class="card-title row-between">
-              <h3>📥 Inbox</h3>
+              <div class="card-title-text">
+                <div class="dual-kicker">ENTRADA / INBOX</div>
+                <h3>📥 Inbox</h3>
+              </div>
               <span class="pill" id="inboxCountPill">0 abiertos</span>
             </div>
             <div class="ops-stats">
@@ -999,7 +1048,10 @@
 
           <section class="column-card">
             <div class="card-title row-between">
-              <h3>🎯 Foco</h3>
+              <div class="card-title-text">
+                <div class="dual-kicker">PRIORIDADES / FOCUS</div>
+                <h3>🎯 Foco</h3>
+              </div>
               <span class="pill warn" id="focusCountPill">0 activos</span>
             </div>
             <div class="ops-stats">
@@ -1009,9 +1061,12 @@
             <div class="list-stack" id="focusFeed"></div>
           </section>
 
-          <section class="column-card">
+          <section class="column-card action-column">
             <div class="card-title row-between">
-              <h3>⚡ Acción</h3>
+              <div class="card-title-text">
+                <div class="dual-kicker">COMMAND / ACTION CENTER</div>
+                <h3>⚡ Acción</h3>
+              </div>
               <span class="pill ok" id="actionModePill">ready</span>
             </div>
             <div class="ops-shell">
@@ -1089,7 +1144,10 @@
       <aside class="side-stack">
         <section class="side-card">
           <div class="card-title row-between">
-            <h3>🧭 Versión</h3>
+            <div class="card-title-text">
+              <div class="dual-kicker">RELEASE / VERSION TRACK</div>
+              <h3>🧭 Versión</h3>
+            </div>
             <span class="pill warn" id="versionRailPill">v0.2.0</span>
           </div>
           <div class="list-stack" id="versionFeed">
@@ -1110,7 +1168,10 @@
 
         <section class="side-card">
           <div class="card-title row-between">
-            <h3>🔔 Notificaciones</h3>
+            <div class="card-title-text">
+              <div class="dual-kicker">ALERTAS / NOTIFICATIONS</div>
+              <h3>🔔 Notificaciones</h3>
+            </div>
             <span class="pill" id="notificationCountPill">0</span>
           </div>
           <div class="list-stack" id="notificationsFeed"></div>
@@ -1118,7 +1179,10 @@
 
         <section class="side-card">
           <div class="card-title row-between">
-            <h3>👥 Colaboradores</h3>
+            <div class="card-title-text">
+              <div class="dual-kicker">TEAM / COLLABORATORS</div>
+              <h3>👥 Colaboradores</h3>
+            </div>
             <span class="pill" id="collaboratorCountPill">0</span>
           </div>
           <div class="list-stack" id="collaboratorsFeed"></div>
@@ -1126,7 +1190,10 @@
 
         <section class="side-card">
           <div class="card-title row-between">
-            <h3>📋 Boards</h3>
+            <div class="card-title-text">
+              <div class="dual-kicker">TRACKERS / BOARDS</div>
+              <h3>📋 Boards</h3>
+            </div>
             <span class="pill" id="boardCountPill">0</span>
           </div>
           <div class="list-stack" id="boardsFeed"></div>
@@ -1134,7 +1201,10 @@
 
         <section class="side-card">
           <div class="card-title row-between">
-            <h3>🧩 Módulos</h3>
+            <div class="card-title-text">
+              <div class="dual-kicker">SKILLS / MODULES</div>
+              <h3>🧩 Módulos</h3>
+            </div>
             <span class="pill" id="moduleCountPill">0</span>
           </div>
           <div class="list-stack" id="modulesFeed"></div>
