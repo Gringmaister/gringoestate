@@ -516,7 +516,7 @@
 
     .main-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.65fr) minmax(300px, 0.75fr);
+      grid-template-columns: minmax(0, 1fr) 360px;
       gap: 18px;
       align-items: start;
     }
@@ -535,8 +535,9 @@
 
     .ops-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr) minmax(300px, 0.8fr);
+      grid-template-columns: minmax(250px, 0.78fr) minmax(250px, 0.78fr) minmax(460px, 1.3fr);
       gap: 14px;
+      align-items: start;
     }
 
     .ops-shell {
@@ -600,6 +601,10 @@
     }
 
     .quick-actions-grid { grid-template-columns: 1fr 1fr; }
+
+    .quick-actions-grid.compact {
+      grid-template-columns: 1fr 1fr;
+    }
 
     .quick-actions-grid.compact .quick-action {
       min-height: 56px;
@@ -741,13 +746,17 @@
     }
 
     .action-row.compact {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .side-stack {
       align-content: start;
       position: sticky;
       top: 12px;
+    }
+
+    .side-stack .list-stack {
+      max-height: unset;
     }
 
     .chat-bubble.user {
@@ -840,6 +849,7 @@
       .auth-card { grid-template-columns: 1fr; }
       .auth-form { flex-direction: column; }
       .side-stack { position: static; }
+      .ops-grid { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 760px) {
