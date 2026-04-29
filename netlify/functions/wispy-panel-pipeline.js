@@ -1,4 +1,5 @@
 const { getContextData, getPipelineState, savePipelineState } = require('./_wispy-panel-utils');
+const { proxyPortableApi } = require('./_wispy-portable-proxy');
 
 function json(statusCode, body) {
   return {
@@ -12,6 +13,8 @@ function json(statusCode, body) {
 }
 
 exports.handler = async function (event) {
+  const proxied = await proxyPortableApi(event, 'api/pipeline');
+  if (proxied) return proxied;
   try {
     const seed = getContextData().pipeline || [];
     const items = getPipelineState(seed);

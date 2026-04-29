@@ -2,6 +2,7 @@ const { getInbox, getContextData, getActionLog, getBugJournal, appendBug } = req
 const { getRuntimeTelemetry } = require('./_wispy-runtime');
 const { getTrelloBoardsSnapshot, getTrelloRecentActivity } = require('./_wispy-trello');
 const { getModuleRegistry } = require('./_wispy-modules');
+const { proxyPortableApi } = require('./_wispy-portable-proxy');
 
 function countBlockedFocus(focus = []) {
   return focus.filter((item) => item.status === 'blocked').length;
@@ -105,7 +106,9 @@ function buildPipeline(context = {}, boards = []) {
   ];
 }
 
-exports.handler = async function () {
+exports.handler = async function (event = {}) {
+  const proxied = await proxyPortableApi({ httpMethod: 'GET' }, 'api/panel-data');
+  if (proxied) return proxied;
   const now = new Date();
   const inbox = getInbox();
   const context = getContextData();

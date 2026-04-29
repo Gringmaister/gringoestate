@@ -1,4 +1,5 @@
 const { getInbox, saveInbox } = require('./_wispy-panel-utils');
+const { proxyPortableApi } = require('./_wispy-portable-proxy');
 
 function json(statusCode, body) {
   return {
@@ -12,6 +13,8 @@ function json(statusCode, body) {
 }
 
 exports.handler = async function (event) {
+  const proxied = await proxyPortableApi(event, 'api/inbox');
+  if (proxied) return proxied;
   try {
     const method = event.httpMethod;
     const items = getInbox();

@@ -13,35 +13,94 @@ function unauthorized(res) {
   res.end(JSON.stringify({ ok: false, error: 'unauthorized' }));
 }
 
-const server = http.createServer(async (req, res) => {
-  if (req.url === '/healthz') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ ok: true }));
-    return;
+async function handler(event = {}) {
+  const reqUrl = event.path || event.url || '/';
+  const method = event.httpMethod || event.method || 'GET';
+  const auth = event.headers?.authorization || event.headers?.Authorization || '';
+
+  if (reqUrl === '/healthz') {
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ok: true })
+    };
   }
 
-  if (req.url !== '/wispy-runtime' || req.method !== 'GET') {
-    res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ ok: false, error: 'not_found' }));
-    return;
+  if (reqUrl !== '/wispy-runtime' && reqUrl !== '/api/runtime') {
+    return {
+      statusCode: 404,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ok: false, error: 'not_found' })
+    };
   }
 
-  const auth = req.headers.authorization || '';
+  if (method !== 'GET') {
+    return {
+      statusCode: 405,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ok: false, error: 'method_not_allowed' })
+    };
+  }
+
   if (token && auth !== `Bearer ${token}`) {
-    unauthorized(res);
-    return;
+    return {
+      statusCode: 401,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ok: false, error: 'unauthorized' })
+    };
   }
 
   try {
     const runtime = await collectRuntime();
-    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-    res.end(JSON.stringify({ ok: true, runtime }));
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+      body: JSON.stringify({ ok: true, runtime })
+    };
   } catch (error) {
-    res.writeHead(500, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ ok: false, error: error.message }));
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ok: false, error: error.message })
+    };
   }
-});
+}
 
-server.listen(port, bindHost, () => {
-  console.log(`wispy-runtime-bridge listening on http://${bindHost}:${port}/wispy-runtime`);
-});
+if (require.main === module) {
+  const server = http.createServer(async (req, res) => {
+    if (req.url === '/healthz') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+      return;
+    }
+
+    if (req.url !== '/wispy-runtime' || req.method !== 'GET') {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: 'not_found' }));
+      return;
+    }
+
+    const auth = req.headers.authorization || '';
+    if (token && auth !== `Bearer ${token}`) {
+      unauthorized(res);
+      return;
+    }
+
+    try {
+      const runtime = await collectRuntime();
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      res.end(JSON.stringify({ ok: true, runtime }));
+    } catch (error) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: error.message }));
+    }
+  });
+
+  server.listen(port, bindHost, () => {
+    console.log(`wispy-runtime-bridge listening on http://${bindHost}:${port}/wispy-runtime`);
+  });
+}
+
+module.exports = {
+  handler
+};

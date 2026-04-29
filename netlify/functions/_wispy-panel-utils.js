@@ -7,7 +7,9 @@ const projectRoot = path.resolve(__dirname, '..', '..');
 const seedDataDir = fs.existsSync(path.join(projectRoot, 'data'))
   ? path.join(projectRoot, 'data')
   : path.resolve(runtimeRoot, 'data');
-const writableDataDir = path.resolve('/tmp', 'wispy-panel-data');
+const writableDataDir = process.env.WISPY_PANEL_DATA_DIR
+  ? path.resolve(process.env.WISPY_PANEL_DATA_DIR)
+  : path.resolve('/tmp', 'wispy-panel-data');
 const inboxPath = path.join(writableDataDir, 'wispy-inbox.json');
 const actionLogPath = path.join(writableDataDir, 'wispy-action-log.json');
 const bugJournalPath = path.join(writableDataDir, 'wispy-bug-journal.json');

@@ -1,4 +1,5 @@
 const { getContextData, updateCollaborator, appendActionLog, appendBug } = require('./_wispy-panel-utils');
+const { proxyPortableApi } = require('./_wispy-portable-proxy');
 
 function inferChannel(item) {
   const role = (item.role || '').toLowerCase();
@@ -13,6 +14,8 @@ function buildFollowUpMessage(item) {
 }
 
 exports.handler = async function (event) {
+  const proxied = await proxyPortableApi(event, 'api/followup');
+  if (proxied) return proxied;
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,

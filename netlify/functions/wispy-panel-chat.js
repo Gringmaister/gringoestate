@@ -1,4 +1,5 @@
 const { getContextData, getInbox, getChatHistory, saveChatHistory } = require('./_wispy-panel-utils');
+const { proxyPortableApi } = require('./_wispy-portable-proxy');
 
 function json(statusCode, body) {
   return {
@@ -37,6 +38,8 @@ function fallbackReply(message, context, inbox) {
 }
 
 exports.handler = async function (event) {
+  const proxied = await proxyPortableApi(event, 'api/chat');
+  if (proxied) return proxied;
   if (event.httpMethod === 'GET') {
     return json(200, { ok: true, items: getChatHistory() });
   }
