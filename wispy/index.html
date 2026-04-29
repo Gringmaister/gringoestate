@@ -334,6 +334,26 @@
     .brand h1 span { color: var(--gold); }
     .brand p { color: #b8aa8d; font-size: 0.9rem; margin-top: 4px; }
 
+    .muted-half { color: var(--text); }
+    .gold-half { color: var(--gold); }
+
+    .nav-btn .nav-main {
+      display: block;
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 0.06em;
+      font-size: 1.15rem;
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+
+    .nav-btn .nav-sub {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #aa9f8a;
+    }
+
     .hero-deck {
       display: grid;
       grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr);
@@ -1003,7 +1023,7 @@
       <div class="brand">
         <img src="/images/isologo.webp" alt="Wispy" />
         <div>
-          <h1>WISPY <span>OFFICE</span></h1>
+          <h1 class="split-title"><span class="muted-half">WISPY</span> <span class="gold-half">OFFICE</span></h1>
           <p>gringo.estate / centro de comando</p>
         </div>
       </div>
@@ -1027,7 +1047,7 @@
       <article class="hero-stage" id="heroStage">
         <div class="hero-kicker mono">✨ executive pulse</div>
         <div class="hero-copy">
-          <h2>Centro de mando con foco, presión y acción.</h2>
+          <h2 class="split-title"><span class="muted-half">CENTRO DE MANDO</span> <span class="gold-half">CON FOCO Y ACCIÓN</span></h2>
           <p id="heroNarrative">La consola tiene que mostrar qué importa ahora y qué podés mover ya, sin parecer un dashboard genérico.</p>
         </div>
         <div class="hero-signals">
@@ -1404,12 +1424,12 @@
             <h3>🧭 Panel</h3>
           </div>
           <div class="nav-list">
-            <button class="nav-btn active" data-view="home">🏠 Home / Command Center</button>
-            <button class="nav-btn" data-view="ops">⚡ Operaciones / Ops</button>
-            <button class="nav-btn" data-view="team">👥 Equipo / Collaborators</button>
-            <button class="nav-btn" data-view="pipeline">🏢 Pipeline / Deal Flow</button>
-            <button class="nav-btn" data-view="skills">🧩 Skills / Modules</button>
-            <button class="nav-btn" data-view="runtime">📡 Runtime / Live</button>
+            <button class="nav-btn active" data-view="home"><span class="nav-main"><span class="muted-half">HOME</span> <span class="gold-half">CENTER</span></span><span class="nav-sub">🏠 command / overview</span></button>
+            <button class="nav-btn" data-view="ops"><span class="nav-main"><span class="muted-half">OPERACIONES</span> <span class="gold-half">OPS</span></span><span class="nav-sub">⚡ action / inbox</span></button>
+            <button class="nav-btn" data-view="team"><span class="nav-main"><span class="muted-half">EQUIPO</span> <span class="gold-half">TEAM</span></span><span class="nav-sub">👥 collaborators / sla</span></button>
+            <button class="nav-btn" data-view="pipeline"><span class="nav-main"><span class="muted-half">PIPELINE</span> <span class="gold-half">FLOW</span></span><span class="nav-sub">🏢 deal flow / next step</span></button>
+            <button class="nav-btn" data-view="skills"><span class="nav-main"><span class="muted-half">SKILLS</span> <span class="gold-half">MODULES</span></span><span class="nav-sub">🧩 gpts / subagents</span></button>
+            <button class="nav-btn" data-view="runtime"><span class="nav-main"><span class="muted-half">RUNTIME</span> <span class="gold-half">LIVE</span></span><span class="nav-sub">📡 bridge / telemetry</span></button>
           </div>
         </section>
       `;
@@ -1428,7 +1448,7 @@
       mainGrid.before(shell);
       shell.append(leftSidebar, workspaceMain);
       leftSidebar.appendChild(sideStack);
-      workspaceMain.append(topGrid, heroDeck, opsSection, runtimeSection);
+      workspaceMain.append(topGrid, heroDeck, opsSection, collaboratorsSection, pipelineSection, modulesSection, runtimeSection);
       mainGrid.remove();
 
       leftSidebar.querySelectorAll('.nav-btn').forEach((button) => {
