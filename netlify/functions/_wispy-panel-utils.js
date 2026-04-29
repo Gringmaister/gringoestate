@@ -14,6 +14,7 @@ const bugJournalPath = path.join(writableDataDir, 'wispy-bug-journal.json');
 const seedInboxPath = path.join(seedDataDir, 'wispy-inbox.json');
 const contextPath = path.join(seedDataDir, 'wispy-context.json');
 const collaboratorStatePath = path.join(writableDataDir, 'wispy-collaborators.json');
+const pipelineStatePath = path.join(writableDataDir, 'wispy-pipeline.json');
 const chatHistoryPath = path.join(writableDataDir, 'wispy-chat-history.json');
 const memoryPath = path.join(workspaceRoot, 'MEMORY.md');
 const userPath = path.join(workspaceRoot, 'USER.md');
@@ -198,6 +199,20 @@ function saveCollaboratorState(items) {
   writeJson(collaboratorStatePath, { items });
 }
 
+function getPipelineState(seedPipeline = []) {
+  const payload = readJson(pipelineStatePath, null);
+  if (payload && Array.isArray(payload.items)) return payload.items;
+  if (Array.isArray(seedPipeline) && seedPipeline.length) {
+    writeJson(pipelineStatePath, { items: seedPipeline });
+    return seedPipeline;
+  }
+  return [];
+}
+
+function savePipelineState(items) {
+  writeJson(pipelineStatePath, { items });
+}
+
 function updateCollaborator(name, patch = {}) {
   const current = getCollaboratorState();
   const updated = current.map((item) => item.name === name ? { ...item, ...patch } : item);
@@ -227,7 +242,7 @@ function getContextData() {
       staff: Array.isArray(seeded.staff) ? seeded.staff : [],
       collaborators: getCollaboratorState(Array.isArray(seeded.collaborators) ? seeded.collaborators : []),
       boards: Array.isArray(seeded.boards) ? seeded.boards : [],
-      pipeline: Array.isArray(seeded.pipeline) ? seeded.pipeline : [],
+      pipeline: getPipelineState(Array.isArray(seeded.pipeline) ? seeded.pipeline : []),
       gpts: Array.isArray(seeded.gpts) ? seeded.gpts : [],
       subagents: Array.isArray(seeded.subagents) ? seeded.subagents : [],
       runtime: Array.isArray(seeded.runtime) ? seeded.runtime : [],
@@ -250,7 +265,7 @@ function getContextData() {
     staff: extractStaff(memoryMd),
     collaborators: getCollaboratorState([]),
     boards: [],
-    pipeline: [],
+    pipeline: getPipelineState([]),
     gpts: [],
     subagents: [],
     runtime: [],
@@ -266,6 +281,7 @@ module.exports = {
   actionLogPath,
   bugJournalPath,
   collaboratorStatePath,
+  pipelineStatePath,
   chatHistoryPath,
   getInbox,
   saveInbox,
@@ -274,6 +290,8 @@ module.exports = {
   appendActionLog,
   getCollaboratorState,
   saveCollaboratorState,
+  getPipelineState,
+  savePipelineState,
   updateCollaborator,
   getChatHistory,
   saveChatHistory,

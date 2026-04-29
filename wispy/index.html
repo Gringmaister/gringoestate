@@ -1682,6 +1682,38 @@
       }
     }
 
+    async function patchCollaborator(name, patch = {}) {
+      try {
+        const response = await fetch('/.netlify/functions/wispy-panel-collaborators', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, patch })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.error || 'No pude actualizar colaborador');
+        renderCollaborators(data.items || []);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    async function patchPipeline(name, patch = {}) {
+      try {
+        const response = await fetch('/.netlify/functions/wispy-panel-pipeline', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, patch })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.error || 'No pude actualizar pipeline');
+        renderPipeline(data.items || []);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
     function renderCollaborators(items) {
       const collaborators = Array.isArray(items) && items.length ? items : [
         { name: 'Pamela', role: 'Admin · contratos y flujos', lastContact: 'alta pendiente', pending: 'Definir tablero, permisos y follow-up operativo', nextAction: 'Dar de alta colaborador y enlazar pendiente real', status: 'setup', statusTone: 'warn', overdue: false, waitingHours: null, slaHours: null },
@@ -1703,6 +1735,8 @@
           <div class="list-meta">
             <button class="ghost-button followup-btn" data-name="${item.name}">Follow-up</button>
             <button class="ghost-button collab-open-btn" data-name="${item.name}">Abrir en acción</button>
+            <button class="ghost-button collab-waiting-btn" data-name="${item.name}">Esperando</button>
+            <button class="ghost-button collab-done-btn" data-name="${item.name}">Done</button>
           </div>
         </div>
       `).join('') || '<div class="list-item"><strong>Sin colaboradores</strong></div>';
@@ -1714,6 +1748,16 @@
           composerInput.value = `Abrí colaborador ${button.dataset.name}: resumime estado, pendiente y próximo mensaje recomendado.`;
           composerInput.focus();
           actionModePill.textContent = 'loaded';
+        });
+      });
+      document.querySelectorAll('.collab-waiting-btn').forEach((button) => {
+        button.addEventListener('click', async () => {
+          await patchCollaborator(button.dataset.name, { status: 'esperando respuesta', statusTone: 'warn' });
+        });
+      });
+      document.querySelectorAll('.collab-done-btn').forEach((button) => {
+        button.addEventListener('click', async () => {
+          await patchCollaborator(button.dataset.name, { status: 'al día', statusTone: 'ok', pending: 'sin pendiente urgente', nextAction: 'Sin acción urgente' });
         });
       });
     }
@@ -1730,8 +1774,24 @@
           <p>${item.summary || ''}</p>
           ${item.nextStep ? `<p><span class="accent">Próximo:</span> ${item.nextStep}</p>` : ''}
           ${item.owner ? `<p><span class="accent">Owner:</span> ${item.owner}</p>` : ''}
+          <div class="list-meta">
+            <button class="ghost-button pipe-open-btn" data-name="${item.name}">Abrir en acción</button>
+            <button class="ghost-button pipe-next-btn" data-name="${item.name}">Mover next</button>
+          </div>
         </div>
       `).join('') || '<div class="list-item"><strong>Sin pipeline</strong><p>No hay deal flow cargado todavía.</p></div>';
+      document.querySelectorAll('.pipe-open-btn').forEach((button) => {
+        button.addEventListener('click', () => {
+          composerInput.value = `Abrí ${button.dataset.name}: resumime estado comercial y próximo paso concreto.`;
+          composerInput.focus();
+          actionModePill.textContent = 'loaded';
+        });
+      });
+      document.querySelectorAll('.pipe-next-btn').forEach((button) => {
+        button.addEventListener('click', async () => {
+          await patchPipeline(button.dataset.name, { stage: 'next-step definido', tone: 'ok' });
+        });
+      });
     }
 
     function renderBoards(items) {
