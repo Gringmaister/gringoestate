@@ -1081,9 +1081,9 @@
             <small id="heroRuntimeNote">Esperando telemetría real.</small>
           </div>
           <div class="hero-metric">
-            <span>⚡ Siguiente jugada</span>
-            <strong id="heroActionValue">—</strong>
-            <small id="heroActionNote">Usá el comando central para destrabar.</small>
+            <span>🧠 Tokens sesión</span>
+            <strong id="heroTokenValue">—</strong>
+            <small id="heroTokenNote">Todavía sin consumo visible.</small>
           </div>
         </div>
       </article>
@@ -1098,6 +1098,8 @@
           <div class="hero-line"><strong class="mono">🔌 RUNTIME BRIDGE</strong><span class="pill" id="heroBridgePill">sync</span></div>
           <p id="heroBridgeBody" class="text-muted">Estado del enlace entre Netlify y el runtime real.</p>
           <div class="hero-line" style="margin-top:10px"><span>Uso sesión</span><span id="heroUsageValue" class="mono">—</span></div>
+          <div class="hero-line" style="margin-top:10px"><span>Thinking</span><span id="heroThinkingPill" class="pill">idle</span></div>
+          <p id="heroThinkingBody" class="text-muted" style="margin-top:8px">Cuando Wispy procese algo, te lo marco acá.</p>
         </section>
       </aside>
     </section>
@@ -1300,6 +1302,26 @@
           </div>
           <div class="list-stack" id="modulesFeed"></div>
         </section>
+
+        <section class="side-card" id="smartHomeSection">
+          <div class="card-title row-between">
+            <div class="card-title-text">
+              <div class="dual-kicker">SMART HOME / CONTROL</div>
+              <h3>🏠 Smart Home</h3>
+            </div>
+            <span class="pill" id="smartHomePill">seed</span>
+          </div>
+          <div class="list-stack" id="smartHomeFeed">
+            <div class="list-item">
+              <div class="list-meta"><strong>Xiaomi Cameras</strong><span class="pill warn">next</span></div>
+              <p>Dejar preparado el tablero para cámaras, visión y alertas futuras.</p>
+            </div>
+            <div class="list-item">
+              <div class="list-meta"><strong>Philips Hue</strong><span class="pill warn">next</span></div>
+              <p>Preparar integración de luces/escenas cuando definamos API y credenciales.</p>
+            </div>
+          </div>
+        </section>
       </aside>
     </section>
 
@@ -1345,13 +1367,15 @@
     const heroInboxNote = document.getElementById('heroInboxNote');
     const heroRuntimeValue = document.getElementById('heroRuntimeValue');
     const heroRuntimeNote = document.getElementById('heroRuntimeNote');
-    const heroActionValue = document.getElementById('heroActionValue');
-    const heroActionNote = document.getElementById('heroActionNote');
+    const heroTokenValue = document.getElementById('heroTokenValue');
+    const heroTokenNote = document.getElementById('heroTokenNote');
     const heroAlertTitle = document.getElementById('heroAlertTitle');
     const heroAlertBody = document.getElementById('heroAlertBody');
     const heroBridgePill = document.getElementById('heroBridgePill');
     const heroBridgeBody = document.getElementById('heroBridgeBody');
     const heroUsageValue = document.getElementById('heroUsageValue');
+    const heroThinkingPill = document.getElementById('heroThinkingPill');
+    const heroThinkingBody = document.getElementById('heroThinkingBody');
     const heroSignalFocus = document.getElementById('heroSignalFocus');
     const heroSignalFollowUp = document.getElementById('heroSignalFollowUp');
     const heroSignalRisk = document.getElementById('heroSignalRisk');
@@ -1376,6 +1400,7 @@
     const collaboratorsSection = document.getElementById('collaboratorsSection');
     const pipelineSection = document.getElementById('pipelineSection');
     const modulesSection = document.getElementById('modulesSection');
+    const smartHomeSection = document.getElementById('smartHomeSection');
 
     const inboxCountPill = document.getElementById('inboxCountPill');
     const inboxUnprocessed = document.getElementById('inboxUnprocessed');
@@ -1409,6 +1434,12 @@
     let liveRefreshTimer = null;
     let currentWorkspaceView = 'home';
 
+    function setThinkingState(mode = 'idle', detail = 'Cuando Wispy procese algo, te lo marco acá.') {
+      heroThinkingPill.textContent = mode;
+      heroThinkingPill.className = `pill ${mode === 'thinking' ? 'warn' : mode === 'error' ? 'danger' : 'ok'}`;
+      heroThinkingBody.textContent = detail;
+    }
+
     function setupDashboardShell() {
       if (!mainGrid || !sideStack || document.querySelector('.dashboard-shell')) return;
 
@@ -1430,6 +1461,7 @@
             <button class="nav-btn" data-view="pipeline"><span class="nav-main"><span class="muted-half">PIPELINE</span> <span class="gold-half">FLOW</span></span><span class="nav-sub">🏢 deal flow / next step</span></button>
             <button class="nav-btn" data-view="skills"><span class="nav-main"><span class="muted-half">SKILLS</span> <span class="gold-half">MODULES</span></span><span class="nav-sub">🧩 gpts / subagents</span></button>
             <button class="nav-btn" data-view="runtime"><span class="nav-main"><span class="muted-half">RUNTIME</span> <span class="gold-half">LIVE</span></span><span class="nav-sub">📡 bridge / telemetry</span></button>
+            <button class="nav-btn" data-view="smarthome"><span class="nav-main"><span class="muted-half">SMART</span> <span class="gold-half">HOME</span></span><span class="nav-sub">🏠 hue / cameras</span></button>
           </div>
         </section>
       `;
@@ -1444,11 +1476,12 @@
       pipelineSection.classList.add('view-panel', 'view-pipeline', 'hidden');
       modulesSection.classList.add('view-panel', 'view-skills', 'hidden');
       runtimeSection.classList.add('view-panel', 'view-runtime', 'hidden');
+      smartHomeSection.classList.add('view-panel', 'view-smarthome', 'hidden');
 
       mainGrid.before(shell);
       shell.append(leftSidebar, workspaceMain);
       leftSidebar.appendChild(sideStack);
-      workspaceMain.append(topGrid, heroDeck, opsSection, collaboratorsSection, pipelineSection, modulesSection, runtimeSection);
+      workspaceMain.append(topGrid, heroDeck, opsSection, collaboratorsSection, pipelineSection, modulesSection, runtimeSection, smartHomeSection);
       mainGrid.remove();
 
       leftSidebar.querySelectorAll('.nav-btn').forEach((button) => {
@@ -1573,9 +1606,10 @@
       const unprocessed = normalizeCount(data.inboxMeta?.unprocessed, inboxItems.length);
       const audioLike = normalizeCount(data.inboxMeta?.audioLike, 0);
       const firstAlert = notifications[0] || null;
-      const nextAction = focusItems[0]?.nextStep || inboxItems[0]?.nextStep || 'Destrabar desde Ops';
       const runtimeSummary = data.runtimeSummary?.status || data.runtimeTelemetry?.source || 'sync';
       const gatewayCard = (data.snapshot || []).find((item) => /gateway/i.test(item.label || ''));
+      const currentSession = data.runtimeTelemetry?.sessions?.current;
+      const aggregate = data.runtimeTelemetry?.sessions?.aggregate;
 
       systemHealthValue.textContent = gatewayCard?.value || runtimeSummary;
       systemBridgeValue.textContent = bridgePending ? 'pending' : 'linked';
@@ -1595,8 +1629,10 @@
       heroRuntimeValue.textContent = bridgePending ? 'bridge pending' : runtimeSummary;
       heroRuntimeNote.textContent = runtimeItems[0]?.note || gatewayCard?.note || 'Runtime listo para mostrar señal real.';
 
-      heroActionValue.textContent = focusItems[0]?.status === 'blocked' ? 'destrabar' : 'ejecutar';
-      heroActionNote.textContent = nextAction;
+      heroTokenValue.textContent = currentSession?.totalTokens ? `${currentSession.totalTokens}` : '—';
+      heroTokenNote.textContent = aggregate?.totalTokens
+        ? `${aggregate.totalTokens} tok visibles · ${aggregate.totalCost?.toFixed ? '$' + aggregate.totalCost.toFixed(2) : 'cost'}`
+        : 'Todavía sin consumo visible.';
 
       heroAlertTitle.textContent = firstAlert?.title || 'Sin alertas críticas.';
       heroAlertBody.textContent = firstAlert?.body || 'Cuando haya un bloqueo real, aparece acá primero.';
@@ -1937,6 +1973,7 @@
     async function loadPanelData() {
       try {
         refreshPanelBtn.textContent = 'Actualizando...';
+        setThinkingState('thinking', 'Sincronizando panel, métricas y runtime.');
         const response = await fetch('/.netlify/functions/wispy-panel-data');
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.error || 'No pude cargar el panel');
@@ -1957,11 +1994,13 @@
           : 'usage —';
         heroUsageValue.textContent = sessionUsagePill.textContent;
         actionModePill.textContent = 'sync';
+        setThinkingState('idle', 'Panel sincronizado.');
       } catch {
         actionModePill.textContent = 'error';
         sessionUsagePill.textContent = 'usage error';
         heroUsageValue.textContent = 'usage error';
         composerOutput.textContent = 'No pude traer el estado vivo del panel ahora.';
+        setThinkingState('error', 'No pude sincronizar el panel en vivo.');
       } finally {
         refreshPanelBtn.textContent = 'Actualizar';
       }
@@ -2055,6 +2094,7 @@
       chatHistory.push({ role: 'user', content: message });
       chatInput.value = '';
       chatModePill.textContent = 'live';
+      setThinkingState('thinking', 'Wispy está procesando el chat y armando respuesta.');
 
       try {
         const response = await fetch('/.netlify/functions/wispy-panel-chat', {
@@ -2069,11 +2109,13 @@
           : [...chatHistory, { role: 'assistant', content: data.reply }];
         renderChatHistory(Array.isArray(data.items) ? data.items : chatHistory);
         chatModePill.textContent = data.mode || 'live';
+        setThinkingState('idle', 'Respuesta lista.');
       } catch {
         const fallback = 'No pude pegarle al chat real ahora. Reintentá en un segundo.';
         renderChatMessage('assistant', fallback);
         chatHistory.push({ role: 'assistant', content: fallback });
         chatModePill.textContent = 'error';
+        setThinkingState('error', 'Falló el chat en vivo.');
       }
     }
 
@@ -2086,6 +2128,7 @@
 
       composerOutput.textContent = 'Procesando acción...';
       actionModePill.textContent = 'running';
+      setThinkingState('thinking', 'Wispy está bajando el pedido a acción ejecutiva.');
 
       try {
         const response = await fetch('/.netlify/functions/wispy-panel-action', {
@@ -2097,9 +2140,11 @@
         if (!response.ok || !data.ok) throw new Error(data.error || 'No pude ejecutar la acción');
         composerOutput.textContent = data.output;
         actionModePill.textContent = 'done';
+        setThinkingState('idle', 'Acción procesada.');
       } catch {
         composerOutput.textContent = buildExecutiveBrief(raw);
         actionModePill.textContent = 'fallback';
+        setThinkingState('error', 'No pude correr la acción real; quedó fallback ejecutivo.');
       }
     });
 
