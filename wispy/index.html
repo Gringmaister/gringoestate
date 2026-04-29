@@ -1191,6 +1191,17 @@
         <section class="side-card">
           <div class="card-title row-between">
             <div class="card-title-text">
+              <div class="dual-kicker">PIPELINE / DEAL FLOW</div>
+              <h3>🏢 Pipeline</h3>
+            </div>
+            <span class="pill" id="pipelineCountPill">0</span>
+          </div>
+          <div class="list-stack" id="pipelineFeed"></div>
+        </section>
+
+        <section class="side-card">
+          <div class="card-title row-between">
+            <div class="card-title-text">
               <div class="dual-kicker">TRACKERS / BOARDS</div>
               <h3>📋 Boards</h3>
             </div>
@@ -1272,6 +1283,7 @@
     const focusFeed = document.getElementById('focusFeed');
     const notificationsFeed = document.getElementById('notificationsFeed');
     const collaboratorsFeed = document.getElementById('collaboratorsFeed');
+    const pipelineFeed = document.getElementById('pipelineFeed');
     const boardsFeed = document.getElementById('boardsFeed');
     const modulesFeed = document.getElementById('modulesFeed');
     const logFeed = document.getElementById('logFeed');
@@ -1285,6 +1297,7 @@
     const focusBlocked = document.getElementById('focusBlocked');
     const notificationCountPill = document.getElementById('notificationCountPill');
     const collaboratorCountPill = document.getElementById('collaboratorCountPill');
+    const pipelineCountPill = document.getElementById('pipelineCountPill');
     const boardCountPill = document.getElementById('boardCountPill');
     const moduleCountPill = document.getElementById('moduleCountPill');
     const logCountPill = document.getElementById('logCountPill');
@@ -1563,6 +1576,22 @@
       });
     }
 
+    function renderPipeline(items) {
+      const pipelineItems = Array.isArray(items) ? items : [];
+      pipelineCountPill.textContent = String(pipelineItems.length);
+      pipelineFeed.innerHTML = pipelineItems.map((item) => `
+        <div class="list-item">
+          <div class="list-meta">
+            <strong>${item.name}</strong>
+            <span class="pill ${item.tone || ''}">${item.stage || 'pipeline'}</span>
+          </div>
+          <p>${item.summary || ''}</p>
+          ${item.nextStep ? `<p><span class="accent">Próximo:</span> ${item.nextStep}</p>` : ''}
+          ${item.owner ? `<p><span class="accent">Owner:</span> ${item.owner}</p>` : ''}
+        </div>
+      `).join('') || '<div class="list-item"><strong>Sin pipeline</strong><p>No hay deal flow cargado todavía.</p></div>';
+    }
+
     function renderBoards(items) {
       const boards = Array.isArray(items) ? items : [];
       boardCountPill.textContent = String(boards.length);
@@ -1584,6 +1613,7 @@
       const total = skills.length + gpts.length + subagents.length;
       moduleCountPill.textContent = String(total);
       modulesFeed.innerHTML = [
+        `<div class="module-highlight"><strong>🧠 Stack personal</strong><p>Skills operativos + GPTs comerciales + subagentes por vertical para Ambbi, Gringo Estate y audio.</p></div>`,
         ...skills.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill">skill</span></div><p>${item.role || 'skill local'}</p></div>`),
         ...gpts.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill ${item.status === 'planned' ? 'warn' : ''}">gpt</span></div><p>${item.role || ''}</p></div>`),
         ...subagents.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill ${item.status === 'planned' ? 'warn' : ''}">subagent</span></div><p>${item.role || ''}</p></div>`)
@@ -1639,6 +1669,7 @@
         renderFocus(data.focus || [], data.focusMeta || {});
         renderNotifications(data.notifications || []);
         renderCollaborators(data.collaborators || []);
+        renderPipeline(data.pipeline || []);
         renderBoards(data.boards || []);
         renderModules(data.modules || {});
         renderLog(data.liveLog || []);

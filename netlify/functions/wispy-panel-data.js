@@ -74,6 +74,37 @@ function maybeAutoRecordBridgePending({ runtimeTelemetry, bugJournal }) {
   });
 }
 
+function buildPipeline(context = {}, boards = []) {
+  if (Array.isArray(context.pipeline) && context.pipeline.length) return context.pipeline;
+
+  return [
+    {
+      name: 'Captación Ambbi',
+      stage: 'pipeline',
+      summary: context.priorities?.[0] || 'Expansión y captación siguen siendo prioridad.',
+      nextStep: 'Bajar a follow-up comercial concreto.',
+      owner: 'Franco',
+      tone: 'warn'
+    },
+    {
+      name: 'Equipo operativo',
+      stage: 'setup',
+      summary: `${(context.staff || []).slice(0, 3).join(' · ') || 'Staff base por consolidar'}`,
+      nextStep: 'Ordenar pendientes por colaborador y SLA.',
+      owner: 'Wispy',
+      tone: 'ok'
+    },
+    {
+      name: 'Boards activos',
+      stage: 'ops',
+      summary: Array.isArray(boards) && boards.length ? boards.slice(0, 2).map((board) => `${board.name}: ${board.pending}`).join(' · ') : 'Sin boards cargados.',
+      nextStep: 'Conectar pipeline real a panel.',
+      owner: 'Panel',
+      tone: 'warn'
+    }
+  ];
+}
+
 exports.handler = async function () {
   const now = new Date();
   const inbox = getInbox();
@@ -138,6 +169,7 @@ exports.handler = async function () {
   const boards = Array.isArray(trelloBoards) && trelloBoards.length
     ? trelloBoards
     : (Array.isArray(context.boards) ? context.boards : []);
+  const pipeline = buildPipeline(context, boards);
   const actionLog = getActionLog();
   let bugJournal = getBugJournal();
   maybeAutoRecordBridgePending({ runtimeTelemetry, bugJournal });
@@ -236,6 +268,7 @@ exports.handler = async function () {
       },
       collaborators,
       boards,
+      pipeline,
       liveLog,
       notifications,
       healthChecks,
