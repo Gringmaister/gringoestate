@@ -102,7 +102,9 @@
       "summary": "Edificio prioritario por ubicación junto al Hospital Italiano.",
       "nextStep": "Preparar follow-up comercial y owner brief.",
       "owner": "Franco",
-      "tone": "warn"
+      "tone": "warn",
+      "lane": "ambbi",
+      "value": "alta"
     },
     {
       "name": "Azcuénaga Petit Hotel",
@@ -110,7 +112,9 @@
       "summary": "Oportunidad alineada con zona núcleo de Ambbi.",
       "nextStep": "Ordenar números y criterio operativo inicial.",
       "owner": "Wispy + Franco",
-      "tone": "ok"
+      "tone": "ok",
+      "lane": "ambbi",
+      "value": "media"
     },
     {
       "name": "Lead inversor Airbnb CABA",
@@ -118,7 +122,9 @@
       "summary": "Comprador buscando ticket USD 90k–140k para renta corta.",
       "nextStep": "Armar shortlist con yield y argumentos de cierre.",
       "owner": "Gringo Estate",
-      "tone": "warn"
+      "tone": "warn",
+      "lane": "gringo",
+      "value": "alta"
     }
   ],
   "gpts": [

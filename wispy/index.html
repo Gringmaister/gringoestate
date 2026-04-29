@@ -1772,10 +1772,14 @@
             <span class="pill ${item.tone || ''}">${item.stage || 'pipeline'}</span>
           </div>
           <p>${item.summary || ''}</p>
+          ${item.lane ? `<p><span class="accent">Línea:</span> ${item.lane}</p>` : ''}
+          ${item.value ? `<p><span class="accent">Valor:</span> ${item.value}</p>` : ''}
           ${item.nextStep ? `<p><span class="accent">Próximo:</span> ${item.nextStep}</p>` : ''}
           ${item.owner ? `<p><span class="accent">Owner:</span> ${item.owner}</p>` : ''}
           <div class="list-meta">
             <button class="ghost-button pipe-open-btn" data-name="${item.name}">Abrir en acción</button>
+            <button class="ghost-button pipe-stage-btn" data-name="${item.name}" data-stage="seguimiento">Seguimiento</button>
+            <button class="ghost-button pipe-stage-btn" data-name="${item.name}" data-stage="cierre">Cierre</button>
             <button class="ghost-button pipe-next-btn" data-name="${item.name}">Mover next</button>
           </div>
         </div>
@@ -1790,6 +1794,11 @@
       document.querySelectorAll('.pipe-next-btn').forEach((button) => {
         button.addEventListener('click', async () => {
           await patchPipeline(button.dataset.name, { stage: 'next-step definido', tone: 'ok' });
+        });
+      });
+      document.querySelectorAll('.pipe-stage-btn').forEach((button) => {
+        button.addEventListener('click', async () => {
+          await patchPipeline(button.dataset.name, { stage: button.dataset.stage, tone: button.dataset.stage === 'cierre' ? 'ok' : 'warn' });
         });
       });
     }
@@ -1816,14 +1825,26 @@
       moduleCountPill.textContent = String(total);
       modulesFeed.innerHTML = [
         `<div class="module-highlight"><strong>🧠 Stack personal</strong><p>Skills operativos + GPTs comerciales + subagentes por vertical para Ambbi, Gringo Estate y audio.</p></div>`,
-        ...skills.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill">skill</span></div><p>${item.role || 'skill local'}</p><div class="list-meta"><button class="ghost-button module-open-btn" data-kind="skill" data-name="${item.name}">Usar</button></div></div>`),
-        ...gpts.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill ${item.status === 'planned' ? 'warn' : ''}">gpt</span></div><p>${item.role || ''}</p><div class="list-meta"><button class="ghost-button module-open-btn" data-kind="gpt" data-name="${item.name}">Preparar</button></div></div>`),
-        ...subagents.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill ${item.status === 'planned' ? 'warn' : ''}">subagent</span></div><p>${item.role || ''}</p><div class="list-meta"><button class="ghost-button module-open-btn" data-kind="subagent" data-name="${item.name}">Abrir</button></div></div>`)
+        ...skills.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill">skill</span></div><p>${item.role || 'skill local'}</p><div class="list-meta"><button class="ghost-button module-open-btn" data-kind="skill" data-name="${item.name}">Usar</button><button class="ghost-button module-action-btn" data-kind="skill" data-name="${item.name}" data-action="brief">Brief</button></div></div>`),
+        ...gpts.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill ${item.status === 'planned' ? 'warn' : ''}">gpt</span></div><p>${item.role || ''}</p><div class="list-meta"><button class="ghost-button module-open-btn" data-kind="gpt" data-name="${item.name}">Preparar</button><button class="ghost-button module-action-btn" data-kind="gpt" data-name="${item.name}" data-action="usar">Usar</button></div></div>`),
+        ...subagents.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill ${item.status === 'planned' ? 'warn' : ''}">subagent</span></div><p>${item.role || ''}</p><div class="list-meta"><button class="ghost-button module-open-btn" data-kind="subagent" data-name="${item.name}">Abrir</button><button class="ghost-button module-action-btn" data-kind="subagent" data-name="${item.name}" data-action="delegar">Delegar</button></div></div>`)
       ].join('') || '<div class="list-item"><strong>Sin módulos</strong></div>';
       document.querySelectorAll('.module-open-btn').forEach((button) => {
         button.addEventListener('click', () => {
           const verb = button.dataset.kind === 'skill' ? 'Usá' : (button.dataset.kind === 'gpt' ? 'Prepará' : 'Abrí');
           composerInput.value = `${verb} ${button.dataset.name} y bajame el resultado a acción concreta.`;
+          composerInput.focus();
+          actionModePill.textContent = 'loaded';
+        });
+      });
+      document.querySelectorAll('.module-action-btn').forEach((button) => {
+        button.addEventListener('click', () => {
+          const action = button.dataset.action === 'brief'
+            ? `Usá ${button.dataset.name} y armame un brief ejecutivo.`
+            : (button.dataset.action === 'delegar'
+              ? `Abrí ${button.dataset.name} y delegale este trabajo con próximos pasos claros.`
+              : `Usá ${button.dataset.name} para resolver este pedido.`);
+          composerInput.value = action;
           composerInput.focus();
           actionModePill.textContent = 'loaded';
         });
