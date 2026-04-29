@@ -183,11 +183,71 @@
       border: 1px solid rgba(212,166,64,0.18);
     }
 
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    }
+
     .workspace {
       width: min(100% - 14px, 1880px);
       margin: 7px auto 20px;
       display: grid;
       gap: 18px;
+    }
+
+    .system-bar {
+      display: grid;
+      grid-template-columns: auto repeat(4, minmax(0, 1fr)) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: rgba(9, 9, 9, 0.82);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+    }
+
+    .system-brand {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding-right: 12px;
+      border-right: 1px solid var(--border);
+    }
+
+    .system-brand strong {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 0.18em;
+      font-size: 1.1rem;
+      color: var(--gold);
+    }
+
+    .system-brand span,
+    .system-tile span,
+    .system-clock {
+      color: var(--muted);
+      font-size: 0.76rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .system-tile {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+      padding: 0 4px;
+    }
+
+    .system-tile strong {
+      font-size: 0.98rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .system-clock {
+      justify-self: end;
+      font-size: 0.8rem;
     }
 
     .brand-row {
@@ -215,6 +275,175 @@
     .brand h1 span { color: var(--gold); }
     .brand p { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
 
+    .hero-deck {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .hero-stage,
+    .hero-rail-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 28px;
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(circle at var(--mx, 78%) var(--my, 12%), rgba(212,166,64,0.16), transparent 26%),
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      box-shadow: var(--shadow);
+    }
+
+    .hero-stage {
+      padding: 24px;
+      min-height: 246px;
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .hero-stage::after {
+      content: '';
+      position: absolute;
+      inset: auto -8% -38% auto;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(212,166,64,0.16), transparent 62%);
+      pointer-events: none;
+    }
+
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(212,166,64,0.18);
+      background: rgba(212,166,64,0.08);
+      color: var(--gold);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .hero-copy h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.8rem, 4vw, 4.2rem);
+      line-height: 0.92;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .hero-copy p {
+      max-width: 780px;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 0.96rem;
+    }
+
+    .hero-signals {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-signal {
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(0,0,0,0.18);
+      padding: 12px 14px;
+      min-width: 0;
+    }
+
+    .hero-signal strong {
+      display: block;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .hero-signal p {
+      color: var(--text);
+      line-height: 1.5;
+      font-size: 0.9rem;
+    }
+
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-metric {
+      border-radius: 18px;
+      padding: 14px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.07);
+      min-width: 0;
+    }
+
+    .hero-metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    .hero-metric strong {
+      display: block;
+      font-size: 1.62rem;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .hero-metric small {
+      color: var(--muted);
+      line-height: 1.5;
+      display: block;
+    }
+
+    .hero-rail {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .hero-rail-card {
+      padding: 18px;
+      min-height: 116px;
+    }
+
+    .hero-rail-card strong,
+    .hero-rail-card h3 {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .hero-rail-card h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 1px;
+    }
+
+    .hero-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
     .top-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -228,6 +457,18 @@
       display: grid;
       gap: 10px;
       align-content: start;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .top-card:hover,
+    .section-card:hover,
+    .side-card:hover,
+    .log-card:hover,
+    .runtime-card:hover,
+    .column-card:hover {
+      transform: translateY(-1px);
+      border-color: rgba(212,166,64,0.16);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
     }
 
     .metric-label {
@@ -295,6 +536,33 @@
       display: grid;
       grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr) minmax(300px, 0.8fr);
       gap: 14px;
+    }
+
+    .ops-shell {
+      display: grid;
+      gap: 14px;
+    }
+
+    .command-deck {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+      gap: 14px;
+      min-height: 0;
+    }
+
+    .command-main,
+    .chat-stack {
+      display: grid;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .command-main {
+      align-content: start;
+    }
+
+    .chat-stack {
+      grid-template-rows: auto 1fr auto;
     }
 
     .column-card,
@@ -388,6 +656,37 @@
       padding-right: 4px;
     }
 
+    .chat-shell {
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.025);
+      padding: 14px;
+    }
+
+    .chat-shell .chat-log {
+      max-height: 340px;
+      min-height: 240px;
+    }
+
+    .command-shell {
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.025);
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .action-row.compact {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .side-stack {
+      align-content: start;
+      position: sticky;
+      top: 12px;
+    }
+
     .chat-bubble.user {
       background: rgba(212,166,64,0.1);
       border-color: rgba(212,166,64,0.18);
@@ -443,23 +742,34 @@
     }
 
     @media (max-width: 1480px) {
+      .system-bar,
+      .hero-deck,
       .top-grid { grid-template-columns: 1fr 1fr; }
       .ops-grid,
+      .command-deck,
       .log-grid,
       .runtime-grid { grid-template-columns: 1fr; }
+      .hero-deck { grid-template-columns: 1fr; }
+      .hero-metrics { grid-template-columns: 1fr 1fr; }
+      .hero-signals { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 1120px) {
       .main-grid,
       .quick-actions-grid,
       .action-row,
+      .action-row.compact,
+      .system-bar,
       .auth-card { grid-template-columns: 1fr; }
       .auth-form { flex-direction: column; }
+      .side-stack { position: static; }
     }
 
     @media (max-width: 760px) {
       .workspace { width: min(100% - 10px, 1880px); }
-      .top-grid { grid-template-columns: 1fr; }
+      .top-grid,
+      .hero-metrics,
+      .hero-signals { grid-template-columns: 1fr; }
       .brand-row { align-items: flex-start; }
       .button,
       .ghost-button,
@@ -487,6 +797,15 @@
   </div>
 
   <main class="workspace private-only">
+    <section class="system-bar">
+      <div class="system-brand mono"><strong>WISPY</strong><span>runtime live</span></div>
+      <div class="system-tile mono"><span>sistema</span><strong id="systemHealthValue">sync</strong></div>
+      <div class="system-tile mono"><span>bridge</span><strong id="systemBridgeValue">pendiente</strong></div>
+      <div class="system-tile mono"><span>foco</span><strong id="systemFocusValue">0 activos</strong></div>
+      <div class="system-tile mono"><span>inbox</span><strong id="systemInboxValue">0 abiertos</strong></div>
+      <div class="system-clock mono" id="systemClock">ARG --:--:--</div>
+    </section>
+
     <div class="brand-row">
       <div class="brand">
         <img src="/images/isologo.webp" alt="Wispy" />
@@ -496,6 +815,7 @@
         </div>
       </div>
       <div class="row-between">
+        <span class="pill warn" id="panelVersionPill">Stage 2 · in progress</span>
         <span class="pill" id="panelLockState">Privado</span>
         <span class="pill" id="sessionUsagePill">usage —</span>
         <button class="ghost-button" id="refreshPanelBtn" type="button">Actualizar</button>
@@ -508,6 +828,65 @@
         <div class="metric-row"><strong class="metric-value">Cargando</strong><span class="status-dot ok">sync</span></div>
         <p class="metric-note">Trayendo estado del sistema.</p>
       </article>
+    </section>
+
+    <section class="hero-deck">
+      <article class="hero-stage" id="heroStage">
+        <div class="hero-kicker mono">◆ executive pulse</div>
+        <div class="hero-copy">
+          <h2>Centro de mando con foco, presión y acción.</h2>
+          <p id="heroNarrative">La consola tiene que mostrar qué importa ahora y qué podés mover ya, sin parecer un dashboard genérico.</p>
+        </div>
+        <div class="hero-signals">
+          <div class="hero-signal">
+            <strong>Foco dominante</strong>
+            <p id="heroSignalFocus">Sin presión operativa fuerte.</p>
+          </div>
+          <div class="hero-signal">
+            <strong>Próximo follow-up</strong>
+            <p id="heroSignalFollowUp">Todavía no hay un follow-up marcado.</p>
+          </div>
+          <div class="hero-signal">
+            <strong>Riesgo activo</strong>
+            <p id="heroSignalRisk">No hay un riesgo levantado todavía.</p>
+          </div>
+        </div>
+        <div class="hero-metrics">
+          <div class="hero-metric">
+            <span>Prioridad ahora</span>
+            <strong id="heroPriorityValue">0</strong>
+            <small id="heroPriorityNote">Sin prioridades activas.</small>
+          </div>
+          <div class="hero-metric">
+            <span>Inbox vivo</span>
+            <strong id="heroInboxValue">0</strong>
+            <small id="heroInboxNote">Nada cargado todavía.</small>
+          </div>
+          <div class="hero-metric">
+            <span>Runtime</span>
+            <strong id="heroRuntimeValue">sync</strong>
+            <small id="heroRuntimeNote">Esperando telemetría real.</small>
+          </div>
+          <div class="hero-metric">
+            <span>Siguiente jugada</span>
+            <strong id="heroActionValue">—</strong>
+            <small id="heroActionNote">Usá el comando central para destrabar.</small>
+          </div>
+        </div>
+      </article>
+
+      <aside class="hero-rail">
+        <section class="hero-rail-card">
+          <strong class="mono">ALERTA ACTIVA</strong>
+          <h3 id="heroAlertTitle">Sin alertas críticas.</h3>
+          <p id="heroAlertBody" class="text-muted">Cuando haya un bloqueo real, aparece acá primero.</p>
+        </section>
+        <section class="hero-rail-card">
+          <div class="hero-line"><strong class="mono">RUNTIME BRIDGE</strong><span class="pill" id="heroBridgePill">sync</span></div>
+          <p id="heroBridgeBody" class="text-muted">Estado del enlace entre Netlify y el runtime real.</p>
+          <div class="hero-line" style="margin-top:10px"><span>Uso sesión</span><span id="heroUsageValue" class="mono">—</span></div>
+        </section>
+      </aside>
     </section>
 
     <section class="main-grid">
@@ -547,49 +926,79 @@
               <h3>Acción</h3>
               <span class="pill ok" id="actionModePill">ready</span>
             </div>
-
-            <div class="quick-actions-grid">
-              <button class="quick-action launcher-trigger" data-template="Creá una tarea clara con dueño, prioridad y próximo paso.">Crear tarea</button>
-              <button class="quick-action launcher-trigger" data-template="Redactá un follow-up corto, directo y ejecutivo para pedir respuesta hoy.">Mandar follow-up</button>
-              <button class="quick-action launcher-trigger" data-template="Abrí colaborador: resumime último contacto, pendiente y próximo mensaje recomendado.">Abrir colaborador</button>
-              <button class="quick-action launcher-trigger" data-template="Prepará este pedido para moverlo a Trello con título, descripción y checklist.">Mover a Trello</button>
-              <button class="quick-action launcher-trigger" data-template="Definí qué automatización conviene disparar y dejá el comando limpio.">Disparar automatización</button>
-              <button class="quick-action launcher-trigger" data-template="Armame el brief de oficina 10:00 con foco en Ambbi, Gringo y pendientes críticos.">Daily brief</button>
-            </div>
-
-            <div>
-              <strong class="stack-title">Comando</strong>
-              <textarea id="composerInput" class="command-input" placeholder="Ej: procesá este audio, armame el daily brief, bajá esto a tareas, escribime un follow-up, ordename pipeline..."></textarea>
-            </div>
-
-            <div class="action-row">
-              <button class="button" id="summarizeBtn" type="button">Ejecutar</button>
-              <button class="ghost-button" id="createTrelloBtn" type="button">Crear en Trello</button>
-              <button class="ghost-button" id="saveInboxBtn" type="button">Guardar en inbox</button>
-              <button class="ghost-button" id="sendChatBtn" type="button">Enviar a Wispy</button>
-              <button class="ghost-button" id="clearBtn" type="button">Limpiar</button>
-            </div>
-
-            <div>
-              <strong class="stack-title">Salida</strong>
-              <div class="output-box" id="composerOutput">Acá va a caer la acción limpia para ejecutar.</div>
-            </div>
-
-            <div>
-              <div class="row-between">
-                <strong class="stack-title">Chat</strong>
-                <span class="pill" id="chatModePill">ready</span>
+            <div class="ops-shell">
+              <div class="quick-actions-grid">
+                <button class="quick-action launcher-trigger" data-template="Creá una tarea clara con dueño, prioridad y próximo paso.">Crear tarea</button>
+                <button class="quick-action launcher-trigger" data-template="Redactá un follow-up corto, directo y ejecutivo para pedir respuesta hoy.">Mandar follow-up</button>
+                <button class="quick-action launcher-trigger" data-template="Abrí colaborador: resumime último contacto, pendiente y próximo mensaje recomendado.">Abrir colaborador</button>
+                <button class="quick-action launcher-trigger" data-template="Prepará este pedido para moverlo a Trello con título, descripción y checklist.">Mover a Trello</button>
+                <button class="quick-action launcher-trigger" data-template="Definí qué automatización conviene disparar y dejá el comando limpio.">Disparar automatización</button>
+                <button class="quick-action launcher-trigger" data-template="Armame el brief de oficina 10:00 con foco en Ambbi, Gringo y pendientes críticos.">Daily brief</button>
               </div>
-              <div class="chat-log" id="chatLog">
-                <div class="chat-bubble assistant"><strong>Wispy</strong>Listo para operar.</div>
+
+              <div class="command-deck">
+                <div class="command-main">
+                  <div class="command-shell">
+                    <div>
+                      <strong class="stack-title">Comando</strong>
+                      <textarea id="composerInput" class="command-input" placeholder="Ej: procesá este audio, armame el daily brief, bajá esto a tareas, escribime un follow-up, ordename pipeline..."></textarea>
+                    </div>
+
+                    <div class="action-row compact">
+                      <button class="button" id="summarizeBtn" type="button">Ejecutar</button>
+                      <button class="ghost-button" id="createTrelloBtn" type="button">Crear en Trello</button>
+                      <button class="ghost-button" id="saveInboxBtn" type="button">Guardar en inbox</button>
+                      <button class="ghost-button" id="sendChatBtn" type="button">Enviar a Wispy</button>
+                      <button class="ghost-button" id="clearBtn" type="button">Limpiar</button>
+                    </div>
+
+                    <div>
+                      <strong class="stack-title">Salida</strong>
+                      <div class="output-box" id="composerOutput">Acá va a caer la acción limpia para ejecutar.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="chat-stack">
+                  <div class="chat-shell">
+                    <div class="row-between">
+                      <strong class="stack-title">Chat</strong>
+                      <span class="pill" id="chatModePill">ready</span>
+                    </div>
+                    <div class="chat-log" id="chatLog">
+                      <div class="chat-bubble assistant"><strong>Wispy</strong>Listo para operar.</div>
+                    </div>
+                    <textarea id="chatInput" class="chat-input" placeholder="Ej: qué priorizarías hoy, resumime Ambbi, armame próximos pasos o bajá esto a acción..."></textarea>
+                  </div>
+                </div>
               </div>
-              <textarea id="chatInput" class="chat-input" placeholder="Ej: qué priorizarías hoy, resumime Ambbi, armame próximos pasos o bajá esto a acción..."></textarea>
             </div>
           </section>
         </div>
       </article>
 
       <aside class="side-stack">
+        <section class="side-card">
+          <div class="card-title row-between">
+            <h3>Versión</h3>
+            <span class="pill warn" id="versionRailPill">stage 2</span>
+          </div>
+          <div class="list-stack" id="versionFeed">
+            <div class="list-item">
+              <div class="list-meta"><strong>Stable command center</strong><span class="pill ok">done</span></div>
+              <p>Deploy estable, inbox, chat, snapshot metrics.</p>
+            </div>
+            <div class="list-item">
+              <div class="list-meta"><strong>Operational usefulness</strong><span class="pill warn">now</span></div>
+              <p>Prioridades reales, chat persistente, métricas fuertes y mejor salida de acción.</p>
+            </div>
+            <div class="list-item">
+              <div class="list-meta"><strong>Business integration</strong><span class="pill">next</span></div>
+              <p>Propiedades, leads, pipeline, módulos Ambbi y equipo vivo.</p>
+            </div>
+          </div>
+        </section>
+
         <section class="side-card">
           <div class="card-title row-between">
             <h3>Notificaciones</h3>
@@ -653,6 +1062,29 @@
     const authError = document.getElementById('authError');
     const panelLockState = document.getElementById('panelLockState');
     const sessionUsagePill = document.getElementById('sessionUsagePill');
+    const systemHealthValue = document.getElementById('systemHealthValue');
+    const systemBridgeValue = document.getElementById('systemBridgeValue');
+    const systemFocusValue = document.getElementById('systemFocusValue');
+    const systemInboxValue = document.getElementById('systemInboxValue');
+    const systemClock = document.getElementById('systemClock');
+    const heroStage = document.getElementById('heroStage');
+    const heroNarrative = document.getElementById('heroNarrative');
+    const heroPriorityValue = document.getElementById('heroPriorityValue');
+    const heroPriorityNote = document.getElementById('heroPriorityNote');
+    const heroInboxValue = document.getElementById('heroInboxValue');
+    const heroInboxNote = document.getElementById('heroInboxNote');
+    const heroRuntimeValue = document.getElementById('heroRuntimeValue');
+    const heroRuntimeNote = document.getElementById('heroRuntimeNote');
+    const heroActionValue = document.getElementById('heroActionValue');
+    const heroActionNote = document.getElementById('heroActionNote');
+    const heroAlertTitle = document.getElementById('heroAlertTitle');
+    const heroAlertBody = document.getElementById('heroAlertBody');
+    const heroBridgePill = document.getElementById('heroBridgePill');
+    const heroBridgeBody = document.getElementById('heroBridgeBody');
+    const heroUsageValue = document.getElementById('heroUsageValue');
+    const heroSignalFocus = document.getElementById('heroSignalFocus');
+    const heroSignalFollowUp = document.getElementById('heroSignalFollowUp');
+    const heroSignalRisk = document.getElementById('heroSignalRisk');
     const body = document.body;
 
     const topGrid = document.getElementById('topGrid');
@@ -780,6 +1212,63 @@
           <p class="metric-note">${item.note || ''}</p>
         </article>
       `).join('');
+    }
+
+    function renderExecutiveDeck(data = {}) {
+      const focusItems = Array.isArray(data.focus) ? data.focus : [];
+      const inboxItems = Array.isArray(data.inbox) ? data.inbox : [];
+      const notifications = Array.isArray(data.notifications) ? data.notifications : [];
+      const runtimeItems = Array.isArray(data.runtime) ? data.runtime : [];
+      const bridgePending = data.runtimeTelemetry?.pending === true;
+      const topFocus = normalizeCount(data.focusMeta?.topCount, focusItems.length);
+      const blocked = normalizeCount(data.focusMeta?.blocked, 0);
+      const unprocessed = normalizeCount(data.inboxMeta?.unprocessed, inboxItems.length);
+      const audioLike = normalizeCount(data.inboxMeta?.audioLike, 0);
+      const firstAlert = notifications[0] || null;
+      const nextAction = focusItems[0]?.nextStep || inboxItems[0]?.nextStep || 'Destrabar desde Ops';
+      const runtimeSummary = data.runtimeSummary?.status || data.runtimeTelemetry?.source || 'sync';
+      const gatewayCard = (data.snapshot || []).find((item) => /gateway/i.test(item.label || ''));
+
+      systemHealthValue.textContent = gatewayCard?.value || runtimeSummary;
+      systemBridgeValue.textContent = bridgePending ? 'pending' : 'linked';
+      systemFocusValue.textContent = `${focusItems.length} activos`;
+      systemInboxValue.textContent = `${inboxItems.length} abiertos`;
+
+      heroPriorityValue.textContent = String(topFocus);
+      heroPriorityNote.textContent = blocked > 0
+        ? `${blocked} bloqueo(s) pidiendo decisión.`
+        : (focusItems[0]?.title || 'Sin prioridades activas fuertes.');
+
+      heroInboxValue.textContent = String(unprocessed);
+      heroInboxNote.textContent = audioLike > 0
+        ? `${audioLike} audio(s) / pedido(s) por procesar.`
+        : `${inboxItems.length} item(s) abiertos en pipeline.`;
+
+      heroRuntimeValue.textContent = bridgePending ? 'bridge pending' : runtimeSummary;
+      heroRuntimeNote.textContent = runtimeItems[0]?.note || gatewayCard?.note || 'Runtime listo para mostrar señal real.';
+
+      heroActionValue.textContent = focusItems[0]?.status === 'blocked' ? 'destrabar' : 'ejecutar';
+      heroActionNote.textContent = nextAction;
+
+      heroAlertTitle.textContent = firstAlert?.title || 'Sin alertas críticas.';
+      heroAlertBody.textContent = firstAlert?.body || 'Cuando haya un bloqueo real, aparece acá primero.';
+
+      heroBridgePill.textContent = bridgePending ? 'pending' : 'live';
+      heroBridgePill.className = `pill ${bridgePending ? 'warn' : 'ok'}`;
+      heroBridgeBody.textContent = bridgePending
+        ? 'Netlify todavía no conversa con el runtime real. Sigue siendo prioridad de infra.'
+        : 'Bridge enlazado. La telemetría real ya alimenta el panel.';
+
+      heroUsageValue.textContent = sessionUsagePill.textContent || '—';
+      heroNarrative.textContent = focusItems[0]?.body
+        ? `Foco actual: ${focusItems[0].body}`
+        : 'La consola tiene que mostrar qué importa ahora y qué podés mover ya, sin parecer un dashboard genérico.';
+
+      heroSignalFocus.textContent = focusItems[0]?.title || 'Sin presión operativa fuerte.';
+      heroSignalFollowUp.textContent = data.collaborators?.find((item) => item.nextAction)?.nextAction || 'Todavía no hay un follow-up marcado.';
+      heroSignalRisk.textContent = blocked > 0
+        ? `${blocked} bloqueo(s) abiertos en foco.`
+        : (firstAlert?.title || 'No hay un riesgo levantado todavía.');
     }
 
     function renderInbox(items, meta = {}) {
@@ -953,6 +1442,7 @@
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.error || 'No pude cargar el panel');
         renderTop(data.snapshot || []);
+        renderExecutiveDeck(data);
         renderInbox(data.inbox || [], data.inboxMeta || {});
         renderFocus(data.focus || [], data.focusMeta || {});
         renderNotifications(data.notifications || []);
@@ -965,10 +1455,12 @@
         sessionUsagePill.textContent = currentSession
           ? `${currentSession.totalTokens} tok · ${currentSession.costTotal?.toFixed ? '$' + currentSession.costTotal.toFixed(2) : 'usage'}`
           : 'usage —';
+        heroUsageValue.textContent = sessionUsagePill.textContent;
         actionModePill.textContent = 'sync';
       } catch {
         actionModePill.textContent = 'error';
         sessionUsagePill.textContent = 'usage error';
+        heroUsageValue.textContent = 'usage error';
         composerOutput.textContent = 'No pude traer el estado vivo del panel ahora.';
       } finally {
         refreshPanelBtn.textContent = 'Actualizar';
@@ -1137,6 +1629,29 @@
 
     refreshPanelBtn.addEventListener('click', loadPanelData);
 
+    function tickSystemClock() {
+      systemClock.textContent = `ARG ${new Intl.DateTimeFormat('es-AR', {
+        timeZone: 'America/Argentina/Buenos_Aires',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).format(new Date())}`;
+    }
+
+    heroStage.addEventListener('pointermove', (event) => {
+      const rect = heroStage.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 100;
+      const y = ((event.clientY - rect.top) / rect.height) * 100;
+      heroStage.style.setProperty('--mx', `${x}%`);
+      heroStage.style.setProperty('--my', `${y}%`);
+    });
+
+    heroStage.addEventListener('pointerleave', () => {
+      heroStage.style.setProperty('--mx', '78%');
+      heroStage.style.setProperty('--my', '12%');
+    });
+
     function startLiveRefresh() {
       if (liveRefreshTimer) clearInterval(liveRefreshTimer);
       liveRefreshTimer = setInterval(() => {
@@ -1146,6 +1661,8 @@
 
     verifyExistingSession();
     lockUi();
+    tickSystemClock();
+    setInterval(tickSystemClock, 1000);
     loadPanelData();
     startLiveRefresh();
   </script>
