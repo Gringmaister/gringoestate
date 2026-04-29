@@ -14,6 +14,7 @@ const bugJournalPath = path.join(writableDataDir, 'wispy-bug-journal.json');
 const seedInboxPath = path.join(seedDataDir, 'wispy-inbox.json');
 const contextPath = path.join(seedDataDir, 'wispy-context.json');
 const collaboratorStatePath = path.join(writableDataDir, 'wispy-collaborators.json');
+const chatHistoryPath = path.join(writableDataDir, 'wispy-chat-history.json');
 const memoryPath = path.join(workspaceRoot, 'MEMORY.md');
 const userPath = path.join(workspaceRoot, 'USER.md');
 const soulPath = path.join(workspaceRoot, 'SOUL.md');
@@ -204,6 +205,15 @@ function updateCollaborator(name, patch = {}) {
   return updated;
 }
 
+function getChatHistory() {
+  const payload = readJson(chatHistoryPath, { items: [] });
+  return Array.isArray(payload.items) ? payload.items : [];
+}
+
+function saveChatHistory(items) {
+  writeJson(chatHistoryPath, { items: items.slice(-40) });
+}
+
 function getContextData() {
   const seeded = readJson(contextPath, null);
   if (seeded && seeded.portfolio) {
@@ -256,6 +266,7 @@ module.exports = {
   actionLogPath,
   bugJournalPath,
   collaboratorStatePath,
+  chatHistoryPath,
   getInbox,
   saveInbox,
   getActionLog,
@@ -264,6 +275,8 @@ module.exports = {
   getCollaboratorState,
   saveCollaboratorState,
   updateCollaborator,
+  getChatHistory,
+  saveChatHistory,
   getBugJournal,
   saveBugJournal,
   appendBug,

@@ -1700,11 +1700,21 @@
           <p><span class="accent">Pendiente:</span> ${item.pending || 'sin pendiente'}</p>
           ${item.waitingHours !== null ? `<p><span class="accent">Espera:</span> ${Math.round(item.waitingHours)}h / SLA ${item.slaHours}h</p>` : ''}
           ${item.nextAction ? `<p><span class="accent">Próximo:</span> ${item.nextAction}</p>` : ''}
-          <div class="list-meta"><button class="ghost-button followup-btn" data-name="${item.name}">Follow-up</button></div>
+          <div class="list-meta">
+            <button class="ghost-button followup-btn" data-name="${item.name}">Follow-up</button>
+            <button class="ghost-button collab-open-btn" data-name="${item.name}">Abrir en acción</button>
+          </div>
         </div>
       `).join('') || '<div class="list-item"><strong>Sin colaboradores</strong></div>';
       document.querySelectorAll('.followup-btn').forEach((button) => {
         button.addEventListener('click', () => triggerFollowUp(button.dataset.name));
+      });
+      document.querySelectorAll('.collab-open-btn').forEach((button) => {
+        button.addEventListener('click', () => {
+          composerInput.value = `Abrí colaborador ${button.dataset.name}: resumime estado, pendiente y próximo mensaje recomendado.`;
+          composerInput.focus();
+          actionModePill.textContent = 'loaded';
+        });
       });
     }
 
@@ -1746,10 +1756,18 @@
       moduleCountPill.textContent = String(total);
       modulesFeed.innerHTML = [
         `<div class="module-highlight"><strong>🧠 Stack personal</strong><p>Skills operativos + GPTs comerciales + subagentes por vertical para Ambbi, Gringo Estate y audio.</p></div>`,
-        ...skills.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill">skill</span></div><p>${item.role || 'skill local'}</p></div>`),
-        ...gpts.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill ${item.status === 'planned' ? 'warn' : ''}">gpt</span></div><p>${item.role || ''}</p></div>`),
-        ...subagents.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill ${item.status === 'planned' ? 'warn' : ''}">subagent</span></div><p>${item.role || ''}</p></div>`)
+        ...skills.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill">skill</span></div><p>${item.role || 'skill local'}</p><div class="list-meta"><button class="ghost-button module-open-btn" data-kind="skill" data-name="${item.name}">Usar</button></div></div>`),
+        ...gpts.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill ${item.status === 'planned' ? 'warn' : ''}">gpt</span></div><p>${item.role || ''}</p><div class="list-meta"><button class="ghost-button module-open-btn" data-kind="gpt" data-name="${item.name}">Preparar</button></div></div>`),
+        ...subagents.map((item) => `<div class="list-item"><div class="list-meta"><strong>${item.name}</strong><span class="pill ${item.status === 'planned' ? 'warn' : ''}">subagent</span></div><p>${item.role || ''}</p><div class="list-meta"><button class="ghost-button module-open-btn" data-kind="subagent" data-name="${item.name}">Abrir</button></div></div>`)
       ].join('') || '<div class="list-item"><strong>Sin módulos</strong></div>';
+      document.querySelectorAll('.module-open-btn').forEach((button) => {
+        button.addEventListener('click', () => {
+          const verb = button.dataset.kind === 'skill' ? 'Usá' : (button.dataset.kind === 'gpt' ? 'Prepará' : 'Abrí');
+          composerInput.value = `${verb} ${button.dataset.name} y bajame el resultado a acción concreta.`;
+          composerInput.focus();
+          actionModePill.textContent = 'loaded';
+        });
+      });
     }
 
     function renderLog(items) {
@@ -1787,6 +1805,37 @@
       bubble.innerHTML = `<strong>${role === 'assistant' ? 'Wispy' : 'Franco'}</strong>${content}`;
       chatLog.appendChild(bubble);
       chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function renderChatHistory(items = []) {
+      chatLog.innerHTML = '';
+      const historyItems = Array.isArray(items) ? items : [];
+      if (!historyItems.length) {
+        renderChatMessage('assistant', 'Listo para operar.');
+        return;
+      }
+      historyItems.forEach((item) => renderChatMessage(item.role === 'assistant' ? 'assistant' : 'user', item.content || ''));
+    }
+
+    async function loadChatHistory() {
+      try {
+        const response = await fetch('/.netlify/functions/wispy-panel-chat');
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error('history');
+        chatHistory = Array.isArray(data.items) ? data.items.map((item) => ({ role: item.role, content: item.content })) : [];
+        renderChatHistory(data.items || []);
+      } catch {
+        renderChatHistory([]);
+      }
+    }
+
+    async function clearPersistentChat() {
+      chatHistory = [];
+      try {
+        await fetch('/.netlify/functions/wispy-panel-chat', { method: 'DELETE' });
+      } catch {}
+      renderChatHistory([]);
+      chatModePill.textContent = 'ready';
     }
 
     async function loadPanelData() {
@@ -1919,8 +1968,10 @@
         });
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.error || 'No pude hablar con Wispy');
-        renderChatMessage('assistant', data.reply);
-        chatHistory.push({ role: 'assistant', content: data.reply });
+        chatHistory = Array.isArray(data.items)
+          ? data.items.map((item) => ({ role: item.role, content: item.content }))
+          : [...chatHistory, { role: 'assistant', content: data.reply }];
+        renderChatHistory(Array.isArray(data.items) ? data.items : chatHistory);
         chatModePill.textContent = data.mode || 'live';
       } catch {
         const fallback = 'No pude pegarle al chat real ahora. Reintentá en un segundo.';
@@ -2006,6 +2057,7 @@
     lockUi();
     tickSystemClock();
     setInterval(tickSystemClock, 1000);
+    loadChatHistory();
     loadPanelData();
     startLiveRefresh();
   </script>
