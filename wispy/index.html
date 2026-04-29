@@ -188,8 +188,9 @@
     }
 
     .workspace {
-      width: min(100% - 14px, 1880px);
-      margin: 7px auto 20px;
+      width: calc(100% - 16px);
+      max-width: none;
+      margin: 7px 8px 20px;
       display: grid;
       gap: 18px;
     }
@@ -273,7 +274,7 @@
 
     .brand h1 { font-size: 2rem; line-height: 0.95; }
     .brand h1 span { color: var(--gold); }
-    .brand p { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+    .brand p { color: #b8aa8d; font-size: 0.9rem; margin-top: 4px; }
 
     .hero-deck {
       display: grid;
@@ -289,7 +290,7 @@
       border-radius: 28px;
       border: 1px solid var(--border);
       background:
-        radial-gradient(circle at var(--mx, 78%) var(--my, 12%), rgba(212,166,64,0.16), transparent 26%),
+        radial-gradient(circle at 82% 12%, rgba(212,166,64,0.12), transparent 24%),
         linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
       box-shadow: var(--shadow);
     }
@@ -338,7 +339,7 @@
 
     .hero-copy p {
       max-width: 780px;
-      color: var(--muted);
+      color: #b7aa93;
       line-height: 1.65;
       font-size: 0.96rem;
     }
@@ -364,12 +365,12 @@
       font-size: 0.82rem;
       text-transform: uppercase;
       letter-spacing: 0.12em;
-      color: var(--muted);
+      color: #d2b06a;
       margin-bottom: 6px;
     }
 
     .hero-signal p {
-      color: var(--text);
+      color: #efe3c7;
       line-height: 1.5;
       font-size: 0.9rem;
     }
@@ -392,7 +393,7 @@
 
     .hero-metric span {
       display: block;
-      color: var(--muted);
+      color: #d2b06a;
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
@@ -407,7 +408,7 @@
     }
 
     .hero-metric small {
-      color: var(--muted);
+      color: #b7aa93;
       line-height: 1.5;
       display: block;
     }
@@ -440,7 +441,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      color: var(--muted);
+      color: #b7aa93;
       font-size: 0.9rem;
     }
 
@@ -472,7 +473,7 @@
     }
 
     .metric-label {
-      color: var(--muted);
+      color: #d2b06a;
       font-size: 0.78rem;
       text-transform: uppercase;
       letter-spacing: 0.12em;
@@ -489,7 +490,7 @@
       flex-wrap: wrap;
     }
 
-    .metric-value { font-size: 2rem; font-weight: 800; line-height: 1; }
+    .metric-value { font-size: 2rem; font-weight: 800; line-height: 1; color: #fff6e4; }
 
     .status-dot,
     .pill {
@@ -531,6 +532,7 @@
 
     .section-title { margin-bottom: 16px; }
     .section-title h2 { font-size: 2.4rem; line-height: 0.95; }
+    .section-title p { color: #b8ab94; }
 
     .ops-grid {
       display: grid;
@@ -604,13 +606,13 @@
     }
     .ops-stat span {
       display: block;
-      color: var(--muted);
+      color: #d2b06a;
       font-size: 0.76rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
       margin-bottom: 6px;
     }
-    .ops-stat strong { font-size: 1.2rem; }
+    .ops-stat strong { font-size: 1.2rem; color: #fff2d3; }
 
     .list-stack,
     .log-list,
@@ -639,6 +641,7 @@
       display: block;
       margin-bottom: 6px;
       font-size: 0.98rem;
+      color: #fff5dd;
     }
 
     .list-item .list-meta,
@@ -677,6 +680,32 @@
       gap: 12px;
     }
 
+    .next-work-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .next-work-card {
+      border-radius: 16px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.028);
+    }
+
+    .next-work-card strong {
+      display: block;
+      color: #fff1d1;
+      margin-bottom: 5px;
+      font-size: 0.95rem;
+    }
+
+    .next-work-card p {
+      color: #b8ab94;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
     .action-row.compact {
       grid-template-columns: repeat(5, minmax(0, 1fr));
     }
@@ -690,6 +719,21 @@
     .chat-bubble.user {
       background: rgba(212,166,64,0.1);
       border-color: rgba(212,166,64,0.18);
+    }
+
+    .quick-action:hover,
+    .ghost-button:hover,
+    .list-item:hover,
+    .top-card:hover,
+    .side-card:hover,
+    .log-card:hover,
+    .runtime-card:hover,
+    .column-card:hover,
+    .hero-rail-card:hover,
+    .hero-signal:hover,
+    .ops-stat:hover,
+    .next-work-card:hover {
+      box-shadow: inset 0 0 0 1px rgba(212,166,64,0.32), 0 0 0 1px rgba(212,166,64,0.08);
     }
 
     .output-box {
@@ -766,10 +810,11 @@
     }
 
     @media (max-width: 760px) {
-      .workspace { width: min(100% - 10px, 1880px); }
+      .workspace { width: calc(100% - 10px); }
       .top-grid,
       .hero-metrics,
       .hero-signals { grid-template-columns: 1fr; }
+      .next-work-grid { grid-template-columns: 1fr; }
       .brand-row { align-items: flex-start; }
       .button,
       .ghost-button,
@@ -815,7 +860,7 @@
         </div>
       </div>
       <div class="row-between">
-        <span class="pill warn" id="panelVersionPill">Stage 2 · in progress</span>
+        <span class="pill warn" id="panelVersionPill">v0.2.0 · stage 2</span>
         <span class="pill" id="panelLockState">Privado</span>
         <span class="pill" id="sessionUsagePill">usage —</span>
         <button class="ghost-button" id="refreshPanelBtn" type="button">Actualizar</button>
@@ -824,7 +869,7 @@
 
     <section class="top-grid" id="topGrid">
       <article class="top-card">
-        <span class="metric-label">Gateway</span>
+        <span class="metric-label">⚡ Gateway</span>
         <div class="metric-row"><strong class="metric-value">Cargando</strong><span class="status-dot ok">sync</span></div>
         <p class="metric-note">Trayendo estado del sistema.</p>
       </article>
@@ -832,43 +877,43 @@
 
     <section class="hero-deck">
       <article class="hero-stage" id="heroStage">
-        <div class="hero-kicker mono">◆ executive pulse</div>
+        <div class="hero-kicker mono">✨ executive pulse</div>
         <div class="hero-copy">
           <h2>Centro de mando con foco, presión y acción.</h2>
           <p id="heroNarrative">La consola tiene que mostrar qué importa ahora y qué podés mover ya, sin parecer un dashboard genérico.</p>
         </div>
         <div class="hero-signals">
           <div class="hero-signal">
-            <strong>Foco dominante</strong>
+            <strong>🎯 Foco dominante</strong>
             <p id="heroSignalFocus">Sin presión operativa fuerte.</p>
           </div>
           <div class="hero-signal">
-            <strong>Próximo follow-up</strong>
+            <strong>📨 Próximo follow-up</strong>
             <p id="heroSignalFollowUp">Todavía no hay un follow-up marcado.</p>
           </div>
           <div class="hero-signal">
-            <strong>Riesgo activo</strong>
+            <strong>🚨 Riesgo activo</strong>
             <p id="heroSignalRisk">No hay un riesgo levantado todavía.</p>
           </div>
         </div>
         <div class="hero-metrics">
           <div class="hero-metric">
-            <span>Prioridad ahora</span>
+            <span>🎯 Prioridad ahora</span>
             <strong id="heroPriorityValue">0</strong>
             <small id="heroPriorityNote">Sin prioridades activas.</small>
           </div>
           <div class="hero-metric">
-            <span>Inbox vivo</span>
+            <span>📥 Inbox vivo</span>
             <strong id="heroInboxValue">0</strong>
             <small id="heroInboxNote">Nada cargado todavía.</small>
           </div>
           <div class="hero-metric">
-            <span>Runtime</span>
+            <span>📡 Runtime</span>
             <strong id="heroRuntimeValue">sync</strong>
             <small id="heroRuntimeNote">Esperando telemetría real.</small>
           </div>
           <div class="hero-metric">
-            <span>Siguiente jugada</span>
+            <span>⚡ Siguiente jugada</span>
             <strong id="heroActionValue">—</strong>
             <small id="heroActionNote">Usá el comando central para destrabar.</small>
           </div>
@@ -877,12 +922,12 @@
 
       <aside class="hero-rail">
         <section class="hero-rail-card">
-          <strong class="mono">ALERTA ACTIVA</strong>
+          <strong class="mono">🚨 ALERTA ACTIVA</strong>
           <h3 id="heroAlertTitle">Sin alertas críticas.</h3>
           <p id="heroAlertBody" class="text-muted">Cuando haya un bloqueo real, aparece acá primero.</p>
         </section>
         <section class="hero-rail-card">
-          <div class="hero-line"><strong class="mono">RUNTIME BRIDGE</strong><span class="pill" id="heroBridgePill">sync</span></div>
+          <div class="hero-line"><strong class="mono">🔌 RUNTIME BRIDGE</strong><span class="pill" id="heroBridgePill">sync</span></div>
           <p id="heroBridgeBody" class="text-muted">Estado del enlace entre Netlify y el runtime real.</p>
           <div class="hero-line" style="margin-top:10px"><span>Uso sesión</span><span id="heroUsageValue" class="mono">—</span></div>
         </section>
@@ -899,7 +944,7 @@
         <div class="ops-grid">
           <section class="column-card">
             <div class="card-title row-between">
-              <h3>Inbox</h3>
+              <h3>📥 Inbox</h3>
               <span class="pill" id="inboxCountPill">0 abiertos</span>
             </div>
             <div class="ops-stats">
@@ -911,7 +956,7 @@
 
           <section class="column-card">
             <div class="card-title row-between">
-              <h3>Foco</h3>
+              <h3>🎯 Foco</h3>
               <span class="pill warn" id="focusCountPill">0 activos</span>
             </div>
             <div class="ops-stats">
@@ -923,7 +968,7 @@
 
           <section class="column-card">
             <div class="card-title row-between">
-              <h3>Acción</h3>
+              <h3>⚡ Acción</h3>
               <span class="pill ok" id="actionModePill">ready</span>
             </div>
             <div class="ops-shell">
@@ -940,7 +985,17 @@
                 <div class="command-main">
                   <div class="command-shell">
                     <div>
-                      <strong class="stack-title">Comando</strong>
+                      <strong class="stack-title">🗺 Próximo en panel</strong>
+                      <div class="next-work-grid">
+                        <div class="next-work-card"><strong>👥 Equipo vivo</strong><p>Pamela, Augusto, Marcelo y roles reales con pending, SLA y follow-up.</p></div>
+                        <div class="next-work-card"><strong>🧠 Skills & GPTs</strong><p>Qué hace cada skill, GPT y subagente y cómo dispararlo desde acá.</p></div>
+                        <div class="next-work-card"><strong>🏢 Pipeline real</strong><p>Propiedades, leads, oportunidades y Ambbi ops conectados.</p></div>
+                        <div class="next-work-card"><strong>💬 Chat persistente</strong><p>Historial real y salida de acción más limpia y ejecutiva.</p></div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <strong class="stack-title">⌨️ Comando</strong>
                       <textarea id="composerInput" class="command-input" placeholder="Ej: procesá este audio, armame el daily brief, bajá esto a tareas, escribime un follow-up, ordename pipeline..."></textarea>
                     </div>
 
@@ -953,7 +1008,7 @@
                     </div>
 
                     <div>
-                      <strong class="stack-title">Salida</strong>
+                      <strong class="stack-title">🪄 Salida</strong>
                       <div class="output-box" id="composerOutput">Acá va a caer la acción limpia para ejecutar.</div>
                     </div>
                   </div>
@@ -962,7 +1017,7 @@
                 <div class="chat-stack">
                   <div class="chat-shell">
                     <div class="row-between">
-                      <strong class="stack-title">Chat</strong>
+                      <strong class="stack-title">💬 Chat</strong>
                       <span class="pill" id="chatModePill">ready</span>
                     </div>
                     <div class="chat-log" id="chatLog">
@@ -980,20 +1035,20 @@
       <aside class="side-stack">
         <section class="side-card">
           <div class="card-title row-between">
-            <h3>Versión</h3>
-            <span class="pill warn" id="versionRailPill">stage 2</span>
+            <h3>🧭 Versión</h3>
+            <span class="pill warn" id="versionRailPill">v0.2.0</span>
           </div>
           <div class="list-stack" id="versionFeed">
             <div class="list-item">
-              <div class="list-meta"><strong>Stable command center</strong><span class="pill ok">done</span></div>
+              <div class="list-meta"><strong>✅ Stable command center</strong><span class="pill ok">done</span></div>
               <p>Deploy estable, inbox, chat, snapshot metrics.</p>
             </div>
             <div class="list-item">
-              <div class="list-meta"><strong>Operational usefulness</strong><span class="pill warn">now</span></div>
+              <div class="list-meta"><strong>🛠 Operational usefulness</strong><span class="pill warn">now</span></div>
               <p>Prioridades reales, chat persistente, métricas fuertes y mejor salida de acción.</p>
             </div>
             <div class="list-item">
-              <div class="list-meta"><strong>Business integration</strong><span class="pill">next</span></div>
+              <div class="list-meta"><strong>🚀 Business integration</strong><span class="pill">next</span></div>
               <p>Propiedades, leads, pipeline, módulos Ambbi y equipo vivo.</p>
             </div>
           </div>
@@ -1001,7 +1056,7 @@
 
         <section class="side-card">
           <div class="card-title row-between">
-            <h3>Notificaciones</h3>
+            <h3>🔔 Notificaciones</h3>
             <span class="pill" id="notificationCountPill">0</span>
           </div>
           <div class="list-stack" id="notificationsFeed"></div>
@@ -1009,7 +1064,7 @@
 
         <section class="side-card">
           <div class="card-title row-between">
-            <h3>Colaboradores</h3>
+            <h3>👥 Colaboradores</h3>
             <span class="pill" id="collaboratorCountPill">0</span>
           </div>
           <div class="list-stack" id="collaboratorsFeed"></div>
@@ -1017,7 +1072,7 @@
 
         <section class="side-card">
           <div class="card-title row-between">
-            <h3>Boards</h3>
+            <h3>📋 Boards</h3>
             <span class="pill" id="boardCountPill">0</span>
           </div>
           <div class="list-stack" id="boardsFeed"></div>
@@ -1025,7 +1080,7 @@
 
         <section class="side-card">
           <div class="card-title row-between">
-            <h3>Módulos</h3>
+            <h3>🧩 Módulos</h3>
             <span class="pill" id="moduleCountPill">0</span>
           </div>
           <div class="list-stack" id="modulesFeed"></div>
@@ -1201,10 +1256,19 @@
       ].join('\n');
     }
 
+    function decorateMetricLabel(label = '') {
+      const lower = label.toLowerCase();
+      if (lower.includes('gateway')) return `⚡ ${label}`;
+      if (lower.includes('sesion') || lower.includes('sesión')) return `🧠 ${label}`;
+      if (lower.includes('tareas')) return `🗂 ${label}`;
+      if (lower.includes('errores') || lower.includes('alerta')) return `🚨 ${label}`;
+      return `✨ ${label}`;
+    }
+
     function renderTop(snapshot) {
       topGrid.innerHTML = snapshot.map((item) => `
         <article class="top-card">
-          <span class="metric-label">${item.label}</span>
+          <span class="metric-label">${decorateMetricLabel(item.label)}</span>
           <div class="metric-row">
             <strong class="metric-value ${item.tone || ''}">${item.value}</strong>
             <span class="status-dot ${item.tone || 'ok'}">${item.badge || 'live'}</span>
@@ -1638,19 +1702,6 @@
         hour12: false
       }).format(new Date())}`;
     }
-
-    heroStage.addEventListener('pointermove', (event) => {
-      const rect = heroStage.getBoundingClientRect();
-      const x = ((event.clientX - rect.left) / rect.width) * 100;
-      const y = ((event.clientY - rect.top) / rect.height) * 100;
-      heroStage.style.setProperty('--mx', `${x}%`);
-      heroStage.style.setProperty('--my', `${y}%`);
-    });
-
-    heroStage.addEventListener('pointerleave', () => {
-      heroStage.style.setProperty('--mx', '78%');
-      heroStage.style.setProperty('--my', '12%');
-    });
 
     function startLiveRefresh() {
       if (liveRefreshTimer) clearInterval(liveRefreshTimer);
