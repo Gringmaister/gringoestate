@@ -195,6 +195,64 @@
       gap: 18px;
     }
 
+    .dashboard-shell {
+      display: grid;
+      grid-template-columns: 290px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .left-sidebar {
+      position: sticky;
+      top: 10px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .workspace-main {
+      display: grid;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .view-panel.hidden {
+      display: none !important;
+    }
+
+    .nav-card {
+      border-radius: 24px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.02));
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 10px;
+    }
+
+    .nav-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.02);
+      color: #eadcc0;
+      transition: border-color .18s ease, background .18s ease, transform .18s ease;
+    }
+
+    .nav-btn.active,
+    .nav-btn:hover {
+      border-color: rgba(212,166,64,0.26);
+      background: rgba(212,166,64,0.09);
+      transform: translateY(-1px);
+    }
+
     .system-bar {
       display: grid;
       grid-template-columns: auto repeat(4, minmax(0, 1fr)) auto;
@@ -886,6 +944,7 @@
     }
 
     @media (max-width: 1120px) {
+      .dashboard-shell,
       .main-grid,
       .quick-actions-grid,
       .action-row,
@@ -895,6 +954,7 @@
       .auth-form { flex-direction: column; }
       .side-stack { position: static; }
       .ops-grid { grid-template-columns: 1fr; }
+      .left-sidebar { position: static; }
     }
 
     @media (max-width: 760px) {
@@ -1142,7 +1202,7 @@
       </article>
 
       <aside class="side-stack">
-        <section class="side-card">
+        <section class="side-card" id="versionSection">
           <div class="card-title row-between">
             <div class="card-title-text">
               <div class="dual-kicker">RELEASE / VERSION TRACK</div>
@@ -1166,7 +1226,7 @@
           </div>
         </section>
 
-        <section class="side-card">
+        <section class="side-card" id="notificationsSection">
           <div class="card-title row-between">
             <div class="card-title-text">
               <div class="dual-kicker">ALERTAS / NOTIFICATIONS</div>
@@ -1177,7 +1237,7 @@
           <div class="list-stack" id="notificationsFeed"></div>
         </section>
 
-        <section class="side-card">
+        <section class="side-card" id="collaboratorsSection">
           <div class="card-title row-between">
             <div class="card-title-text">
               <div class="dual-kicker">TEAM / COLLABORATORS</div>
@@ -1188,7 +1248,7 @@
           <div class="list-stack" id="collaboratorsFeed"></div>
         </section>
 
-        <section class="side-card">
+        <section class="side-card" id="pipelineSection">
           <div class="card-title row-between">
             <div class="card-title-text">
               <div class="dual-kicker">PIPELINE / DEAL FLOW</div>
@@ -1199,7 +1259,7 @@
           <div class="list-stack" id="pipelineFeed"></div>
         </section>
 
-        <section class="side-card">
+        <section class="side-card" id="boardsSection">
           <div class="card-title row-between">
             <div class="card-title-text">
               <div class="dual-kicker">TRACKERS / BOARDS</div>
@@ -1210,7 +1270,7 @@
           <div class="list-stack" id="boardsFeed"></div>
         </section>
 
-        <section class="side-card">
+        <section class="side-card" id="modulesSection">
           <div class="card-title row-between">
             <div class="card-title-text">
               <div class="dual-kicker">SKILLS / MODULES</div>
@@ -1223,7 +1283,7 @@
       </aside>
     </section>
 
-    <section class="log-grid">
+    <section class="log-grid" id="runtimeSection">
       <article class="log-card">
         <div class="runtime-head">
           <h3>Consola Live</h3>
@@ -1288,6 +1348,14 @@
     const modulesFeed = document.getElementById('modulesFeed');
     const logFeed = document.getElementById('logFeed');
     const runtimeFeed = document.getElementById('runtimeFeed');
+    const heroDeck = document.querySelector('.hero-deck');
+    const opsSection = document.getElementById('ops');
+    const mainGrid = document.querySelector('.main-grid');
+    const sideStack = document.querySelector('.side-stack');
+    const runtimeSection = document.getElementById('runtimeSection');
+    const collaboratorsSection = document.getElementById('collaboratorsSection');
+    const pipelineSection = document.getElementById('pipelineSection');
+    const modulesSection = document.getElementById('modulesSection');
 
     const inboxCountPill = document.getElementById('inboxCountPill');
     const inboxUnprocessed = document.getElementById('inboxUnprocessed');
@@ -1319,6 +1387,70 @@
     const SESSION_KEY = 'wispy_private_console';
     let chatHistory = [];
     let liveRefreshTimer = null;
+    let currentWorkspaceView = 'home';
+
+    function setupDashboardShell() {
+      if (!mainGrid || !sideStack || document.querySelector('.dashboard-shell')) return;
+
+      const shell = document.createElement('section');
+      shell.className = 'dashboard-shell';
+
+      const leftSidebar = document.createElement('aside');
+      leftSidebar.className = 'left-sidebar';
+      leftSidebar.innerHTML = `
+        <section class="nav-card">
+          <div class="card-title-text">
+            <div class="dual-kicker">SECCIONES / NAVIGATION</div>
+            <h3>🧭 Panel</h3>
+          </div>
+          <div class="nav-list">
+            <button class="nav-btn active" data-view="home">🏠 Home / Command Center</button>
+            <button class="nav-btn" data-view="ops">⚡ Operaciones / Ops</button>
+            <button class="nav-btn" data-view="team">👥 Equipo / Collaborators</button>
+            <button class="nav-btn" data-view="pipeline">🏢 Pipeline / Deal Flow</button>
+            <button class="nav-btn" data-view="skills">🧩 Skills / Modules</button>
+            <button class="nav-btn" data-view="runtime">📡 Runtime / Live</button>
+          </div>
+        </section>
+      `;
+
+      const workspaceMain = document.createElement('div');
+      workspaceMain.className = 'workspace-main';
+
+      topGrid.classList.add('view-panel', 'view-home');
+      heroDeck.classList.add('view-panel', 'view-home');
+      opsSection.classList.add('view-panel', 'view-home');
+      runtimeSection.classList.add('view-panel', 'view-runtime', 'hidden');
+
+      mainGrid.before(shell);
+      shell.append(leftSidebar, workspaceMain);
+      leftSidebar.appendChild(sideStack);
+      workspaceMain.append(topGrid, heroDeck, opsSection, runtimeSection);
+      mainGrid.remove();
+
+      leftSidebar.querySelectorAll('.nav-btn').forEach((button) => {
+        button.addEventListener('click', () => switchWorkspaceView(button.dataset.view));
+      });
+    }
+
+    function switchWorkspaceView(view) {
+      currentWorkspaceView = view;
+      document.querySelectorAll('.nav-btn').forEach((button) => {
+        button.classList.toggle('active', button.dataset.view === view);
+      });
+
+      const homePanels = document.querySelectorAll('.view-home');
+      const runtimePanels = document.querySelectorAll('.view-runtime');
+      const showRuntime = view === 'runtime';
+
+      homePanels.forEach((panel) => panel.classList.toggle('hidden', showRuntime));
+      runtimePanels.forEach((panel) => panel.classList.toggle('hidden', !showRuntime));
+
+      if (view === 'ops') opsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (view === 'team') collaboratorsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (view === 'pipeline') pipelineSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (view === 'skills') modulesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 
     function unlockUi() {
       body.classList.remove('locked');
@@ -1869,6 +2001,7 @@
       }, 12000);
     }
 
+    setupDashboardShell();
     verifyExistingSession();
     lockUi();
     tickSystemClock();
