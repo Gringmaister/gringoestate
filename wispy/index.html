@@ -465,8 +465,7 @@
     .section-card:hover,
     .side-card:hover,
     .log-card:hover,
-    .runtime-card:hover,
-    .column-card:hover {
+    .runtime-card:hover {
       transform: translateY(-1px);
       border-color: rgba(212,166,64,0.16);
       background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
@@ -531,7 +530,7 @@
     }
 
     .section-title { margin-bottom: 16px; }
-    .section-title h2 { font-size: 2.4rem; line-height: 0.95; }
+    .section-title h2 { font-size: 2.4rem; line-height: 0.95; color: #f3e3b7; }
     .section-title p { color: #b8ab94; }
 
     .ops-grid {
@@ -586,6 +585,10 @@
     .card-title h3 { font-size: 1.7rem; }
     .stack-title { font-size: 1.45rem; }
 
+    .column-card.action-column {
+      grid-template-rows: auto 1fr;
+    }
+
     .quick-actions-grid,
     .shortcut-grid,
     .action-row,
@@ -597,6 +600,14 @@
     }
 
     .quick-actions-grid { grid-template-columns: 1fr 1fr; }
+
+    .quick-actions-grid.compact .quick-action {
+      min-height: 56px;
+      padding: 10px 11px;
+      text-align: left;
+      line-height: 1.35;
+      color: #eadcc0;
+    }
 
     .ops-stat {
       border-radius: 18px;
@@ -680,6 +691,23 @@
       gap: 12px;
     }
 
+    .command-shell.primary {
+      background: linear-gradient(180deg, rgba(212,166,64,0.08), rgba(255,255,255,0.018));
+      border-color: rgba(212,166,64,0.18);
+    }
+
+    .action-groups {
+      display: grid;
+      gap: 10px;
+    }
+
+    .action-group-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #d4a640;
+    }
+
     .next-work-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -706,6 +734,12 @@
       line-height: 1.5;
     }
 
+    .roadmap-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
     .action-row.compact {
       grid-template-columns: repeat(5, minmax(0, 1fr));
     }
@@ -728,7 +762,6 @@
     .side-card:hover,
     .log-card:hover,
     .runtime-card:hover,
-    .column-card:hover,
     .hero-rail-card:hover,
     .hero-signal:hover,
     .ops-stat:hover,
@@ -942,7 +975,7 @@
         </div>
 
         <div class="ops-grid">
-          <section class="column-card">
+          <section class="column-card action-column">
             <div class="card-title row-between">
               <h3>📥 Inbox</h3>
               <span class="pill" id="inboxCountPill">0 abiertos</span>
@@ -972,20 +1005,31 @@
               <span class="pill ok" id="actionModePill">ready</span>
             </div>
             <div class="ops-shell">
-              <div class="quick-actions-grid">
-                <button class="quick-action launcher-trigger" data-template="Creá una tarea clara con dueño, prioridad y próximo paso.">Crear tarea</button>
-                <button class="quick-action launcher-trigger" data-template="Redactá un follow-up corto, directo y ejecutivo para pedir respuesta hoy.">Mandar follow-up</button>
-                <button class="quick-action launcher-trigger" data-template="Abrí colaborador: resumime último contacto, pendiente y próximo mensaje recomendado.">Abrir colaborador</button>
-                <button class="quick-action launcher-trigger" data-template="Prepará este pedido para moverlo a Trello con título, descripción y checklist.">Mover a Trello</button>
-                <button class="quick-action launcher-trigger" data-template="Definí qué automatización conviene disparar y dejá el comando limpio.">Disparar automatización</button>
-                <button class="quick-action launcher-trigger" data-template="Armame el brief de oficina 10:00 con foco en Ambbi, Gringo y pendientes críticos.">Daily brief</button>
+              <div class="action-groups">
+                <div>
+                  <div class="action-group-title">Launchers rápidos</div>
+                  <div class="quick-actions-grid compact">
+                    <button class="quick-action launcher-trigger" data-template="Creá una tarea clara con dueño, prioridad y próximo paso.">📝 Crear tarea</button>
+                    <button class="quick-action launcher-trigger" data-template="Redactá un follow-up corto, directo y ejecutivo para pedir respuesta hoy.">📨 Mandar follow-up</button>
+                    <button class="quick-action launcher-trigger" data-template="Abrí colaborador: resumime último contacto, pendiente y próximo mensaje recomendado.">👥 Abrir colaborador</button>
+                    <button class="quick-action launcher-trigger" data-template="Prepará este pedido para moverlo a Trello con título, descripción y checklist.">📋 Mover a Trello</button>
+                    <button class="quick-action launcher-trigger" data-template="Definí qué automatización conviene disparar y dejá el comando limpio.">⚙️ Disparar automatización</button>
+                    <button class="quick-action launcher-trigger" data-template="Armame el brief de oficina 10:00 con foco en Ambbi, Gringo y pendientes críticos.">☀️ Daily brief</button>
+                  </div>
+                </div>
               </div>
 
               <div class="command-deck">
                 <div class="command-main">
-                  <div class="command-shell">
+                  <div class="command-shell primary">
                     <div>
                       <strong class="stack-title">🗺 Próximo en panel</strong>
+                      <div class="roadmap-chip-row" style="margin:8px 0 10px">
+                        <span class="pill warn">ahora</span>
+                        <span class="pill">colaboradores vivos</span>
+                        <span class="pill">skills & GPTs</span>
+                        <span class="pill">pipeline real</span>
+                      </div>
                       <div class="next-work-grid">
                         <div class="next-work-card"><strong>👥 Equipo vivo</strong><p>Pamela, Augusto, Marcelo y roles reales con pending, SLA y follow-up.</p></div>
                         <div class="next-work-card"><strong>🧠 Skills & GPTs</strong><p>Qué hace cada skill, GPT y subagente y cómo dispararlo desde acá.</p></div>
@@ -1414,7 +1458,11 @@
     }
 
     function renderCollaborators(items) {
-      const collaborators = Array.isArray(items) ? items : [];
+      const collaborators = Array.isArray(items) && items.length ? items : [
+        { name: 'Pamela', role: 'Admin · contratos y flujos', lastContact: 'alta pendiente', pending: 'Definir tablero, permisos y follow-up operativo', nextAction: 'Dar de alta colaborador y enlazar pendiente real', status: 'setup', statusTone: 'warn', overdue: false, waitingHours: null, slaHours: null },
+        { name: 'Augusto', role: 'Anfitrionaje · huésped y experiencia', lastContact: 'alta pendiente', pending: 'Configurar playbook de mensajes y SLA', nextAction: 'Conectar mensajes tipo y seguimiento diario', status: 'setup', statusTone: 'warn', overdue: false, waitingHours: null, slaHours: null },
+        { name: 'Marcelo', role: 'Mantenimiento · obras y reparaciones', lastContact: 'alta pendiente', pending: 'Definir flujo de incidentes y escalado', nextAction: 'Crear board operativo y reglas de prioridad', status: 'setup', statusTone: 'warn', overdue: false, waitingHours: null, slaHours: null }
+      ];
       collaboratorCountPill.textContent = String(collaborators.length);
       collaboratorsFeed.innerHTML = collaborators.map((item) => `
         <div class="list-item">
