@@ -684,6 +684,19 @@
       padding: 18px;
       display: grid;
       gap: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brain-section::after {
+      content: '';
+      position: absolute;
+      inset: auto -8% -55% auto;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(212,166,64,0.12), transparent 66%);
+      pointer-events: none;
     }
 
     .brain-head {
@@ -734,6 +747,53 @@
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 10px;
+    }
+
+    .brain-activity {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .activity-bar {
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+      padding: 10px 12px;
+    }
+
+    .activity-bar span {
+      display: block;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #b4a58a;
+      margin-bottom: 8px;
+    }
+
+    .activity-track {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .activity-fill {
+      height: 100%;
+      width: 12%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(199,154,53,0.72), rgba(244,238,224,0.92));
+      transition: width .35s ease;
+    }
+
+    .activity-fill.live {
+      animation: brainPulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes brainPulse {
+      0%, 100% { opacity: 0.55; transform: scaleX(0.96); }
+      50% { opacity: 1; transform: scaleX(1); }
     }
 
     .brain-chip {
@@ -1340,7 +1400,7 @@
           </div>
           <div class="hero-metric">
             <span>📡 Runtime</span>
-            <strong id="heroRuntimeValue">sync</strong>
+            <strong id="heroRuntimeValue">espera</strong>
             <small id="heroRuntimeNote">Esperando telemetría real.</small>
           </div>
           <div class="hero-metric">
@@ -1383,9 +1443,15 @@
       </div>
       <div class="brain-tape">
         <div class="brain-chip"><span>Modo</span><strong id="brainModeChip">Espera</strong></div>
-        <div class="brain-chip"><span>Chat</span><strong id="brainChatChip">Ready</strong></div>
-        <div class="brain-chip"><span>Acción</span><strong id="brainActionChip">Ready</strong></div>
+        <div class="brain-chip"><span>Chat</span><strong id="brainChatChip">Listo</strong></div>
+        <div class="brain-chip"><span>Acción</span><strong id="brainActionChip">Listo</strong></div>
         <div class="brain-chip"><span>Bridge</span><strong id="brainBridgeChip">Sin enlace</strong></div>
+      </div>
+      <div class="brain-activity">
+        <div class="activity-bar"><span>Proceso</span><div class="activity-track"><div class="activity-fill" id="brainProcessBar"></div></div></div>
+        <div class="activity-bar"><span>Chat</span><div class="activity-track"><div class="activity-fill" id="brainChatBar"></div></div></div>
+        <div class="activity-bar"><span>Acción</span><div class="activity-track"><div class="activity-fill" id="brainActionBar"></div></div></div>
+        <div class="activity-bar"><span>Bridge</span><div class="activity-track"><div class="activity-fill" id="brainBridgeBar"></div></div></div>
       </div>
     </section>
 
@@ -1722,6 +1788,10 @@
     const brainChatChip = document.getElementById('brainChatChip');
     const brainActionChip = document.getElementById('brainActionChip');
     const brainBridgeChip = document.getElementById('brainBridgeChip');
+    const brainProcessBar = document.getElementById('brainProcessBar');
+    const brainChatBar = document.getElementById('brainChatBar');
+    const brainActionBar = document.getElementById('brainActionBar');
+    const brainBridgeBar = document.getElementById('brainBridgeBar');
     const notifBtn = document.getElementById('notifBtn');
     const notifBadge = document.getElementById('notifBadge');
     const notifDropdown = document.getElementById('notifDropdown');
@@ -1802,6 +1872,8 @@
       brainStatusPill.className = `pill ${mode === 'thinking' ? 'warn' : mode === 'error' ? 'danger' : 'ok'}`;
       brainNow.textContent = detail;
       brainModeChip.textContent = labels[mode] || mode;
+      brainProcessBar.style.width = mode === 'thinking' ? '86%' : mode === 'error' ? '42%' : '18%';
+      brainProcessBar.classList.toggle('live', mode === 'thinking');
     }
 
     function setBrainContext(patch = {}) {
@@ -1811,6 +1883,18 @@
       if (patch.chat) brainChatChip.textContent = patch.chat;
       if (patch.action) brainActionChip.textContent = patch.action;
       if (patch.bridge) brainBridgeChip.textContent = patch.bridge;
+      if (patch.chatBar) {
+        brainChatBar.style.width = patch.chatBar.width;
+        brainChatBar.classList.toggle('live', !!patch.chatBar.live);
+      }
+      if (patch.actionBar) {
+        brainActionBar.style.width = patch.actionBar.width;
+        brainActionBar.classList.toggle('live', !!patch.actionBar.live);
+      }
+      if (patch.bridgeBar) {
+        brainBridgeBar.style.width = patch.bridgeBar.width;
+        brainBridgeBar.classList.toggle('live', !!patch.bridgeBar.live);
+      }
     }
 
     function setupDashboardShell() {
@@ -2134,7 +2218,10 @@
         task: focusItems[0]?.body || inboxItems[0]?.summary || 'Sin tarea dominante cargada.',
         target: 'Franco / panel privado',
         lastMove: firstAlert?.body || inboxItems[0]?.nextStep || 'Esperando próximo movimiento fuerte.',
-        bridge: bridgePending ? 'Sin enlace' : 'En vivo'
+        bridge: bridgePending ? 'Sin enlace' : 'En vivo',
+        chatBar: { width: '22%', live: false },
+        actionBar: { width: blocked > 0 ? '74%' : '36%', live: blocked > 0 },
+        bridgeBar: { width: bridgePending ? '28%' : '92%', live: !bridgePending }
       });
     }
 
@@ -2486,7 +2573,8 @@
         setBrainContext({
           lastMove: 'Sincronización completa del Home y módulos.',
           action: 'Sincronizado',
-          bridge: data.runtimeTelemetry?.pending ? 'Sin enlace' : 'En vivo'
+          bridge: data.runtimeTelemetry?.pending ? 'Sin enlace' : 'En vivo',
+          bridgeBar: { width: data.runtimeTelemetry?.pending ? '26%' : '94%', live: !data.runtimeTelemetry?.pending }
         });
       } catch {
         actionModePill.textContent = 'error';
@@ -2494,7 +2582,7 @@
         heroUsageValue.textContent = 'error de uso';
         composerOutput.textContent = 'No pude traer el estado vivo del panel ahora.';
         setThinkingState('error', 'No pude sincronizar el panel en vivo.');
-        setBrainContext({ lastMove: 'Falló la sincronización del panel.', action: 'Error' });
+        setBrainContext({ lastMove: 'Falló la sincronización del panel.', action: 'Error', bridgeBar: { width: '18%', live: false } });
       } finally {
         refreshPanelBtn.textContent = 'Actualizar';
       }
@@ -2593,7 +2681,8 @@
         task: `Responder chat: ${message.slice(0, 120)}`,
         target: 'Franco / chat del panel',
         lastMove: 'Entró un mensaje nuevo al cerebro de Wispy.',
-        chat: 'Procesando'
+        chat: 'Procesando',
+        chatBar: { width: '88%', live: true }
       });
 
       try {
@@ -2610,14 +2699,14 @@
         renderChatHistory(Array.isArray(data.items) ? data.items : chatHistory);
         chatModePill.textContent = data.mode || 'live';
         setThinkingState('idle', 'Respuesta lista.');
-        setBrainContext({ lastMove: 'Respuesta entregada al chat del panel.', chat: 'Listo' });
+        setBrainContext({ lastMove: 'Respuesta entregada al chat del panel.', chat: 'Listo', chatBar: { width: '30%', live: false } });
       } catch {
         const fallback = 'No pude pegarle al chat real ahora. Reintentá en un segundo.';
         renderChatMessage('assistant', fallback);
         chatHistory.push({ role: 'assistant', content: fallback });
         chatModePill.textContent = 'error';
         setThinkingState('error', 'Falló el chat en vivo.');
-        setBrainContext({ lastMove: 'El chat falló y quedó en fallback.', chat: 'Error' });
+        setBrainContext({ lastMove: 'El chat falló y quedó en fallback.', chat: 'Error', chatBar: { width: '44%', live: false } });
       }
     }
 
@@ -2635,7 +2724,8 @@
         task: `Resolver pedido: ${raw.slice(0, 120)}`,
         target: 'Motor de acciones / Ops',
         lastMove: 'Entró una acción nueva para ejecutar.',
-        action: 'Procesando'
+        action: 'Procesando',
+        actionBar: { width: '90%', live: true }
       });
 
       try {
@@ -2649,12 +2739,12 @@
         composerOutput.textContent = data.output;
         actionModePill.textContent = 'done';
         setThinkingState('idle', 'Acción procesada.');
-        setBrainContext({ lastMove: 'Acción resuelta y bajada al panel.', action: 'Listo' });
+        setBrainContext({ lastMove: 'Acción resuelta y bajada al panel.', action: 'Listo', actionBar: { width: '34%', live: false } });
       } catch {
         composerOutput.textContent = buildExecutiveBrief(raw);
         actionModePill.textContent = 'fallback';
         setThinkingState('error', 'No pude correr la acción real; quedó fallback ejecutivo.');
-        setBrainContext({ lastMove: 'La acción cayó a fallback ejecutivo.', action: 'Fallback' });
+        setBrainContext({ lastMove: 'La acción cayó a resumen ejecutivo de respaldo.', action: 'Respaldo', actionBar: { width: '48%', live: false } });
       }
     });
 
