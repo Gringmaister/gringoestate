@@ -1,9 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const workspaceRoot = path.resolve(__dirname, '..', '..', '..');
+const repoRoot = path.resolve(__dirname, '..', '..');
+const workspaceRoot = path.resolve(repoRoot, '..');
 const trelloRoot = path.join(workspaceRoot, 'trello');
-const dataRoot = path.join(workspaceRoot, 'gringoestate', 'data');
+const dataRoot = path.join(repoRoot, 'data');
 const envFile = path.join(process.env.HOME || '', 'gringo-ai', '.env');
 const discoveredIdsPath = path.join(trelloRoot, 'discovered_ids.json');
 const trelloSnapshotPath = path.join(dataRoot, 'wispy-trello-snapshot.json');
