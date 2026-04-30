@@ -316,6 +316,59 @@
       gap: 16px;
     }
 
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+    }
+
+    .notif-wrap {
+      position: relative;
+    }
+
+    .notif-btn {
+      min-width: 48px;
+      padding: 12px 14px;
+    }
+
+    .notif-badge {
+      position: absolute;
+      top: -6px;
+      right: -4px;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: var(--gold);
+      color: #111;
+      font-size: 0.68rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5px;
+      box-shadow: 0 6px 14px rgba(212,166,64,0.26);
+    }
+
+    .notif-dropdown {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 10px);
+      width: min(420px, 88vw);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: rgba(10,10,10,0.96);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      z-index: 120;
+    }
+
+    .notif-dropdown.hidden {
+      display: none;
+    }
+
     .brand {
       display: flex;
       align-items: center;
@@ -1143,10 +1196,20 @@
           <p>gringo.estate / centro de comando</p>
         </div>
       </div>
-      <div class="row-between">
+      <div class="top-actions">
         <span class="pill warn" id="panelVersionPill">v0.2.0 · stage 2</span>
         <span class="pill" id="panelLockState">Privado</span>
         <span class="pill" id="sessionUsagePill">usage —</span>
+        <div class="notif-wrap">
+          <button class="ghost-button notif-btn" id="notifBtn" type="button">🔔<span class="notif-badge" id="notifBadge">0</span></button>
+          <div class="notif-dropdown hidden" id="notifDropdown">
+            <div class="card-title-text">
+              <div class="dual-kicker">ALERTAS / NOTIFICATIONS</div>
+              <h3>Notificaciones</h3>
+            </div>
+            <div class="list-stack" id="notifDropdownFeed"></div>
+          </div>
+        </div>
         <button class="ghost-button" id="refreshPanelBtn" type="button">Actualizar</button>
       </div>
     </div>
@@ -1222,18 +1285,18 @@
 
     <section class="analytics-grid" id="analyticsSection">
       <article class="chart-card">
-        <div class="chart-head">
-          <div class="card-title-text">
-            <div class="dual-kicker">HOME / EXECUTIVE GRAPH</div>
-            <h3>📈 Token + Activity Trend</h3>
+          <div class="chart-head">
+            <div class="card-title-text">
+              <div class="dual-kicker">HOME / EXECUTIVE GRAPH</div>
+              <h3>📈 Consumo de Tokens</h3>
+            </div>
+            <span class="pill" id="trendPill">live</span>
           </div>
-          <span class="pill" id="trendPill">live</span>
-        </div>
         <div class="chart-stage" id="trendChartStage"></div>
         <div class="chart-footer">
-          <div class="chart-stat"><span>Hoy</span><strong id="trendStatSession">—</strong></div>
-          <div class="chart-stat"><span>Semana</span><strong id="trendStatTotal">—</strong></div>
-          <div class="chart-stat"><span>Mes</span><strong id="trendStatCost">—</strong></div>
+          <div class="chart-stat"><span>Por prompt</span><strong id="trendStatSession">—</strong></div>
+          <div class="chart-stat"><span>Por fecha</span><strong id="trendStatTotal">—</strong></div>
+          <div class="chart-stat"><span>Últimos 30 días</span><strong id="trendStatCost">—</strong></div>
         </div>
       </article>
 
@@ -1242,7 +1305,7 @@
           <div class="chart-head">
             <div class="card-title-text">
               <div class="dual-kicker">PIPELINE / DISTRIBUTION</div>
-              <h3>🏢 Deal Flow Mix</h3>
+              <h3>🏢 Pipeline por Etapa</h3>
             </div>
             <span class="pill" id="pipelineChartPill">ops</span>
           </div>
@@ -1402,11 +1465,11 @@
               <p>Deploy estable, inbox, chat, snapshot metrics.</p>
             </div>
             <div class="list-item">
-              <div class="list-meta"><strong>🛠 Operational usefulness</strong><span class="pill warn">now</span></div>
+              <div class="list-meta"><strong>🛠 Operational usefulness</strong><span class="pill warn">NOW</span></div>
               <p>Prioridades reales, chat persistente, métricas fuertes y mejor salida de acción.</p>
             </div>
             <div class="list-item">
-              <div class="list-meta"><strong>🚀 Business integration</strong><span class="pill">next</span></div>
+              <div class="list-meta"><strong>🚀 Business integration</strong><span class="pill">NEXT</span></div>
               <p>Propiedades, leads, pipeline, módulos Ambbi y equipo vivo.</p>
             </div>
           </div>
@@ -1477,11 +1540,11 @@
           </div>
           <div class="list-stack" id="smartHomeFeed">
             <div class="list-item">
-              <div class="list-meta"><strong>Xiaomi Cameras</strong><span class="pill warn">next</span></div>
+              <div class="list-meta"><strong>Xiaomi Cameras</strong><span class="pill warn">NEXT</span></div>
               <p>Dejar preparado el tablero para cámaras, visión y alertas futuras.</p>
             </div>
             <div class="list-item">
-              <div class="list-meta"><strong>Philips Hue</strong><span class="pill warn">next</span></div>
+              <div class="list-meta"><strong>Philips Hue</strong><span class="pill warn">NEXT</span></div>
               <p>Preparar integración de luces/escenas cuando definamos API y credenciales.</p>
             </div>
           </div>
@@ -1543,6 +1606,10 @@
     const heroSignalFocus = document.getElementById('heroSignalFocus');
     const heroSignalFollowUp = document.getElementById('heroSignalFollowUp');
     const heroSignalRisk = document.getElementById('heroSignalRisk');
+    const notifBtn = document.getElementById('notifBtn');
+    const notifBadge = document.getElementById('notifBadge');
+    const notifDropdown = document.getElementById('notifDropdown');
+    const notifDropdownFeed = document.getElementById('notifDropdownFeed');
     const analyticsSection = document.getElementById('analyticsSection');
     const trendChartStage = document.getElementById('trendChartStage');
     const pipelineChartStage = document.getElementById('pipelineChartStage');
@@ -1572,6 +1639,7 @@
     const mainGrid = document.querySelector('.main-grid');
     const sideStack = document.querySelector('.side-stack');
     const runtimeSection = document.getElementById('runtimeSection');
+    const notificationsSection = document.getElementById('notificationsSection');
     const collaboratorsSection = document.getElementById('collaboratorsSection');
     const pipelineSection = document.getElementById('pipelineSection');
     const modulesSection = document.getElementById('modulesSection');
@@ -1648,6 +1716,7 @@
       heroDeck.classList.add('view-panel', 'view-home');
       analyticsSection.classList.add('view-panel', 'view-home');
       opsSection.classList.add('view-panel', 'view-ops', 'hidden');
+      notificationsSection.classList.add('view-panel', 'view-ops', 'hidden');
       collaboratorsSection.classList.add('view-panel', 'view-team', 'hidden');
       pipelineSection.classList.add('view-panel', 'view-pipeline', 'hidden');
       modulesSection.classList.add('view-panel', 'view-skills', 'hidden');
@@ -1790,11 +1859,11 @@
       trendChartStage.innerHTML = `
         <svg viewBox="0 0 ${width} ${height}" class="trend-svg" preserveAspectRatio="none">
           <line x1="20" y1="170" x2="540" y2="170" stroke="rgba(255,255,255,0.12)" />
-          <polyline fill="none" stroke="rgba(212,166,64,0.95)" stroke-width="4" points="${points}" />
+          <polyline fill="none" stroke="rgba(244,238,224,0.92)" stroke-width="4" points="${points}" />
           ${values.map((value, index) => {
             const x = 30 + (index * ((width - 60) / Math.max(values.length - 1, 1)));
             const y = height - 20 - ((value / max) * (height - 55));
-            return `<circle cx="${x}" cy="${y}" r="5" fill="#d4a640" />`;
+            return `<circle cx="${x}" cy="${y}" r="5" fill="#c79a35" />`;
           }).join('')}
           ${['input', 'output', 'cache', 'session', 'total'].map((label, index) => {
             const x = 30 + (index * ((width - 60) / Math.max(values.length - 1, 1)));
@@ -1807,8 +1876,9 @@
         if (!window) return '—';
         return `${window.tokens || 0} tok · ${window.messages || 0} msg`;
       };
-      trendStatSession.textContent = fmtWindow(usageWindows.day);
-      trendStatTotal.textContent = fmtWindow(usageWindows.week);
+      const perPrompt = (Number(current.inputTokens || 0) + Number(current.outputTokens || 0) + Number(current.cacheRead || 0)) || Number(current.totalTokens || 0);
+      trendStatSession.textContent = perPrompt ? `${perPrompt} tok` : '—';
+      trendStatTotal.textContent = fmtWindow(usageWindows.day);
       trendStatCost.textContent = fmtWindow(usageWindows.month);
     }
 
@@ -1821,7 +1891,7 @@
       }, {});
       const entries = Object.entries(counts);
       const max = Math.max(...entries.map(([, value]) => value), 1);
-      const colors = ['#d4a640', '#ffbb55', '#4dde95', '#7db9ff', '#ff7b7b'];
+      const colors = ['#c79a35', '#d4a640', '#b9852f', '#e0b35a', '#8b6a2d'];
       pipelineChartStage.innerHTML = `
         <svg viewBox="0 0 320 210" class="bars-svg">
           <line x1="18" y1="180" x2="302" y2="180" stroke="rgba(255,255,255,0.12)" />
@@ -1852,8 +1922,18 @@
       miniTeamValue.textContent = `${collaborators.length} activos`;
       miniSlaValue.textContent = `${overdue} vencidos`;
       miniSmartValue.textContent = 'Hue + Xiaomi seed';
-      miniBridgeValue.textContent = data.runtimeTelemetry?.pending ? 'pending' : 'live';
+      miniBridgeValue.textContent = data.runtimeTelemetry?.pending ? 'sin enlace' : 'live';
     }
+
+    notifBtn.addEventListener('click', () => {
+      notifDropdown.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!notifDropdown.contains(event.target) && !notifBtn.contains(event.target)) {
+        notifDropdown.classList.add('hidden');
+      }
+    });
 
     function renderExecutiveDeck(data = {}) {
       const focusItems = Array.isArray(data.focus) ? data.focus : [];
@@ -1872,7 +1952,7 @@
       const aggregate = data.runtimeTelemetry?.sessions?.aggregate;
 
       systemHealthValue.textContent = gatewayCard?.value || runtimeSummary;
-      systemBridgeValue.textContent = bridgePending ? 'pending' : 'linked';
+      systemBridgeValue.textContent = bridgePending ? 'sin enlazar' : 'conectado';
       systemFocusValue.textContent = `${focusItems.length} activos`;
       systemInboxValue.textContent = `${inboxItems.length} abiertos`;
 
@@ -1886,7 +1966,7 @@
         ? `${audioLike} audio(s) / pedido(s) por procesar.`
         : `${inboxItems.length} item(s) abiertos en pipeline.`;
 
-      heroRuntimeValue.textContent = bridgePending ? 'bridge pending' : runtimeSummary;
+      heroRuntimeValue.textContent = bridgePending ? 'sin enlace' : runtimeSummary;
       heroRuntimeNote.textContent = runtimeItems[0]?.note || gatewayCard?.note || 'Runtime listo para mostrar señal real.';
 
       heroTokenValue.textContent = currentSession?.totalTokens ? `${currentSession.totalTokens}` : '—';
@@ -1899,10 +1979,10 @@
       heroAlertTitle.textContent = firstAlert?.title || 'Sin alertas críticas.';
       heroAlertBody.textContent = firstAlert?.body || 'Cuando haya un bloqueo real, aparece acá primero.';
 
-      heroBridgePill.textContent = bridgePending ? 'pending' : 'live';
+      heroBridgePill.textContent = bridgePending ? 'sin enlazar' : 'live';
       heroBridgePill.className = `pill ${bridgePending ? 'warn' : 'ok'}`;
       heroBridgeBody.textContent = bridgePending
-        ? 'Netlify todavía no conversa con el runtime real. Sigue siendo prioridad de infra.'
+        ? 'El panel todavía no está conversando con el runtime real. Falta cerrar el enlace técnico.'
         : 'Bridge enlazado. La telemetría real ya alimenta el panel.';
 
       heroUsageValue.textContent = sessionUsagePill.textContent || '—';
@@ -1910,8 +1990,8 @@
         ? `Foco actual: ${focusItems[0].body}`
         : 'La consola tiene que mostrar qué importa ahora y qué podés mover ya, sin parecer un dashboard genérico.';
 
-      heroSignalFocus.textContent = focusItems[0]?.title || 'Sin presión operativa fuerte.';
-      heroSignalFollowUp.textContent = data.collaborators?.find((item) => item.nextAction)?.nextAction || 'Todavía no hay un follow-up marcado.';
+      heroSignalFocus.textContent = focusItems[0]?.title || inboxItems[0]?.title || 'Sin foco cargado todavía.';
+      heroSignalFollowUp.textContent = data.collaborators?.find((item) => item.nextAction)?.nextAction || inboxItems[0]?.nextStep || 'Sin follow-up cargado todavía.';
       heroSignalRisk.textContent = blocked > 0
         ? `${blocked} bloqueo(s) abiertos en foco.`
         : (firstAlert?.title || 'No hay un riesgo levantado todavía.');
@@ -1964,6 +2044,7 @@
     function renderNotifications(items) {
       const notifications = Array.isArray(items) ? items : [];
       notificationCountPill.textContent = String(notifications.length);
+      notifBadge.textContent = String(notifications.length);
       notificationsFeed.innerHTML = notifications.map((item) => `
         <div class="list-item">
           <div class="list-meta">
@@ -1973,6 +2054,7 @@
           <p>${item.body}</p>
         </div>
       `).join('') || '<div class="list-item"><strong>Sin notificaciones</strong><p>No hay alertas relevantes ahora.</p></div>';
+      notifDropdownFeed.innerHTML = notificationsFeed.innerHTML;
     }
 
     async function triggerFollowUp(name) {
