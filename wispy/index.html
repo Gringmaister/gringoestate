@@ -1231,9 +1231,9 @@
         </div>
         <div class="chart-stage" id="trendChartStage"></div>
         <div class="chart-footer">
-          <div class="chart-stat"><span>Sesión</span><strong id="trendStatSession">—</strong></div>
-          <div class="chart-stat"><span>Total visible</span><strong id="trendStatTotal">—</strong></div>
-          <div class="chart-stat"><span>Costo visible</span><strong id="trendStatCost">—</strong></div>
+          <div class="chart-stat"><span>Hoy</span><strong id="trendStatSession">—</strong></div>
+          <div class="chart-stat"><span>Semana</span><strong id="trendStatTotal">—</strong></div>
+          <div class="chart-stat"><span>Mes</span><strong id="trendStatCost">—</strong></div>
         </div>
       </article>
 
@@ -1802,11 +1802,14 @@
           }).join('')}
         </svg>
       `;
-      trendStatSession.textContent = session ? `${session} tok` : '—';
-      trendStatTotal.textContent = total ? `${total} tok` : '—';
-      trendStatCost.textContent = runtimeTelemetry?.sessions?.aggregate?.totalCost?.toFixed
-        ? `$${runtimeTelemetry.sessions.aggregate.totalCost.toFixed(2)}`
-        : '—';
+      const usageWindows = runtimeTelemetry?.sessions?.usageWindows || {};
+      const fmtWindow = (window) => {
+        if (!window) return '—';
+        return `${window.tokens || 0} tok · ${window.messages || 0} msg`;
+      };
+      trendStatSession.textContent = fmtWindow(usageWindows.day);
+      trendStatTotal.textContent = fmtWindow(usageWindows.week);
+      trendStatCost.textContent = fmtWindow(usageWindows.month);
     }
 
     function renderPipelineChart(items = []) {
@@ -1887,9 +1890,11 @@
       heroRuntimeNote.textContent = runtimeItems[0]?.note || gatewayCard?.note || 'Runtime listo para mostrar señal real.';
 
       heroTokenValue.textContent = currentSession?.totalTokens ? `${currentSession.totalTokens}` : '—';
-      heroTokenNote.textContent = aggregate?.totalTokens
-        ? `${aggregate.totalTokens} tok visibles · ${aggregate.totalCost?.toFixed ? '$' + aggregate.totalCost.toFixed(2) : 'cost'}`
-        : 'Todavía sin consumo visible.';
+      heroTokenNote.textContent = currentSession?.contextLimit
+        ? `${currentSession.contextPct}% del cap · límite ${currentSession.contextLimit} tok`
+        : (aggregate?.totalTokens
+          ? `${aggregate.totalTokens} tok visibles · ${aggregate.totalCost?.toFixed ? '$' + aggregate.totalCost.toFixed(2) : 'cost'}`
+          : 'Todavía sin consumo visible.');
 
       heroAlertTitle.textContent = firstAlert?.title || 'Sin alertas críticas.';
       heroAlertBody.textContent = firstAlert?.body || 'Cuando haya un bloqueo real, aparece acá primero.';

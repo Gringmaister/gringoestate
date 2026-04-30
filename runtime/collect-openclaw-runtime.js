@@ -160,6 +160,48 @@ function parseSessionUsageFromTranscript(sessionFile) {
   return null;
 }
 
+function collectUsageWindows(sessionFiles = []) {
+  const now = Date.now();
+  const periods = {
+    day: now - (24 * 60 * 60 * 1000),
+    week: now - (7 * 24 * 60 * 60 * 1000),
+    month: now - (30 * 24 * 60 * 60 * 1000)
+  };
+  const base = () => ({ tokens: 0, cost: 0, messages: 0, iterations: 0 });
+  const windows = { day: base(), week: base(), month: base() };
+
+  for (const sessionFile of sessionFiles) {
+    if (!sessionFile || !fileExists(sessionFile)) continue;
+    let lines = [];
+    try {
+      lines = fs.readFileSync(sessionFile, 'utf8').split('\n').filter(Boolean);
+    } catch {
+      continue;
+    }
+
+    for (const line of lines) {
+      const parsed = safeJsonParse(line, null);
+      if (!parsed?.timestamp || parsed?.type !== 'message') continue;
+      const ts = new Date(parsed.timestamp).getTime();
+      if (!Number.isFinite(ts)) continue;
+      const role = parsed?.message?.role || null;
+      const usage = parsed?.message?.usage || null;
+
+      for (const [period, cutoff] of Object.entries(periods)) {
+        if (ts < cutoff) continue;
+        if (role === 'user' || role === 'assistant') windows[period].messages += 1;
+        if (role === 'assistant' && usage) {
+          windows[period].iterations += 1;
+          windows[period].tokens += Number(usage.totalTokens || 0);
+          windows[period].cost += Number(usage.cost?.total || 0);
+        }
+      }
+    }
+  }
+
+  return windows;
+}
+
 function collectSessions() {
   const index = readJson(sessionsIndexPath, {});
   const entries = Object.entries(index || {});
@@ -168,6 +210,7 @@ function collectSessions() {
     return {
       key,
       sessionId: value?.sessionId || null,
+      sessionFile: value?.sessionFile || null,
       model: usage?.model || value?.model || 'gpt-5.4',
       updatedAt: value?.updatedAt || null,
       usage,
@@ -195,6 +238,7 @@ function collectSessions() {
 
 async function collectRuntime() {
   const sessions = collectSessions();
+  const usageWindows = collectUsageWindows(sessions.sessions.map((session) => session.sessionFile).filter(Boolean));
   const gatewayProcess = detectGatewayProcess();
   const gatewayReachable = await probePort('127.0.0.1', 18789);
   const statusOutput = await getOpenclawStatusOutput();
@@ -244,6 +288,7 @@ async function collectRuntime() {
         totalCost,
         models: [...new Set(sessions.sessions.map((session) => session.model).filter(Boolean))]
       },
+      usageWindows,
       recent: sessions.sessions.slice(0, 5).map((session) => ({
         key: session.key,
         model: session.model,
