@@ -1,0 +1,293 @@
+{
+  "generatedAt": "2026-04-30T17:50:12.386Z",
+  "boards": [
+    {
+      "name": "PERSONAL",
+      "pending": 88,
+      "today": 0,
+      "blocked": 0
+    },
+    {
+      "name": "AMBBI",
+      "pending": 67,
+      "today": 0,
+      "blocked": 0
+    },
+    {
+      "name": "MANTENIMIENTO",
+      "pending": 85,
+      "today": 0,
+      "blocked": 0
+    },
+    {
+      "name": "GRINGO PMS",
+      "pending": 16,
+      "today": 0,
+      "blocked": 1
+    },
+    {
+      "name": "WISPY",
+      "pending": 4,
+      "today": 2,
+      "blocked": 0,
+      "synthetic": true
+    }
+  ],
+  "activity": [
+    {
+      "title": "Movimiento PERSONAL",
+      "body": "Hablar con ABOGADO Nacho · TAREAS DIARIAS",
+      "time": "trello",
+      "tone": "ok",
+      "at": "2026-04-30T17:48:03.067Z"
+    },
+    {
+      "title": "Movimiento PERSONAL",
+      "body": "PAGAR AIRDNA · TAREAS DIARIAS",
+      "time": "trello",
+      "tone": "ok",
+      "at": "2026-04-30T17:45:10.851Z"
+    },
+    {
+      "title": "Movimiento PERSONAL",
+      "body": "RESPUESTA ARABE SIRIA · TAREAS DIARIAS",
+      "time": "trello",
+      "tone": "ok",
+      "at": "2026-04-30T17:45:09.718Z"
+    },
+    {
+      "title": "Movimiento PERSONAL",
+      "body": "modificar pagares MARCELA fecha correcta · TAREAS DIARIAS",
+      "time": "trello",
+      "tone": "ok",
+      "at": "2026-04-29T23:39:41.464Z"
+    },
+    {
+      "title": "Movimiento PERSONAL",
+      "body": "pago 1006 sellos · TAREAS DIARIAS",
+      "time": "trello",
+      "tone": "ok",
+      "at": "2026-04-29T23:39:37.990Z"
+    },
+    {
+      "title": "Movimiento PERSONAL",
+      "body": "Mandarle a Gustavo el contrato de 908 · 🔥 URGENTE E IMPORTANTE →",
+      "time": "trello",
+      "tone": "ok",
+      "at": "2026-04-29T22:25:10.296Z"
+    },
+    {
+      "title": "Movimiento PERSONAL",
+      "body": "Mandarle a Nacho el informe de las propiedades · 🔥 URGENTE E IMPORTANTE →",
+      "time": "trello",
+      "tone": "ok",
+      "at": "2026-04-29T22:25:10.013Z"
+    },
+    {
+      "title": "Movimiento PERSONAL",
+      "body": "PAGO HOY A GRACIANA 201 · TAREAS DIARIAS",
+      "time": "trello",
+      "tone": "ok",
+      "at": "2026-04-29T11:45:07.664Z"
+    }
+  ],
+  "brokerage": {
+    "stats": {
+      "leads": 2,
+      "tasaciones": 3,
+      "publicaciones": 1,
+      "cierres": 7,
+      "docs": 4
+    },
+    "queue": [
+      {
+        "title": "Mandarle a Nacho el informe de las propiedades",
+        "module": "Tasación",
+        "nextStep": "Abrir card y bajar próximo paso exacto.",
+        "tone": "danger",
+        "due": "🔥 URGENTE E IMPORTANTE →"
+      },
+      {
+        "title": "Mandarle a Gustavo el contrato de 908",
+        "module": "Documental",
+        "nextStep": "Abrir card y bajar próximo paso exacto.",
+        "tone": "danger",
+        "due": "🔥 URGENTE E IMPORTANTE →"
+      },
+      {
+        "title": "modificar pagares MARCELA fecha correcta",
+        "module": "Documental",
+        "nextStep": "Abrir card y bajar próximo paso exacto.",
+        "tone": "warn",
+        "due": "TAREAS DIARIAS"
+      },
+      {
+        "title": "PROPUESTA 908",
+        "module": "Tasación",
+        "nextStep": "Abrir card y bajar próximo paso exacto.",
+        "tone": "warn",
+        "due": "TAREAS DIARIAS"
+      },
+      {
+        "title": "pago 1006 sellos",
+        "module": "Documental",
+        "nextStep": "Abrir card y bajar próximo paso exacto.",
+        "tone": "warn",
+        "due": "TAREAS DIARIAS"
+      }
+    ],
+    "alerts": [
+      {
+        "title": "Mandarle a Nacho el informe de las propiedades",
+        "body": "Está en urgente e importante dentro del Trello personal.",
+        "tone": "danger"
+      },
+      {
+        "title": "Mandarle a Gustavo el contrato de 908",
+        "body": "Está en urgente e importante dentro del Trello personal.",
+        "tone": "danger"
+      },
+      {
+        "title": "PROPUESTA 908",
+        "body": "Tema broker/documental activo dentro de tareas diarias.",
+        "tone": "warn"
+      },
+      {
+        "title": "pago 1006 sellos",
+        "body": "Tema broker/documental activo dentro de tareas diarias.",
+        "tone": "warn"
+      }
+    ],
+    "milestones": [],
+    "modules": [
+      {
+        "name": "Captación",
+        "count": 6,
+        "tone": "ok",
+        "cases": [
+          "♾️ BÚSQUEDAS ALQUILER",
+          "♾️ BÚSQUEDAS EMPRENDIMIENTOS",
+          "♾️ AMBAR RECOLETA"
+        ]
+      },
+      {
+        "name": "Tasación",
+        "count": 3,
+        "tone": "ok",
+        "cases": [
+          "Mandarle a Nacho el informe de las propiedades",
+          "PROPUESTA 908",
+          "♾️ TASACIONES"
+        ]
+      },
+      {
+        "name": "Comercialización",
+        "count": 1,
+        "tone": "ok",
+        "cases": [
+          "♾️ GRINGO ESTATE"
+        ]
+      },
+      {
+        "name": "Cierre",
+        "count": 4,
+        "tone": "danger",
+        "cases": [
+          "preparar reunion German",
+          "Hablar con susana VENTA",
+          "♾️ BÚSQUEDAS VENTA"
+        ]
+      },
+      {
+        "name": "Documental",
+        "count": 5,
+        "tone": "ok",
+        "cases": [
+          "Mandarle a Gustavo el contrato de 908",
+          "modificar pagares MARCELA fecha correcta",
+          "pago 1006 sellos"
+        ]
+      }
+    ],
+    "spotlight": {
+      "title": "Mandarle a Nacho el informe de las propiedades",
+      "type": "Caso real desde Trello personal",
+      "module": "Tasación",
+      "status": "En curso",
+      "semaphore": "Rojo",
+      "summary": "Abrir card y bajar próximo paso exacto.",
+      "nextStep": "Abrir card y bajar próximo paso exacto.",
+      "owner": "Franco",
+      "deadline": "🔥 URGENTE E IMPORTANTE →",
+      "chips": [
+        "Tasación",
+        "🔥 URGENTE E IMPORTANTE →"
+      ],
+      "moduleData": {
+        "captacion": [
+          "Lead tomado desde Trello personal",
+          "Hace falta bajar siguiente acción operativa"
+        ],
+        "tasacion": [
+          "Caso marcado para análisis comercial",
+          "Revisar comparables y criterio de precio"
+        ],
+        "comercializacion": [
+          "Confirmar material y salida premium si corresponde"
+        ],
+        "cierre": [
+          "Caso sensible dentro del funnel real",
+          "Revisar faltantes, fechas y responsables"
+        ],
+        "documental": [
+          "Revisar si toca contrato, sellos o soporte legal"
+        ]
+      },
+      "documents": [
+        {
+          "name": "Brokerage Core · sistema cerrado + handoffs finales",
+          "status": "definición WISPY"
+        },
+        {
+          "name": "Módulo Documental · cierre funcional v1",
+          "status": "definición WISPY"
+        },
+        {
+          "name": "Módulo Operación / Cierre · cierre funcional v1",
+          "status": "definición WISPY"
+        }
+      ],
+      "activity": [
+        "Card viva en 🔥 URGENTE E IMPORTANTE →",
+        "Abrir card y bajar próximo paso exacto.",
+        "Brokerage en panel · pantalla exacta v1"
+      ]
+    },
+    "activity": [
+      {
+        "title": "Mandarle a Nacho el informe de las propiedades",
+        "body": "Movimiento visible en 🔥 URGENTE E IMPORTANTE →",
+        "time": "trello",
+        "tone": "ok"
+      },
+      {
+        "title": "Mandarle a Gustavo el contrato de 908",
+        "body": "Movimiento visible en 🔥 URGENTE E IMPORTANTE →",
+        "time": "trello",
+        "tone": "ok"
+      },
+      {
+        "title": "modificar pagares MARCELA fecha correcta",
+        "body": "Movimiento visible en TAREAS DIARIAS",
+        "time": "trello",
+        "tone": "ok"
+      },
+      {
+        "title": "PROPUESTA 908",
+        "body": "Movimiento visible en TAREAS DIARIAS",
+        "time": "trello",
+        "tone": "ok"
+      }
+    ]
+  }
+}

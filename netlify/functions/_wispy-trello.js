@@ -3,8 +3,10 @@ const path = require('path');
 
 const workspaceRoot = path.resolve(__dirname, '..', '..', '..');
 const trelloRoot = path.join(workspaceRoot, 'trello');
+const dataRoot = path.join(workspaceRoot, 'gringoestate', 'data');
 const envFile = path.join(process.env.HOME || '', 'gringo-ai', '.env');
 const discoveredIdsPath = path.join(trelloRoot, 'discovered_ids.json');
+const trelloSnapshotPath = path.join(dataRoot, 'wispy-trello-snapshot.json');
 
 function readJson(filePath, fallback = null) {
   try {
@@ -76,11 +78,15 @@ function getSelectedBoards(discovered) {
   ].filter((item) => boards[item.key]?.id).map((item) => ({ ...item, id: boards[item.key].id }));
 }
 
+function readSnapshot() {
+  return readJson(trelloSnapshotPath, null);
+}
+
 async function getTrelloBoardsSnapshot() {
   const dotenv = readDotEnv(envFile);
   const key = getEnv('TRELLO_API_KEY', dotenv);
   const token = getEnv('TRELLO_TOKEN', dotenv);
-  if (!key || !token) return null;
+  if (!key || !token) return readSnapshot()?.boards || null;
 
   const discovered = readJson(discoveredIdsPath, {});
   const selected = getSelectedBoards(discovered);
@@ -142,7 +148,7 @@ async function getTrelloRecentActivity(limit = 8) {
   const dotenv = readDotEnv(envFile);
   const key = getEnv('TRELLO_API_KEY', dotenv);
   const token = getEnv('TRELLO_TOKEN', dotenv);
-  if (!key || !token) return [];
+  if (!key || !token) return (readSnapshot()?.activity || []).slice(0, limit);
 
   const discovered = readJson(discoveredIdsPath, {});
   const selected = getSelectedBoards(discovered);
@@ -207,7 +213,7 @@ async function getBrokeragePanelData() {
   const dotenv = readDotEnv(envFile);
   const key = getEnv('TRELLO_API_KEY', dotenv);
   const token = getEnv('TRELLO_TOKEN', dotenv);
-  if (!key || !token) return null;
+  if (!key || !token) return readSnapshot()?.brokerage || null;
 
   const discovered = readJson(discoveredIdsPath, {});
   const personalBoardId = discovered?.boards?.gringoestate_personal?.id;
@@ -324,5 +330,6 @@ module.exports = {
   getTrelloBoardsSnapshot,
   getTrelloRecentActivity,
   createTrelloCard,
-  getBrokeragePanelData
+  getBrokeragePanelData,
+  readSnapshot
 };
