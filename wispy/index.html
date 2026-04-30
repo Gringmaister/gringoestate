@@ -440,15 +440,16 @@
     .brokerage-case-meta,
     .brokerage-mini-label {
       color: var(--muted);
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
+      font-size: 0.69rem;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
     }
 
     .brokerage-kpi strong {
       display: block;
-      font-size: 1.8rem;
-      margin-top: 8px;
+      font-size: 1.25rem;
+      margin-top: 4px;
+      line-height: 1;
     }
 
     .brokerage-grid {
@@ -471,10 +472,10 @@
     .brokerage-module-card,
     .brokerage-milestone,
     .brokerage-tab {
-      border-radius: 16px;
+      border-radius: 14px;
       border: 1px solid rgba(255,255,255,0.07);
       background: rgba(255,255,255,0.02);
-      padding: 12px 14px;
+      padding: 10px 12px;
     }
 
     .brokerage-row,
@@ -499,7 +500,8 @@
     .brokerage-module-card strong,
     .brokerage-milestone strong,
     .brokerage-spotlight h3 {
-      font-size: 1rem;
+      font-size: 0.92rem;
+      line-height: 1.25;
     }
 
     .brokerage-case p,
@@ -509,18 +511,73 @@
     .brokerage-milestone p,
     .brokerage-spotlight p {
       color: var(--muted);
-      line-height: 1.5;
-      font-size: 0.92rem;
-      margin-top: 6px;
+      line-height: 1.35;
+      font-size: 0.82rem;
+      margin-top: 4px;
     }
 
     .brokerage-chip {
       border-radius: 999px;
       border: 1px solid rgba(212,166,64,0.18);
       background: rgba(212,166,64,0.08);
-      padding: 5px 9px;
-      font-size: 0.75rem;
+      padding: 4px 8px;
+      font-size: 0.7rem;
       color: #eadcc0;
+    }
+
+    .brokerage-kpi {
+      padding: 12px 14px;
+      min-height: 78px;
+    }
+
+    .brokerage-kpi.compact strong {
+      font-size: 1.05rem;
+    }
+
+    .brokerage-case-copy {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .brokerage-case-copy p,
+    .brokerage-module-card p {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .brokerage-actions.compact {
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .brokerage-actions.compact .ghost-button {
+      padding: 6px 9px;
+      font-size: 0.72rem;
+      min-height: 32px;
+    }
+
+    .brokerage-case-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brokerage-mini-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .brokerage-sidecard h3,
+    .brokerage-card h3 {
+      font-size: 0.98rem;
     }
 
     .brokerage-tab ul {
@@ -2675,13 +2732,12 @@
       const spotlight = brokerage.spotlight || {};
 
       brokerageKpis.innerHTML = [
-        ['Leads activos', stats.leads || 0],
-        ['Tasaciones abiertas', stats.tasaciones || 0],
-        ['Publicaciones activas', stats.publicaciones || 0],
-        ['Cierres vivos', stats.cierres || 0],
-        ['Docs pendientes', stats.docs || 0]
+        ['Leads', stats.leads || 0],
+        ['Tasaciones', stats.tasaciones || 0],
+        ['Cierres', stats.cierres || 0],
+        ['Docs', stats.docs || 0]
       ].map(([label, value]) => `
-        <div class="brokerage-kpi">
+        <div class="brokerage-kpi compact">
           <span>${label}</span>
           <strong>${value}</strong>
         </div>
@@ -2691,13 +2747,19 @@
       brokerageQueue.innerHTML = queue.map((item) => `
         <div class="brokerage-case">
           <div class="brokerage-row">
-            <strong>${item.title}</strong>
+            <div class="brokerage-case-copy">
+              <strong>${item.title}</strong>
+              <p>${item.nextStep || ''}</p>
+            </div>
             <span class="pill ${item.tone || ''}">${item.module || 'Caso'}</span>
           </div>
-          <p>${item.nextStep || ''}</p>
-          <div class="brokerage-row">
-            <span class="brokerage-case-meta">vence ${item.due || '—'}</span>
-            <button class="ghost-button brokerage-open-case" data-title="${item.title}">Abrir</button>
+          <div class="brokerage-case-foot">
+            <span class="brokerage-case-meta">${item.due || 'sin fecha'}</span>
+            <div class="brokerage-actions compact">
+              <button class="ghost-button brokerage-quick-action" data-title="${item.title}" data-action="estado">Estado</button>
+              <button class="ghost-button brokerage-quick-action" data-title="${item.title}" data-action="seguir">Seguir</button>
+              <button class="ghost-button brokerage-quick-action" data-title="${item.title}" data-action="doc">Doc</button>
+            </div>
           </div>
         </div>
       `).join('') || '<div class="brokerage-case"><strong>Sin casos</strong><p>No hay cola prioritaria cargada.</p></div>';
@@ -2709,6 +2771,10 @@
             <span class="pill ${item.tone || ''}">${item.count || 0}</span>
           </div>
           <p>${Array.isArray(item.cases) ? item.cases.slice(0, 2).join(' · ') : 'Sin casos destacados.'}</p>
+          <div class="brokerage-actions compact">
+            <button class="ghost-button brokerage-module-action" data-module="${item.name}" data-action="ver">Ver</button>
+            <button class="ghost-button brokerage-module-action" data-module="${item.name}" data-action="limpiar">Limpiar</button>
+          </div>
         </div>
       `).join('');
 
@@ -2724,6 +2790,10 @@
             <span class="pill ${item.tone || ''}">${item.tone || 'alerta'}</span>
           </div>
           <p>${item.body || ''}</p>
+          <div class="brokerage-actions compact">
+            <button class="ghost-button brokerage-alert-action" data-title="${item.title}" data-action="resolver">Resolver</button>
+            <button class="ghost-button brokerage-alert-action" data-title="${item.title}" data-action="mensaje">Mensaje</button>
+          </div>
         </div>
       `).join('') || '<div class="brokerage-case"><strong>Sin alertas</strong><p>No hay bloqueos cargados.</p></div>';
 
@@ -2757,9 +2827,37 @@
       brokerageSpotlightDocs.innerHTML = (Array.isArray(spotlight.documents) ? spotlight.documents : []).map((item) => `<li>${item.name} · ${item.status}</li>`).join('');
       brokerageSpotlightActivity.innerHTML = (Array.isArray(spotlight.activity) ? spotlight.activity : []).map((item) => `<li>${item}</li>`).join('');
 
-      document.querySelectorAll('.brokerage-open-case').forEach((button) => {
+      document.querySelectorAll('.brokerage-quick-action').forEach((button) => {
         button.addEventListener('click', () => {
-          composerInput.value = `Abrí el caso ${button.dataset.title} y bajame estado, bloqueo y próximo paso.`;
+          const title = button.dataset.title;
+          const action = button.dataset.action;
+          composerInput.value = action === 'estado'
+            ? `Dame estado, bloqueo y próximo paso del caso ${title}.`
+            : action === 'seguir'
+              ? `Preparame seguimiento concreto para ${title} con mensaje sugerido y próximo movimiento.`
+              : `Decime qué documento o soporte falta en ${title} y cómo resolverlo.`;
+          composerInput.focus();
+          actionModePill.textContent = 'loaded';
+        });
+      });
+
+      document.querySelectorAll('.brokerage-module-action').forEach((button) => {
+        button.addEventListener('click', () => {
+          const mod = button.dataset.module;
+          composerInput.value = button.dataset.action === 'ver'
+            ? `Mostrame cola, urgencias y próximo paso del módulo ${mod}.`
+            : `Decime cómo limpiar y ordenar el módulo ${mod} con criterio ejecutivo.`;
+          composerInput.focus();
+          actionModePill.textContent = 'loaded';
+        });
+      });
+
+      document.querySelectorAll('.brokerage-alert-action').forEach((button) => {
+        button.addEventListener('click', () => {
+          const title = button.dataset.title;
+          composerInput.value = button.dataset.action === 'resolver'
+            ? `Resolvé la alerta ${title} con pasos concretos.`
+            : `Redactame mensaje corto para destrabar ${title}.`;
           composerInput.focus();
           actionModePill.textContent = 'loaded';
         });
