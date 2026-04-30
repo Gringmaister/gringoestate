@@ -674,6 +674,90 @@
       margin-bottom: 8px;
     }
 
+    .brain-section {
+      border-radius: 26px;
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(circle at top right, rgba(212,166,64,0.08), transparent 26%),
+        linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.02));
+      box-shadow: var(--shadow);
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .brain-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brain-stream {
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(0,0,0,0.2);
+      padding: 14px;
+      min-height: 160px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .brain-line {
+      display: grid;
+      grid-template-columns: 118px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .brain-line:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .brain-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #b4a58a;
+    }
+
+    .brain-value {
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .brain-tape {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .brain-chip {
+      border-radius: 14px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .brain-chip span {
+      display: block;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #b4a58a;
+      margin-bottom: 6px;
+    }
+
+    .brain-chip strong {
+      display: block;
+      color: var(--text);
+      font-size: 0.98rem;
+    }
+
     .hero-rail-card h3 {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 1.6rem;
@@ -1217,7 +1301,7 @@
     <section class="top-grid" id="topGrid">
       <article class="top-card">
         <span class="metric-label">⚡ Gateway</span>
-        <div class="metric-row"><strong class="metric-value">Cargando</strong><span class="status-dot ok">sync</span></div>
+        <div class="metric-row"><strong class="metric-value">Cargando</strong><span class="status-dot ok">vivo</span></div>
         <p class="metric-note">Trayendo estado del sistema.</p>
       </article>
     </section>
@@ -1283,6 +1367,28 @@
       </aside>
     </section>
 
+    <section class="brain-section" id="brainSection">
+      <div class="brain-head">
+        <div class="card-title-text">
+          <div class="dual-kicker">CEREBRO / WISPY LIVE</div>
+          <h3>🧠 El Cerebro de Wispy</h3>
+        </div>
+        <span class="pill" id="brainStatusPill">en espera</span>
+      </div>
+      <div class="brain-stream" id="brainStream">
+        <div class="brain-line"><span class="brain-label">Ahora</span><div class="brain-value" id="brainNow">Esperando próxima instrucción o sincronización.</div></div>
+        <div class="brain-line"><span class="brain-label">Resolviendo</span><div class="brain-value" id="brainTask">Sin tarea en curso.</div></div>
+        <div class="brain-line"><span class="brain-label">Hablando con</span><div class="brain-value" id="brainTarget">Franco / panel privado</div></div>
+        <div class="brain-line"><span class="brain-label">Último movimiento</span><div class="brain-value" id="brainLastMove">Sin movimiento relevante todavía.</div></div>
+      </div>
+      <div class="brain-tape">
+        <div class="brain-chip"><span>Modo</span><strong id="brainModeChip">Espera</strong></div>
+        <div class="brain-chip"><span>Chat</span><strong id="brainChatChip">Ready</strong></div>
+        <div class="brain-chip"><span>Acción</span><strong id="brainActionChip">Ready</strong></div>
+        <div class="brain-chip"><span>Bridge</span><strong id="brainBridgeChip">Sin enlace</strong></div>
+      </div>
+    </section>
+
     <section class="analytics-grid" id="analyticsSection">
       <article class="chart-card">
           <div class="chart-head">
@@ -1319,7 +1425,7 @@
               <div class="dual-kicker">SISTEMA / MICRO DASHBOARD</div>
               <h3>🧭 Equipo + Smart Home</h3>
             </div>
-            <span class="pill ok" id="miniDashboardPill">ready</span>
+            <span class="pill ok" id="miniDashboardPill">listo</span>
           </div>
           <div class="mini-grid">
             <div class="mini-grid-item"><span>Colaboradores</span><strong id="miniTeamValue">—</strong></div>
@@ -1563,7 +1669,7 @@
 
       <article class="runtime-card">
         <div class="runtime-head">
-          <h3>Skills / Runtime</h3>
+          <h3>Skills / Estado</h3>
           <span class="pill" id="runtimePill">sync</span>
         </div>
         <div class="runtime-list" id="runtimeFeed"></div>
@@ -1606,6 +1712,16 @@
     const heroSignalFocus = document.getElementById('heroSignalFocus');
     const heroSignalFollowUp = document.getElementById('heroSignalFollowUp');
     const heroSignalRisk = document.getElementById('heroSignalRisk');
+    const brainSection = document.getElementById('brainSection');
+    const brainStatusPill = document.getElementById('brainStatusPill');
+    const brainNow = document.getElementById('brainNow');
+    const brainTask = document.getElementById('brainTask');
+    const brainTarget = document.getElementById('brainTarget');
+    const brainLastMove = document.getElementById('brainLastMove');
+    const brainModeChip = document.getElementById('brainModeChip');
+    const brainChatChip = document.getElementById('brainChatChip');
+    const brainActionChip = document.getElementById('brainActionChip');
+    const brainBridgeChip = document.getElementById('brainBridgeChip');
     const notifBtn = document.getElementById('notifBtn');
     const notifBadge = document.getElementById('notifBadge');
     const notifDropdown = document.getElementById('notifDropdown');
@@ -1682,6 +1798,19 @@
       heroThinkingPill.textContent = labels[mode] || mode;
       heroThinkingPill.className = `pill ${mode === 'thinking' ? 'warn' : mode === 'error' ? 'danger' : 'ok'}`;
       heroThinkingBody.textContent = detail;
+      brainStatusPill.textContent = labels[mode] || mode;
+      brainStatusPill.className = `pill ${mode === 'thinking' ? 'warn' : mode === 'error' ? 'danger' : 'ok'}`;
+      brainNow.textContent = detail;
+      brainModeChip.textContent = labels[mode] || mode;
+    }
+
+    function setBrainContext(patch = {}) {
+      if (patch.task) brainTask.textContent = patch.task;
+      if (patch.target) brainTarget.textContent = patch.target;
+      if (patch.lastMove) brainLastMove.textContent = patch.lastMove;
+      if (patch.chat) brainChatChip.textContent = patch.chat;
+      if (patch.action) brainActionChip.textContent = patch.action;
+      if (patch.bridge) brainBridgeChip.textContent = patch.bridge;
     }
 
     function setupDashboardShell() {
@@ -1715,6 +1844,7 @@
 
       topGrid.classList.add('view-panel', 'view-home');
       heroDeck.classList.add('view-panel', 'view-home');
+      brainSection.classList.add('view-panel', 'view-home');
       analyticsSection.classList.add('view-panel', 'view-home');
       opsSection.classList.add('view-panel', 'view-ops', 'hidden');
       notificationsSection.classList.add('view-panel', 'view-ops', 'hidden');
@@ -1727,7 +1857,7 @@
       mainGrid.before(shell);
       shell.append(leftSidebar, workspaceMain);
       leftSidebar.appendChild(sideStack);
-      workspaceMain.append(topGrid, heroDeck, analyticsSection, opsSection, collaboratorsSection, pipelineSection, modulesSection, runtimeSection, smartHomeSection);
+      workspaceMain.append(topGrid, heroDeck, brainSection, analyticsSection, opsSection, collaboratorsSection, pipelineSection, modulesSection, runtimeSection, smartHomeSection);
       mainGrid.remove();
 
       leftSidebar.querySelectorAll('.nav-btn').forEach((button) => {
@@ -1999,6 +2129,13 @@
       heroSignalRisk.textContent = blocked > 0
         ? `${blocked} bloqueo(s) abiertos en foco.`
         : (firstAlert?.title || 'No hay un riesgo levantado todavía.');
+
+      setBrainContext({
+        task: focusItems[0]?.body || inboxItems[0]?.summary || 'Sin tarea dominante cargada.',
+        target: 'Franco / panel privado',
+        lastMove: firstAlert?.body || inboxItems[0]?.nextStep || 'Esperando próximo movimiento fuerte.',
+        bridge: bridgePending ? 'Sin enlace' : 'En vivo'
+      });
     }
 
     function renderInbox(items, meta = {}) {
@@ -2346,12 +2483,18 @@
         heroUsageValue.textContent = sessionUsagePill.textContent;
         actionModePill.textContent = 'sync';
         setThinkingState('idle', 'Panel sincronizado.');
+        setBrainContext({
+          lastMove: 'Sincronización completa del Home y módulos.',
+          action: 'Sincronizado',
+          bridge: data.runtimeTelemetry?.pending ? 'Sin enlace' : 'En vivo'
+        });
       } catch {
         actionModePill.textContent = 'error';
         sessionUsagePill.textContent = 'error de uso';
         heroUsageValue.textContent = 'error de uso';
         composerOutput.textContent = 'No pude traer el estado vivo del panel ahora.';
         setThinkingState('error', 'No pude sincronizar el panel en vivo.');
+        setBrainContext({ lastMove: 'Falló la sincronización del panel.', action: 'Error' });
       } finally {
         refreshPanelBtn.textContent = 'Actualizar';
       }
@@ -2446,6 +2589,12 @@
       chatInput.value = '';
       chatModePill.textContent = 'live';
       setThinkingState('thinking', 'Wispy está procesando el chat y armando respuesta.');
+      setBrainContext({
+        task: `Responder chat: ${message.slice(0, 120)}`,
+        target: 'Franco / chat del panel',
+        lastMove: 'Entró un mensaje nuevo al cerebro de Wispy.',
+        chat: 'Procesando'
+      });
 
       try {
         const response = await fetch('/.netlify/functions/wispy-panel-chat', {
@@ -2461,12 +2610,14 @@
         renderChatHistory(Array.isArray(data.items) ? data.items : chatHistory);
         chatModePill.textContent = data.mode || 'live';
         setThinkingState('idle', 'Respuesta lista.');
+        setBrainContext({ lastMove: 'Respuesta entregada al chat del panel.', chat: 'Listo' });
       } catch {
         const fallback = 'No pude pegarle al chat real ahora. Reintentá en un segundo.';
         renderChatMessage('assistant', fallback);
         chatHistory.push({ role: 'assistant', content: fallback });
         chatModePill.textContent = 'error';
         setThinkingState('error', 'Falló el chat en vivo.');
+        setBrainContext({ lastMove: 'El chat falló y quedó en fallback.', chat: 'Error' });
       }
     }
 
@@ -2480,6 +2631,12 @@
       composerOutput.textContent = 'Procesando acción...';
       actionModePill.textContent = 'running';
       setThinkingState('thinking', 'Wispy está bajando el pedido a acción ejecutiva.');
+      setBrainContext({
+        task: `Resolver pedido: ${raw.slice(0, 120)}`,
+        target: 'Motor de acciones / Ops',
+        lastMove: 'Entró una acción nueva para ejecutar.',
+        action: 'Procesando'
+      });
 
       try {
         const response = await fetch('/.netlify/functions/wispy-panel-action', {
@@ -2492,10 +2649,12 @@
         composerOutput.textContent = data.output;
         actionModePill.textContent = 'done';
         setThinkingState('idle', 'Acción procesada.');
+        setBrainContext({ lastMove: 'Acción resuelta y bajada al panel.', action: 'Listo' });
       } catch {
         composerOutput.textContent = buildExecutiveBrief(raw);
         actionModePill.textContent = 'fallback';
         setThinkingState('error', 'No pude correr la acción real; quedó fallback ejecutivo.');
+        setBrainContext({ lastMove: 'La acción cayó a fallback ejecutivo.', action: 'Fallback' });
       }
     });
 
