@@ -1180,8 +1180,8 @@
 
   <main class="workspace private-only">
     <section class="system-bar">
-      <div class="system-brand mono"><strong>WISPY</strong><span>runtime live</span></div>
-      <div class="system-tile mono"><span>sistema</span><strong id="systemHealthValue">sync</strong></div>
+      <div class="system-brand mono"><strong>WISPY</strong><span>runtime en vivo</span></div>
+      <div class="system-tile mono"><span>sistema</span><strong id="systemHealthValue">cargando</strong></div>
       <div class="system-tile mono"><span>bridge</span><strong id="systemBridgeValue">pendiente</strong></div>
       <div class="system-tile mono"><span>foco</span><strong id="systemFocusValue">0 activos</strong></div>
       <div class="system-tile mono"><span>inbox</span><strong id="systemInboxValue">0 abiertos</strong></div>
@@ -1199,7 +1199,7 @@
       <div class="top-actions">
         <span class="pill warn" id="panelVersionPill">v0.2.0 · stage 2</span>
         <span class="pill" id="panelLockState">Privado</span>
-        <span class="pill" id="sessionUsagePill">usage —</span>
+        <span class="pill" id="sessionUsagePill">uso —</span>
         <div class="notif-wrap">
           <button class="ghost-button notif-btn" id="notifBtn" type="button">🔔<span class="notif-badge" id="notifBadge">0</span></button>
           <div class="notif-dropdown hidden" id="notifDropdown">
@@ -1277,7 +1277,7 @@
           <div class="hero-line"><strong class="mono">🔌 RUNTIME BRIDGE</strong><span class="pill" id="heroBridgePill">sync</span></div>
           <p id="heroBridgeBody" class="text-muted">Estado del enlace entre Netlify y el runtime real.</p>
           <div class="hero-line" style="margin-top:10px"><span>Uso sesión</span><span id="heroUsageValue" class="mono">—</span></div>
-          <div class="hero-line" style="margin-top:10px"><span>Thinking</span><span id="heroThinkingPill" class="pill">idle</span></div>
+          <div class="hero-line" style="margin-top:10px"><span>Proceso</span><span id="heroThinkingPill" class="pill">en espera</span></div>
           <p id="heroThinkingBody" class="text-muted" style="margin-top:8px">Cuando Wispy procese algo, te lo marco acá.</p>
         </section>
       </aside>
@@ -1287,10 +1287,10 @@
       <article class="chart-card">
           <div class="chart-head">
             <div class="card-title-text">
-              <div class="dual-kicker">HOME / EXECUTIVE GRAPH</div>
+              <div class="dual-kicker">HOME / CONSUMO EJECUTIVO</div>
               <h3>📈 Consumo de Tokens</h3>
             </div>
-            <span class="pill" id="trendPill">live</span>
+            <span class="pill" id="trendPill">en vivo</span>
           </div>
         <div class="chart-stage" id="trendChartStage"></div>
         <div class="chart-footer">
@@ -1304,7 +1304,7 @@
         <article class="chart-card">
           <div class="chart-head">
             <div class="card-title-text">
-              <div class="dual-kicker">PIPELINE / DISTRIBUTION</div>
+              <div class="dual-kicker">PIPELINE / DISTRIBUCIÓN</div>
               <h3>🏢 Pipeline por Etapa</h3>
             </div>
             <span class="pill" id="pipelineChartPill">ops</span>
@@ -1316,16 +1316,16 @@
         <article class="chart-card">
           <div class="chart-head">
             <div class="card-title-text">
-              <div class="dual-kicker">SYSTEM / MICRO DASHBOARD</div>
-              <h3>🧭 Team + Smart Home</h3>
+              <div class="dual-kicker">SISTEMA / MICRO DASHBOARD</div>
+              <h3>🧭 Equipo + Smart Home</h3>
             </div>
             <span class="pill ok" id="miniDashboardPill">ready</span>
           </div>
           <div class="mini-grid">
             <div class="mini-grid-item"><span>Colaboradores</span><strong id="miniTeamValue">—</strong></div>
             <div class="mini-grid-item"><span>SLA vencidos</span><strong id="miniSlaValue">—</strong></div>
-            <div class="mini-grid-item"><span>Smart Home</span><strong id="miniSmartValue">seed mode</strong></div>
-            <div class="mini-grid-item"><span>Bridge</span><strong id="miniBridgeValue">—</strong></div>
+            <div class="mini-grid-item"><span>Smart Home</span><strong id="miniSmartValue">modo semilla</strong></div>
+            <div class="mini-grid-item"><span>Enlace</span><strong id="miniBridgeValue">—</strong></div>
           </div>
         </article>
       </div>
@@ -1489,7 +1489,7 @@
         <section class="side-card" id="collaboratorsSection">
           <div class="card-title row-between">
             <div class="card-title-text">
-              <div class="dual-kicker">TEAM / COLLABORATORS</div>
+              <div class="dual-kicker">EQUIPO / COLABORADORES</div>
               <h3>👥 Colaboradores</h3>
             </div>
             <span class="pill" id="collaboratorCountPill">0</span>
@@ -1536,7 +1536,7 @@
               <div class="dual-kicker">SMART HOME / CONTROL</div>
               <h3>🏠 Smart Home</h3>
             </div>
-            <span class="pill" id="smartHomePill">seed</span>
+            <span class="pill" id="smartHomePill">semilla</span>
           </div>
           <div class="list-stack" id="smartHomeFeed">
             <div class="list-item">
@@ -1555,7 +1555,7 @@
     <section class="log-grid" id="runtimeSection">
       <article class="log-card">
         <div class="runtime-head">
-          <h3>Consola Live</h3>
+          <h3>Consola en Vivo</h3>
           <span class="pill" id="logCountPill">0 eventos</span>
         </div>
         <div class="log-list" id="logFeed"></div>
@@ -1678,7 +1678,8 @@
     let currentWorkspaceView = 'home';
 
     function setThinkingState(mode = 'idle', detail = 'Cuando Wispy procese algo, te lo marco acá.') {
-      heroThinkingPill.textContent = mode;
+      const labels = { idle: 'en espera', thinking: 'procesando', error: 'error' };
+      heroThinkingPill.textContent = labels[mode] || mode;
       heroThinkingPill.className = `pill ${mode === 'thinking' ? 'warn' : mode === 'error' ? 'danger' : 'ok'}`;
       heroThinkingBody.textContent = detail;
     }
@@ -1833,7 +1834,7 @@
           <span class="metric-label">${decorateMetricLabel(item.label)}</span>
           <div class="metric-row">
             <strong class="metric-value ${item.tone || ''}">${item.value}</strong>
-            <span class="status-dot ${item.tone || 'ok'}">${item.badge || 'live'}</span>
+            <span class="status-dot ${item.tone || 'ok'}">${item.badge || 'vivo'}</span>
           </div>
           <p class="metric-note">${item.note || ''}</p>
         </article>
@@ -1921,8 +1922,8 @@
       const overdue = collaborators.filter((item) => item.overdue).length;
       miniTeamValue.textContent = `${collaborators.length} activos`;
       miniSlaValue.textContent = `${overdue} vencidos`;
-      miniSmartValue.textContent = 'Hue + Xiaomi seed';
-      miniBridgeValue.textContent = data.runtimeTelemetry?.pending ? 'sin enlace' : 'live';
+      miniSmartValue.textContent = 'Hue + Xiaomi listo';
+      miniBridgeValue.textContent = data.runtimeTelemetry?.pending ? 'sin enlace' : 'vivo';
     }
 
     notifBtn.addEventListener('click', () => {
@@ -1946,7 +1947,10 @@
       const unprocessed = normalizeCount(data.inboxMeta?.unprocessed, inboxItems.length);
       const audioLike = normalizeCount(data.inboxMeta?.audioLike, 0);
       const firstAlert = notifications[0] || null;
-      const runtimeSummary = data.runtimeSummary?.status || data.runtimeTelemetry?.source || 'sync';
+      const runtimeSummaryRaw = data.runtimeSummary?.status || data.runtimeTelemetry?.source || 'sync';
+      const runtimeSummary = runtimeSummaryRaw === 'local-openclaw'
+        ? 'runtime local'
+        : runtimeSummaryRaw.replace(/-/g, ' ');
       const gatewayCard = (data.snapshot || []).find((item) => /gateway/i.test(item.label || ''));
       const currentSession = data.runtimeTelemetry?.sessions?.current;
       const aggregate = data.runtimeTelemetry?.sessions?.aggregate;
@@ -2337,15 +2341,15 @@
         renderMiniDashboard(data);
         const currentSession = data.runtimeTelemetry?.sessions?.current;
         sessionUsagePill.textContent = currentSession
-          ? `${currentSession.totalTokens} tok · ${currentSession.costTotal?.toFixed ? '$' + currentSession.costTotal.toFixed(2) : 'usage'}`
-          : 'usage —';
+          ? `${currentSession.totalTokens} tok · ${currentSession.costTotal?.toFixed ? '$' + currentSession.costTotal.toFixed(2) : 'uso'}`
+          : 'uso —';
         heroUsageValue.textContent = sessionUsagePill.textContent;
         actionModePill.textContent = 'sync';
         setThinkingState('idle', 'Panel sincronizado.');
       } catch {
         actionModePill.textContent = 'error';
-        sessionUsagePill.textContent = 'usage error';
-        heroUsageValue.textContent = 'usage error';
+        sessionUsagePill.textContent = 'error de uso';
+        heroUsageValue.textContent = 'error de uso';
         composerOutput.textContent = 'No pude traer el estado vivo del panel ahora.';
         setThinkingState('error', 'No pude sincronizar el panel en vivo.');
       } finally {
