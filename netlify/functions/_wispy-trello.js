@@ -8,6 +8,12 @@ const dataRoot = path.join(repoRoot, 'data');
 const envFile = path.join(process.env.HOME || '', 'gringo-ai', '.env');
 const discoveredIdsPath = path.join(trelloRoot, 'discovered_ids.json');
 const trelloSnapshotPath = path.join(dataRoot, 'wispy-trello-snapshot.json');
+let bundledSnapshot = null;
+try {
+  bundledSnapshot = require('../../data/wispy-trello-snapshot.json');
+} catch {
+  bundledSnapshot = null;
+}
 
 function readJson(filePath, fallback = null) {
   try {
@@ -80,7 +86,7 @@ function getSelectedBoards(discovered) {
 }
 
 function readSnapshot() {
-  return readJson(trelloSnapshotPath, null);
+  return readJson(trelloSnapshotPath, null) || bundledSnapshot;
 }
 
 async function getTrelloBoardsSnapshot() {
