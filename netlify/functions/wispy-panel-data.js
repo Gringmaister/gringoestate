@@ -3,6 +3,12 @@ const { getRuntimeTelemetry } = require('./_wispy-runtime');
 const { getTrelloBoardsSnapshot, getTrelloRecentActivity, getBrokeragePanelData } = require('./_wispy-trello');
 const { getModuleRegistry } = require('./_wispy-modules');
 const { proxyPortableApi } = require('./_wispy-portable-proxy');
+let bundledTrelloSnapshot = null;
+try {
+  bundledTrelloSnapshot = require('../../data/wispy-trello-snapshot.json');
+} catch {
+  bundledTrelloSnapshot = null;
+}
 
 function countBlockedFocus(focus = []) {
   return focus.filter((item) => item.status === 'blocked').length;
@@ -116,6 +122,7 @@ exports.handler = async function (event = {}) {
   const trelloBoards = await getTrelloBoardsSnapshot().catch(() => null);
   const trelloActivity = await getTrelloRecentActivity(6).catch(() => []);
   const brokeragePanel = await getBrokeragePanelData().catch(() => null);
+  const snapshotFallback = bundledTrelloSnapshot || {};
   const modules = getModuleRegistry();
 
   const openInbox = inbox.filter((item) => item.status !== 'done');
@@ -172,7 +179,9 @@ exports.handler = async function (event = {}) {
   const collaborators = enrichCollaborators(Array.isArray(context.collaborators) ? context.collaborators : []);
   const boards = Array.isArray(trelloBoards) && trelloBoards.length
     ? trelloBoards
-    : (Array.isArray(context.boards) ? context.boards : []);
+    : (Array.isArray(snapshotFallback.boards) && snapshotFallback.boards.length
+      ? snapshotFallback.boards
+      : (Array.isArray(context.boards) ? context.boards : []));
   const pipeline = buildPipeline(context, boards);
   const actionLog = getActionLog();
   let bugJournal = getBugJournal();
@@ -193,7 +202,7 @@ exports.handler = async function (event = {}) {
   }] : [];
   const liveLog = [
     ...actionLog,
-    ...trelloActivity,
+    ...(Array.isArray(trelloActivity) && trelloActivity.length ? trelloActivity : ((snapshotFallback.activity || []).slice(0, 6))),
     ...(Array.isArray(context.liveLog) ? context.liveLog : []),
     ...((runtimeTelemetry?.liveLogItems) || []),
     ...bridgeAlert,
@@ -283,7 +292,7 @@ exports.handler = async function (event = {}) {
         status: runtimeTelemetry?.source || 'seed'
       },
       runtimeTelemetry,
-      brokerage: brokeragePanel || context.brokerage || {},
+      brokerage: brokeragePanel || snapshotFallback.brokerage || context.brokerage || {},
       source: {
         portfolio: context.portfolio,
         prioritiesCount: (context.priorities || []).length,
