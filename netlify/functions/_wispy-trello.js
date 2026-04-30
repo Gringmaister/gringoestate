@@ -64,6 +64,8 @@ async function trelloFetch(url, options = {}) {
   return await response.json();
 }
 
+const WISPY_BOARD_ID = '69efaaa0c87c7dc98b43653e';
+
 function getSelectedBoards(discovered) {
   const boards = discovered?.boards || {};
   return [
@@ -181,8 +183,146 @@ async function getTrelloRecentActivity(limit = 8) {
     }));
 }
 
+function normalizeText(value = '') {
+  return String(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+function isBrokerRelated(name = '') {
+  return /(tasacion|tasaciones|busqueda|busquedas|venta|alquiler|propuesta|contrato|pagares|pagare|sellos|cierre|gringo estate|referido|informe|abogado|reunion)/i.test(name);
+}
+
+function pickModule(name = '') {
+  const text = normalizeText(name);
+  if (/(tasacion|tasaciones|informe|propuesta)/.test(text)) return 'Tasación';
+  if (/(gringo estate|fotos|render|copy|publica|aviso|staging|dron)/.test(text)) return 'Comercialización';
+  if (/(contrato|pagare|pagares|sellos|boleto|reserva|escritur|abogado)/.test(text)) return 'Documental';
+  if (/(cierre|reunion|venta|propuesta|abogado|sellos)/.test(text)) return 'Cierre';
+  return 'Captación';
+}
+
+async function getBrokeragePanelData() {
+  const dotenv = readDotEnv(envFile);
+  const key = getEnv('TRELLO_API_KEY', dotenv);
+  const token = getEnv('TRELLO_TOKEN', dotenv);
+  if (!key || !token) return null;
+
+  const discovered = readJson(discoveredIdsPath, {});
+  const personalBoardId = discovered?.boards?.gringoestate_personal?.id;
+  if (!personalBoardId) return null;
+
+  const params = new URLSearchParams({
+    key,
+    token,
+    cards: 'open',
+    card_fields: 'name,idList,due,dueComplete,labels,dateLastActivity,desc',
+    lists: 'open',
+    list_fields: 'name',
+    fields: 'name'
+  }).toString();
+
+  const [personal, wispy] = await Promise.all([
+    trelloFetch(`https://api.trello.com/1/boards/${personalBoardId}?${params}`),
+    trelloFetch(`https://api.trello.com/1/boards/${WISPY_BOARD_ID}?${params}`).catch(() => null)
+  ]);
+
+  const personalLists = Object.fromEntries((personal.lists || []).map((item) => [item.id, item.name]));
+  const allPersonalCards = personal.cards || [];
+  const brokerListCards = allPersonalCards.filter((card) => personalLists[card.idList] === 'BROKER / OPERACIONES');
+  const urgentCards = allPersonalCards.filter((card) => personalLists[card.idList] === '🔥 URGENTE E IMPORTANTE →' && isBrokerRelated(card.name));
+  const dailyBrokerCards = allPersonalCards.filter((card) => personalLists[card.idList] === 'TAREAS DIARIAS' && isBrokerRelated(card.name));
+  const brokerUniverse = [...urgentCards, ...dailyBrokerCards, ...brokerListCards].filter((card, index, arr) => arr.findIndex((x) => x.id === card.id) === index);
+
+  const wLists = Object.fromEntries(((wispy && wispy.lists) || []).map((item) => [item.id, item.name]));
+  const wCards = (wispy && wispy.cards) || [];
+  const moduleCards = wCards.filter((card) => wLists[card.idList] === 'MEJORAS OPERATIVAS' && /Módulo|Brokerage Core|Épica/.test(card.name));
+  const panelCards = wCards.filter((card) => wLists[card.idList] === 'PANEL / UI' && /Brokerage|panel/i.test(card.name));
+
+  const stats = {
+    leads: brokerUniverse.filter((card) => /(busqueda|referido|gringo estate|posibles negocios)/i.test(card.name)).length || brokerListCards.length,
+    tasaciones: brokerUniverse.filter((card) => /(tasacion|tasaciones|propuesta|informe)/i.test(card.name)).length,
+    publicaciones: brokerUniverse.filter((card) => /(gringo estate|aviso|publica|fotos|render|copy)/i.test(card.name)).length || panelCards.length,
+    cierres: brokerUniverse.filter((card) => /(cierre|contrato|sellos|abogado|propuesta|reunion)/i.test(card.name)).length,
+    docs: brokerUniverse.filter((card) => /(contrato|pagare|pagares|sellos|boleto|reserva|escritur)/i.test(card.name)).length
+  };
+
+  const queue = brokerUniverse.slice(0, 5).map((card) => ({
+    title: card.name,
+    module: pickModule(card.name),
+    nextStep: card.desc ? card.desc.split('\n')[0].slice(0, 120) : 'Abrir card y bajar próximo paso exacto.',
+    tone: personalLists[card.idList] === '🔥 URGENTE E IMPORTANTE →' ? 'danger' : 'warn',
+    due: card.due ? new Date(card.due).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }) : personalLists[card.idList]
+  }));
+
+  const alerts = [
+    ...urgentCards.slice(0, 2).map((card) => ({ title: card.name, body: 'Está en urgente e importante dentro del Trello personal.', tone: 'danger' })),
+    ...dailyBrokerCards.filter((card) => /(contrato|sellos|abogado|propuesta)/i.test(card.name)).slice(0, 2).map((card) => ({ title: card.name, body: 'Tema broker/documental activo dentro de tareas diarias.', tone: 'warn' }))
+  ].slice(0, 4);
+
+  const milestones = brokerUniverse.filter((card) => card.due).sort((a, b) => new Date(a.due) - new Date(b.due)).slice(0, 4).map((card) => ({
+    title: card.name,
+    when: new Date(card.due).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+  }));
+
+  const modules = ['Captación', 'Tasación', 'Comercialización', 'Cierre', 'Documental'].map((name) => {
+    const cases = brokerUniverse.filter((card) => pickModule(card.name) === name).slice(0, 3).map((card) => card.name);
+    return {
+      name,
+      count: brokerUniverse.filter((card) => pickModule(card.name) === name).length,
+      tone: name === 'Cierre' && cases.length ? 'danger' : (cases.length ? 'ok' : 'warn'),
+      cases
+    };
+  });
+
+  const spotlightCard = queue[0];
+  const spotlightSource = brokerUniverse[0];
+  const spotlight = spotlightCard ? {
+    title: spotlightCard.title,
+    type: 'Caso real desde Trello personal',
+    module: spotlightCard.module,
+    status: spotlightCard.module === 'Cierre' ? 'Activo' : 'En curso',
+    semaphore: spotlightCard.tone === 'danger' ? 'Rojo' : 'Amarillo',
+    summary: spotlightCard.nextStep,
+    nextStep: spotlightCard.nextStep,
+    owner: 'Franco',
+    deadline: spotlightCard.due || 'sin fecha',
+    chips: [spotlightCard.module, personalLists[spotlightSource.idList] || 'Trello'],
+    moduleData: {
+      captacion: ['Lead tomado desde Trello personal', 'Hace falta bajar siguiente acción operativa'],
+      tasacion: ['Caso marcado para análisis comercial', 'Revisar comparables y criterio de precio'],
+      comercializacion: ['Confirmar material y salida premium si corresponde'],
+      cierre: ['Caso sensible dentro del funnel real', 'Revisar faltantes, fechas y responsables'],
+      documental: ['Revisar si toca contrato, sellos o soporte legal']
+    },
+    documents: moduleCards.slice(0, 3).map((card) => ({ name: card.name, status: 'definición WISPY' })),
+    activity: [
+      `Card viva en ${personalLists[spotlightSource.idList] || 'Trello personal'}`,
+      spotlightCard.nextStep,
+      panelCards[0]?.name || 'Vista brokerage en construcción activa.'
+    ]
+  } : null;
+
+  return {
+    stats,
+    queue,
+    alerts,
+    milestones,
+    modules,
+    spotlight,
+    activity: brokerUniverse.slice(0, 4).map((card) => ({
+      title: card.name,
+      body: `Movimiento visible en ${personalLists[card.idList] || 'Trello personal'}`,
+      time: 'trello',
+      tone: 'ok'
+    }))
+  };
+}
+
 module.exports = {
   getTrelloBoardsSnapshot,
   getTrelloRecentActivity,
-  createTrelloCard
+  createTrelloCard,
+  getBrokeragePanelData
 };

@@ -250,7 +250,8 @@ function getContextData() {
       runtime: Array.isArray(seeded.runtime) ? seeded.runtime : [],
       liveLog: Array.isArray(seeded.liveLog) ? seeded.liveLog : [],
       daily: Array.isArray(seeded.daily) ? seeded.daily : [],
-      communication: Array.isArray(seeded.communication) ? seeded.communication : []
+      communication: Array.isArray(seeded.communication) ? seeded.communication : [],
+      brokerage: seeded.brokerage && typeof seeded.brokerage === 'object' ? seeded.brokerage : {}
     };
   }
 
@@ -273,7 +274,8 @@ function getContextData() {
     runtime: [],
     liveLog: [],
     daily: getLatestDailyMemorySnippet(),
-    communication: extractBullets('COMUNICACIÓN Y "VIBE" ARGENTINO', memoryMd, 3)
+    communication: extractBullets('COMUNICACIÓN Y "VIBE" ARGENTINO', memoryMd, 3),
+    brokerage: {}
   };
 }
 

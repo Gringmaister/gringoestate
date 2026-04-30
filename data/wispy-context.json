@@ -127,6 +127,111 @@
       "value": "alta"
     }
   ],
+  "brokerage": {
+    "stats": {
+      "leads": 9,
+      "tasaciones": 3,
+      "publicaciones": 4,
+      "cierres": 2,
+      "docs": 5
+    },
+    "queue": [
+      {
+        "title": "Recoleta / vendedor Uriburu 1070",
+        "module": "Captación",
+        "nextStep": "Cerrar NURC y validar precio esperado.",
+        "tone": "warn",
+        "due": "hoy"
+      },
+      {
+        "title": "Venta oficina Santa Fe",
+        "module": "Tasación",
+        "nextStep": "Terminar ACM y rango de salida.",
+        "tone": "ok",
+        "due": "hoy"
+      },
+      {
+        "title": "Departamento Palermo / staging",
+        "module": "Comercialización",
+        "nextStep": "Validar render + copy antes de publicar.",
+        "tone": "warn",
+        "due": "mañana"
+      },
+      {
+        "title": "Comprador Belgrano / reserva",
+        "module": "Cierre",
+        "nextStep": "Confirmar refuerzo y escribano.",
+        "tone": "danger",
+        "due": "48h"
+      },
+      {
+        "title": "Boleto local comercial",
+        "module": "Documental",
+        "nextStep": "Revisar faltantes y emitir versión final.",
+        "tone": "warn",
+        "due": "mañana"
+      }
+    ],
+    "alerts": [
+      {
+        "title": "Reserva por vencer",
+        "body": "Comprador Belgrano sin refuerzo acreditado todavía.",
+        "tone": "danger"
+      },
+      {
+        "title": "Tasación frenada",
+        "body": "Falta link testigo y expensas finales en oficina Santa Fe.",
+        "tone": "warn"
+      },
+      {
+        "title": "Documento pendiente",
+        "body": "Boleto local comercial requiere dato de CUIT y domicilio.",
+        "tone": "warn"
+      }
+    ],
+    "milestones": [
+      { "title": "Follow-up vendedor Uriburu", "when": "hoy 18:30" },
+      { "title": "ACM oficina Santa Fe", "when": "mañana 10:00" },
+      { "title": "Refuerzo comprador Belgrano", "when": "mañana 12:00" },
+      { "title": "Boleto local comercial", "when": "mañana 17:00" }
+    ],
+    "modules": [
+      { "name": "Captación", "count": 3, "tone": "warn", "cases": ["Uriburu 1070 vendedor", "Lead Nuñez", "Comprador Recoleta"] },
+      { "name": "Tasación", "count": 2, "tone": "ok", "cases": ["Oficina Santa Fe", "Departamento Caballito"] },
+      { "name": "Comercialización", "count": 4, "tone": "ok", "cases": ["Palermo staging", "Recoleta fotos", "Local Colegiales"] },
+      { "name": "Cierre", "count": 2, "tone": "danger", "cases": ["Comprador Belgrano", "Venta local comercial"] },
+      { "name": "Documental", "count": 3, "tone": "warn", "cases": ["Boleto local", "Reserva Recoleta", "Acta posesión"] }
+    ],
+    "spotlight": {
+      "title": "Comprador Belgrano / reserva",
+      "type": "Comprador · cierre vivo",
+      "module": "Cierre",
+      "status": "Esperando refuerzo",
+      "semaphore": "Rojo",
+      "summary": "Oferta aceptada, falta refuerzo y confirmación final de escribano.",
+      "nextStep": "Confirmar acreditación + cerrar fecha de firma.",
+      "owner": "Franco",
+      "deadline": "48h",
+      "chips": ["Reserva", "Refuerzo", "Escribano"],
+      "moduleData": {
+        "captacion": ["Lead calificado", "Capacidad validada", "Necesidad alta"],
+        "tasacion": ["Rango validado", "Precio cierre razonable"],
+        "comercializacion": ["No aplica", "Caso ya convertido"],
+        "cierre": ["Reserva tomada", "Refuerzo pendiente", "Escribano sin confirmar", "Saldo y plazos alineados"],
+        "documental": ["Reserva emitida", "Conformidad pendiente", "Boleto aún no requerido"]
+      },
+      "documents": [
+        { "name": "Reserva", "status": "emitida" },
+        { "name": "Conformidad / refuerzo", "status": "faltan datos" },
+        { "name": "Carpeta final", "status": "pendiente" }
+      ],
+      "activity": [
+        "Wispy cargó la reserva y marcó vencimiento.",
+        "Franco negoció condiciones finales por audio.",
+        "Falta refuerzo y confirmación de escribano."
+      ]
+    }
+  },
   "gpts": [
     {
       "name": "Broker Copy Premium",

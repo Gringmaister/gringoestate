@@ -407,6 +407,140 @@
       color: #aa9f8a;
     }
 
+    .brokerage-shell,
+    .brokerage-grid,
+    .brokerage-kpis,
+    .brokerage-module-strip,
+    .brokerage-milestones,
+    .brokerage-docs,
+    .brokerage-activity {
+      display: grid;
+      gap: 12px;
+    }
+
+    .brokerage-shell { gap: 16px; }
+    .brokerage-kpis,
+    .brokerage-module-strip,
+    .brokerage-spotlight-tabs {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .brokerage-kpi,
+    .brokerage-card,
+    .brokerage-sidecard,
+    .brokerage-spotlight {
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.02));
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .brokerage-kpi span,
+    .brokerage-case-meta,
+    .brokerage-mini-label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brokerage-kpi strong {
+      display: block;
+      font-size: 1.8rem;
+      margin-top: 8px;
+    }
+
+    .brokerage-grid {
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.9fr);
+      align-items: start;
+    }
+
+    .brokerage-list,
+    .brokerage-docs,
+    .brokerage-activity,
+    .brokerage-module-strip,
+    .brokerage-sidegrid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .brokerage-case,
+    .brokerage-doc,
+    .brokerage-activity-item,
+    .brokerage-module-card,
+    .brokerage-milestone,
+    .brokerage-tab {
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.02);
+      padding: 12px 14px;
+    }
+
+    .brokerage-row,
+    .brokerage-line,
+    .brokerage-actions,
+    .brokerage-chip-row,
+    .brokerage-spotlight-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brokerage-row,
+    .brokerage-spotlight-head {
+      justify-content: space-between;
+    }
+
+    .brokerage-case strong,
+    .brokerage-doc strong,
+    .brokerage-activity-item strong,
+    .brokerage-module-card strong,
+    .brokerage-milestone strong,
+    .brokerage-spotlight h3 {
+      font-size: 1rem;
+    }
+
+    .brokerage-case p,
+    .brokerage-doc p,
+    .brokerage-activity-item p,
+    .brokerage-module-card p,
+    .brokerage-milestone p,
+    .brokerage-spotlight p {
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.92rem;
+      margin-top: 6px;
+    }
+
+    .brokerage-chip {
+      border-radius: 999px;
+      border: 1px solid rgba(212,166,64,0.18);
+      background: rgba(212,166,64,0.08);
+      padding: 5px 9px;
+      font-size: 0.75rem;
+      color: #eadcc0;
+    }
+
+    .brokerage-tab ul {
+      padding-left: 16px;
+      color: var(--muted);
+      display: grid;
+      gap: 4px;
+      font-size: 0.88rem;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 1180px) {
+      .brokerage-kpis,
+      .brokerage-module-strip,
+      .brokerage-spotlight-tabs,
+      .brokerage-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .hero-deck {
       display: grid;
       grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr);
@@ -1503,6 +1637,86 @@
       </div>
     </section>
 
+    <section class="section-card brokerage-shell hidden" id="brokerageSection">
+      <div class="section-title">
+        <div class="section-kicker">BROKERAGE / GRINGO ESTATE</div>
+        <h2>Cabina ejecutiva para captación, tasación, comercialización, cierre y documental.</h2>
+        <p>El módulo privado para ver qué está vivo, qué está trabado y qué caso tenés que tocar ahora.</p>
+      </div>
+      <div class="brokerage-kpis" id="brokerageKpis"></div>
+      <div class="brokerage-grid">
+        <div class="brokerage-card brokerage-list">
+          <div class="card-title row-between">
+            <div class="card-title-text">
+              <div class="dual-kicker">PRIORIDAD / CASES NOW</div>
+              <h3>🎯 Cola prioritaria</h3>
+            </div>
+            <span class="pill" id="brokerageQueuePill">0 casos</span>
+          </div>
+          <div class="brokerage-list" id="brokerageQueue"></div>
+          <div class="card-title row-between" style="margin-top:8px">
+            <div class="card-title-text">
+              <div class="dual-kicker">MÓDULOS / FLOW</div>
+              <h3>🧭 Pipeline por módulo</h3>
+            </div>
+          </div>
+          <div class="brokerage-module-strip" id="brokerageModules"></div>
+          <div class="card-title row-between" style="margin-top:8px">
+            <div class="card-title-text">
+              <div class="dual-kicker">LIVE / MOVIMIENTOS</div>
+              <h3>🪄 Actividad reciente</h3>
+            </div>
+          </div>
+          <div class="brokerage-activity" id="brokerageActivity"></div>
+        </div>
+        <div class="brokerage-sidegrid">
+          <div class="brokerage-sidecard">
+            <div class="card-title row-between">
+              <div class="card-title-text">
+                <div class="dual-kicker">RISK / ALERTAS</div>
+                <h3>🚨 Bloqueos</h3>
+              </div>
+              <span class="pill warn" id="brokerageAlertPill">0</span>
+            </div>
+            <div class="brokerage-list" id="brokerageAlerts"></div>
+          </div>
+          <div class="brokerage-sidecard">
+            <div class="card-title row-between">
+              <div class="card-title-text">
+                <div class="dual-kicker">AGENDA / HITOS</div>
+                <h3>📅 Próximos hitos</h3>
+              </div>
+            </div>
+            <div class="brokerage-milestones" id="brokerageMilestones"></div>
+          </div>
+        </div>
+      </div>
+      <div class="brokerage-spotlight">
+        <div class="brokerage-spotlight-head">
+          <div>
+            <div class="dual-kicker">CASO / FICHA ÚNICA</div>
+            <h3 id="brokerageSpotlightTitle">Sin caso seleccionado</h3>
+            <p id="brokerageSpotlightSummary">Abrí un caso prioritario para ver el estado vivo del brokerage.</p>
+          </div>
+          <div class="brokerage-actions">
+            <span class="pill" id="brokerageSpotlightModule">módulo</span>
+            <span class="pill" id="brokerageSpotlightStatus">estado</span>
+            <span class="pill" id="brokerageSpotlightSemaphore">semaforo</span>
+          </div>
+        </div>
+        <div class="brokerage-chip-row" id="brokerageSpotlightChips"></div>
+        <div class="brokerage-line"><span class="brokerage-mini-label">Próximo paso</span><strong id="brokerageSpotlightNext">—</strong></div>
+        <div class="brokerage-line"><span class="brokerage-mini-label">Responsable</span><strong id="brokerageSpotlightOwner">—</strong></div>
+        <div class="brokerage-line"><span class="brokerage-mini-label">Fecha crítica</span><strong id="brokerageSpotlightDeadline">—</strong></div>
+        <div class="brokerage-spotlight-tabs">
+          <div class="brokerage-tab"><strong>Resumen</strong><ul id="brokerageSpotlightOverview"></ul></div>
+          <div class="brokerage-tab"><strong>Módulo actual</strong><ul id="brokerageSpotlightModuleData"></ul></div>
+          <div class="brokerage-tab"><strong>Documentos</strong><ul id="brokerageSpotlightDocs"></ul></div>
+          <div class="brokerage-tab"><strong>Actividad</strong><ul id="brokerageSpotlightActivity"></ul></div>
+        </div>
+      </div>
+    </section>
+
     <section class="main-grid">
       <article class="section-card" id="ops">
         <div class="section-title">
@@ -1828,8 +2042,31 @@
     const notificationsSection = document.getElementById('notificationsSection');
     const collaboratorsSection = document.getElementById('collaboratorsSection');
     const pipelineSection = document.getElementById('pipelineSection');
+    const brokerageSection = document.getElementById('brokerageSection');
     const modulesSection = document.getElementById('modulesSection');
     const smartHomeSection = document.getElementById('smartHomeSection');
+
+    const brokerageKpis = document.getElementById('brokerageKpis');
+    const brokerageQueue = document.getElementById('brokerageQueue');
+    const brokerageQueuePill = document.getElementById('brokerageQueuePill');
+    const brokerageModules = document.getElementById('brokerageModules');
+    const brokerageActivity = document.getElementById('brokerageActivity');
+    const brokerageAlerts = document.getElementById('brokerageAlerts');
+    const brokerageAlertPill = document.getElementById('brokerageAlertPill');
+    const brokerageMilestones = document.getElementById('brokerageMilestones');
+    const brokerageSpotlightTitle = document.getElementById('brokerageSpotlightTitle');
+    const brokerageSpotlightSummary = document.getElementById('brokerageSpotlightSummary');
+    const brokerageSpotlightModule = document.getElementById('brokerageSpotlightModule');
+    const brokerageSpotlightStatus = document.getElementById('brokerageSpotlightStatus');
+    const brokerageSpotlightSemaphore = document.getElementById('brokerageSpotlightSemaphore');
+    const brokerageSpotlightChips = document.getElementById('brokerageSpotlightChips');
+    const brokerageSpotlightNext = document.getElementById('brokerageSpotlightNext');
+    const brokerageSpotlightOwner = document.getElementById('brokerageSpotlightOwner');
+    const brokerageSpotlightDeadline = document.getElementById('brokerageSpotlightDeadline');
+    const brokerageSpotlightOverview = document.getElementById('brokerageSpotlightOverview');
+    const brokerageSpotlightModuleData = document.getElementById('brokerageSpotlightModuleData');
+    const brokerageSpotlightDocs = document.getElementById('brokerageSpotlightDocs');
+    const brokerageSpotlightActivity = document.getElementById('brokerageSpotlightActivity');
 
     const inboxCountPill = document.getElementById('inboxCountPill');
     const inboxUnprocessed = document.getElementById('inboxUnprocessed');
@@ -1916,6 +2153,7 @@
             <button class="nav-btn" data-view="ops"><span class="nav-main"><span class="muted-half">OPERACIONES</span> <span class="gold-half">OPS</span></span><span class="nav-sub">⚡ action / inbox</span></button>
             <button class="nav-btn" data-view="team"><span class="nav-main"><span class="muted-half">EQUIPO</span> <span class="gold-half">TEAM</span></span><span class="nav-sub">👥 collaborators / sla</span></button>
             <button class="nav-btn" data-view="pipeline"><span class="nav-main"><span class="muted-half">PIPELINE</span> <span class="gold-half">FLOW</span></span><span class="nav-sub">🏢 deal flow / next step</span></button>
+            <button class="nav-btn" data-view="brokerage"><span class="nav-main"><span class="muted-half">BROKERAGE</span> <span class="gold-half">CORE</span></span><span class="nav-sub">🏛 captación / cierre</span></button>
             <button class="nav-btn" data-view="skills"><span class="nav-main"><span class="muted-half">SKILLS</span> <span class="gold-half">MODULES</span></span><span class="nav-sub">🧩 gpts / subagents</span></button>
             <button class="nav-btn" data-view="runtime"><span class="nav-main"><span class="muted-half">RUNTIME</span> <span class="gold-half">LIVE</span></span><span class="nav-sub">📡 bridge / telemetry</span></button>
             <button class="nav-btn" data-view="smarthome"><span class="nav-main"><span class="muted-half">SMART</span> <span class="gold-half">HOME</span></span><span class="nav-sub">🏠 hue / cameras</span></button>
@@ -1934,6 +2172,7 @@
       notificationsSection.classList.add('view-panel', 'view-ops', 'hidden');
       collaboratorsSection.classList.add('view-panel', 'view-team', 'hidden');
       pipelineSection.classList.add('view-panel', 'view-pipeline', 'hidden');
+      brokerageSection.classList.add('view-panel', 'view-brokerage', 'hidden');
       modulesSection.classList.add('view-panel', 'view-skills', 'hidden');
       runtimeSection.classList.add('view-panel', 'view-runtime', 'hidden');
       smartHomeSection.classList.add('view-panel', 'view-smarthome', 'hidden');
@@ -1941,7 +2180,7 @@
       mainGrid.before(shell);
       shell.append(leftSidebar, workspaceMain);
       leftSidebar.appendChild(sideStack);
-      workspaceMain.append(topGrid, heroDeck, brainSection, analyticsSection, opsSection, collaboratorsSection, pipelineSection, modulesSection, runtimeSection, smartHomeSection);
+      workspaceMain.append(topGrid, heroDeck, brainSection, analyticsSection, opsSection, collaboratorsSection, pipelineSection, brokerageSection, modulesSection, runtimeSection, smartHomeSection);
       mainGrid.remove();
 
       leftSidebar.querySelectorAll('.nav-btn').forEach((button) => {
@@ -2426,6 +2665,107 @@
       });
     }
 
+    function renderBrokerage(data = {}) {
+      const brokerage = data.brokerage || {};
+      const stats = brokerage.stats || {};
+      const queue = Array.isArray(brokerage.queue) ? brokerage.queue : [];
+      const alerts = Array.isArray(brokerage.alerts) ? brokerage.alerts : [];
+      const milestones = Array.isArray(brokerage.milestones) ? brokerage.milestones : [];
+      const modules = Array.isArray(brokerage.modules) ? brokerage.modules : [];
+      const spotlight = brokerage.spotlight || {};
+
+      brokerageKpis.innerHTML = [
+        ['Leads activos', stats.leads || 0],
+        ['Tasaciones abiertas', stats.tasaciones || 0],
+        ['Publicaciones activas', stats.publicaciones || 0],
+        ['Cierres vivos', stats.cierres || 0],
+        ['Docs pendientes', stats.docs || 0]
+      ].map(([label, value]) => `
+        <div class="brokerage-kpi">
+          <span>${label}</span>
+          <strong>${value}</strong>
+        </div>
+      `).join('');
+
+      brokerageQueuePill.textContent = `${queue.length} casos`;
+      brokerageQueue.innerHTML = queue.map((item) => `
+        <div class="brokerage-case">
+          <div class="brokerage-row">
+            <strong>${item.title}</strong>
+            <span class="pill ${item.tone || ''}">${item.module || 'Caso'}</span>
+          </div>
+          <p>${item.nextStep || ''}</p>
+          <div class="brokerage-row">
+            <span class="brokerage-case-meta">vence ${item.due || '—'}</span>
+            <button class="ghost-button brokerage-open-case" data-title="${item.title}">Abrir</button>
+          </div>
+        </div>
+      `).join('') || '<div class="brokerage-case"><strong>Sin casos</strong><p>No hay cola prioritaria cargada.</p></div>';
+
+      brokerageModules.innerHTML = modules.map((item) => `
+        <div class="brokerage-module-card">
+          <div class="brokerage-row">
+            <strong>${item.name}</strong>
+            <span class="pill ${item.tone || ''}">${item.count || 0}</span>
+          </div>
+          <p>${Array.isArray(item.cases) ? item.cases.slice(0, 2).join(' · ') : 'Sin casos destacados.'}</p>
+        </div>
+      `).join('');
+
+      brokerageActivity.innerHTML = (Array.isArray(spotlight.activity) ? spotlight.activity : []).map((item) => `
+        <div class="brokerage-activity-item"><strong>Movimiento</strong><p>${item}</p></div>
+      `).join('') || '<div class="brokerage-activity-item"><strong>Sin actividad</strong><p>No hay movimientos cargados todavía.</p></div>';
+
+      brokerageAlertPill.textContent = String(alerts.length);
+      brokerageAlerts.innerHTML = alerts.map((item) => `
+        <div class="brokerage-case">
+          <div class="brokerage-row">
+            <strong>${item.title}</strong>
+            <span class="pill ${item.tone || ''}">${item.tone || 'alerta'}</span>
+          </div>
+          <p>${item.body || ''}</p>
+        </div>
+      `).join('') || '<div class="brokerage-case"><strong>Sin alertas</strong><p>No hay bloqueos cargados.</p></div>';
+
+      brokerageMilestones.innerHTML = milestones.map((item) => `
+        <div class="brokerage-milestone">
+          <strong>${item.title}</strong>
+          <p>${item.when || ''}</p>
+        </div>
+      `).join('') || '<div class="brokerage-milestone"><strong>Sin hitos</strong><p>No hay próximos hitos cargados.</p></div>';
+
+      brokerageSpotlightTitle.textContent = spotlight.title || 'Sin caso seleccionado';
+      brokerageSpotlightSummary.textContent = spotlight.summary || 'Sin resumen ejecutivo cargado.';
+      brokerageSpotlightModule.textContent = spotlight.module || 'módulo';
+      brokerageSpotlightStatus.textContent = spotlight.status || 'estado';
+      brokerageSpotlightSemaphore.textContent = spotlight.semaphore || 'semáforo';
+      brokerageSpotlightSemaphore.className = `pill ${String(spotlight.semaphore || '').toLowerCase().includes('rojo') ? 'danger' : String(spotlight.semaphore || '').toLowerCase().includes('amarillo') ? 'warn' : 'ok'}`;
+      brokerageSpotlightChips.innerHTML = (Array.isArray(spotlight.chips) ? spotlight.chips : []).map((chip) => `<span class="brokerage-chip">${chip}</span>`).join('');
+      brokerageSpotlightNext.textContent = spotlight.nextStep || '—';
+      brokerageSpotlightOwner.textContent = spotlight.owner || '—';
+      brokerageSpotlightDeadline.textContent = spotlight.deadline || '—';
+      brokerageSpotlightOverview.innerHTML = [spotlight.type, spotlight.status, spotlight.summary].filter(Boolean).map((item) => `<li>${item}</li>`).join('');
+      const moduleKey = String(spotlight.module || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const moduleDataMap = spotlight.moduleData || {};
+      const pickedModuleData = moduleKey.includes('capt') ? moduleDataMap.captacion
+        : moduleKey.includes('tasa') ? moduleDataMap.tasacion
+        : moduleKey.includes('comer') ? moduleDataMap.comercializacion
+        : moduleKey.includes('cierre') ? moduleDataMap.cierre
+        : moduleKey.includes('doc') ? moduleDataMap.documental
+        : [];
+      brokerageSpotlightModuleData.innerHTML = (pickedModuleData || []).map((item) => `<li>${item}</li>`).join('');
+      brokerageSpotlightDocs.innerHTML = (Array.isArray(spotlight.documents) ? spotlight.documents : []).map((item) => `<li>${item.name} · ${item.status}</li>`).join('');
+      brokerageSpotlightActivity.innerHTML = (Array.isArray(spotlight.activity) ? spotlight.activity : []).map((item) => `<li>${item}</li>`).join('');
+
+      document.querySelectorAll('.brokerage-open-case').forEach((button) => {
+        button.addEventListener('click', () => {
+          composerInput.value = `Abrí el caso ${button.dataset.title} y bajame estado, bloqueo y próximo paso.`;
+          composerInput.focus();
+          actionModePill.textContent = 'loaded';
+        });
+      });
+    }
+
     function renderBoards(items) {
       const boards = Array.isArray(items) ? items : [];
       boardCountPill.textContent = String(boards.length);
@@ -2556,6 +2896,7 @@
         renderNotifications(data.notifications || []);
         renderCollaborators(data.collaborators || []);
         renderPipeline(data.pipeline || []);
+        renderBrokerage(data);
         renderBoards(data.boards || []);
         renderModules(data.modules || {});
         renderLog(data.liveLog || []);

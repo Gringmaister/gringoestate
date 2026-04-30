@@ -1,6 +1,6 @@
 const { getInbox, getContextData, getActionLog, getBugJournal, appendBug } = require('./_wispy-panel-utils');
 const { getRuntimeTelemetry } = require('./_wispy-runtime');
-const { getTrelloBoardsSnapshot, getTrelloRecentActivity } = require('./_wispy-trello');
+const { getTrelloBoardsSnapshot, getTrelloRecentActivity, getBrokeragePanelData } = require('./_wispy-trello');
 const { getModuleRegistry } = require('./_wispy-modules');
 const { proxyPortableApi } = require('./_wispy-portable-proxy');
 
@@ -115,6 +115,7 @@ exports.handler = async function (event = {}) {
   const runtimeTelemetry = await getRuntimeTelemetry();
   const trelloBoards = await getTrelloBoardsSnapshot().catch(() => null);
   const trelloActivity = await getTrelloRecentActivity(6).catch(() => []);
+  const brokeragePanel = await getBrokeragePanelData().catch(() => null);
   const modules = getModuleRegistry();
 
   const openInbox = inbox.filter((item) => item.status !== 'done');
@@ -282,6 +283,7 @@ exports.handler = async function (event = {}) {
         status: runtimeTelemetry?.source || 'seed'
       },
       runtimeTelemetry,
+      brokerage: brokeragePanel || context.brokerage || {},
       source: {
         portfolio: context.portfolio,
         prioritiesCount: (context.priorities || []).length,
