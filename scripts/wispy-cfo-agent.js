@@ -45,6 +45,7 @@ const ROW_COLUMNS = Object.freeze([
   'DESCRIPCION',
   'CANTIDAD',
   'EGRESO',
+  'MEDIO DE PAGO',
   'PRECIO UNITARIO',
   'PESOS',
   'USD',
@@ -52,11 +53,10 @@ const ROW_COLUMNS = Object.freeze([
   'FECHA DE PAGO',
   'CUOTAS',
   'ANOTACIONES',
-  'MEDIO DE PAGO',
-  'COMPROBANTE',
-  'FUENTE',
-  'NOTAS CFO',
-  'CONFIANZA'
+  'COMPROBANTE (LINK)',
+  'ANOTACIONES_2',
+  'FUENTE DEL DATO',
+  'NOTAS DEL SISTEMA'
 ]);
 
 const STRICT_OUTPUT_SCHEMA = Object.freeze({
@@ -278,6 +278,7 @@ function deterministicParse(input, fx) {
     DESCRIPCION: input.DESCRIPCION || input.descripcion || text,
     CANTIDAD: input.CANTIDAD || input.cantidad || 1,
     EGRESO: input.EGRESO || input.egreso || input.CATEGORIA || input.categoria || guessCategory(text),
+    'MEDIO DE PAGO': input['MEDIO DE PAGO'] || input.medio_de_pago || '',
     'PRECIO UNITARIO': input['PRECIO UNITARIO'] || input.precio_unitario || originalAmount || pesos || usd || '',
     PESOS: pesos || '',
     USD: usd || '',
@@ -285,11 +286,10 @@ function deterministicParse(input, fx) {
     'FECHA DE PAGO': formatDate(paymentDate),
     CUOTAS: input.CUOTAS || input.cuotas || '',
     ANOTACIONES: input.ANOTACIONES || input.anotaciones || (provider ? `Proveedor: ${provider}` : ''),
-    'MEDIO DE PAGO': input['MEDIO DE PAGO'] || input.medio_de_pago || '',
-    COMPROBANTE: input.COMPROBANTE || input.comprobante || input.comprobante_link || '',
-    FUENTE: input.FUENTE || input.fuente || 'WhatsApp',
-    'NOTAS CFO': input['NOTAS CFO'] || input.notas_cfo || `TC blue venta ${fx}`,
-    CONFIANZA: input.CONFIANZA || input.confianza || (originalAmount ? 'alta' : 'media')
+    'COMPROBANTE (LINK)': input['COMPROBANTE (LINK)'] || input.COMPROBANTE || input.comprobante || input.comprobante_link || '',
+    ANOTACIONES_2: '',
+    'FUENTE DEL DATO': input['FUENTE DEL DATO'] || input.FUENTE || input.fuente || 'Wispy-CFO Automático',
+    'NOTAS DEL SISTEMA': input['NOTAS DEL SISTEMA'] || input['NOTAS CFO'] || input.notas_cfo || `Dólar Blue Venta a $${fx}`
   };
   return rowObject;
 }
@@ -326,7 +326,7 @@ function mimeFor(filePath) {
 }
 
 async function uploadReceipt({ token, rootId, filePath, rowObject }) {
-  if (!filePath) return { skipped: true, link: rowObject.COMPROBANTE || '' };
+  if (!filePath) return { skipped: true, link: rowObject['COMPROBANTE (LINK)'] || '' };
   if (!fs.existsSync(filePath)) throw new Error(`Comprobante no encontrado: ${filePath}`);
   const [day, month, year] = String(rowObject['FECHA DE PAGO']).split('/').map(Number);
   const date = new Date(year, month - 1, day);
@@ -391,7 +391,7 @@ async function run(input, { dryRun = false } = {}) {
   const driveRootId = process.env.WISPY_FINANCE_DRIVE_ROOT_ID || DEFAULT_DRIVE_ROOT_ID;
   const fx = await fetchBlueRate();
   const rowObject = validateStrictObject(deterministicParse(input, fx));
-  let driveResult = { skipped: true, link: rowObject.COMPROBANTE || '' };
+  let driveResult = { skipped: true, link: rowObject['COMPROBANTE (LINK)'] || '' };
   let sheetResult = null;
 
   const attachmentPath = input.attachmentPath || input.comprobantePath || input.receiptPath || input.filePath || '';
@@ -404,7 +404,7 @@ async function run(input, { dryRun = false } = {}) {
 
   try {
     driveResult = await uploadReceipt({ token, rootId: driveRootId, filePath: attachmentPath, rowObject });
-    rowObject.COMPROBANTE = driveResult.link || rowObject.COMPROBANTE || '';
+    rowObject['COMPROBANTE (LINK)'] = driveResult.link || rowObject['COMPROBANTE (LINK)'] || '';
   } catch (error) {
     return { ok: false, stage: 'drive', errorMessage: `❌ Error en Drive: ${error.message}` };
   }
@@ -412,7 +412,7 @@ async function run(input, { dryRun = false } = {}) {
   try {
     sheetResult = await appendSheetRow({ token, spreadsheetId, sheetName, row: rowFromObject(rowObject) });
   } catch (error) {
-    return { ok: false, stage: 'sheets', errorMessage: `❌ Error en Sheets: ${error.message}` };
+    return { ok: false, stage: 'sheets', errorMessage: `❌ Error de escritura en planilla. ${error.message}` };
   }
 
   return {
