@@ -405,13 +405,20 @@ async function run(input, { dryRun = false } = {}) {
     driveResult = await uploadReceipt({ token, rootId: driveRootId, filePath: attachmentPath, rowObject });
     rowObject['COMPROBANTE (LINK)'] = driveResult.link || rowObject['COMPROBANTE (LINK)'] || '';
   } catch (error) {
-    return { ok: false, stage: 'drive', errorMessage: `❌ Error técnico: No pude subir el comprobante a Drive. Revisando permisos de la Service Account. Detalle: ${error.message}` };
+    const quota = String(error.message || '').includes('storageQuotaExceeded') || String(error.message || '').includes('Service Accounts do not have storage quota');
+    driveResult = {
+      skipped: false,
+      degraded: true,
+      error: error.message,
+      link: quota ? '⚠️ Error: Cuota Drive excedida' : `⚠️ Error Drive: ${error.message}`
+    };
+    rowObject['COMPROBANTE (LINK)'] = driveResult.link;
   }
 
   try {
     sheetResult = await appendSheetRow({ token, spreadsheetId, sheetName, row: rowFromObject(rowObject) });
   } catch (error) {
-    return { ok: false, stage: 'sheets', errorMessage: `❌ Error técnico: No pude escribir en el Excel. Revisando permisos de la Service Account. Detalle: ${error.message}` };
+    return { ok: false, stage: 'sheets', errorMessage: `❌ Error crítico: No pude escribir en la planilla. Motivo: ${error.message}`, drive: driveResult };
   }
 
   return {
