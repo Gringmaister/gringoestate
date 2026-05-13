@@ -18,6 +18,7 @@ const { run: runCfo } = require('./wispy-cfo-agent');
 
 const ACK_MESSAGE = '⏳ Procesando gasto...';
 const LOG_PATH = process.env.WISPY_CFO_ROUTER_LOG || '/home/franco/.openclaw/workspace/logs/wispy-cfo-router.log';
+const BURN_GROUP_JID = '120363406989655854@g.us';
 
 const FINANCE_KEYWORDS = [
   'gasto', 'gastos', 'pagamos', 'pago', 'pagué', 'pague', 'transferencia',
@@ -63,13 +64,28 @@ function normalizeInbound(message = {}) {
   return {
     ...message,
     text: message.text || message.caption || message.transcript || message.body || message.message || '',
-    messageId: message.messageId || message.message_id || message.id || ''
+    messageId: message.messageId || message.message_id || message.id || '',
+    chatId: message.chatId || message.chat_id || message.from || message.to || '',
+    chatType: message.chatType || message.chat_type || (String(message.chatId || message.chat_id || '').endsWith('@g.us') ? 'group' : 'direct')
   };
+}
+
+function isWispyMentioned(message = {}) {
+  const text = String(message.text || '');
+  return message.wasMentioned === true || /@\s*wispy/i.test(text) || /wispy/i.test(text);
 }
 
 function shouldRouteToCfo(message = {}) {
   const normalized = normalizeInbound(message);
   const text = normalized.text;
+  const isGroup = normalized.chatType === 'group' || String(normalized.chatId).endsWith('@g.us');
+  const isBurnGroup = normalized.chatId === BURN_GROUP_JID;
+  const mentioned = normalized.wasMentioned === true || /@\s*wispy/i.test(String(text)) || /\bwispy\b/i.test(String(text));
+  if (isGroup && !isBurnGroup && !mentioned) {
+    const result = { route: false, silent: true, reason: 'passive_group_requires_mention' };
+    writeInternalLog({ messageId: normalized.messageId, chatId: normalized.chatId, decision: 'ignored', reason: result.reason, textPreview: String(text).slice(0, 180) });
+    return result;
+  }
   if (isBlocked(text)) {
     const result = {
       route: false,
@@ -77,14 +93,14 @@ function shouldRouteToCfo(message = {}) {
       reason: 'blocked_scope',
       reply: '❌ Este canal registra solo Ambbi/Metropolitan. CANARIAN o gastos personales quedan fuera.'
     };
-    writeInternalLog({ messageId: normalized.messageId, decision: 'blocked_scope', textPreview: String(text).slice(0, 180) });
+    writeInternalLog({ messageId: normalized.messageId, chatId: normalized.chatId, decision: 'blocked_scope', textPreview: String(text).slice(0, 180) });
     return result;
   }
   const attachment = hasAttachment(normalized);
   const financeSignal = hasFinanceSignal(text);
   if (!attachment && !financeSignal) {
     const result = { route: false, silent: true, reason: 'no_finance_signal' };
-    writeInternalLog({ messageId: normalized.messageId, decision: 'ignored', reason: result.reason, hasAttachment: attachment, financeSignal, textPreview: String(text).slice(0, 180) });
+    writeInternalLog({ messageId: normalized.messageId, chatId: normalized.chatId, decision: 'ignored', reason: result.reason, hasAttachment: attachment, financeSignal, textPreview: String(text).slice(0, 180) });
     return result;
   }
   const result = {
@@ -96,7 +112,7 @@ function shouldRouteToCfo(message = {}) {
     scopeHint: scopeHint(text),
     payload: normalized
   };
-  writeInternalLog({ messageId: normalized.messageId, decision: 'routed', reason: result.reason, scopeHint: result.scopeHint, textPreview: String(text).slice(0, 180) });
+  writeInternalLog({ messageId: normalized.messageId, chatId: normalized.chatId, decision: 'routed', reason: result.reason, scopeHint: result.scopeHint, textPreview: String(text).slice(0, 180) });
   return result;
 }
 
@@ -164,5 +180,6 @@ module.exports = {
   hasFinanceSignal,
   hasAttachment,
   writeInternalLog,
-  LOG_PATH
+  LOG_PATH,
+  BURN_GROUP_JID
 };
