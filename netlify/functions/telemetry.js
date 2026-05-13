@@ -61,6 +61,34 @@ function emptyTelemetry() {
   };
 }
 
+async function fetchBridgeTelemetry() {
+  const bridgeUrl = process.env.WISPY_RUNTIME_BRIDGE_URL || 'http://209.126.82.189:3002/wispy-runtime';
+  const response = await fetch(bridgeUrl, { headers: { Accept: 'application/json' } });
+  if (!response.ok) throw new Error(`bridge HTTP ${response.status}`);
+  const data = await response.json();
+  const runtime = data.runtime || data;
+  const current = runtime?.sessions?.current || {};
+  const aggregate = runtime?.sessions?.aggregate || {};
+  const totalTokens = Number(current.totalTokens || aggregate.totalTokens || 0);
+  const inputTokens = Number(current.inputTokens || 0);
+  const outputTokens = Number(current.outputTokens || 0);
+  const cacheRead = Number(current.cacheRead || Math.max(0, totalTokens - inputTokens - outputTokens));
+  const model = current.model || runtime?.tokens?.currentModel || 'gpt-5.5';
+  const synthetic = {
+    timestamp: runtime.collectedAt || data.timestamp || new Date().toISOString(),
+    source: 'wispy-runtime-bridge',
+    channel: 'whatsapp',
+    provider: model.includes('/') ? model.split('/')[0] : 'openai-codex',
+    model,
+    inputTokens,
+    outputTokens,
+    totalTokens,
+    cost: Number(current.costTotal || aggregate.totalCost || 0),
+    summary: `current session cacheRead=${cacheRead}`
+  };
+  return buildTelemetry({ interactions: totalTokens ? [synthetic] : [], source: 'runtime-bridge-3002' });
+}
+
 function buildTelemetry(raw = {}) {
   const interactions = Array.isArray(raw.interactions) ? raw.interactions : [];
   const normalized = interactions.map((item, index) => {
@@ -147,6 +175,14 @@ exports.handler = async function (event = {}) {
     payload = buildTelemetry({ ...collectInteractions(80), source: 'local-runtime' });
   } catch (error) {
     payload = { ...payload, source: 'fallback-empty', error: error.message };
+  }
+
+  if (!payload?.totals?.tokens) {
+    try {
+      payload = await fetchBridgeTelemetry();
+    } catch (error) {
+      payload = { ...payload, bridgeError: error.message };
+    }
   }
 
   return {

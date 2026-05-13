@@ -1620,6 +1620,19 @@
       .ghost-button,
       .quick-action { width: 100%; }
     }
+
+    /* Temporary COO band-aid: hide disconnected/static dashboard noise until Grafana replaces this panel. */
+    .left-sidebar,
+    #brokerageSection,
+    #pipelineSection,
+    #modulesSection,
+    #smartHomeSection,
+    #collaboratorsSection,
+    #notificationsSection,
+    #boardsFeed,
+    #modulesFeed {
+      display: none !important;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>

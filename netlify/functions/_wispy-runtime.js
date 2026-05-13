@@ -8,8 +8,7 @@ async function fetchJson(url, options = {}) {
 }
 
 async function getBridgeRuntime() {
-  const bridgeUrl = process.env.WISPY_RUNTIME_BRIDGE_URL;
-  if (!bridgeUrl) return null;
+  const bridgeUrl = process.env.WISPY_RUNTIME_BRIDGE_URL || 'http://209.126.82.189:3002/wispy-runtime';
 
   const headers = {};
   if (process.env.WISPY_RUNTIME_BRIDGE_TOKEN) {
