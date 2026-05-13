@@ -1221,6 +1221,16 @@
       display: inline-block;
     }
 
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(77,222,149,0.42); }
+      50% { opacity: .58; transform: scale(.82); box-shadow: 0 0 0 8px rgba(77,222,149,0); }
+    }
+
+    .status-dot.ok::before {
+      animation: pulse 1.65s ease-in-out infinite;
+    }
+
     .main-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 360px;
@@ -1581,6 +1591,10 @@
 
 
 
+    .hero-deck {
+      grid-template-columns: 1fr;
+    }
+
     .grafana-f1-shell {
       display: grid;
       gap: 16px;
@@ -1653,7 +1667,6 @@
       .command-deck,
       .log-grid,
       .runtime-grid { grid-template-columns: 1fr; }
-      .hero-deck { grid-template-columns: 1fr; }
       .hero-metrics { grid-template-columns: 1fr 1fr; }
       .analytics-grid { grid-template-columns: 1fr; }
       .chart-footer,
@@ -1806,20 +1819,6 @@
         </div>
       </article>
 
-      <aside class="hero-rail">
-        <section class="hero-rail-card">
-          <strong class="mono">🚨 ALERTA ACTIVA</strong>
-          <h3 id="heroAlertTitle">Sin alertas críticas.</h3>
-          <p id="heroAlertBody" class="text-muted">Cuando haya un bloqueo real, aparece acá primero.</p>
-        </section>
-        <section class="hero-rail-card">
-          <div class="hero-line"><strong class="mono">🔌 RUNTIME BRIDGE</strong><span class="pill" id="heroBridgePill">sync</span></div>
-          <p id="heroBridgeBody" class="text-muted">Estado del enlace entre Netlify y el runtime real.</p>
-          <div class="hero-line" style="margin-top:10px"><span>Uso sesión</span><span id="heroUsageValue" class="mono">—</span></div>
-          <div class="hero-line" style="margin-top:10px"><span>Proceso</span><span id="heroThinkingPill" class="pill">en espera</span></div>
-          <p id="heroThinkingBody" class="text-muted" style="margin-top:8px">Cuando Wispy procese algo, te lo marco acá.</p>
-        </section>
-      </aside>
     </section>
 
     <section class="brain-section" id="brainSection">
@@ -1862,14 +1861,7 @@
             <a class="ghost-button" href="https://space-nowhere-jumping-tri.trycloudflare.com/d/wispy-f1-llm-intelligence/ceo-llm-intelligence-c2b7-f1-telemetry?orgId=1&refresh=5s" target="_blank" rel="noopener">Abrir Grafana ↗</a>
           </div>
           <iframe class="grafana-frame main" title="CEO LLM Intelligence F1 Telemetry" src="https://space-nowhere-jumping-tri.trycloudflare.com/d/wispy-f1-llm-intelligence/ceo-llm-intelligence-c2b7-f1-telemetry?orgId=1&refresh=5s&kiosk"></iframe>
-        </div>
-        <div class="grafana-solo-grid">
-          <iframe class="grafana-frame solo" title="Combustible OAuth Plus" src="https://space-nowhere-jumping-tri.trycloudflare.com/d-solo/wispy-f1-llm-intelligence/ceo-llm-intelligence-c2b7-f1-telemetry?orgId=1&panelId=1&refresh=5s&theme=dark"></iframe>
-          <iframe class="grafana-frame solo" title="Eficiencia de Memoria" src="https://space-nowhere-jumping-tri.trycloudflare.com/d-solo/wispy-f1-llm-intelligence/ceo-llm-intelligence-c2b7-f1-telemetry?orgId=1&panelId=2&refresh=5s&theme=dark"></iframe>
-          <iframe class="grafana-frame solo" title="Saturación de Contexto" src="https://space-nowhere-jumping-tri.trycloudflare.com/d-solo/wispy-f1-llm-intelligence/ceo-llm-intelligence-c2b7-f1-telemetry?orgId=1&panelId=3&refresh=5s&theme=dark"></iframe>
-          <iframe class="grafana-frame solo" title="Estabilidad API" src="https://space-nowhere-jumping-tri.trycloudflare.com/d-solo/wispy-f1-llm-intelligence/ceo-llm-intelligence-c2b7-f1-telemetry?orgId=1&panelId=4&refresh=5s&theme=dark"></iframe>
-        </div>
-      </article>
+        </div>      </article>
       <article class="chart-card">
           <div class="chart-head">
             <div class="card-title-text">
@@ -2522,9 +2514,11 @@
 
     function setThinkingState(mode = 'idle', detail = 'Cuando Wispy procese algo, te lo marco acá.') {
       const labels = { idle: 'en espera', thinking: 'procesando', error: 'error' };
-      heroThinkingPill.textContent = labels[mode] || mode;
-      heroThinkingPill.className = `pill ${mode === 'thinking' ? 'warn' : mode === 'error' ? 'danger' : 'ok'}`;
-      heroThinkingBody.textContent = detail;
+      if (heroThinkingPill) {
+        heroThinkingPill.textContent = labels[mode] || mode;
+        heroThinkingPill.className = `pill ${mode === 'thinking' ? 'warn' : mode === 'error' ? 'danger' : 'ok'}`;
+      }
+      if (heroThinkingBody) heroThinkingBody.textContent = detail;
       brainStatusPill.textContent = labels[mode] || mode;
       brainStatusPill.className = `pill ${mode === 'thinking' ? 'warn' : mode === 'error' ? 'danger' : 'ok'}`;
       brainNow.textContent = detail;
@@ -2850,16 +2844,20 @@
           ? `${aggregate.totalTokens} tok visibles · ${aggregate.totalCost?.toFixed ? '$' + aggregate.totalCost.toFixed(2) : 'cost'}`
           : 'Todavía sin consumo visible.');
 
-      heroAlertTitle.textContent = firstAlert?.title || 'Sin alertas críticas.';
-      heroAlertBody.textContent = firstAlert?.body || 'Cuando haya un bloqueo real, aparece acá primero.';
+      if (heroAlertTitle) heroAlertTitle.textContent = firstAlert?.title || 'Sin alertas críticas.';
+      if (heroAlertBody) heroAlertBody.textContent = firstAlert?.body || 'Cuando haya un bloqueo real, aparece acá primero.';
 
-      heroBridgePill.textContent = bridgePending ? 'sin enlazar' : 'live';
-      heroBridgePill.className = `pill ${bridgePending ? 'warn' : 'ok'}`;
-      heroBridgeBody.textContent = bridgePending
-        ? 'El panel todavía no está conversando con el runtime real. Falta cerrar el enlace técnico.'
-        : 'Bridge enlazado. La telemetría real ya alimenta el panel.';
+      if (heroBridgePill) {
+        heroBridgePill.textContent = bridgePending ? 'sin enlazar' : 'live';
+        heroBridgePill.className = `pill ${bridgePending ? 'warn' : 'ok'}`;
+      }
+      if (heroBridgeBody) {
+        heroBridgeBody.textContent = bridgePending
+          ? 'El panel todavía no está conversando con el runtime real. Falta cerrar el enlace técnico.'
+          : 'Bridge enlazado. La telemetría real ya alimenta el panel.';
+      }
 
-      heroUsageValue.textContent = sessionUsagePill.textContent || '—';
+      if (heroUsageValue) heroUsageValue.textContent = sessionUsagePill.textContent || '—';
       heroNarrative.textContent = focusItems[0]?.body
         ? `Foco actual: ${focusItems[0].body}`
         : 'La consola tiene que mostrar qué importa ahora y qué podés mover ya, sin parecer un dashboard genérico.';
@@ -3447,7 +3445,7 @@
         sessionUsagePill.textContent = currentSession
           ? `${currentSession.totalTokens} tok · ${currentSession.costTotal?.toFixed ? '$' + currentSession.costTotal.toFixed(2) : 'uso'}`
           : 'uso —';
-        heroUsageValue.textContent = sessionUsagePill.textContent;
+        if (heroUsageValue) heroUsageValue.textContent = sessionUsagePill.textContent;
         actionModePill.textContent = 'sync';
         setThinkingState('idle', 'Panel sincronizado.');
         setBrainContext({
@@ -3459,7 +3457,7 @@
       } catch {
         actionModePill.textContent = 'error';
         sessionUsagePill.textContent = 'error de uso';
-        heroUsageValue.textContent = 'error de uso';
+        if (heroUsageValue) heroUsageValue.textContent = 'error de uso';
         composerOutput.textContent = 'No pude traer el estado vivo del panel ahora.';
         setThinkingState('error', 'No pude sincronizar el panel en vivo.');
         setBrainContext({ lastMove: 'Falló la sincronización del panel.', action: 'Error', bridgeBar: { width: '18%', live: false } });
