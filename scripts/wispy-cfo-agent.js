@@ -335,22 +335,21 @@ async function uploadReceipt({ token, rootId, filePath, rowObject }) {
   const provider = String(rowObject.ANOTACIONES || '').replace(/^Proveedor:\s*/i, '') || 'Sin proveedor';
   const amount = rowObject.PESOS || rowObject.USD || rowObject['PRECIO UNITARIO'] || '';
   const filename = `${date.toISOString().slice(0, 10)} - ${safeName(provider)} - ${safeName(amount)}${path.extname(filePath)}`;
-  const boundary = `wispy_cfo_${crypto.randomBytes(12).toString('hex')}`;
-  const metadata = { name: filename, parents: [monthFolder.id] };
-  const body = Buffer.concat([
-    Buffer.from(`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`),
-    Buffer.from(`--${boundary}\r\nContent-Type: ${mimeFor(filePath)}\r\n\r\n`),
-    fs.readFileSync(filePath),
-    Buffer.from(`\r\n--${boundary}--\r\n`)
-  ]);
-  const response = await fetch(`${DRIVE_UPLOAD_BASE}/files?uploadType=multipart&fields=id,name,webViewLink&supportsAllDrives=true`, {
+  const metadata = await googleJson(`${DRIVE_BASE}/files?fields=id,name,webViewLink&supportsAllDrives=true`, {
+    token,
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
-    body
+    body: { name: filename, parents: [monthFolder.id] }
   });
-  const payload = await response.json();
-  if (!response.ok) throw new Error(`Drive upload ${response.status}: ${JSON.stringify(payload)}`);
-  return { skipped: false, folder: `${year}/${monthFolderName(date)}`, file: payload.name, link: payload.webViewLink || `https://drive.google.com/file/d/${payload.id}/view` };
+  const response = await fetch(`${DRIVE_UPLOAD_BASE}/files/${metadata.id}?uploadType=media&supportsAllDrives=true`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': mimeFor(filePath) },
+    body: fs.readFileSync(filePath)
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(`Drive media upload ${response.status}: ${JSON.stringify(payload)}`);
+  }
+  return { skipped: false, folder: `${year}/${monthFolderName(date)}`, file: metadata.name, link: metadata.webViewLink || `https://drive.google.com/file/d/${metadata.id}/view` };
 }
 
 function sheetRange(sheetName, range) {
@@ -369,9 +368,9 @@ async function appendSheetRow({ token, spreadsheetId, sheetName, row }) {
 function confirmation(rowObject, driveResult) {
   const ars = rowObject.PESOS ? `$${rowObject.PESOS} ARS` : '';
   const usd = rowObject.USD ? `$${rowObject.USD} USD` : '';
-  const provider = String(rowObject.ANOTACIONES || '').replace(/^Proveedor:\s*/i, '') || rowObject.DESCRIPCION;
-  const fileLine = driveResult?.skipped ? 'Sin comprobante adjunto.' : `Guardado en carpeta ${driveResult.folder}.`;
-  return `✅ **Gasto Procesado**\n- **Registro:** ${ars || usd}${ars && usd ? ` -> ${usd}` : ''} en 'Burn ambbi'.\n- **Archivo:** ${fileLine}\n- **Dólar:** Blue Venta $${rowObject['TIPO DE CAMBIO'] || 'N/A'}.\n- **Proveedor:** ${provider}.`;
+  const costCenter = rowObject['COST CENTER'] || rowObject.DEPTO || '—';
+  const receipt = driveResult?.link || rowObject['COMPROBANTE (LINK)'] || 'Sin comprobante adjunto';
+  return `✅ **Gasto cargado correctamente**\n- **Monto:** ${ars || '—'} / ${usd || '—'} (Dólar Blue: ${rowObject['TIPO DE CAMBIO'] || 'N/A'})\n- **Empresa:** ${rowObject.EMPRESA || '—'}\n- **Unidad/Depto:** ${costCenter}\n- **Comprobante:** ${receipt}`;
 }
 
 async function readInput(args) {
@@ -406,13 +405,13 @@ async function run(input, { dryRun = false } = {}) {
     driveResult = await uploadReceipt({ token, rootId: driveRootId, filePath: attachmentPath, rowObject });
     rowObject['COMPROBANTE (LINK)'] = driveResult.link || rowObject['COMPROBANTE (LINK)'] || '';
   } catch (error) {
-    return { ok: false, stage: 'drive', errorMessage: `❌ Error en Drive: ${error.message}` };
+    return { ok: false, stage: 'drive', errorMessage: `❌ Error técnico: No pude subir el comprobante a Drive. Revisando permisos de la Service Account. Detalle: ${error.message}` };
   }
 
   try {
     sheetResult = await appendSheetRow({ token, spreadsheetId, sheetName, row: rowFromObject(rowObject) });
   } catch (error) {
-    return { ok: false, stage: 'sheets', errorMessage: `❌ Error de escritura en planilla. ${error.message}` };
+    return { ok: false, stage: 'sheets', errorMessage: `❌ Error técnico: No pude escribir en el Excel. Revisando permisos de la Service Account. Detalle: ${error.message}` };
   }
 
   return {

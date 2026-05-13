@@ -2,28 +2,39 @@
 'use strict';
 
 const fs = require('fs');
+const path = require('path');
 
 /**
  * Wispy-CFO WhatsApp whitelist router.
  *
- * Gate BEFORE any LLM/CFO processing:
- * - Ignore silently when no attachment AND no financial keyword/amount.
- * - Route only Ambbi/Metropolitan-like financial messages to scripts/wispy-cfo-agent.js.
- * - Reject CANARIAN/personal scope explicitly.
- *
- * This module is intentionally side-effect-light: OpenClaw runtime calls should use
- * shouldRouteToCfo(message) before spawning/running Wispy-CFO.
+ * v3 feedback protocol:
+ * - If a message passes whitelist, caller must immediately send ACK_MESSAGE.
+ * - If a message is ignored, write an internal log line (no group reply).
+ * - If blocked by scope, reply with the blocked-scope message.
  */
+
+const ACK_MESSAGE = '⏳ Leyendo información y procesando comprobante...';
+const LOG_PATH = process.env.WISPY_CFO_ROUTER_LOG || '/home/franco/.openclaw/workspace/logs/wispy-cfo-router.log';
 
 const FINANCE_KEYWORDS = [
   'gasto', 'gastos', 'pagamos', 'pago', 'pagué', 'pague', 'transferencia',
   'pesos', 'ars', 'usd', '$', 'factura', 'recibo', 'ticket', 'comprobante',
   'presupuesto', 'seña', 'senia', 'honorarios', 'proveedor', 'arreglo',
-  'mantenimiento', 'limpieza', 'suscripción', 'suscripcion', 'cuota'
+  'mantenimiento', 'limpieza', 'suscripción', 'suscripcion', 'cuota', 'abono',
+  'deposito', 'depósito', 'mercado pago', 'mp', 'banco', 'efectivo'
 ];
 
 const ALLOWED_SCOPE = ['ambbi', 'metropolitan', 'uriburu', 'depto', 'departamento'];
 const BLOCKED_SCOPE = ['canarian', 'personal', 'gasto personal'];
+
+function ensureLogDir() {
+  fs.mkdirSync(path.dirname(LOG_PATH), { recursive: true });
+}
+
+function writeInternalLog(event) {
+  ensureLogDir();
+  fs.appendFileSync(LOG_PATH, JSON.stringify({ ts: new Date().toISOString(), ...event }) + '\n');
+}
 
 function hasAttachment(message = {}) {
   if (message.hasAttachment || message.hasMedia) return true;
@@ -50,25 +61,35 @@ function scopeHint(text = '') {
 
 function shouldRouteToCfo(message = {}) {
   const text = message.text || message.caption || message.transcript || message.body || '';
+  const messageId = message.messageId || message.message_id || message.id || '';
   if (isBlocked(text)) {
-    return {
+    const result = {
       route: false,
       silent: false,
       reason: 'blocked_scope',
       reply: '❌ Este canal registra solo Ambbi/Metropolitan. CANARIAN o gastos personales quedan fuera.'
     };
+    writeInternalLog({ messageId, decision: 'blocked_scope', textPreview: String(text).slice(0, 180) });
+    return result;
   }
   const attachment = hasAttachment(message);
   const financeSignal = hasFinanceSignal(text);
-  if (!attachment && !financeSignal) return { route: false, silent: true, reason: 'no_finance_signal' };
-  return {
+  if (!attachment && !financeSignal) {
+    const result = { route: false, silent: true, reason: 'no_finance_signal' };
+    writeInternalLog({ messageId, decision: 'ignored', reason: result.reason, hasAttachment: attachment, financeSignal, textPreview: String(text).slice(0, 180) });
+    return result;
+  }
+  const result = {
     route: true,
     silent: false,
     reason: attachment ? 'attachment_or_receipt' : 'finance_keyword',
     target: 'Wispy-CFO',
+    ackMessage: ACK_MESSAGE,
     scopeHint: scopeHint(text),
     payload: message
   };
+  writeInternalLog({ messageId, decision: 'routed', reason: result.reason, scopeHint: result.scopeHint, textPreview: String(text).slice(0, 180) });
+  return result;
 }
 
 if (require.main === module) {
@@ -77,4 +98,4 @@ if (require.main === module) {
   console.log(JSON.stringify(shouldRouteToCfo(message), null, 2));
 }
 
-module.exports = { FINANCE_KEYWORDS, shouldRouteToCfo, hasFinanceSignal, hasAttachment };
+module.exports = { ACK_MESSAGE, FINANCE_KEYWORDS, shouldRouteToCfo, hasFinanceSignal, hasAttachment, writeInternalLog, LOG_PATH };
