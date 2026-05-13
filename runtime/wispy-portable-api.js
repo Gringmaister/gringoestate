@@ -8,6 +8,8 @@ const inbox = require('../netlify/functions/wispy-panel-inbox');
 const followup = require('../netlify/functions/wispy-panel-followup');
 const collaborators = require('../netlify/functions/wispy-panel-collaborators');
 const pipeline = require('../netlify/functions/wispy-panel-pipeline');
+const uriburuRevenue = require('../netlify/functions/uriburu-revenue');
+const telemetry = require('../netlify/functions/telemetry');
 const runtimeBridge = require('./wispy-runtime-bridge');
 
 const port = Number(process.env.WISPY_API_PORT || 8788);
@@ -70,6 +72,10 @@ async function route(req, res) {
     response = await callHandler(collaborators, req, body);
   } else if (url.pathname === '/api/pipeline') {
     response = await callHandler(pipeline, req, body);
+  } else if (url.pathname === '/api/uriburu-revenue') {
+    response = await callHandler(uriburuRevenue, req, body);
+  } else if (url.pathname === '/api/telemetry') {
+    response = await callHandler(telemetry, req, body);
   } else {
     response = {
       statusCode: 404,

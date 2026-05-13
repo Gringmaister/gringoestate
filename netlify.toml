@@ -9,3 +9,8 @@
   # Directorio donde Netlify debe buscar tus funciones para desplegarlas.
   # Basado en tu código, esta es la ruta correcta.
   directory = "netlify/functions/"
+
+[[redirects]]
+  from = "/api/telemetry"
+  to = "/.netlify/functions/telemetry"
+  status = 200
