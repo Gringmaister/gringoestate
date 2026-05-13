@@ -166,9 +166,7 @@ function buildTelemetry(raw = {}) {
 }
 
 exports.handler = async function (event = {}) {
-  const proxied = await proxyPortableApi(event, 'api/telemetry');
-  if (proxied) return proxied;
-
+  // Prefer direct runtime bridge for high-resolution live data. Do not rely on Netlify envs during band-aid mode.
   let payload = emptyTelemetry();
   try {
     const { collectInteractions } = require('../../runtime/collect-interactions');

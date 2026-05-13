@@ -8,15 +8,27 @@ async function fetchJson(url, options = {}) {
 }
 
 async function getBridgeRuntime() {
-  const bridgeUrl = process.env.WISPY_RUNTIME_BRIDGE_URL || 'http://209.126.82.189:3002/wispy-runtime';
+  const candidates = [
+    process.env.WISPY_RUNTIME_BRIDGE_URL,
+    'http://209.126.82.189:3002/wispy-runtime'
+  ].filter(Boolean);
 
   const headers = {};
   if (process.env.WISPY_RUNTIME_BRIDGE_TOKEN) {
     headers.Authorization = `Bearer ${process.env.WISPY_RUNTIME_BRIDGE_TOKEN}`;
   }
 
-  const payload = await fetchJson(bridgeUrl, { headers });
-  return payload?.runtime || null;
+  let lastError = null;
+  for (const bridgeUrl of candidates) {
+    try {
+      const payload = await fetchJson(bridgeUrl, { headers });
+      return payload?.runtime || null;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  if (lastError) throw lastError;
+  return null;
 }
 
 async function getLocalRuntime() {
