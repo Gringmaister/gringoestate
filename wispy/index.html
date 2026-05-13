@@ -1579,6 +1579,72 @@
       50% { transform: scale(1.04); opacity: 1; }
     }
 
+
+
+    .grafana-f1-shell {
+      display: grid;
+      gap: 16px;
+      grid-column: 1 / -1;
+    }
+
+    .grafana-f1-hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 30px;
+      border: 1px solid rgba(212,166,64,0.18);
+      background:
+        radial-gradient(circle at 18% 18%, rgba(212,166,64,0.18), transparent 28%),
+        radial-gradient(circle at 82% 0%, rgba(77,222,149,0.10), transparent 26%),
+        linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.018));
+      box-shadow: 0 28px 90px rgba(0,0,0,0.48), inset 0 0 0 1px rgba(255,255,255,0.035);
+      padding: 18px;
+    }
+
+    .grafana-f1-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .grafana-f1-head h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.4rem, 5vw, 5.4rem);
+      line-height: .9;
+      letter-spacing: 1.4px;
+    }
+
+    .grafana-f1-head p { color: var(--muted); max-width: 760px; margin-top: 8px; }
+
+    .grafana-frame {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 24px;
+      background: #050505;
+      box-shadow: inset 0 0 0 1px rgba(212,166,64,0.08);
+    }
+
+    .grafana-frame.main { height: min(1180px, 92vh); }
+
+    .grafana-solo-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grafana-frame.solo { height: 285px; }
+
+    @media (max-width: 1280px) {
+      .grafana-solo-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .grafana-f1-head { align-items: flex-start; flex-direction: column; }
+      .grafana-solo-grid { grid-template-columns: 1fr; }
+      .grafana-frame.main { height: 960px; }
+    }
+
     @media (max-width: 1480px) {
       .system-bar,
       .hero-deck,
@@ -1621,16 +1687,12 @@
       .quick-action { width: 100%; }
     }
 
-    /* Temporary COO band-aid: hide disconnected/static dashboard noise until Grafana replaces this panel. */
-    .left-sidebar,
+    /* F1 telemetry mode: keep structural shell alive; hide only disconnected/non-IA views. */
     #brokerageSection,
     #pipelineSection,
-    #modulesSection,
     #smartHomeSection,
-    #collaboratorsSection,
-    #notificationsSection,
-    #boardsFeed,
-    #modulesFeed {
+    #analyticsSection > article.chart-card,
+    #analyticsSection > .analytics-stack {
       display: none !important;
     }
   </style>
@@ -1789,6 +1851,25 @@
     </section>
 
     <section class="analytics-grid" id="analyticsSection">
+      <article class="grafana-f1-shell" id="grafanaF1Section">
+        <div class="grafana-f1-hero">
+          <div class="grafana-f1-head">
+            <div>
+              <div class="dual-kicker">CEO LLM INTELLIGENCE / F1 TELEMETRY</div>
+              <h2><span class="muted-half">MOTOR IA</span> <span class="gold-half">EN VIVO</span></h2>
+              <p>Velocímetro OAuth, semáforos de caché/contexto/API/gasto y deep dive de tokens directo desde Grafana.</p>
+            </div>
+            <a class="ghost-button" href="https://space-nowhere-jumping-tri.trycloudflare.com/d/wispy-f1-llm-intelligence/ceo-llm-intelligence-c2b7-f1-telemetry?orgId=1&refresh=5s" target="_blank" rel="noopener">Abrir Grafana ↗</a>
+          </div>
+          <iframe class="grafana-frame main" title="CEO LLM Intelligence F1 Telemetry" src="https://space-nowhere-jumping-tri.trycloudflare.com/d/wispy-f1-llm-intelligence/ceo-llm-intelligence-c2b7-f1-telemetry?orgId=1&refresh=5s&kiosk"></iframe>
+        </div>
+        <div class="grafana-solo-grid">
+          <iframe class="grafana-frame solo" title="Combustible OAuth Plus" src="https://space-nowhere-jumping-tri.trycloudflare.com/d-solo/wispy-f1-llm-intelligence/ceo-llm-intelligence-c2b7-f1-telemetry?orgId=1&panelId=1&refresh=5s&theme=dark"></iframe>
+          <iframe class="grafana-frame solo" title="Eficiencia de Memoria" src="https://space-nowhere-jumping-tri.trycloudflare.com/d-solo/wispy-f1-llm-intelligence/ceo-llm-intelligence-c2b7-f1-telemetry?orgId=1&panelId=2&refresh=5s&theme=dark"></iframe>
+          <iframe class="grafana-frame solo" title="Saturación de Contexto" src="https://space-nowhere-jumping-tri.trycloudflare.com/d-solo/wispy-f1-llm-intelligence/ceo-llm-intelligence-c2b7-f1-telemetry?orgId=1&panelId=3&refresh=5s&theme=dark"></iframe>
+          <iframe class="grafana-frame solo" title="Estabilidad API" src="https://space-nowhere-jumping-tri.trycloudflare.com/d-solo/wispy-f1-llm-intelligence/ceo-llm-intelligence-c2b7-f1-telemetry?orgId=1&panelId=4&refresh=5s&theme=dark"></iframe>
+        </div>
+      </article>
       <article class="chart-card">
           <div class="chart-head">
             <div class="card-title-text">
@@ -2491,11 +2572,8 @@
             <button class="nav-btn active" data-view="home"><span class="nav-main"><span class="muted-half">HOME</span> <span class="gold-half">CENTER</span></span><span class="nav-sub">🏠 command / overview</span></button>
             <button class="nav-btn" data-view="ops"><span class="nav-main"><span class="muted-half">OPERACIONES</span> <span class="gold-half">OPS</span></span><span class="nav-sub">⚡ action / inbox</span></button>
             <button class="nav-btn" data-view="team"><span class="nav-main"><span class="muted-half">EQUIPO</span> <span class="gold-half">TEAM</span></span><span class="nav-sub">👥 collaborators / sla</span></button>
-            <button class="nav-btn" data-view="pipeline"><span class="nav-main"><span class="muted-half">PIPELINE</span> <span class="gold-half">FLOW</span></span><span class="nav-sub">🏢 deal flow / next step</span></button>
-            <button class="nav-btn" data-view="brokerage"><span class="nav-main"><span class="muted-half">BROKERAGE</span> <span class="gold-half">CORE</span></span><span class="nav-sub">🏛 captación / cierre</span></button>
             <button class="nav-btn" data-view="skills"><span class="nav-main"><span class="muted-half">SKILLS</span> <span class="gold-half">MODULES</span></span><span class="nav-sub">🧩 gpts / subagents</span></button>
             <button class="nav-btn" data-view="runtime"><span class="nav-main"><span class="muted-half">RUNTIME</span> <span class="gold-half">LIVE</span></span><span class="nav-sub">📡 bridge / telemetry</span></button>
-            <button class="nav-btn" data-view="smarthome"><span class="nav-main"><span class="muted-half">SMART</span> <span class="gold-half">HOME</span></span><span class="nav-sub">🏠 hue / cameras</span></button>
           </div>
         </section>
       `;
