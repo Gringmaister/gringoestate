@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script src="https://cdn.tailwindcss.com"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wispy Office — Gringo Estate</title>
@@ -419,6 +420,63 @@
     }
 
     .brokerage-shell { gap: 16px; }
+
+    .brokerage-command-bar,
+    .brokerage-filter-row,
+    .brokerage-spotlight-cta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brokerage-command-bar {
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(212,166,64,0.16);
+      background: linear-gradient(180deg, rgba(212,166,64,0.1), rgba(255,255,255,0.025));
+      box-shadow: var(--shadow);
+    }
+
+    .brokerage-command-copy {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .brokerage-command-copy strong {
+      font-size: 0.94rem;
+      line-height: 1.2;
+    }
+
+    .brokerage-command-copy p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.35;
+    }
+
+    .brokerage-filter-row {
+      margin: 6px 0 2px;
+    }
+
+    .brokerage-filter-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.02);
+      color: #f2ead9;
+      padding: 7px 11px;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+    }
+
+    .brokerage-filter-btn.is-active {
+      border-color: rgba(212,166,64,0.35);
+      background: rgba(212,166,64,0.13);
+      color: #f4e2b5;
+    }
     .brokerage-kpis,
     .brokerage-module-strip,
     .brokerage-spotlight-tabs {
@@ -1734,16 +1792,98 @@
       </article>
 
       <div class="analytics-stack">
-        <article class="chart-card">
+                <article class="chart-card rounded-3xl border border-white/10 bg-white/5 p-5">
           <div class="chart-head">
             <div class="card-title-text">
-              <div class="dual-kicker">NEGOCIO / OPORTUNIDADES</div>
-              <h3>🏢 Oportunidades por Etapa</h3>
+              <div class="dual-kicker">IA / COST CONTROL</div>
+              <h3>🧠 Telemetría de Costos</h3>
             </div>
-            <span class="pill" id="pipelineChartPill">ops</span>
+            <span class="pill ok" id="costTelemetryPill">router activo</span>
           </div>
-          <div class="chart-stage" id="pipelineChartStage"></div>
-          <div class="legend-list" id="pipelineLegend"></div>
+
+          <div class="grid gap-3 md:grid-cols-2">
+            <div class="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4">
+              <div class="text-xs uppercase tracking-[0.22em] text-emerald-300">Tier 1 / Default</div>
+              <div class="mt-2 text-2xl font-semibold text-white" id="tier1Model">gpt-4o-mini</div>
+              <p class="mt-2 text-sm text-zinc-300">Infra, logs, recordatorios, clasificación, Notion.</p>
+              <div class="mt-4 h-2 rounded-full bg-white/10">
+                <div class="h-2 rounded-full bg-emerald-300" style="width:85%"></div>
+              </div>
+              <p class="mt-2 text-xs text-zinc-400">85% tráfico estimado</p>
+            </div>
+
+            <div class="rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4">
+              <div class="text-xs uppercase tracking-[0.22em] text-amber-300">Tier 2 / Premium</div>
+              <div class="mt-2 text-2xl font-semibold text-white" id="tier2Model">gpt-5.5</div>
+              <p class="mt-2 text-sm text-zinc-300">Ambbi, Uriburu, revenue, clientes, brokerage, estrategia.</p>
+              <div class="mt-4 h-2 rounded-full bg-white/10">
+                <div class="h-2 rounded-full bg-amber-300" style="width:15%"></div>
+              </div>
+              <p class="mt-2 text-xs text-zinc-400">15% tráfico estimado</p>
+            </div>
+          </div>
+
+          <div id="pipelineChartStage" class="hidden"></div>
+          <div id="pipelineLegend" class="hidden"></div>
+        </article>
+
+        <article class="chart-card rounded-3xl border border-white/10 bg-white/5 p-5">
+          <div class="chart-head">
+            <div class="card-title-text">
+              <div class="dual-kicker">URIBURU / REVENUE</div>
+              <h3>🏢 Uriburu 201</h3>
+            </div>
+            <span class="pill" id="uriburuRevenuePill">cargando</span>
+          </div>
+
+          <div class="grid gap-3 md:grid-cols-2">
+            <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <span class="text-xs uppercase tracking-[0.22em] text-zinc-400">Ocupación</span>
+              <strong class="mt-2 block text-3xl text-white" id="uriburuOccupancy">—</strong>
+              <p class="mt-1 text-xs text-zinc-400" id="uriburuNights">— noches</p>
+            </div>
+
+            <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <span class="text-xs uppercase tracking-[0.22em] text-zinc-400">ADR</span>
+              <strong class="mt-2 block text-3xl text-white" id="uriburuAdr">—</strong>
+              <p class="mt-1 text-xs text-zinc-400">Tarifa diaria promedio</p>
+            </div>
+
+            <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <span class="text-xs uppercase tracking-[0.22em] text-zinc-400">Ingresos</span>
+              <strong class="mt-2 block text-3xl text-white" id="uriburuRevenue">—</strong>
+              <p class="mt-1 text-xs text-zinc-400">Revenue bruto mensual</p>
+            </div>
+
+            <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <span class="text-xs uppercase tracking-[0.22em] text-zinc-400">Margen Neto</span>
+              <strong class="mt-2 block text-3xl text-white" id="uriburuMargin">—</strong>
+              <p class="mt-1 text-xs text-zinc-400" id="uriburuMarginPct">—</p>
+            </div>
+          </div>
+
+          <div class="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div class="grid gap-3 md:grid-cols-3">
+              <div>
+                <span class="text-xs uppercase tracking-[0.22em] text-zinc-400">Unidad</span>
+                <strong class="mt-1 block text-white" id="uriburuUnit">—</strong>
+              </div>
+              <div>
+                <span class="text-xs uppercase tracking-[0.22em] text-zinc-400">Check-in</span>
+                <strong class="mt-1 block text-white" id="uriburuCheckIn">—</strong>
+              </div>
+              <div>
+                <span class="text-xs uppercase tracking-[0.22em] text-zinc-400">Check-out</span>
+                <strong class="mt-1 block text-white" id="uriburuCheckOut">—</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 space-y-2" id="uriburuAlerts">
+            <div class="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-400">
+              Cargando alertas…
+            </div>
+          </div>
         </article>
 
         <article class="chart-card">
@@ -1770,6 +1910,17 @@
         <h2>Cabina ejecutiva para captación, tasación, comercialización, cierre y documental.</h2>
         <p>El módulo privado para ver qué está vivo, qué está trabado y qué caso tenés que tocar ahora.</p>
       </div>
+      <div class="brokerage-command-bar">
+        <div class="brokerage-command-copy">
+          <strong>🎯 Mesa brokerage</strong>
+          <p>Entrá por caso, destrabá rápido y bajá el próximo movimiento al composer sin perder contexto.</p>
+        </div>
+        <div class="brokerage-actions compact">
+          <button class="ghost-button brokerage-top-action" data-template="Mostrame qué caso de brokerage tengo que tocar primero, por qué y con qué mensaje salir hoy.">Priorizar</button>
+          <button class="ghost-button brokerage-top-action" data-template="Dame un barrido ejecutivo del pipeline de brokerage: captación, tasación, comercialización, cierre y documental.">Barrido pipeline</button>
+          <button class="ghost-button brokerage-top-action" data-template="Decime qué alertas de brokerage tengo que destrabar hoy y redactame el primer mensaje para cada una.">Destrabar</button>
+        </div>
+      </div>
       <div class="brokerage-kpis" id="brokerageKpis"></div>
       <div class="brokerage-grid">
         <div class="brokerage-card brokerage-list">
@@ -1780,6 +1931,7 @@
             </div>
             <span class="pill" id="brokerageQueuePill">0 casos</span>
           </div>
+          <div class="brokerage-filter-row" id="brokerageFilters"></div>
           <div class="brokerage-list" id="brokerageQueue"></div>
           <div class="card-title row-between" style="margin-top:8px">
             <div class="card-title-text">
@@ -1833,6 +1985,12 @@
           </div>
         </div>
         <div class="brokerage-chip-row" id="brokerageSpotlightChips"></div>
+        <div class="brokerage-spotlight-cta" id="brokerageSpotlightActions">
+          <button class="ghost-button brokerage-spotlight-action" data-action="status">Pedir update</button>
+          <button class="ghost-button brokerage-spotlight-action" data-action="message">Redactar mensaje</button>
+          <button class="ghost-button brokerage-spotlight-action" data-action="doc">Resolver doc</button>
+          <button class="ghost-button brokerage-spotlight-action" data-action="next">Bajar próximo paso</button>
+        </div>
         <div class="brokerage-line"><span class="brokerage-mini-label">Próximo paso</span><strong id="brokerageSpotlightNext">—</strong></div>
         <div class="brokerage-line"><span class="brokerage-mini-label">Responsable</span><strong id="brokerageSpotlightOwner">—</strong></div>
         <div class="brokerage-line"><span class="brokerage-mini-label">Fecha crítica</span><strong id="brokerageSpotlightDeadline">—</strong></div>
@@ -2736,10 +2894,11 @@
         button.addEventListener('click', () => triggerFollowUp(button.dataset.name));
       });
       document.querySelectorAll('.collab-open-btn').forEach((button) => {
-        button.addEventListener('click', () => {
-          composerInput.value = `Abrí colaborador ${button.dataset.name}: resumime estado, pendiente y próximo mensaje recomendado.`;
-          composerInput.focus();
-          actionModePill.textContent = 'loaded';
+        button.addEventListener('click', async () => {
+          await runPanelAction(`Abrí colaborador ${button.dataset.name}: resumime estado, pendiente y próximo mensaje recomendado.`, {
+            target: 'Colaboradores / panel',
+            lastMove: `Se abrió colaborador ${button.dataset.name} desde el panel.`
+          });
         });
       });
       document.querySelectorAll('.collab-waiting-btn').forEach((button) => {
@@ -2777,10 +2936,11 @@
         </div>
       `).join('') || '<div class="list-item"><strong>Sin pipeline</strong><p>No hay deal flow cargado todavía.</p></div>';
       document.querySelectorAll('.pipe-open-btn').forEach((button) => {
-        button.addEventListener('click', () => {
-          composerInput.value = `Abrí ${button.dataset.name}: resumime estado comercial y próximo paso concreto.`;
-          composerInput.focus();
-          actionModePill.textContent = 'loaded';
+        button.addEventListener('click', async () => {
+          await runPanelAction(`Abrí ${button.dataset.name}: resumime estado comercial y próximo paso concreto.`, {
+            target: 'Pipeline / panel',
+            lastMove: `Se abrió ${button.dataset.name} desde pipeline.`
+          });
         });
       });
       document.querySelectorAll('.pipe-next-btn').forEach((button) => {
@@ -2806,6 +2966,24 @@
       const urgentCases = queue.filter((item) => item.tone === 'danger').length;
       const warnedDocs = queue.filter((item) => String(item.module || '').toLowerCase().includes('doc')).length;
       const closingPressure = queue.filter((item) => String(item.module || '').toLowerCase().includes('cierre')).length + (stats.cierres || 0);
+      const normalizedSpotlightModule = String(spotlight.module || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const availableFilters = [
+        { key: 'all', label: 'Todo' },
+        { key: 'captacion', label: 'Captación' },
+        { key: 'tasacion', label: 'Tasación' },
+        { key: 'comercializacion', label: 'Comercialización' },
+        { key: 'cierre', label: 'Cierre' },
+        { key: 'documental', label: 'Docs' }
+      ];
+      const desiredFilter = String(window.__wispyBrokerageFilter || 'all');
+      const activeFilter = availableFilters.some((item) => item.key === desiredFilter) ? desiredFilter : 'all';
+      window.__wispyBrokerageFilter = activeFilter;
+      const matchesFilter = (item, filterKey) => {
+        if (filterKey === 'all') return true;
+        const mod = String(item.module || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return filterKey === 'documental' ? mod.includes('doc') : mod.includes(filterKey);
+      };
+      const filteredQueue = queue.filter((item) => matchesFilter(item, activeFilter));
       const derivedTriggers = milestones.length
         ? milestones.map((item) => ({ title: item.title, note: item.when || 'próximo movimiento', tone: 'ok' }))
         : [
@@ -2817,6 +2995,7 @@
 
       brokerageKpis.innerHTML = [
         ['Urgencias', urgentCases, urgentCases ? `${urgentCases} para tocar ya` : 'sin presión roja', 'accent'],
+        ['Captación', stats.leads || 0, `${queue.filter((item) => String(item.module || '').includes('Capt')).length} vivas en cola`, ''],
         ['Tasaciones', stats.tasaciones || 0, `${queue.filter((item) => item.module === 'Tasación').length} activas en cola`, ''],
         ['Cierres', stats.cierres || 0, closingPressure ? `${closingPressure} con presión comercial` : 'sin presión de cierre', ''],
         ['Docs', stats.docs || 0, warnedDocs ? `${warnedDocs} piden soporte` : 'sin faltantes marcados', '']
@@ -2828,8 +3007,13 @@
         </div>
       `).join('');
 
-      brokerageQueuePill.textContent = `${queue.length} activos`;
-      brokerageQueue.innerHTML = queue.map((item) => `
+      brokerageFilters.innerHTML = availableFilters.map((item) => {
+        const count = item.key === 'all' ? queue.length : queue.filter((entry) => matchesFilter(entry, item.key)).length;
+        return `<button class="brokerage-filter-btn ${item.key === activeFilter ? 'is-active' : ''}" data-filter="${item.key}">${item.label} · ${count}</button>`;
+      }).join('');
+
+      brokerageQueuePill.textContent = `${filteredQueue.length} activos`;
+      brokerageQueue.innerHTML = filteredQueue.map((item) => `
         <div class="brokerage-case">
           <div class="brokerage-case-row">
             <div class="brokerage-case-copy">
@@ -2848,7 +3032,7 @@
             </div>
           </div>
         </div>
-      `).join('') || '<div class="brokerage-case"><strong>Sin casos</strong><p>No hay cola prioritaria cargada.</p></div>';
+      `).join('') || '<div class="brokerage-case"><strong>Sin casos</strong><p>No hay casos para este módulo.</p></div>';
 
       brokerageModules.innerHTML = modules.map((item) => `
         <div class="brokerage-module-card">
@@ -2903,7 +3087,7 @@
       brokerageSpotlightOwner.textContent = spotlight.owner || '—';
       brokerageSpotlightDeadline.textContent = spotlight.deadline || '—';
       brokerageSpotlightOverview.innerHTML = [spotlight.type, spotlight.status, spotlight.summary].filter(Boolean).map((item) => `<li>${item}</li>`).join('');
-      const moduleKey = String(spotlight.module || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const moduleKey = normalizedSpotlightModule;
       const moduleDataMap = spotlight.moduleData || {};
       const pickedModuleData = moduleKey.includes('capt') ? moduleDataMap.captacion
         : moduleKey.includes('tasa') ? moduleDataMap.tasacion
@@ -2915,39 +3099,79 @@
       brokerageSpotlightDocs.innerHTML = (Array.isArray(spotlight.documents) ? spotlight.documents : []).map((item) => `<li>${item.name} · ${item.status}</li>`).join('');
       brokerageSpotlightActivity.innerHTML = (Array.isArray(spotlight.activity) ? spotlight.activity : []).map((item) => `<li>${item}</li>`).join('');
 
-      document.querySelectorAll('.brokerage-quick-action').forEach((button) => {
+      document.querySelectorAll('.brokerage-top-action').forEach((button) => {
+        button.addEventListener('click', async () => {
+          await runPanelAction(button.dataset.template || '', {
+            target: 'Brokerage / mesa ejecutiva',
+            lastMove: 'Se disparó una acción rápida de brokerage.'
+          });
+        });
+      });
+
+      document.querySelectorAll('.brokerage-filter-btn').forEach((button) => {
         button.addEventListener('click', () => {
+          window.__wispyBrokerageFilter = button.dataset.filter || 'all';
+          renderBrokerage(data);
+        });
+      });
+
+      document.querySelectorAll('.brokerage-spotlight-action').forEach((button) => {
+        button.addEventListener('click', async () => {
+          const title = spotlight.title || 'este caso';
+          const action = button.dataset.action;
+          const prompt = action === 'status'
+            ? `Dame update ejecutivo de ${title}: estado, bloqueo, riesgo y próximo paso.`
+            : action === 'message'
+              ? `Redactame el mejor mensaje corto para mover ${title} hoy.`
+              : action === 'doc'
+                ? `Decime qué soporte o documento falta en ${title} y cómo cerrarlo sin fricción.`
+                : `Bajame ${title} a plan de acción con dueño, deadline y trigger siguiente.`;
+          await runPanelAction(prompt, {
+            target: 'Brokerage / spotlight',
+            lastMove: `Se accionó el spotlight de ${title}.`
+          });
+        });
+      });
+
+      document.querySelectorAll('.brokerage-quick-action').forEach((button) => {
+        button.addEventListener('click', async () => {
           const title = button.dataset.title;
           const action = button.dataset.action;
-          composerInput.value = action === 'estado'
+          const prompt = action === 'estado'
             ? `Dame estado, bloqueo y próximo paso del caso ${title}.`
             : action === 'seguir'
               ? `Preparame seguimiento concreto para ${title} con mensaje sugerido y próximo movimiento.`
               : `Decime qué documento o soporte falta en ${title} y cómo resolverlo.`;
-          composerInput.focus();
-          actionModePill.textContent = 'loaded';
+          await runPanelAction(prompt, {
+            target: 'Brokerage / cola prioritaria',
+            lastMove: `Se abrió acción rápida para ${title}.`
+          });
         });
       });
 
       document.querySelectorAll('.brokerage-module-action').forEach((button) => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', async () => {
           const mod = button.dataset.module;
-          composerInput.value = button.dataset.action === 'ver'
+          const prompt = button.dataset.action === 'ver'
             ? `Mostrame cola, urgencias y próximo paso del módulo ${mod}.`
             : `Decime cómo limpiar y ordenar el módulo ${mod} con criterio ejecutivo.`;
-          composerInput.focus();
-          actionModePill.textContent = 'loaded';
+          await runPanelAction(prompt, {
+            target: 'Brokerage / módulos',
+            lastMove: `Se abrió el módulo ${mod}.`
+          });
         });
       });
 
       document.querySelectorAll('.brokerage-alert-action').forEach((button) => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', async () => {
           const title = button.dataset.title;
-          composerInput.value = button.dataset.action === 'resolver'
+          const prompt = button.dataset.action === 'resolver'
             ? `Resolvé la alerta ${title} con pasos concretos.`
             : `Redactame mensaje corto para destrabar ${title}.`;
-          composerInput.focus();
-          actionModePill.textContent = 'loaded';
+          await runPanelAction(prompt, {
+            target: 'Brokerage / alertas',
+            lastMove: `Se accionó una alerta de brokerage: ${title}.`
+          });
         });
       });
     }
@@ -3237,20 +3461,21 @@
       }
     }
 
-    summarizeBtn.addEventListener('click', async () => {
-      const raw = composerInput.value.trim();
-      if (!raw) {
+    async function runPanelAction(raw, options = {}) {
+      const prompt = String(raw || '').trim();
+      if (!prompt) {
         composerOutput.textContent = 'Escribí un pedido y lo bajo a acción.';
-        return;
+        return false;
       }
 
+      composerInput.value = prompt;
       composerOutput.textContent = 'Procesando acción...';
       actionModePill.textContent = 'running';
-      setThinkingState('thinking', 'Wispy está bajando el pedido a acción ejecutiva.');
+      setThinkingState('thinking', options.thinkingText || 'Wispy está bajando el pedido a acción ejecutiva.');
       setBrainContext({
-        task: `Resolver pedido: ${raw.slice(0, 120)}`,
-        target: 'Motor de acciones / Ops',
-        lastMove: 'Entró una acción nueva para ejecutar.',
+        task: `Resolver pedido: ${prompt.slice(0, 120)}`,
+        target: options.target || 'Motor de acciones / Ops',
+        lastMove: options.lastMove || 'Entró una acción nueva para ejecutar.',
         action: 'Procesando',
         actionBar: { width: '90%', live: true }
       });
@@ -3259,20 +3484,27 @@
         const response = await fetch('/.netlify/functions/wispy-panel-action', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: raw })
+          body: JSON.stringify({ prompt })
         });
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.error || 'No pude ejecutar la acción');
         composerOutput.textContent = data.output;
         actionModePill.textContent = 'done';
-        setThinkingState('idle', 'Acción procesada.');
-        setBrainContext({ lastMove: 'Acción resuelta y bajada al panel.', action: 'Listo', actionBar: { width: '34%', live: false } });
+        setThinkingState('idle', options.doneText || 'Acción procesada.');
+        setBrainContext({ lastMove: options.doneMove || 'Acción resuelta y bajada al panel.', action: 'Listo', actionBar: { width: '34%', live: false } });
+        if (options.refreshAfter) await loadPanelData();
+        return true;
       } catch {
-        composerOutput.textContent = buildExecutiveBrief(raw);
+        composerOutput.textContent = buildExecutiveBrief(prompt);
         actionModePill.textContent = 'fallback';
-        setThinkingState('error', 'No pude correr la acción real; quedó fallback ejecutivo.');
-        setBrainContext({ lastMove: 'La acción cayó a resumen ejecutivo de respaldo.', action: 'Respaldo', actionBar: { width: '48%', live: false } });
+        setThinkingState('error', options.errorText || 'No pude correr la acción real; quedó fallback ejecutivo.');
+        setBrainContext({ lastMove: options.errorMove || 'La acción cayó a resumen ejecutivo de respaldo.', action: 'Respaldo', actionBar: { width: '48%', live: false } });
+        return false;
       }
+    }
+
+    summarizeBtn.addEventListener('click', async () => {
+      await runPanelAction(composerInput.value);
     });
 
     saveInboxBtn.addEventListener('click', saveCurrentToInbox);
@@ -3291,13 +3523,12 @@
     });
 
     launcherButtons.forEach((button) => {
-      button.addEventListener('click', () => {
+      button.addEventListener('click', async () => {
         const template = button.dataset.template || '';
-        composerInput.value = template;
-        composerOutput.textContent = buildExecutiveBrief(template);
-        actionModePill.textContent = 'loaded';
-        composerInput.focus();
-        composerInput.setSelectionRange(composerInput.value.length, composerInput.value.length);
+        await runPanelAction(template, {
+          target: 'Launchers rápidos / Ops',
+          lastMove: `Se disparó launcher: ${button.textContent.trim()}`
+        });
       });
     });
 
@@ -3329,5 +3560,92 @@
     loadPanelData();
     startLiveRefresh();
   </script>
+<script>
+  function wispyMoney(value) {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0
+    }).format(Number(value || 0));
+  }
+
+  function wispyPct(value) {
+    return String(Number(value || 0).toFixed(0)) + "%";
+  }
+
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
+
+  function escapeHtml(value) {
+    return String(value || "").replace(/[&<>'"]/g, function (char) {
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char];
+    });
+  }
+
+  async function loadUriburuRevenue() {
+    const pill = document.getElementById("uriburuRevenuePill");
+
+    try {
+      const response = await fetch("/.netlify/functions/uriburu-revenue", {
+        headers: { Accept: "application/json" }
+      });
+
+      if (!response.ok) throw new Error("HTTP " + response.status);
+
+      const data = await response.json();
+      const kpis = data.kpis || {};
+      const unit = Array.isArray(data.units) ? data.units[0] : null;
+
+      setText("uriburuOccupancy", wispyPct(kpis.occupancyPct));
+      setText("uriburuNights", String(kpis.bookedNights || 0) + "/" + String(kpis.availableNights || 0) + " noches");
+      setText("uriburuAdr", wispyMoney(kpis.adrUsd));
+      setText("uriburuRevenue", wispyMoney(kpis.grossRevenueUsd));
+      setText("uriburuMargin", wispyMoney(kpis.netMarginUsd));
+      setText("uriburuMarginPct", wispyPct(kpis.netMarginPct));
+
+      setText("uriburuUnit", (unit && unit.label) || (data.building && data.building.unit) || "Uriburu 201");
+      setText("uriburuCheckIn", (unit && unit.nextCheckIn) || "—");
+      setText("uriburuCheckOut", (unit && unit.nextCheckOut) || "—");
+
+      const alertsBox = document.getElementById("uriburuAlerts");
+      if (alertsBox) {
+        const alerts = Array.isArray(data.alerts) ? data.alerts : [];
+        alertsBox.innerHTML = alerts.length
+          ? alerts.map(function (alert) {
+              const tone = alert.level === "warning" ? "bg-amber-400" : "bg-emerald-400";
+              return '<div class="rounded-2xl border border-white/10 bg-black/20 p-4">'
+                + '<div class="flex items-start gap-3">'
+                + '<span class="mt-1 h-2.5 w-2.5 rounded-full ' + tone + '"></span>'
+                + '<div>'
+                + '<p class="font-semibold text-white">' + escapeHtml(alert.title || "Alerta") + '</p>'
+                + '<p class="mt-1 text-sm text-zinc-400">' + escapeHtml(alert.detail || "") + '</p>'
+                + '</div></div></div>';
+            }).join("")
+          : '<div class="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-400">Sin alertas activas.</div>';
+      }
+
+      if (pill) {
+        pill.textContent = data.source || "online";
+        pill.className = "pill ok";
+      }
+    } catch (error) {
+      console.error("Uriburu Revenue load failed:", error);
+
+      if (pill) {
+        pill.textContent = "error";
+        pill.className = "pill danger";
+      }
+
+      const alertsBox = document.getElementById("uriburuAlerts");
+      if (alertsBox) {
+        alertsBox.innerHTML = '<div class="rounded-2xl border border-red-400/20 bg-red-400/10 p-4 text-sm text-red-200">No pude cargar Uriburu Revenue. Revisar deploy de /.netlify/functions/uriburu-revenue.</div>';
+      }
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadUriburuRevenue);
+</script>
 </body>
 </html>
