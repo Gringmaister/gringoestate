@@ -24,6 +24,7 @@ const DEFAULT_CREDENTIALS = '/home/franco/.openclaw/workspace/secrets/google-sa-
 const DEFAULT_SPREADSHEET_ID = '1htz5jbM26ZnjTCC7rl43g46pPhjDoVjUAlmwMaDfGoE';
 const DEFAULT_SHEET_NAME = 'Burn ambbi';
 const DEFAULT_DRIVE_ROOT_ID = '1cD4Vs5UbZTlKpGhvYEHRveqfqYJ7jUTb';
+const DEFAULT_APPS_SCRIPT_BRIDGE_URL = 'https://script.google.com/macros/s/AKfycbyEk8JQgGcKugn9qOH_J9sWsfwr5ENK5kVchFDrO09eNZ7Q8vYt3YKuLvyGFK7Rfcn8/exec';
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const SHEETS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets';
 const DRIVE_BASE = 'https://www.googleapis.com/drive/v3';
@@ -335,21 +336,26 @@ async function uploadReceipt({ token, rootId, filePath, rowObject }) {
   const provider = String(rowObject.ANOTACIONES || '').replace(/^Proveedor:\s*/i, '') || 'Sin proveedor';
   const amount = rowObject.PESOS || rowObject.USD || rowObject['PRECIO UNITARIO'] || '';
   const filename = `${date.toISOString().slice(0, 10)} - ${safeName(provider)} - ${safeName(amount)}${path.extname(filePath)}`;
-  const metadata = await googleJson(`${DRIVE_BASE}/files?fields=id,name,webViewLink&supportsAllDrives=true`, {
-    token,
+  const bridgeUrl = process.env.WISPY_APPS_SCRIPT_BRIDGE_URL || DEFAULT_APPS_SCRIPT_BRIDGE_URL;
+  const mimeType = mimeFor(filePath);
+  const base64Data = fs.readFileSync(filePath).toString('base64');
+  const response = await fetch(bridgeUrl, {
     method: 'POST',
-    body: { name: filename, parents: [monthFolder.id] }
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      folderId: rootId,
+      fileName: filename,
+      mimeType,
+      base64Data
+    })
   });
-  const response = await fetch(`${DRIVE_UPLOAD_BASE}/files/${metadata.id}?uploadType=media&supportsAllDrives=true`, {
-    method: 'PATCH',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': mimeFor(filePath) },
-    body: fs.readFileSync(filePath)
-  });
-  if (!response.ok) {
-    const payload = await response.json().catch(() => ({}));
-    throw new Error(`Drive media upload ${response.status}: ${JSON.stringify(payload)}`);
-  }
-  return { skipped: false, folder: `${year}/${monthFolderName(date)}`, file: metadata.name, link: metadata.webViewLink || `https://drive.google.com/file/d/${metadata.id}/view` };
+  const raw = await response.text();
+  let payload;
+  try { payload = raw ? JSON.parse(raw) : {}; } catch { payload = { raw }; }
+  if (!response.ok) throw new Error(`Apps Script bridge ${response.status}: ${raw}`);
+  const link = payload.fileUrl || payload.url || payload.webViewLink || payload.link || '';
+  if (!link) throw new Error(`Apps Script bridge response without fileUrl: ${raw}`);
+  return { skipped: false, folder: `${year}/${monthFolderName(date)}`, file: filename, link, bridge: 'apps-script' };
 }
 
 function sheetRange(sheetName, range) {
@@ -410,7 +416,7 @@ async function run(input, { dryRun = false } = {}) {
       skipped: false,
       degraded: true,
       error: error.message,
-      link: quota ? '⚠️ Error: Cuota Drive excedida' : `⚠️ Error Drive: ${error.message}`
+      link: String(error.message || '').includes('Apps Script') ? '⚠️ Error Puente' : (quota ? '⚠️ Error: Cuota Drive excedida' : `⚠️ Error Drive: ${error.message}`)
     };
     rowObject['COMPROBANTE (LINK)'] = driveResult.link;
   }
