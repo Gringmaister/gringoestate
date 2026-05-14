@@ -10,7 +10,7 @@ async function fetchJson(url, options = {}) {
 async function getBridgeRuntime() {
   const candidates = [
     process.env.WISPY_RUNTIME_BRIDGE_URL,
-    'http://209.126.82.189:3002/wispy-runtime'
+    'https://lock-detective-break-theorem.trycloudflare.com/wispy-runtime'
   ].filter(Boolean);
 
   const headers = {};
