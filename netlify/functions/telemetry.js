@@ -62,10 +62,23 @@ function emptyTelemetry() {
 }
 
 async function fetchBridgeTelemetry() {
-  const bridgeUrl = process.env.WISPY_RUNTIME_BRIDGE_URL || 'https://lock-detective-break-theorem.trycloudflare.com/wispy-runtime';
-  const response = await fetch(bridgeUrl, { headers: { Accept: 'application/json' } });
-  if (!response.ok) throw new Error(`bridge HTTP ${response.status}`);
-  const data = await response.json();
+  const candidates = [
+    process.env.WISPY_RUNTIME_BRIDGE_URL,
+    'https://lock-detective-break-theorem.trycloudflare.com/wispy-runtime'
+  ].filter(Boolean);
+  let data = null;
+  let lastError = null;
+  for (const bridgeUrl of candidates) {
+    try {
+      const response = await fetch(bridgeUrl, { headers: { Accept: 'application/json' } });
+      if (!response.ok) throw new Error(`bridge HTTP ${response.status}`);
+      data = await response.json();
+      break;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  if (!data) throw lastError || new Error('bridge unavailable');
   const runtime = data.runtime || data;
   const current = runtime?.sessions?.current || {};
   const aggregate = runtime?.sessions?.aggregate || {};
