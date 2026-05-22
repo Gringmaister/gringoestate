@@ -392,9 +392,9 @@
 
     .horizontal-scroll-section { position: relative; }
     .horizontal-scroll-wrapper { position: sticky; top: 0; display: flex; flex-direction: column; align-items: stretch; height: 100vh; width: 100%; overflow: hidden; }
-    .cards-container { display: flex; align-items: stretch; flex: 1; min-height: 0; gap: clamp(3rem, 7vw, 6rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; will-change: transform; }
+    .cards-container { display: flex; align-items: center; flex: 1; min-height: 0; gap: clamp(3rem, 7vw, 6rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; will-change: transform; }
 
-    .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); min-height: 450px; border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; transition: transform 0.4s ease, box-shadow 0.4s ease; }
+    .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; transition: transform 0.4s ease, box-shadow 0.4s ease; }
     
     .card-inner-content { background: var(--card-bg); width: 100%; height: 100%; border-radius: 18px; position: relative; z-index: 3; overflow: hidden; }
     
@@ -770,20 +770,54 @@
 
     @media (max-width: 1023px) {
       .nav-links-desktop { display: none; }
-      
+
+      /* --- Layout mobile: carrusel horizontal con scroll-snap --- */
       .horizontal-scroll-section { height: auto !important; }
       .horizontal-scroll-wrapper { position: relative !important; height: auto !important; overflow: visible !important; }
-      .services-header { padding: 4.5rem 1.5rem 0; }
+      .services-header { padding: 4.5rem 1.5rem 1rem; }
+
       .cards-container {
-        flex-direction: column;
-        align-items: center;
+        flex-direction: row !important;
+        align-items: stretch !important;
         flex: none;
         width: 100%;
-        padding: 0 1.5rem;
-        gap: 1.5rem;
-        padding-bottom: 2rem;
+        padding: 0 1rem 1.5rem !important;
+        gap: 1rem;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        left: 0 !important;
+        transform: none !important;
       }
-      .service-card-stacked { width: 100% !important; max-width: 500px; height: 480px; min-height: unset; }
+      .cards-container::-webkit-scrollbar { display: none; }
+
+      .service-card-stacked {
+        flex-shrink: 0 !important;
+        width: 82vw !important;
+        max-width: 360px;
+        height: 68vw !important;
+        min-height: 280px;
+        max-height: 420px;
+        scroll-snap-align: center;
+      }
+
+      /* Indicador de swipe — primera tarjeta visible */
+      .cards-container::after {
+        content: '← deslizá →';
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 120px;
+        font-size: 0.75rem;
+        color: var(--primary);
+        opacity: 0.7;
+        letter-spacing: 1px;
+        font-family: 'Bebas Neue', sans-serif;
+        padding-right: 1rem;
+        scroll-snap-align: none;
+      }
     }
 
     @media (max-width: 768px) {
