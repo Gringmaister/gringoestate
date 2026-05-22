@@ -129,8 +129,6 @@
     /* ---- Mobile Menu ---- */
     body.no-scroll {
       overflow: hidden;
-      position: fixed;
-      width: 100%;
     }
     .menu-overlay {
       position: fixed;
@@ -1144,7 +1142,6 @@
         const isActive = mobileMenu.classList.contains('is-active');
         if (!isActive) {
             menuScrollY = window.scrollY;
-            document.body.style.top = `-${menuScrollY}px`;
             mobileMenu.classList.add('is-active');
             menuOverlay.classList.add('is-active');
             menuToggle.classList.add('open');
@@ -1156,8 +1153,8 @@
             menuToggle.classList.remove('open');
             menuToggle.setAttribute('aria-expanded', 'false');
             document.body.classList.remove('no-scroll');
-            document.body.style.top = '';
             window.scrollTo(0, menuScrollY);
+            ScrollTrigger.refresh();
         }
     }
 
@@ -1199,7 +1196,6 @@
     function openCardModal(card) {
         lastFocusedCard = card;
         modalScrollY = window.scrollY;
-        document.body.style.top = `-${modalScrollY}px`;
 
         const cardModalImage = cardModal.querySelector('.card-modal-image');
         const cardModalTextContent = cardModal.querySelector('.card-modal-text-content');
@@ -1235,7 +1231,6 @@
     function closeCardModal() {
         cardModal.classList.remove('is-visible');
         document.body.classList.remove('no-scroll');
-        document.body.style.top = '';
         window.scrollTo(0, modalScrollY);
         document.removeEventListener('keydown', trapFocus);
         if (lastFocusedCard) lastFocusedCard.focus({ preventScroll: true });
@@ -1245,6 +1240,7 @@
                 trigger.enable();
             }
         });
+        ScrollTrigger.refresh();
     }
     
     document.querySelectorAll('.service-card-stacked').forEach(card => {
