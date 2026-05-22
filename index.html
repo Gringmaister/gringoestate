@@ -129,6 +129,8 @@
     /* ---- Mobile Menu ---- */
     body.no-scroll {
       overflow: hidden;
+      position: fixed;
+      width: 100%;
     }
     .menu-overlay {
       position: fixed;
@@ -309,13 +311,14 @@
     .about-text p{color:var(--text-light);line-height:1.8;margin-bottom:1rem;}
     .about-text .section-title { color: var(--light); }
     
-    #services-stacked { color: #fff; padding-top: 4.5rem; padding-bottom: 4.5rem; }
-    #services-stacked > .section-title, #services-stacked > .subtitle { padding-left: 1.5rem; padding-right: 1.5rem; }
-    #services-stacked .subtitle { text-align: center; max-width: 700px; margin: -1rem auto 2rem; color: #ccc; z-index: 2; position: relative; }
-    
+    #services-stacked { color: #fff; padding-top: 0; padding-bottom: 0; }
+
+    .services-header { padding: 3rem 1.5rem 0; flex-shrink: 0; }
+    .services-header .subtitle { text-align: center; max-width: 700px; margin: -1rem auto 0; color: #ccc; z-index: 2; position: relative; }
+
     .horizontal-scroll-section { position: relative; }
-    .horizontal-scroll-wrapper { position: sticky; top: 0; display: flex; align-items: center; height: 100vh; width: 100%; overflow: hidden; }
-    .cards-container { display: flex; gap: clamp(3rem, 7vw, 6rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; will-change: transform; }
+    .horizontal-scroll-wrapper { position: sticky; top: 0; display: flex; flex-direction: column; align-items: stretch; height: 100vh; width: 100%; overflow: hidden; }
+    .cards-container { display: flex; align-items: center; flex: 1; min-height: 0; gap: clamp(3rem, 7vw, 6rem); padding: 0 calc(50vw - clamp(150px, 30vw, 350px)); position: relative; left: 0; will-change: transform; }
     
     .service-card-stacked { flex-shrink: 0; width: clamp(300px, 60vw, 700px); height: clamp(450px, 70vh, 600px); border-radius: 20px; box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4); display: flex; overflow: hidden; position: relative; background: var(--card-bg); padding: 2px; transition: transform 0.4s ease, box-shadow 0.4s ease; }
     
@@ -691,12 +694,15 @@
       
       .horizontal-scroll-section { height: auto !important; }
       .horizontal-scroll-wrapper { position: relative !important; height: auto !important; overflow: visible !important; }
-      .cards-container { 
-        flex-direction: column; 
+      .services-header { padding: 4.5rem 1.5rem 0; }
+      .cards-container {
+        flex-direction: column;
         align-items: center;
+        flex: none;
         width: 100%;
         padding: 0 1.5rem;
         gap: 1.5rem;
+        padding-bottom: 2rem;
       }
       .service-card-stacked { width: 100% !important; max-width: 500px; }
     }
@@ -785,12 +791,14 @@
       </section>
 
       <section id="services-stacked" class="section-full-width">
-          <h2 class="section-title">NUESTROS <span>SERVICIOS</span></h2>
-          <p class="subtitle">
-              Descubrí cómo GringoEstate transforma el Real Estate con soluciones innovadoras y un enfoque directo.
-          </p>
           <div class="horizontal-scroll-section">
               <div class="horizontal-scroll-wrapper">
+                  <div class="services-header">
+                      <h2 class="section-title">NUESTROS <span>SERVICIOS</span></h2>
+                      <p class="subtitle">
+                          Descubrí cómo GringoEstate transforma el Real Estate con soluciones innovadoras y un enfoque directo.
+                      </p>
+                  </div>
                   <div class="cards-container">
                       
                       <article class="service-card-stacked" data-card-id="tarjeta1">
@@ -1130,14 +1138,27 @@
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
     const menuOverlay = document.getElementById('menu-overlay');
+    let menuScrollY = 0;
 
     function toggleMenu() {
         const isActive = mobileMenu.classList.contains('is-active');
-        mobileMenu.classList.toggle('is-active', !isActive);
-        menuOverlay.classList.toggle('is-active', !isActive);
-        menuToggle.classList.toggle('open', !isActive);
-        menuToggle.setAttribute('aria-expanded', String(!isActive));
-        document.body.classList.toggle('no-scroll', !isActive);
+        if (!isActive) {
+            menuScrollY = window.scrollY;
+            document.body.style.top = `-${menuScrollY}px`;
+            mobileMenu.classList.add('is-active');
+            menuOverlay.classList.add('is-active');
+            menuToggle.classList.add('open');
+            menuToggle.setAttribute('aria-expanded', 'true');
+            document.body.classList.add('no-scroll');
+        } else {
+            mobileMenu.classList.remove('is-active');
+            menuOverlay.classList.remove('is-active');
+            menuToggle.classList.remove('open');
+            menuToggle.setAttribute('aria-expanded', 'false');
+            document.body.classList.remove('no-scroll');
+            document.body.style.top = '';
+            window.scrollTo(0, menuScrollY);
+        }
     }
 
     menuToggle.addEventListener('click', toggleMenu);
@@ -1156,6 +1177,7 @@
     const interestSelect = document.getElementById('interest-select');
     const propertyDetails = document.getElementById('property-details');
     let lastFocusedCard = null;
+    let modalScrollY = 0;
 
     const FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
@@ -1176,6 +1198,9 @@
 
     function openCardModal(card) {
         lastFocusedCard = card;
+        modalScrollY = window.scrollY;
+        document.body.style.top = `-${modalScrollY}px`;
+
         const cardModalImage = cardModal.querySelector('.card-modal-image');
         const cardModalTextContent = cardModal.querySelector('.card-modal-text-content');
         const imageSrc = card.querySelector('.card-image').src;
@@ -1210,8 +1235,10 @@
     function closeCardModal() {
         cardModal.classList.remove('is-visible');
         document.body.classList.remove('no-scroll');
+        document.body.style.top = '';
+        window.scrollTo(0, modalScrollY);
         document.removeEventListener('keydown', trapFocus);
-        if (lastFocusedCard) lastFocusedCard.focus();
+        if (lastFocusedCard) lastFocusedCard.focus({ preventScroll: true });
 
         ScrollTrigger.getAll().forEach(trigger => {
             if (trigger.pin && trigger.pin.classList.contains('horizontal-scroll-wrapper')) {
