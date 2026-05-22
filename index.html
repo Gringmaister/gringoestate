@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-AR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -24,6 +24,9 @@
   <meta name="twitter:description" content="Soy Franco Garbini y hago que el Real Estate en CABA sea más simple y rentable para vos. Esta es mi carta de presentación y mis servicios. ¿Tenés una idea? Agendá una llamada y la bajamos a tierra.">
   <meta name="twitter:image" content="https://www.gringo.estate/images/gringoestate-og-image.jpg">
   
+  <link rel="canonical" href="https://www.gringo.estate/">
+  <link rel="preload" as="image" href="https://raw.githubusercontent.com/Gringmaister/gringoestate/main/images/hero-bg.webp" type="image/webp">
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
@@ -36,6 +39,54 @@
     gtag('config', 'G-Y1DWC69608');
   </script>
   
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "RealEstateAgent",
+        "@id": "https://www.gringo.estate/#organization",
+        "name": "GringoEstate",
+        "url": "https://www.gringo.estate",
+        "logo": "https://www.gringo.estate/images/isologo.webp",
+        "description": "Transformamos el Real Estate con soluciones innovadoras. Venta en 90 días, gestión de alquiler temporario, personal shopper inmobiliario y asesoría para desarrolladores.",
+        "telephone": "+5491156106169",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Buenos Aires",
+          "addressRegion": "CABA",
+          "addressCountry": "AR"
+        },
+        "sameAs": [
+          "https://www.linkedin.com/company/gringoestate/",
+          "https://twitter.com/Gringoestate",
+          "https://instagram.com/Gringoestate"
+        ],
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "5",
+          "reviewCount": "1250"
+        }
+      },
+      {
+        "@type": "Person",
+        "@id": "https://www.gringo.estate/#franco",
+        "name": "Franco Garbini",
+        "jobTitle": "Fundador",
+        "worksFor": { "@id": "https://www.gringo.estate/#organization" },
+        "url": "https://www.gringo.estate"
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://www.gringo.estate/#website",
+        "url": "https://www.gringo.estate",
+        "name": "GringoEstate",
+        "publisher": { "@id": "https://www.gringo.estate/#organization" }
+      }
+    ]
+  }
+  </script>
+
   <style>
     :root {
       --primary: #FFBF00;
@@ -673,7 +724,7 @@
       <li><a href="#contact"><span class="menu-item-number">05</span>Contacto</a></li>
     </ul>
   </div>
-  <button class="menu-button" id="menu-toggle" aria-label="Abrir o cerrar menú de navegación">
+  <button class="menu-button" id="menu-toggle" aria-label="Abrir o cerrar menú de navegación" aria-expanded="false" aria-controls="mobile-menu">
       <span class="bar bar1"></span>
       <span class="bar bar2"></span>
       <span class="bar bar3"></span>
@@ -681,9 +732,9 @@
   <a href="https://wa.me/5491156106169" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width:28px; height:28px; fill:white;"><path d="M380.9 97.1C339.4 55.6 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.8 0-67.6-9.5-97.8-26.7l-7-4.1-72.5 19 19.3-71.1-4.5-7.4c-18.3-30.7-27.9-66.2-27.9-102.3 0-108.6 88.4-197 197-197s197 88.4 197 197-88.4 197-197 197zm83.7-118.2c-3.7-1.9-22.1-10.9-25.6-12.1-3.4-1.2-5.9-1.9-8.4 1.9-2.5 3.7-9.7 12.1-11.9 14.5-2.2 2.5-4.5 2.8-8.2 1-3.7-1.9-15.7-5.8-30-18.5-11.1-9.6-18.7-21.6-20.9-25.3-2.2-3.7-0.2-5.9 1.7-7.7 1.7-1.5 3.7-3.7 5.5-5.5 1.8-1.8 2.5-3.7 3.7-6.2 1.2-2.5 0.6-4.8-0.3-6.7-0.9-1.9-8.4-20.1-11.5-27.5-3.1-7.4-6.2-6.3-8.4-6.3-2.2 0-4.8 0-7.4 0-2.5 0-6.7 1.2-10.3 5.9-3.7 4.8-14.1 13.8-14.1 33.5 0 19.8 14.4 38.9 16.4 41.4 2 2.5 28.2 42.8 68.2 60.1 9.7 4.1 17.3 6.6 23.1 8.8 13.3 5.1 25.6 4.3 35.1 2.6 10.8-1.9 22.1-9 25.2-17.6 3.1-8.6 3.1-16 2.2-17.6-0.9-1.5-3.4-2.5-7.1-4.5z"/></svg>
   </a>
-  <div id="card-modal" class="card-modal">
+  <div id="card-modal" class="card-modal" role="dialog" aria-modal="true" aria-labelledby="card-modal-title">
     <div class="card-modal-content-wrapper">
-      <button class="card-modal-close-btn">×</button>
+      <button class="card-modal-close-btn" aria-label="Cerrar">×</button>
       <img src="" alt="Imagen de fondo del servicio" class="card-modal-image">
       <div class="card-modal-text-content">
       </div>
@@ -728,8 +779,8 @@
         </div>
         <div class="about-text">
             <h2 class="section-title text-left">SOY FRANCO GARBINI</h2>
-            <p><strong>Deportista, entusiasta de la tecnología y apasionado del mundo inmobiliario.</strong> Hace 4 años renuncié a la seguridad del mundo corporativo (Banco Galicia) para subalquilar mi primer monoambiente. <br>Una apuesta personal...</p>
-            <p>Hoy, esa apuesta se transformó en un <strong>sistema de negocios</strong>: socio en <strong>Baigun R&N</strong>, fundador de <strong>AMBBI</strong> (<strong>+500 reviews 5⭐️</strong>) y responsable de la comercialización de <strong>edificios completos</strong>. Combino datos, tecnología y un equipo ágil para entregar resultados reales, sin traje ni corbata.</p>
+            <p><strong>Deportista, entusiasta de la tecnología y apasionado del mundo inmobiliario.</strong> Hace 5 años renuncié a la seguridad del mundo corporativo (Banco Galicia) para subalquilar mi primer monoambiente. <br>Una apuesta personal...</p>
+            <p>Hoy, esa apuesta se transformó en un <strong>sistema de negocios</strong>: socio en <strong>Baigun R&N</strong>, fundador de <strong>AMBBI</strong> (<strong>+1250 reseñas 5⭐️</strong>) y responsable de la comercialización de <strong>edificios completos</strong>. Combino datos, tecnología y un equipo ágil para entregar resultados reales, sin traje ni corbata.</p>
         </div>
       </section>
 
@@ -956,7 +1007,7 @@
       </div>
 
     <footer>
-      <p>© 2025 Franco Garbini · GringoEstate · Todos los derechos reservados.</p>
+      <p>© 2026 Franco Garbini · GringoEstate · Todos los derechos reservados.</p>
       <p style="margin-top:1rem;">
         <a href="https://www.linkedin.com/company/gringoestate/" target="_blank" rel="noopener noreferrer">LinkedIn</a>  •  
         <a href="https://twitter.com/Gringoestate" target="_blank" rel="noopener noreferrer">Twitter (X)</a>  •  
@@ -1085,6 +1136,7 @@
         mobileMenu.classList.toggle('is-active', !isActive);
         menuOverlay.classList.toggle('is-active', !isActive);
         menuToggle.classList.toggle('open', !isActive);
+        menuToggle.setAttribute('aria-expanded', String(!isActive));
         document.body.classList.toggle('no-scroll', !isActive);
     }
 
@@ -1103,24 +1155,50 @@
     const cardModal = document.getElementById('card-modal');
     const interestSelect = document.getElementById('interest-select');
     const propertyDetails = document.getElementById('property-details');
-    
+    let lastFocusedCard = null;
+
+    const FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+    function trapFocus(e) {
+        const focusable = Array.from(cardModal.querySelectorAll(FOCUSABLE));
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.key === 'Tab') {
+            if (e.shiftKey) {
+                if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+            } else {
+                if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+        }
+        if (e.key === 'Escape') { closeCardModal(); }
+    }
+
     function openCardModal(card) {
+        lastFocusedCard = card;
         const cardModalImage = cardModal.querySelector('.card-modal-image');
         const cardModalTextContent = cardModal.querySelector('.card-modal-text-content');
         const imageSrc = card.querySelector('.card-image').src;
         const fullDetailsContent = card.querySelector('.card-full-details-content').innerHTML;
 
         cardModalImage.src = imageSrc;
-        cardModalTextContent.innerHTML = ''; 
-        
+        cardModalTextContent.innerHTML = '';
+
         const contentWrapper = document.createElement('div');
         contentWrapper.className = 'modal-content-inner-wrapper';
         contentWrapper.innerHTML = fullDetailsContent;
-        
+
+        const titleEl = contentWrapper.querySelector('h3');
+        if (titleEl) titleEl.id = 'card-modal-title';
+
         cardModalTextContent.appendChild(contentWrapper);
 
         cardModal.classList.add('is-visible');
         document.body.classList.add('no-scroll');
+        document.addEventListener('keydown', trapFocus);
+
+        const firstFocusable = cardModal.querySelector(FOCUSABLE);
+        if (firstFocusable) firstFocusable.focus();
 
         ScrollTrigger.getAll().forEach(trigger => {
             if (trigger.pin && trigger.pin.classList.contains('horizontal-scroll-wrapper')) {
@@ -1132,7 +1210,9 @@
     function closeCardModal() {
         cardModal.classList.remove('is-visible');
         document.body.classList.remove('no-scroll');
-        
+        document.removeEventListener('keydown', trapFocus);
+        if (lastFocusedCard) lastFocusedCard.focus();
+
         ScrollTrigger.getAll().forEach(trigger => {
             if (trigger.pin && trigger.pin.classList.contains('horizontal-scroll-wrapper')) {
                 trigger.enable();
@@ -1366,7 +1446,7 @@
             alquilerResult.style.color = '#e0e0e0';
 
         } catch (error) {
-            alquilerResult.innerHTML = `<p style="text-align:center;">Error: ${error.message}</p>`;
+            alquilerResult.innerHTML = `<p style="text-align:center;">Error: ${escapeHtml(error.message)}</p>`;
             alquilerResult.style.color = '#ff6b6b';
             console.error("Error en el cálculo de alquiler:", error);
         } finally {
@@ -1379,15 +1459,21 @@
         calcularAlquilerBtn.addEventListener('click', calcularNuevoAlquilerConAPI);
     }
 
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
     async function callGeminiAPI(prompt, resultElement, loaderElement) {
       loaderElement.style.display = 'inline-block';
       resultElement.textContent = 'Generando...';
       resultElement.style.color = '#e0e0e0';
 
-      const payload = { 
-          prompt: prompt
-      };
-      const apiUrl = `/.netlify/functions/generate-description`; 
+      const payload = { prompt: prompt };
+      const apiUrl = `/.netlify/functions/generate-description`;
 
       try {
           const response = await fetch(apiUrl, {
@@ -1397,20 +1483,20 @@
           });
 
           const result = await response.json();
-          
+
           if (!response.ok) {
               throw new Error(result.error || `Error del servidor: ${response.status}`);
           }
-          
+
           if (result.text) {
-              resultElement.innerHTML = result.text.replace(/\n/g, '<br>');
+              resultElement.innerHTML = escapeHtml(result.text).replace(/\n/g, '<br>');
               resultElement.style.textAlign = 'left';
               resultElement.style.whiteSpace = 'normal';
           } else {
               throw new Error('La respuesta de la IA no tuvo el formato esperado.');
           }
       } catch (error) {
-          resultElement.textContent = `Error al conectar con la IA. ${error.message}`;
+          resultElement.innerHTML = `<p style="text-align:center;">Error al conectar con la IA. ${escapeHtml(error.message)}</p>`;
           resultElement.style.color = '#ff6b6b';
           console.error('Error calling the backend function:', error);
       } finally {
