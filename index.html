@@ -783,8 +783,8 @@
         </div>
         <div class="about-text">
             <h2 class="section-title text-left">SOY FRANCO GARBINI</h2>
-            <p><strong>Deportista, entusiasta de la tecnología y apasionado del mundo inmobiliario.</strong> Hace 5 años renuncié a la seguridad del mundo corporativo (Banco Galicia) para subalquilar mi primer monoambiente. <br>Una apuesta personal...</p>
-            <p>Hoy, esa apuesta se transformó en un <strong>sistema de negocios</strong>: socio en <strong>Baigun R&N</strong>, fundador de <strong>AMBBI</strong> (<strong>+1250 reseñas 5⭐️</strong>) y responsable de la comercialización de <strong>edificios completos</strong>. Combino datos, tecnología y un equipo ágil para entregar resultados reales, sin traje ni corbata.</p>
+            <p><strong>Deportista, entusiasta de la tecnología y apasionado del mundo inmobiliario.</strong> Hace <span class="stat-count" data-count="5">5</span> años renuncié a la seguridad del mundo corporativo (Banco Galicia) para subalquilar mi primer monoambiente. <br>Una apuesta personal...</p>
+            <p>Hoy, esa apuesta se transformó en un <strong>sistema de negocios</strong>: socio en <strong>Baigun R&N</strong>, fundador de <strong>AMBBI</strong> (<strong>+<span class="stat-count" data-count="1250">1250</span> reseñas 5⭐️</strong>) y responsable de la comercialización de <strong>edificios completos</strong>. Combino datos, tecnología y un equipo ágil para entregar resultados reales, sin traje ni corbata.</p>
         </div>
       </section>
 
@@ -1153,8 +1153,10 @@
             menuToggle.classList.remove('open');
             menuToggle.setAttribute('aria-expanded', 'false');
             document.body.classList.remove('no-scroll');
-            window.scrollTo(0, menuScrollY);
-            ScrollTrigger.refresh();
+            requestAnimationFrame(() => {
+                window.scrollTo(0, menuScrollY);
+                ScrollTrigger.update();
+            });
         }
     }
 
@@ -1231,7 +1233,6 @@
     function closeCardModal() {
         cardModal.classList.remove('is-visible');
         document.body.classList.remove('no-scroll');
-        window.scrollTo(0, modalScrollY);
         document.removeEventListener('keydown', trapFocus);
         if (lastFocusedCard) lastFocusedCard.focus({ preventScroll: true });
 
@@ -1240,7 +1241,11 @@
                 trigger.enable();
             }
         });
-        ScrollTrigger.refresh();
+
+        requestAnimationFrame(() => {
+            window.scrollTo(0, modalScrollY);
+            ScrollTrigger.update();
+        });
     }
     
     document.querySelectorAll('.service-card-stacked').forEach(card => {
@@ -1536,6 +1541,62 @@
             }
             const prompt = `Actúa como un copywriter inmobiliario experto. Genera una descripción profesional, atractiva y persuasiva para una propiedad con las siguientes características: ${propertyInput.value}. El tono debe ser directo, moderno y confiable, como "sin corbata". Estructura el texto con un título llamativo, un párrafo introductorio, una lista de 3-4 puntos clave (usando emojis como ✅) y un párrafo de cierre que invite a la acción.`;
             callGeminiAPI(prompt, descriptionResult, loaderDescription);
+        });
+    }
+
+    // --- Contador animado en stats ---
+    if (!prefersReducedMotion) {
+        const statEls = document.querySelectorAll('.stat-count');
+        if (statEls.length) {
+            const countObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    countObserver.unobserve(entry.target);
+                    const el = entry.target;
+                    const target = parseInt(el.dataset.count, 10);
+                    const duration = target > 100 ? 1800 : 1000;
+                    let startTime = null;
+                    const easeOut = t => 1 - Math.pow(1 - t, 3);
+                    const step = (ts) => {
+                        if (!startTime) startTime = ts;
+                        const progress = Math.min((ts - startTime) / duration, 1);
+                        el.textContent = Math.floor(easeOut(progress) * target);
+                        if (progress < 1) requestAnimationFrame(step);
+                        else el.textContent = target;
+                    };
+                    requestAnimationFrame(step);
+                });
+            }, { threshold: 0.5 });
+            statEls.forEach(el => countObserver.observe(el));
+        }
+    }
+
+    // --- Efecto magnético en botones CTA (solo desktop pointer:fine) ---
+    if (!prefersReducedMotion && window.matchMedia('(pointer: fine)').matches) {
+        document.querySelectorAll('.btn-primary, .btn-enviar-mensaje').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = (e.clientX - rect.left - rect.width / 2) * 0.25;
+                const y = (e.clientY - rect.top - rect.height / 2) * 0.25;
+                gsap.to(btn, { x, y, duration: 0.3, ease: 'power2.out' });
+            });
+            btn.addEventListener('mouseleave', () => {
+                gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' });
+            });
+        });
+    }
+
+    // --- Parallax hero background ---
+    if (!prefersReducedMotion) {
+        gsap.to('header', {
+            backgroundPositionY: '35%',
+            ease: 'none',
+            scrollTrigger: {
+                trigger: 'header',
+                start: 'top top',
+                end: 'bottom top',
+                scrub: true,
+            }
         });
     }
 
