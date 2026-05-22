@@ -1490,7 +1490,9 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        const particleCount = 5000;
+        const isMobile = window.innerWidth < 768;
+        const isLowEnd = navigator.hardwareConcurrency !== undefined && navigator.hardwareConcurrency <= 4;
+        const particleCount = (isMobile || isLowEnd) ? 1000 : 5000;
         const positions = new Float32Array(particleCount * 3);
         for (let i = 0; i < particleCount * 3; i++) {
             positions[i] = (Math.random() - 0.5) * 10;
