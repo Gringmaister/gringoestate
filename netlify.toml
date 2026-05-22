@@ -10,7 +10,24 @@
   # Basado en tu código, esta es la ruta correcta.
   directory = "netlify/functions/"
 
+# Redirect www → apex (evita contenido duplicado en SEO)
+[[redirects]]
+  from   = "https://www.gringo.estate/*"
+  to     = "https://gringo.estate/:splat"
+  status = 301
+  force  = true
+
 [[redirects]]
   from = "/api/telemetry"
   to = "/.netlify/functions/telemetry"
   status = 200
+
+# Security headers para todos los recursos
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options            = "DENY"
+    X-Content-Type-Options     = "nosniff"
+    Referrer-Policy            = "strict-origin-when-cross-origin"
+    Strict-Transport-Security  = "max-age=31536000; includeSubDomains"
+    Permissions-Policy         = "camera=(), microphone=(), geolocation=()"
