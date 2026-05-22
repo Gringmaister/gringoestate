@@ -547,7 +547,7 @@
     .ai-tool-card textarea {
       background-color: #1a1a1a;
       color: #fff;
-      border: 1px solid #444;
+      border: 1px solid #666;
       border-radius: 8px;
       padding: 1rem;
       font-size: 1rem;
@@ -774,7 +774,7 @@
   <div id="card-modal" class="card-modal" role="dialog" aria-modal="true" aria-labelledby="card-modal-title">
     <div class="card-modal-content-wrapper">
       <button class="card-modal-close-btn" aria-label="Cerrar">×</button>
-      <img src="" alt="Imagen de fondo del servicio" class="card-modal-image">
+      <img src="" alt="Imagen de fondo del servicio" class="card-modal-image" width="700" height="500">
       <div class="card-modal-text-content">
       </div>
     </div>
@@ -1005,7 +1005,7 @@
                   <div class="ai-coming-soon">
                       <h3>MÁS HERRAMIENTAS EN CONSTRUCCIÓN...</h3>
                       <p>
-                          El arsenal de GringoEstate seguirá creciendo. Pronto integraremos un <strong>Asistente para Redactar Contratos</strong> y otras herramientas para que tomes las mejores decisiones.
+                          El arsenal de GringoEstate seguirá creciendo. <strong>Próximamente (2026)</strong>: Asistente para Redactar Contratos y más herramientas para que tomes las mejores decisiones con información real.
                       </p>
                   </div>
               </div>
@@ -1047,6 +1047,7 @@
                           <label for="contact-message" class="sr-only">Tu mensaje</label>
                           <textarea id="contact-message" name="message" rows="4" placeholder="Contame un poco sobre tu proyecto..." required></textarea>
                           <button type="submit" class="btn-enviar-mensaje">Enviar Mensaje</button>
+                          <div id="form-feedback" role="alert" aria-live="polite" style="display:none; padding:1rem; border-radius:8px; text-align:center; font-weight:700; margin-top:0.5rem;"></div>
                       </form>
                   </div>
               </div>
@@ -1324,6 +1325,46 @@
         }
     });
 
+    // --- Contact Form Submission Feedback ---
+    const contactForm = document.getElementById('contact-form');
+    const formFeedback = document.getElementById('form-feedback');
+    if (contactForm && formFeedback) {
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = contactForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+            formFeedback.style.display = 'none';
+
+            try {
+                const formData = new FormData(contactForm);
+                const response = await fetch(contactForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (response.ok) {
+                    formFeedback.textContent = '✅ ¡Mensaje enviado! Te respondo en menos de 24 horas.';
+                    formFeedback.style.display = 'block';
+                    formFeedback.style.background = 'rgba(37,211,102,0.15)';
+                    formFeedback.style.color = '#25d366';
+                    contactForm.reset();
+                    if (propertyDetails) propertyDetails.style.display = 'none';
+                } else {
+                    throw new Error('Error en el servidor');
+                }
+            } catch {
+                formFeedback.textContent = '❌ Algo salió mal. Escribime directo a WhatsApp.';
+                formFeedback.style.display = 'block';
+                formFeedback.style.background = 'rgba(231,76,60,0.15)';
+                formFeedback.style.color = '#e74c3c';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Enviar Mensaje';
+            }
+        });
+    }
+
     // --- Contact Form Logic ---
     interestSelect.addEventListener('change', () => {
         if (interestSelect.value === 'Tasar mi propiedad') {
@@ -1515,7 +1556,7 @@
         } catch (error) {
             alquilerResult.innerHTML = `<p style="text-align:center;">Error: ${escapeHtml(error.message)}</p>`;
             alquilerResult.style.color = '#ff6b6b';
-            console.error("Error en el cálculo de alquiler:", error);
+            if (window.location.hostname === 'localhost') console.error("Error en el cálculo de alquiler:", error);
         } finally {
             loaderAlquiler.style.display = 'none';
             calcularAlquilerBtn.disabled = false;
@@ -1565,7 +1606,7 @@
       } catch (error) {
           resultElement.innerHTML = `<p style="text-align:center;">Error al conectar con la IA. ${escapeHtml(error.message)}</p>`;
           resultElement.style.color = '#ff6b6b';
-          console.error('Error calling the backend function:', error);
+          if (window.location.hostname === 'localhost') console.error('Error calling the backend function:', error);
       } finally {
           loaderElement.style.display = 'none';
       }
