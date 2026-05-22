@@ -8,6 +8,8 @@
   <meta name="description" content="Transformamos el Real Estate con soluciones innovadoras. Venta en 90 días, gestión de alquiler temporario, personal shopper inmobiliario y asesoría para desarrolladores.">
   <meta name="keywords" content="real estate, inmobiliaria, venta de propiedades, alquiler temporario, personal shopper inmobiliario, desarrollos, baigun, ambbi, franco garbini">
   <meta name="author" content="GringoEstate">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#FFBF00">
 
   <link rel="icon" href="/images/isologo.webp" type="image/webp" sizes="any">
   <link rel="apple-touch-icon" href="/images/isologo.webp">
@@ -15,6 +17,8 @@
   <meta property="og:title" content="GringoEstate – Real Estate sin corbata">
   <meta property="og:description" content="Soy Franco Garbini y hago que el Real Estate en CABA sea más simple y rentable para vos. Esta es mi carta de presentación y mis servicios. ¿Tenés una idea? Agendá una llamada y la bajamos a tierra.">
   <meta property="og:image" content="https://www.gringo.estate/images/gringoestate-og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta property="og:url" content="https://www.gringo.estate">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_AR">
@@ -82,6 +86,78 @@
         "url": "https://www.gringo.estate",
         "name": "GringoEstate",
         "publisher": { "@id": "https://www.gringo.estate/#organization" }
+      },
+      {
+        "@type": "Service",
+        "@id": "https://www.gringo.estate/#tasacion",
+        "name": "Tasación Profesional de Propiedades",
+        "description": "Conocé el valor de mercado actual de tu propiedad sin compromiso. Profesional, rápida y 100% gratuita en 48 horas hábiles.",
+        "provider": { "@id": "https://www.gringo.estate/#organization" },
+        "areaServed": { "@type": "City", "name": "Buenos Aires" },
+        "url": "https://www.gringo.estate/#services-stacked"
+      },
+      {
+        "@type": "Service",
+        "@id": "https://www.gringo.estate/#venta",
+        "name": "Venta de Propiedades en 90 Días",
+        "description": "Estrategia 360° con fotos profesionales, tour virtual, anuncios destacados y negociación experta para vender tu propiedad en 90 días bajo exclusividad.",
+        "provider": { "@id": "https://www.gringo.estate/#organization" },
+        "areaServed": { "@type": "City", "name": "Buenos Aires" },
+        "url": "https://www.gringo.estate/#services-stacked"
+      },
+      {
+        "@type": "Service",
+        "@id": "https://www.gringo.estate/#temporario",
+        "name": "Gestión de Alquiler Temporario",
+        "description": "Servicio llave en mano para maximizar la rentabilidad de tu propiedad en plataformas como Airbnb. Gestión integral con más de 1250 reseñas 5 estrellas.",
+        "provider": { "@id": "https://www.gringo.estate/#organization" },
+        "areaServed": { "@type": "City", "name": "Buenos Aires" },
+        "url": "https://www.ambbi.com.ar/"
+      },
+      {
+        "@type": "Service",
+        "@id": "https://www.gringo.estate/#alquiler-flex",
+        "name": "Gestión de Alquiler Flex y Tradicional",
+        "description": "Modalidades de alquiler a mediano y largo plazo: Flex (1-12 meses) para propiedades amobladas y Tradicional (2 años) para renta estable.",
+        "provider": { "@id": "https://www.gringo.estate/#organization" },
+        "areaServed": { "@type": "City", "name": "Buenos Aires" },
+        "url": "https://www.gringo.estate/#services-stacked"
+      },
+      {
+        "@type": "Service",
+        "@id": "https://www.gringo.estate/#pozo",
+        "name": "Inversión en Emprendimientos desde Pozo",
+        "description": "Acceso a cartera exclusiva de más de 26 emprendimientos con análisis de ROI y acompañamiento completo desde la firma hasta la entrega.",
+        "provider": { "@id": "https://www.gringo.estate/#organization" },
+        "areaServed": { "@type": "City", "name": "Buenos Aires" },
+        "url": "https://www.baigunryn.com/emprendimientos/"
+      },
+      {
+        "@type": "Service",
+        "@id": "https://www.gringo.estate/#desarrolladores",
+        "name": "Asesoría para Desarrolladores Inmobiliarios",
+        "description": "Alianza estratégica para la comercialización integral de emprendimientos: marketing, gestión de renta temporaria y respaldo de Baigun R&N.",
+        "provider": { "@id": "https://www.gringo.estate/#organization" },
+        "areaServed": { "@type": "City", "name": "Buenos Aires" },
+        "url": "https://www.gringo.estate/#services-stacked"
+      },
+      {
+        "@type": "Service",
+        "@id": "https://www.gringo.estate/#personal-shopper",
+        "name": "Personal Shopper Inmobiliario",
+        "description": "Servicio exclusivo para compradores: definición de criterios, búsqueda activa incluyendo propiedades off-market, y asesoría en negociación.",
+        "provider": { "@id": "https://www.gringo.estate/#organization" },
+        "areaServed": { "@type": "City", "name": "Buenos Aires" },
+        "url": "https://www.gringo.estate/#services-stacked"
+      },
+      {
+        "@type": "Service",
+        "@id": "https://www.gringo.estate/#comerciales",
+        "name": "Locales Comerciales y Oficinas",
+        "description": "Especialistas en ubicaciones estratégicas para marcas, franquicias e inversores, con respaldo de Baigun R&N y red de más de 50 marcas adheridas.",
+        "provider": { "@id": "https://www.gringo.estate/#organization" },
+        "areaServed": { "@type": "City", "name": "Buenos Aires" },
+        "url": "https://www.gringo.estate/#services-stacked"
       }
     ]
   }
@@ -935,28 +1011,28 @@
                       <div class="portfolio-item">
                           <picture><source srcset="/images/proyecto-ambar.webp" type="image/webp"><img src="/images/proyecto-ambar.webp" alt="Fachada del proyecto Ámbar en Recoleta" loading="lazy" width="600" height="400"/></picture>
                           <div class="portfolio-content">
-                              <span class="project-title">Ámbar · <span class="project-location">Recoleta (15 Unidades)</span></span>
+                              <h3 class="project-title">Ámbar · <span class="project-location">Recoleta (15 Unidades)</span></h3>
                               <div class="view-more">Ver más →</div>
                           </div>
                       </div>
                       <div class="portfolio-item">
                           <picture><source srcset="/images/proyecto-charlone.webp" type="image/webp"><img src="/images/proyecto-charlone.webp" alt="Render de la Torre Charlone en Colegiales" loading="lazy" width="600" height="400"/></picture>
                           <div class="portfolio-content">
-                              <span class="project-title">Torre Charlone · <span class="project-location">Colegiales</span></span>
+                              <h3 class="project-title">Torre Charlone · <span class="project-location">Colegiales</span></h3>
                               <div class="view-more">Ver más →</div>
                           </div>
                       </div>
                       <div class="portfolio-item">
                           <picture><source srcset="/images/proyecto-nunez.webp" type="image/webp"><img src="/images/proyecto-nunez.webp" alt="Exterior del proyecto Casona en Núñez" loading="lazy" width="600" height="400"/></picture>
                           <div class="portfolio-content">
-                              <span class="project-title">Casona · <span class="project-location">Núñez</span></span>
+                              <h3 class="project-title">Casona · <span class="project-location">Núñez</span></h3>
                               <div class="view-more">Ver más →</div>
                           </div>
                       </div>
                       <div class="portfolio-item">
                           <picture><source srcset="/images/proyecto-palermo.webp" type="image/webp"><img src="/images/proyecto-palermo.webp" alt="Render del proyecto Concepción Live en Palermo" loading="lazy" width="600" height="400"/></picture>
                           <div class="portfolio-content">
-                              <span class="project-title">Concepción Live · <span class="project-location">Palermo</span></span>
+                              <h3 class="project-title">Concepción Live · <span class="project-location">Palermo</span></h3>
                               <div class="view-more">Ver más →</div>
                           </div>
                       </div>
