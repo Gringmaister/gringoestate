@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gringo Office</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#070707" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --gold: #d4a640;
+      --gold-soft: rgba(212,166,64,0.12);
+      --bg: #070707;
+      --bg-2: #111111;
+      --card: rgba(255,255,255,0.035);
+      --card-2: rgba(255,255,255,0.05);
+      --text: #f5f1e8;
+      --muted: #9f988d;
+      --border: rgba(255,255,255,0.08);
+      --ok: #4dde95;
+      --warn: #ffbb55;
+      --danger: #ff7b7b;
+      --blue: #5b9cf6;
+      --purple: #a78bfa;
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --shadow: 0 24px 70px rgba(0,0,0,0.36);
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(212,166,64,0.13), transparent 26%),
+        radial-gradient(circle at bottom left, rgba(212,166,64,0.07), transparent 24%),
+        linear-gradient(180deg, #050505 0%, #101010 100%);
+      color: var(--text);
+    }
+    button, input, textarea, select { font: inherit; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── SYSTEM BAR ─────────────────────────────────────────── */
+    .system-bar {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(5,5,5,0.88);
+      backdrop-filter: blur(18px);
+    }
+    .system-brand {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-right: 8px;
+    }
+    .system-brand strong {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 0.18em;
+      font-size: 1.2rem;
+      color: var(--gold);
+    }
+    .system-brand span { color: var(--muted); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; }
+    .sys-tiles { display: flex; gap: 20px; flex: 1; }
+    .sys-tile { min-width: 0; }
+    .sys-tile span { display: block; font-size: 0.68rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+    .sys-tile strong { font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sys-clock { color: var(--muted); font-size: 0.78rem; letter-spacing: 0.08em; margin-left: auto; font-family: var(--mono); }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); margin-right: 4px; }
+    .dot.ok { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+    .dot.warn { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+    .dot.err { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
+
+    /* ── LAYOUT ─────────────────────────────────────────────── */
+    .workspace {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      min-height: calc(100vh - 50px);
+    }
+    .sidebar {
+      position: sticky;
+      top: 50px;
+      height: calc(100vh - 50px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      border-right: 1px solid var(--border);
+      background: rgba(5,5,5,0.55);
+      padding: 18px 14px;
+      display: grid;
+      align-content: start;
+      gap: 6px;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(212,166,64,0.18); border-radius: 2px; }
+    .sidebar-section { margin-top: 18px; }
+    .sidebar-section:first-child { margin-top: 0; }
+    .sidebar-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 8px;
+      margin-bottom: 6px;
+    }
+    .nav-btn {
+      width: 100%;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .18s ease;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .nav-btn .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+    .nav-btn .nav-sub { font-size: 0.68rem; color: var(--muted); display: block; }
+    .nav-btn:hover { border-color: rgba(212,166,64,0.2); background: rgba(212,166,64,0.06); color: var(--text); transform: translateX(2px); }
+    .nav-btn.active { border-color: rgba(212,166,64,0.28); background: rgba(212,166,64,0.1); color: var(--gold); }
+    .nav-btn.active .nav-sub { color: rgba(212,166,64,0.7); }
+
+    /* ── MAIN CONTENT ───────────────────────────────────────── */
+    .main-content { padding: 20px 22px; min-width: 0; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-head h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.2rem;
+      letter-spacing: 0.08em;
+      color: var(--text);
+      line-height: 1;
+    }
+    .section-head .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .badge-gold { background: rgba(212,166,64,0.15); color: var(--gold); border: 1px solid rgba(212,166,64,0.25); }
+    .badge-ok   { background: rgba(77,222,149,0.12); color: var(--ok); border: 1px solid rgba(77,222,149,0.2); }
+    .badge-warn { background: rgba(255,187,85,0.12); color: var(--warn); border: 1px solid rgba(255,187,85,0.2); }
+    .badge-muted { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
+
+    /* ── CARDS ──────────────────────────────────────────────── */
+    .card {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015));
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .card-gold {
+      border-color: rgba(212,166,64,0.2);
+      background: linear-gradient(180deg, rgba(212,166,64,0.08), rgba(255,255,255,0.015));
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .card-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+    }
+    .card-sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── KPI GRID ───────────────────────────────────────────── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .kpi {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.025);
+      padding: 14px 16px;
+    }
+    .kpi.accent { border-color: rgba(212,166,64,0.22); background: rgba(212,166,64,0.07); }
+    .kpi span { display: block; font-size: 0.7rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+    .kpi strong { display: block; font-size: 1.6rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .kpi small { font-size: 0.72rem; color: var(--muted); margin-top: 4px; display: block; }
+
+    /* ── GRID HELPERS ───────────────────────────────────────── */
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
+    .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+    .stack { display: grid; gap: 14px; }
+
+    /* ── AGENT CARDS ────────────────────────────────────────── */
+    .agent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px; }
+    .agent-card {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .agent-header {
+      padding: 16px 18px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .agent-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 0.12em;
+    }
+    .agent-body { padding: 16px 18px; display: grid; gap: 12px; }
+
+    /* ── STATS ROW ──────────────────────────────────────────── */
+    .stats-row { display: flex; gap: 14px; flex-wrap: wrap; }
+    .stat-item { }
+    .stat-item span { display: block; font-size: 0.68rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+    .stat-item strong { font-size: 1.1rem; font-weight: 700; }
+
+    /* ── TABLES ─────────────────────────────────────────────── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .data-table th {
+      text-align: left;
+      padding: 8px 10px;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table td {
+      padding: 9px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: middle;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover td { background: rgba(212,166,64,0.04); }
+
+    /* ── BUTTONS ────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 16px;
+      border-radius: 12px;
+      border: none;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .18s ease;
+    }
+    .btn-gold { background: var(--gold); color: #101010; box-shadow: 0 6px 20px rgba(212,166,64,0.2); }
+    .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(212,166,64,0.28); }
+    .btn-ghost { background: rgba(212,166,64,0.08); color: var(--text); border: 1px solid rgba(212,166,64,0.18); }
+    .btn-ghost:hover { background: rgba(212,166,64,0.14); transform: translateY(-1px); }
+    .btn-danger { background: rgba(255,123,123,0.12); color: var(--danger); border: 1px solid rgba(255,123,123,0.2); }
+    .btn-sm { padding: 6px 10px; font-size: 0.74rem; border-radius: 9px; }
+
+    /* ── INPUTS ─────────────────────────────────────────────── */
+    .input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.3);
+      color: var(--text);
+      outline: none;
+      font-size: 0.88rem;
+      transition: border-color .18s;
+    }
+    .input:focus { border-color: rgba(212,166,64,0.36); }
+    textarea.input { resize: vertical; min-height: 80px; font-family: var(--mono); font-size: 0.82rem; }
+
+    /* ── LOG / MONO ─────────────────────────────────────────── */
+    .log-box {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: #a8c89a;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 12px 14px;
+      max-height: 240px;
+      overflow-y: auto;
+      line-height: 1.7;
+    }
+    .log-box::-webkit-scrollbar { width: 4px; }
+    .log-box::-webkit-scrollbar-thumb { background: rgba(212,166,64,0.2); border-radius: 2px; }
+    .log-line { border-bottom: 1px solid rgba(255,255,255,0.04); padding: 2px 0; }
+
+    /* ── TOGGLE ─────────────────────────────────────────────── */
+    .toggle-wrap { display: flex; align-items: center; gap: 10px; }
+    .toggle {
+      position: relative; width: 42px; height: 24px;
+      background: rgba(255,255,255,0.12); border-radius: 12px;
+      cursor: pointer; transition: background .2s;
+      flex-shrink: 0;
+    }
+    .toggle.on { background: var(--gold); }
+    .toggle::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; transition: left .2s;
+    }
+    .toggle.on::after { left: 21px; }
+
+    /* ── SUB-TABS ───────────────────────────────────────────── */
+    .sub-tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+    .sub-tab {
+      padding: 7px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 600;
+      border: 1px solid transparent; background: transparent; color: var(--muted);
+      cursor: pointer; transition: all .18s;
+    }
+    .sub-tab.active { border-color: rgba(212,166,64,0.26); background: rgba(212,166,64,0.1); color: var(--gold); }
+    .sub-tab:hover:not(.active) { border-color: var(--border); color: var(--text); }
+    .sub-view { display: none; }
+    .sub-view.active { display: block; }
+
+    /* ── MODAL ──────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(5,5,5,0.75); backdrop-filter: blur(8px);
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal {
+      width: min(520px, 94vw);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(212,166,64,0.2);
+      background: linear-gradient(160deg, rgba(212,166,64,0.06), rgba(20,20,20,0.98));
+      box-shadow: 0 40px 90px rgba(0,0,0,0.5);
+      padding: 28px;
+    }
+    .modal h3 { font-family: 'Bebas Neue'; font-size: 1.5rem; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 16px; }
+
+    /* ── TOAST ──────────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 999;
+      padding: 12px 20px; border-radius: 14px; font-size: 0.85rem; font-weight: 600;
+      background: rgba(20,20,20,0.95); border: 1px solid var(--border);
+      backdrop-filter: blur(12px); box-shadow: var(--shadow);
+      transition: opacity .3s; opacity: 0; pointer-events: none;
+    }
+    #toast.show { opacity: 1; }
+    #toast.ok { border-color: rgba(77,222,149,0.3); color: var(--ok); }
+    #toast.err { border-color: rgba(255,123,123,0.3); color: var(--danger); }
+
+    /* ── CANARIAN LOCK ──────────────────────────────────────── */
+    #canarian-lock {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 60vh; gap: 20px;
+    }
+    .lock-card {
+      width: min(380px, 92%);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(212,166,64,0.22);
+      background: linear-gradient(160deg, rgba(212,166,64,0.08), rgba(18,18,18,0.97));
+      box-shadow: var(--shadow);
+      padding: 32px;
+      text-align: center;
+    }
+    .lock-icon { font-size: 2.8rem; margin-bottom: 12px; }
+    .lock-card h2 { font-family: 'Bebas Neue'; font-size: 1.8rem; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 6px; }
+    .lock-card p { color: var(--muted); font-size: 0.84rem; margin-bottom: 20px; }
+    .pin-input {
+      font-family: var(--mono); font-size: 1.4rem; letter-spacing: 0.4em;
+      text-align: center; width: 100%; padding: 14px;
+      border-radius: 14px; border: 1px solid var(--border);
+      background: rgba(0,0,0,0.4); color: var(--text); outline: none;
+      transition: border-color .2s;
+    }
+    .pin-input:focus { border-color: rgba(212,166,64,0.4); }
+    .pin-error { color: var(--danger); font-size: 0.82rem; margin-top: 8px; min-height: 20px; }
+    .pin-shake { animation: shake .4s ease; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+
+    /* ── PLACEHOLDER ────────────────────────────────────────── */
+    .placeholder-block {
+      border-radius: var(--radius-lg); border: 1px dashed rgba(212,166,64,0.2);
+      background: rgba(212,166,64,0.03); padding: 36px;
+      text-align: center; color: var(--muted);
+    }
+    .placeholder-block .ph-icon { font-size: 2.4rem; margin-bottom: 10px; }
+    .placeholder-block h3 { font-family: 'Bebas Neue'; font-size: 1.3rem; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 6px; }
+
+    /* ── CHAT BUBBLES ───────────────────────────────────────── */
+    .chat-area { max-height: 260px; overflow-y: auto; display: grid; gap: 8px; padding: 4px; margin-bottom: 12px; }
+    .chat-area::-webkit-scrollbar { width: 4px; }
+    .bubble { padding: 10px 14px; border-radius: 16px; max-width: 82%; font-size: 0.84rem; line-height: 1.5; }
+    .bubble.guest { background: rgba(255,255,255,0.06); border: 1px solid var(--border); align-self: flex-end; }
+    .bubble.agent { background: rgba(212,166,64,0.1); border: 1px solid rgba(212,166,64,0.18); color: #f4e2b5; align-self: flex-start; }
+
+    /* ── DOCKER GRID ────────────────────────────────────────── */
+    .docker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+    .docker-item {
+      padding: 10px 12px; border-radius: 12px;
+      border: 1px solid var(--border); background: rgba(255,255,255,0.02);
+      font-size: 0.78rem;
+    }
+    .docker-item .d-name { font-weight: 700; margin-bottom: 2px; font-size: 0.82rem; }
+    .docker-item .d-status { color: var(--muted); }
+
+    /* ── RESPONSIVE ─────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .workspace { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; display: flex; flex-wrap: wrap; gap: 4px; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .agent-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── SYSTEM BAR ──────────────────────────────────────────────── -->
+<div class="system-bar">
+  <div class="system-brand">
+    <strong>GRINGO OFFICE</strong>
+    <span>centro de mando</span>
+  </div>
+  <div class="sys-tiles">
+    <div class="sys-tile">
+      <span>Wispy</span>
+      <strong id="sb-wispy"><span class="dot"></span>—</strong>
+    </div>
+    <div class="sys-tile">
+      <span>Bambi</span>
+      <strong id="sb-bambi"><span class="dot"></span>—</strong>
+    </div>
+    <div class="sys-tile">
+      <span>Docker</span>
+      <strong id="sb-docker"><span class="dot"></span>—</strong>
+    </div>
+    <div class="sys-tile">
+      <span>Huéspedes</span>
+      <strong id="sb-guests">—</strong>
+    </div>
+  </div>
+  <div class="sys-clock" id="sys-clock">ARG —:—</div>
+</div>
+
+<!-- ── WORKSPACE ───────────────────────────────────────────────── -->
+<div class="workspace">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Principal</div>
+      <button class="nav-btn active" onclick="nav('home')" id="nav-home">
+        <span class="nav-icon">⬛</span>
+        <span>HOME <small class="nav-sub">Command / Overview</small></span>
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Stack IA</div>
+      <button class="nav-btn" onclick="nav('agentes')" id="nav-agentes">
+        <span class="nav-icon">🤖</span>
+        <span>AGENTES <small class="nav-sub">Wispy · Bambi · Leonardo</small></span>
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operaciones</div>
+      <button class="nav-btn" onclick="nav('ambbi')" id="nav-ambbi">
+        <span class="nav-icon">🏢</span>
+        <span>AMBBI <small class="nav-sub">Tareas · Huéspedes · Archivos</small></span>
+      </button>
+      <button class="nav-btn" onclick="nav('gebroker')" id="nav-gebroker">
+        <span class="nav-icon">🏘️</span>
+        <span>GE BROKER <small class="nav-sub">Pipeline · CRM</small></span>
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Infraestructura</div>
+      <button class="nav-btn" onclick="nav('smarthome')" id="nav-smarthome">
+        <span class="nav-icon">💡</span>
+        <span>SMART HOME <small class="nav-sub">Hue · Google · Xiaomi</small></span>
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Confidencial</div>
+      <button class="nav-btn" onclick="nav('canarian')" id="nav-canarian">
+        <span class="nav-icon">🔒</span>
+        <span>CANARIAN <small class="nav-sub">Ledger · LLC · Ops</small></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- ════════════════ HOME ════════════════ -->
+    <div class="view active" id="view-home">
+      <div class="section-head">
+        <h1>HOME CENTER</h1>
+        <span class="badge badge-gold" id="home-date">—</span>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:18px;">
+        <div class="kpi accent">
+          <span>Tokens hoy</span>
+          <strong id="kpi-tokens">—</strong>
+          <small id="kpi-cost">costo: $—</small>
+        </div>
+        <div class="kpi">
+          <span>Wispy WA</span>
+          <strong id="kpi-wa">—</strong>
+          <small id="kpi-model">—</small>
+        </div>
+        <div class="kpi">
+          <span>Bambi mode</span>
+          <strong id="kpi-bambi">—</strong>
+          <small id="kpi-kill">kill: —</small>
+        </div>
+        <div class="kpi">
+          <span>Containers OK</span>
+          <strong id="kpi-docker">—</strong>
+        </div>
+        <div class="kpi">
+          <span>Huéspedes DB</span>
+          <strong id="kpi-guests">1135</strong>
+          <small>Notion activos</small>
+        </div>
+        <div class="kpi">
+          <span>Tareas abiertas</span>
+          <strong id="kpi-tasks">—</strong>
+        </div>
+      </div>
+
+      <!-- AI Chart -->
+      <div class="card" style="margin-bottom:18px;">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Motor IA — Últimas 72h</div>
+            <div class="card-sub" id="ai-model-badge">cargando…</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadTelemetry()">↻ actualizar</button>
+        </div>
+        <canvas id="ai-chart" height="90"></canvas>
+        <div class="stats-row" style="margin-top:12px;">
+          <div class="stat-item"><span>Tokens 24h</span><strong id="ai-t24">—</strong></div>
+          <div class="stat-item"><span>Costo 24h</span><strong id="ai-c24">—</strong></div>
+          <div class="stat-item"><span>Iteraciones 24h</span><strong id="ai-i24">—</strong></div>
+          <div class="stat-item"><span>Total histórico</span><strong id="ai-total">—</strong></div>
+        </div>
+      </div>
+
+      <!-- Docker -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Containers Docker</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadDocker()">↻</button>
+        </div>
+        <div class="docker-grid" id="docker-grid">
+          <div style="color:var(--muted);font-size:.82rem;">cargando…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ AGENTES ════════════════ -->
+    <div class="view" id="view-agentes">
+      <div class="section-head">
+        <h1>AGENTES</h1>
+        <span class="badge badge-ok">Stack IA Activo</span>
+      </div>
+
+      <div class="agent-grid">
+
+        <!-- WISPY -->
+        <div class="agent-card">
+          <div class="agent-header">
+            <div>
+              <div class="agent-name" style="color:var(--gold)">WISPY</div>
+              <div style="font-size:.74rem;color:var(--muted)">AI Gateway · OpenClaw</div>
+            </div>
+            <span class="badge badge-ok" id="wispy-wa-badge">—</span>
+          </div>
+          <div class="agent-body">
+            <div class="stats-row">
+              <div class="stat-item"><span>Modelo</span><strong id="w-model">—</strong></div>
+              <div class="stat-item"><span>Tokens 24h</span><strong id="w-t24">—</strong></div>
+              <div class="stat-item"><span>Costo 24h</span><strong id="w-c24">—</strong></div>
+              <div class="stat-item"><span>Total</span><strong id="w-total">—</strong></div>
+            </div>
+            <div>
+              <div style="font-size:.72rem;color:var(--muted);margin-bottom:6px;letter-spacing:.08em;text-transform:uppercase;">Tokens 72h</div>
+              <canvas id="wispy-spark" height="50"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- BAMBI -->
+        <div class="agent-card" style="grid-column: span 2 / auto;">
+          <div class="agent-header">
+            <div>
+              <div class="agent-name" style="color:#a8d8b8">BAMBI</div>
+              <div style="font-size:.74rem;color:var(--muted)">Anfitrión Ambbi · Shadow Mode</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span class="badge badge-warn" id="bambi-mode-badge">—</span>
+              <span class="badge badge-muted" id="bambi-window-badge">—</span>
+            </div>
+          </div>
+          <div class="agent-body">
+            <!-- Sub-tabs Bambi -->
+            <div class="sub-tabs">
+              <button class="sub-tab active" onclick="bambiTab('stats')">📊 Stats</button>
+              <button class="sub-tab" onclick="bambiTab('chat')">💬 Test Chat</button>
+              <button class="sub-tab" onclick="bambiTab('log')">📜 Shadow Log</button>
+            </div>
+
+            <!-- Stats -->
+            <div class="sub-view active" id="bt-stats">
+              <div class="grid-3" style="margin-bottom:14px;">
+                <div class="kpi"><span>Resueltos 24h</span><strong id="b-resolved">—</strong></div>
+                <div class="kpi"><span>Escalados 24h</span><strong id="b-escalated">—</strong></div>
+                <div class="kpi"><span>Tomó control</span><strong id="b-takeover">—</strong></div>
+              </div>
+              <div class="card" style="padding:14px;">
+                <div style="font-size:.72rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">Top Keywords Huéspedes</div>
+                <div id="b-keywords" style="display:grid;gap:6px;"></div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center;margin-top:14px;">
+                <div class="toggle-wrap">
+                  <div class="toggle" id="bambi-kill-toggle" onclick="toggleKill()"></div>
+                  <span style="font-size:.82rem;">Kill Switch</span>
+                  <span style="font-size:.74rem;color:var(--muted);" id="kill-label">inactivo</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Test Chat -->
+            <div class="sub-view" id="bt-chat">
+              <div class="chat-area" id="chat-area"></div>
+              <div style="display:flex;gap:8px;">
+                <input class="input" id="chat-input" placeholder="Mensaje de prueba…" onkeydown="if(event.key==='Enter')sendChat()">
+                <button class="btn btn-gold" onclick="sendChat()">Enviar</button>
+              </div>
+              <div style="font-size:.72rem;color:var(--muted);margin-top:6px;">El test no envía mensaje real al huésped</div>
+            </div>
+
+            <!-- Shadow Log -->
+            <div class="sub-view" id="bt-log">
+              <div class="log-box" id="shadow-log">cargando…</div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="loadShadowLog()">↻ actualizar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEONARDO -->
+        <div class="agent-card">
+          <div class="agent-header">
+            <div>
+              <div class="agent-name" style="color:var(--purple)">LEONARDO</div>
+              <div style="font-size:.74rem;color:var(--muted)">CRM · Ventas · GE Broker</div>
+            </div>
+            <span class="badge badge-muted">Próximamente</span>
+          </div>
+          <div class="agent-body">
+            <div class="placeholder-block" style="padding:20px;">
+              <div class="ph-icon">🧠</div>
+              <h3>En Desarrollo</h3>
+              <p style="font-size:.8rem;margin-top:4px;">CRM de leads, pipeline de propiedades y automatización de ventas para Gringo Estate.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════════════ AMBBI ════════════════ -->
+    <div class="view" id="view-ambbi">
+      <div class="section-head">
+        <h1>AMBBI</h1>
+        <span class="badge badge-gold">Operaciones</span>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" onclick="ambiTab('tareas')">📋 Tareas</button>
+        <button class="sub-tab" onclick="ambiTab('huespedes')">👥 Huéspedes</button>
+        <button class="sub-tab" onclick="ambiTab('archivos')">📁 Archivos Madre</button>
+      </div>
+
+      <!-- TAREAS -->
+      <div class="sub-view active" id="at-tareas">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-ghost btn-sm" onclick="filterTasks('all')">Todas</button>
+            <button class="btn btn-ghost btn-sm" onclick="filterTasks('urgente')">Urgentes</button>
+            <button class="btn btn-ghost btn-sm" onclick="filterTasks('delegado')">Delegadas</button>
+          </div>
+          <button class="btn btn-gold btn-sm" onclick="showModal('modal-task')">+ Nueva tarea</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table class="data-table" id="tasks-table">
+            <thead><tr>
+              <th>Título</th><th>Responsable</th><th>Estado</th><th>Prioridad</th><th>Área</th>
+            </tr></thead>
+            <tbody id="tasks-body">
+              <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- HUÉSPEDES -->
+      <div class="sub-view" id="at-huespedes">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div class="stats-row">
+            <div class="stat-item"><span>Total DB</span><strong id="h-total">1135</strong></div>
+            <div class="stat-item"><span>Con email</span><strong id="h-email">~280</strong></div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="exportContacts()">↑ Sync WA → Notion</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table class="data-table">
+            <thead><tr>
+              <th>Nombre</th><th>Teléfono</th><th>Email</th><th>Unidad</th><th>Plataforma</th><th>Último contacto</th>
+            </tr></thead>
+            <tbody id="guests-body">
+              <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="loadGuests()">↻ más huéspedes</button>
+      </div>
+
+      <!-- ARCHIVOS -->
+      <div class="sub-view" id="at-archivos">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Archivos</div>
+            </div>
+            <div id="files-list" style="display:grid;gap:6px;"></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div><div class="card-title" id="file-name-title">—</div><div class="card-sub" id="file-meta">Seleccioná un archivo</div></div>
+              <button class="btn btn-gold btn-sm" id="save-btn" onclick="saveFile()" style="display:none;">Guardar</button>
+            </div>
+            <textarea class="input" id="file-editor" style="min-height:320px;display:none;" oninput="markDirty()"></textarea>
+            <div style="font-size:.72rem;color:var(--muted);margin-top:6px;" id="save-status"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ GE BROKER ════════════════ -->
+    <div class="view" id="view-gebroker">
+      <div class="section-head">
+        <h1>GE BROKER</h1>
+        <span class="badge badge-gold">Pipeline Activo</span>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <button class="btn btn-gold btn-sm" onclick="showModal('modal-prop')">+ Nueva propiedad</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table class="data-table">
+          <thead><tr>
+            <th>Dirección</th><th>Tipo</th><th>Estado</th><th>Precio</th><th>Propietario</th><th>Fecha</th><th></th>
+          </tr></thead>
+          <tbody id="props-body">
+            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">Pipeline vacío — agregá la primera propiedad</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:18px;" class="card">
+        <div class="card-head"><div class="card-title">Leonardo CRM</div><span class="badge badge-muted">Próximamente</span></div>
+        <div class="placeholder-block" style="padding:18px;">
+          <div class="ph-icon">📊</div>
+          <h3>CRM de Leads</h3>
+          <p style="font-size:.82rem;">Gestión de leads, seguimiento de compradores y automatización de ventas vía Leonardo.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ SMART HOME ════════════════ -->
+    <div class="view" id="view-smarthome">
+      <div class="section-head">
+        <h1>SMART HOME</h1>
+        <span class="badge badge-muted" id="hue-badge">Sin configurar</span>
+      </div>
+      <div class="stack">
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title">Philips Hue</div><div class="card-sub" id="hue-sub">Cargando estado…</div></div>
+          </div>
+          <div id="hue-lights" class="docker-grid"></div>
+          <div id="hue-setup" class="placeholder-block" style="display:none;">
+            <div class="ph-icon">💡</div>
+            <h3>Conectar Philips Hue</h3>
+            <p style="font-size:.82rem;margin-top:4px;">Configurá <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:6px;">HUE_BRIDGE_IP</code> y <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:6px;">HUE_USERNAME</code> en el archivo <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:6px;">wispy-stack/.env</code> del servidor y hacé rebuild del bridge.</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="placeholder-block">
+            <div class="ph-icon">🏠</div>
+            <h3>Google Home</h3>
+            <p style="font-size:.8rem;">OAuth pendiente de configuración</p>
+          </div>
+          <div class="placeholder-block">
+            <div class="ph-icon">📷</div>
+            <h3>Xiaomi / Mi Home</h3>
+            <p style="font-size:.8rem;">Token de cámara pendiente</p>
+          </div>
+          <div class="placeholder-block">
+            <div class="ph-icon">⚡</div>
+            <h3>Samsung SmartLife</h3>
+            <p style="font-size:.8rem;">App key pendiente</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ CANARIAN ════════════════ -->
+    <div class="view" id="view-canarian">
+      <div class="section-head">
+        <h1>CANARIAN</h1>
+        <span class="badge badge-gold">Confidencial · LLC Wyoming</span>
+      </div>
+
+      <!-- PIN LOCK -->
+      <div id="canarian-lock">
+        <div class="lock-card">
+          <div class="lock-icon">🔒</div>
+          <h2>Canarian Finance</h2>
+          <p>Ingresá tu PIN para acceder al ledger confidencial</p>
+          <input class="pin-input" id="pin-input" type="password" inputmode="numeric" maxlength="8"
+            placeholder="••••" onkeydown="if(event.key==='Enter')unlockCanarian()">
+          <div class="pin-error" id="pin-error"></div>
+          <button class="btn btn-gold" style="width:100%;margin-top:16px;" onclick="unlockCanarian()">Acceder</button>
+        </div>
+      </div>
+
+      <!-- LEDGER (hidden until unlocked) -->
+      <div id="canarian-content" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div class="stats-row">
+            <div class="stat-item"><span>Balance USDT</span><strong id="c-usdt" style="color:var(--ok)">$0</strong></div>
+            <div class="stat-item"><span>Balance USD</span><strong id="c-usd">$0</strong></div>
+            <div class="stat-item"><span>Balance ARS</span><strong id="c-ars">$0</strong></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-gold btn-sm" onclick="showModal('modal-canarian')">+ Movimiento</button>
+            <button class="btn btn-danger btn-sm" onclick="lockCanarian()">🔒 Bloquear</button>
+          </div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table class="data-table">
+            <thead><tr>
+              <th>Fecha</th><th>Tipo</th><th>Monto</th><th>Moneda</th><th>Contraparte</th><th>Nota</th><th></th>
+            </tr></thead>
+            <tbody id="ledger-body">
+              <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">Sin movimientos registrados</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:10px;">
+          🔐 Auto-bloqueo en <span id="lock-timer">5:00</span> min · PIN nunca expuesto en logs ni en grupos de WA
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ════════ MODALES ════════════════════════════════════════════ -->
+
+<!-- Modal nueva tarea -->
+<div class="modal-overlay hidden" id="modal-task">
+  <div class="modal">
+    <h3>Nueva Tarea</h3>
+    <div class="stack">
+      <input class="input" id="t-title" placeholder="Título de la tarea">
+      <div class="grid-2">
+        <select class="input" id="t-responsable">
+          <option value="">Responsable…</option>
+          <option>Pamela</option><option>Augusto</option>
+          <option>Marcelo</option><option>Sandra</option><option>Franco</option>
+        </select>
+        <select class="input" id="t-area">
+          <option value="">Área…</option>
+          <option>Ambbi</option><option>Mantenimiento</option>
+          <option>Limpieza</option><option>Administración</option><option>GE</option>
+        </select>
+      </div>
+      <select class="input" id="t-prioridad">
+        <option value="Media">Prioridad Media</option>
+        <option value="Alta">Alta</option>
+        <option value="Baja">Baja</option>
+        <option value="Urgente">Urgente</option>
+      </select>
+      <textarea class="input" id="t-notas" placeholder="Notas adicionales…" style="min-height:60px;"></textarea>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="hideModal('modal-task')">Cancelar</button>
+        <button class="btn btn-gold" onclick="createTask()">Crear + Notificar WA</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal nueva propiedad -->
+<div class="modal-overlay hidden" id="modal-prop">
+  <div class="modal">
+    <h3>Nueva Propiedad</h3>
+    <div class="stack">
+      <input class="input" id="p-direccion" placeholder="Dirección completa">
+      <div class="grid-2">
+        <select class="input" id="p-tipo">
+          <option>Departamento</option><option>PH</option>
+          <option>Casa</option><option>Local</option><option>Edificio</option>
+        </select>
+        <select class="input" id="p-estado">
+          <option>Captación</option><option>En cartera</option>
+          <option>En proceso</option><option>Cerrado</option>
+        </select>
+      </div>
+      <input class="input" id="p-precio" placeholder="Precio (USD)">
+      <input class="input" id="p-propietario" placeholder="Propietario">
+      <textarea class="input" id="p-notas" placeholder="Notas…" style="min-height:60px;"></textarea>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="hideModal('modal-prop')">Cancelar</button>
+        <button class="btn btn-gold" onclick="createProperty()">Agregar al pipeline</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal movimiento Canarian -->
+<div class="modal-overlay hidden" id="modal-canarian">
+  <div class="modal">
+    <h3>Nuevo Movimiento</h3>
+    <div class="stack">
+      <div class="grid-2">
+        <input class="input" id="c-fecha" type="date">
+        <select class="input" id="c-tipo">
+          <option value="ingreso_usdt">Ingreso USDT</option>
+          <option value="egreso_usdt">Egreso USDT</option>
+          <option value="ingreso_usd">Ingreso USD</option>
+          <option value="egreso_usd">Egreso USD</option>
+          <option value="ingreso_ars">Ingreso ARS</option>
+          <option value="egreso_ars">Egreso ARS</option>
+          <option value="comision">Comisión</option>
+          <option value="wire">Wire transfer</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <input class="input" id="c-monto" type="number" placeholder="Monto">
+        <select class="input" id="c-moneda">
+          <option>USDT</option><option>USD</option><option>ARS</option>
+        </select>
+      </div>
+      <input class="input" id="c-contraparte" placeholder="Contraparte (nombre / alias)">
+      <textarea class="input" id="c-nota" placeholder="Nota…" style="min-height:60px;"></textarea>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="hideModal('modal-canarian')">Cancelar</button>
+        <button class="btn btn-gold" onclick="createLedgerEntry()">Registrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ════════ SCRIPTS ════════════════════════════════════════════ -->
+<script>
+const API = '/office/api';
+let aiChart = null, wispySpark = null;
+let canarianPin = null, lockTimer = null, lockSecondsLeft = 300;
+let currentFile = null, fileDirty = false;
+let allTasks = [], bambiKillActive = false;
+
+// ── NAVIGATION ──────────────────────────────────────────────────
+function nav(section) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + section)?.classList.add('active');
+  document.getElementById('nav-' + section)?.classList.add('active');
+
+  if (section === 'home')      { loadTelemetry(); loadDocker(); }
+  if (section === 'agentes')   { loadWispy(); loadBambiMode(); loadBambiAnalytics(); loadShadowLog(); }
+  if (section === 'ambbi')     { loadTasks(); loadFiles(); }
+  if (section === 'gebroker')  { loadProperties(); }
+  if (section === 'smarthome') { loadHue(); }
+  if (section === 'canarian')  { checkCanaSession(); }
+}
+
+// ── CLOCK ────────────────────────────────────────────────────────
+function tick() {
+  const now = new Date();
+  const arg = now.toLocaleString('es-AR', {timeZone:'America/Argentina/Buenos_Aires', hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  document.getElementById('sys-clock').textContent = 'ARG ' + arg;
+  document.getElementById('home-date').textContent = now.toLocaleDateString('es-AR', {timeZone:'America/Argentina/Buenos_Aires', weekday:'short', day:'numeric', month:'short'});
+}
+setInterval(tick, 1000); tick();
+
+// ── FETCH HELPER ─────────────────────────────────────────────────
+async function apiFetch(path, opts = {}) {
+  try {
+    const r = await fetch(API + path, opts);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  } catch (e) {
+    console.warn('API error', path, e.message);
+    return null;
+  }
+}
+
+// ── TOAST ────────────────────────────────────────────────────────
+function toast(msg, type = 'ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 3000);
+}
+
+// ── MODAL ────────────────────────────────────────────────────────
+function showModal(id) { document.getElementById(id)?.classList.remove('hidden'); }
+function hideModal(id) { document.getElementById(id)?.classList.add('hidden'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden')); });
+
+// ── SUB-TABS ─────────────────────────────────────────────────────
+function bambiTab(t) { switchSubTab('bt-', t, 3); }
+function ambiTab(t)  { switchSubTab('at-', t, 3); }
+function switchSubTab(prefix, id, count) {
+  const parent = document.getElementById(prefix + id)?.parentElement;
+  if (!parent) return;
+  parent.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+  parent.querySelectorAll('.sub-view').forEach(v => v.classList.remove('active'));
+  const view = document.getElementById(prefix + id);
+  if (view) view.classList.add('active');
+  const tabs = parent.querySelectorAll('.sub-tab');
+  const map = {stats:0, chat:1, log:2, tareas:0, huespedes:1, archivos:2};
+  if (tabs[map[id]] !== undefined) tabs[map[id]].classList.add('active');
+  if (id === 'huespedes') loadGuests();
+  if (id === 'archivos') loadFiles();
+}
+
+// ── TELEMETRY / AI ────────────────────────────────────────────────
+async function loadTelemetry() {
+  const d = await apiFetch('/telemetry');
+  if (!d?.ok) return;
+  const t24 = d.windows?.day?.totalTokens || 0;
+  const c24 = (d.windows?.day?.cost || 0).toFixed(4);
+  const i24 = d.windows?.day?.iterations || 0;
+  const tot = d.totals?.totalTokens || 0;
+  document.getElementById('kpi-tokens').textContent  = t24.toLocaleString('es-AR');
+  document.getElementById('kpi-cost').textContent    = 'costo: $' + c24;
+  document.getElementById('kpi-model').textContent   = d.model || '—';
+  document.getElementById('ai-t24').textContent      = t24.toLocaleString('es-AR');
+  document.getElementById('ai-c24').textContent      = '$' + c24;
+  document.getElementById('ai-i24').textContent      = i24;
+  document.getElementById('ai-total').textContent    = tot.toLocaleString('es-AR');
+  document.getElementById('ai-model-badge').textContent = (d.model || '?') + ' · ' + (d.provider || '?');
+  if (!d.series?.length) return;
+  const labels = d.series.map(p => {
+    const dt = new Date(p.hour);
+    return dt.toLocaleString('es-AR', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
+  });
+  const ctx = document.getElementById('ai-chart').getContext('2d');
+  if (aiChart) aiChart.destroy();
+  aiChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Tokens', data: d.series.map(p => p.tokens), borderColor: '#d4a640', backgroundColor: 'rgba(212,166,64,0.08)', fill: true, tension: 0.35, pointRadius: 0, yAxisID: 'yT' },
+        { label: 'Costo USD', data: d.series.map(p => p.cost), borderColor: '#4dde95', backgroundColor: 'rgba(77,222,149,0.05)', fill: false, tension: 0.35, pointRadius: 0, yAxisID: 'yC' }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { labels: { color: '#9f988d', font: { size: 11 } } } },
+      scales: {
+        x:  { ticks: { color: '#6b6050', maxTicksLimit: 14, font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        yT: { type: 'linear', position: 'left',  ticks: { color: '#9f988d', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        yC: { type: 'linear', position: 'right', ticks: { color: '#4dde95', font: { size: 10 }, callback: v => '$' + v.toFixed(3) }, grid: { drawOnChartArea: false } }
+      }
+    }
+  });
+}
+
+// ── DOCKER ────────────────────────────────────────────────────────
+async function loadDocker() {
+  const d = await apiFetch('/docker');
+  const grid = document.getElementById('docker-grid');
+  if (!d?.containers) { grid.innerHTML = '<span style="color:var(--muted)">Sin datos</span>'; return; }
+  const up = d.containers.filter(c => c.status?.toLowerCase().includes('up')).length;
+  document.getElementById('kpi-docker').textContent = up + '/' + d.containers.length;
+  document.getElementById('sb-docker').innerHTML = `<span class="dot ok"></span>${up}/${d.containers.length} UP`;
+  grid.innerHTML = d.containers.map(c => {
+    const ok = c.status?.toLowerCase().includes('up');
+    return `<div class="docker-item">
+      <div class="d-name"><span class="dot ${ok?'ok':'err'}"></span>${c.name || '—'}</div>
+      <div class="d-status" style="color:${ok?'var(--ok)':'var(--danger)'}">${c.status?.split(' ').slice(0,3).join(' ') || '—'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── SYSTEM BAR ───────────────────────────────────────────────────
+async function loadSystemBar() {
+  const [wispy, bambi, tasks] = await Promise.all([
+    apiFetch('/wispy/status'),
+    apiFetch('/bambi/api/mode'),
+    apiFetch('/tasks')
+  ]);
+  if (wispy) {
+    const ok = wispy.wa_status === 'WORKING';
+    document.getElementById('sb-wispy').innerHTML = `<span class="dot ${ok?'ok':'warn'}"></span>${wispy.wa_status || '—'}`;
+    document.getElementById('kpi-wa').textContent = wispy.wa_status || '—';
+  }
+  if (bambi) {
+    const live = bambi.mode === 'live';
+    document.getElementById('sb-bambi').innerHTML = `<span class="dot ${live?'ok':'warn'}"></span>${bambi.mode?.toUpperCase() || '—'}`;
+    document.getElementById('kpi-bambi').textContent = bambi.mode?.toUpperCase() || '—';
+    document.getElementById('kpi-kill').textContent = 'kill: ' + (bambi.kill ? '🔴 ON' : '🟢 OFF');
+  }
+  if (tasks) {
+    const open = (tasks.all || []).filter(t => t.status !== 'Done' && t.status !== 'Archivado').length;
+    document.getElementById('kpi-tasks').textContent = open;
+  }
+}
+
+// ── WISPY STATUS ─────────────────────────────────────────────────
+async function loadWispy() {
+  const d = await apiFetch('/wispy/status');
+  if (!d) return;
+  const ok = d.wa_status === 'WORKING';
+  document.getElementById('wispy-wa-badge').textContent = d.wa_status || '—';
+  document.getElementById('wispy-wa-badge').className = 'badge ' + (ok ? 'badge-ok' : 'badge-warn');
+  document.getElementById('w-model').textContent  = d.model || '—';
+  document.getElementById('w-t24').textContent    = (d.tokens_24h || 0).toLocaleString('es-AR');
+  document.getElementById('w-c24').textContent    = '$' + (d.cost_24h || 0).toFixed(4);
+  document.getElementById('w-total').textContent  = (d.tokens_total || 0).toLocaleString('es-AR');
+  // Sparkline
+  const series = d.series_72h || [];
+  if (series.length) {
+    const ctx2 = document.getElementById('wispy-spark').getContext('2d');
+    if (wispySpark) wispySpark.destroy();
+    wispySpark = new Chart(ctx2, {
+      type: 'line',
+      data: { labels: series.map((_,i) => i), datasets: [{ data: series.map(p => p.tokens), borderColor: '#d4a640', backgroundColor: 'rgba(212,166,64,0.12)', fill: true, tension: 0.35, pointRadius: 0 }] },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+    });
+  }
+}
+
+// ── BAMBI ────────────────────────────────────────────────────────
+async function loadBambiMode() {
+  const d = await apiFetch('/bambi/api/mode');
+  if (!d) return;
+  document.getElementById('bambi-mode-badge').textContent = d.mode?.toUpperCase() || '—';
+  document.getElementById('bambi-mode-badge').className = 'badge ' + (d.mode === 'live' ? 'badge-ok' : 'badge-warn');
+  document.getElementById('bambi-window-badge').textContent = d.window || '—';
+  bambiKillActive = !!d.kill;
+  const tog = document.getElementById('bambi-kill-toggle');
+  tog.classList.toggle('on', bambiKillActive);
+  document.getElementById('kill-label').textContent = bambiKillActive ? '🔴 activo' : '🟢 inactivo';
+}
+
+async function loadBambiAnalytics() {
+  const d = await apiFetch('/bambi/api/analytics');
+  if (!d) return;
+  document.getElementById('b-resolved').textContent  = d.totalResolved || 0;
+  document.getElementById('b-escalated').textContent = d.totalEscalated || 0;
+  document.getElementById('b-takeover').textContent  = d.totalTakeover  || 0;
+  const kw = d.topKeywords || [];
+  const max = kw[0]?.count || 1;
+  document.getElementById('b-keywords').innerHTML = kw.slice(0,5).map(k =>
+    `<div style="display:flex;align-items:center;gap:8px;font-size:.82rem;">
+      <span style="min-width:80px;color:var(--text);">${k.word}</span>
+      <div style="flex:1;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;height:8px;">
+        <div style="width:${Math.round(100*k.count/max)}%;height:100%;background:var(--gold);border-radius:4px;"></div>
+      </div>
+      <span style="color:var(--muted);min-width:28px;text-align:right;">${k.count}</span>
+    </div>`).join('') || '<span style="color:var(--muted);font-size:.82rem;">Sin datos aún</span>';
+}
+
+async function toggleKill() {
+  const newState = !bambiKillActive;
+  const d = await apiFetch('/bambi/api/kill', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ active: newState })
+  });
+  if (d) { bambiKillActive = newState; await loadBambiMode(); toast(newState ? '🔴 Kill switch activado' : '🟢 Kill switch desactivado', newState ? 'err' : 'ok'); }
+}
+
+async function loadShadowLog() {
+  const d = await apiFetch('/bambi/api/shadow-log?limit=20');
+  const box = document.getElementById('shadow-log');
+  if (!Array.isArray(d) || d.length === 0) { box.textContent = 'Sin entradas en shadow log'; return; }
+  box.innerHTML = d.map(e => {
+    const ts = e.ts ? new Date(e.ts).toLocaleString('es-AR', {hour:'2-digit', minute:'2-digit', month:'short', day:'numeric'}) : '—';
+    return `<div class="log-line"><span style="color:var(--gold);">${ts}</span> <span style="color:var(--muted);">+${e.phone || '?'}</span> → ${e.text || ''}</div>`;
+  }).join('');
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  const area = document.getElementById('chat-area');
+  area.insertAdjacentHTML('beforeend', `<div style="display:flex;justify-content:flex-end;"><div class="bubble guest">${msg}</div></div>`);
+  input.value = '';
+  area.scrollTop = area.scrollHeight;
+  const d = await apiFetch('/bambi/api/chat', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ message: msg, lang: 'es' })
+  });
+  const reply = d?.response || 'Sin respuesta del agente';
+  area.insertAdjacentHTML('beforeend', `<div style="display:flex;"><div class="bubble agent"><strong style="font-size:.7rem;color:var(--gold);display:block;margin-bottom:3px;">BAMBI</strong>${reply}</div></div>`);
+  area.scrollTop = area.scrollHeight;
+}
+
+// Auto-refresh shadow log when on agentes view
+setInterval(() => {
+  if (document.getElementById('view-agentes')?.classList.contains('active') &&
+      document.getElementById('bt-log')?.classList.contains('active')) {
+    loadShadowLog();
+  }
+}, 15000);
+
+// ── TASKS ─────────────────────────────────────────────────────────
+async function loadTasks() {
+  const d = await apiFetch('/tasks');
+  allTasks = d?.all || [];
+  renderTasks(allTasks);
+}
+function renderTasks(tasks) {
+  const colorMap = { Pamela:'#d4a640', Augusto:'#4dde95', Marcelo:'#5b9cf6', Sandra:'#a78bfa', Franco:'#ff7b7b' };
+  const prioColor = { Urgente:'var(--danger)', Alta:'var(--warn)', Media:'var(--ok)', Baja:'var(--muted)' };
+  const body = document.getElementById('tasks-body');
+  if (!tasks.length) { body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">Sin tareas</td></tr>'; return; }
+  body.innerHTML = tasks.slice(0,30).map(t => {
+    const r = t.responsable || '—';
+    const col = colorMap[r] || 'var(--muted)';
+    const pc = prioColor[t.priority] || 'var(--muted)';
+    return `<tr>
+      <td style="font-weight:600;">${t.title || '—'}</td>
+      <td><span style="background:${col}22;color:${col};padding:2px 8px;border-radius:8px;font-size:.76rem;font-weight:700;">${r}</span></td>
+      <td><span style="color:var(--muted);font-size:.78rem;">${t.status || '—'}</span></td>
+      <td><span style="color:${pc};font-size:.78rem;font-weight:700;">${t.priority || '—'}</span></td>
+      <td style="color:var(--muted);font-size:.78rem;">${t.area || '—'}</td>
+    </tr>`;
+  }).join('');
+}
+function filterTasks(f) {
+  if (f === 'all') return renderTasks(allTasks);
+  renderTasks(allTasks.filter(t => (t.status || '').toLowerCase().includes(f) || (t.priority || '').toLowerCase().includes(f)));
+}
+async function createTask() {
+  const body = { title: document.getElementById('t-title').value.trim(), responsable: document.getElementById('t-responsable').value, area: document.getElementById('t-area').value, priority: document.getElementById('t-prioridad').value, notes: document.getElementById('t-notas').value };
+  if (!body.title) return toast('El título es requerido', 'err');
+  const d = await apiFetch('/tasks/create', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  if (d?.ok) { hideModal('modal-task'); toast('✅ Tarea creada' + (body.responsable ? ' + WA a ' + body.responsable : '')); loadTasks(); }
+  else toast('Error al crear la tarea', 'err');
+}
+
+// ── GUESTS ────────────────────────────────────────────────────────
+async function loadGuests() {
+  const d = await apiFetch('/notion/guests?limit=30');
+  const body = document.getElementById('guests-body');
+  const guests = d?.guests || [];
+  if (!guests.length) { body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">Sin datos</td></tr>'; return; }
+  document.getElementById('h-total').textContent = d.count || guests.length;
+  body.innerHTML = guests.map(g => `<tr>
+    <td style="font-weight:600;">${g.nombre || '—'}</td>
+    <td style="font-family:var(--mono);font-size:.76rem;color:var(--muted);">${g.telefono || '—'}</td>
+    <td style="font-size:.78rem;">${g.email || '—'}</td>
+    <td><span style="background:rgba(91,156,246,0.12);color:#5b9cf6;padding:2px 6px;border-radius:6px;font-size:.74rem;">${g.unidad || '—'}</span></td>
+    <td style="font-size:.78rem;color:var(--muted);">${g.plataforma || '—'}</td>
+    <td style="font-size:.76rem;color:var(--muted);">${g.ultimoContacto ? new Date(g.ultimoContacto).toLocaleDateString('es-AR') : '—'}</td>
+  </tr>`).join('');
+}
+async function exportContacts() {
+  const d = await apiFetch('/export-contacts', { method: 'POST' });
+  toast(d?.ok ? '↑ Export iniciado (pid ' + d.pid + ')' : 'Error al exportar', d?.ok ? 'ok' : 'err');
+}
+
+// ── FILES ─────────────────────────────────────────────────────────
+async function loadFiles() {
+  const d = await apiFetch('/files');
+  if (!Array.isArray(d)) return;
+  document.getElementById('files-list').innerHTML = d.map(f =>
+    `<button class="btn btn-ghost btn-sm" style="justify-content:flex-start;" onclick="openFile('${f.name}')">
+      📄 ${f.name} <span style="color:var(--muted);margin-left:auto;font-size:.7rem;">${f.size ? (f.size/1024).toFixed(1)+'KB' : ''}</span>
+    </button>`).join('');
+}
+async function openFile(name) {
+  const d = await apiFetch('/files/' + name);
+  if (!d?.content) return;
+  currentFile = name; fileDirty = false;
+  document.getElementById('file-name-title').textContent = name;
+  document.getElementById('file-meta').textContent = 'cargado';
+  document.getElementById('file-editor').value = d.content;
+  document.getElementById('file-editor').style.display = '';
+  document.getElementById('save-btn').style.display = '';
+  document.getElementById('save-status').textContent = '';
+}
+function markDirty() { fileDirty = true; document.getElementById('save-status').textContent = '⚠ Sin guardar'; }
+async function saveFile() {
+  if (!currentFile) return;
+  const content = document.getElementById('file-editor').value;
+  const d = await apiFetch('/files/' + currentFile, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ content }) });
+  if (d?.ok) { fileDirty = false; document.getElementById('save-status').textContent = '✅ Guardado · backup: ' + (d.backup || ''); toast('✅ Archivo guardado'); }
+  else toast('Error: ' + (d?.error || 'desconocido'), 'err');
+}
+
+// ── PROPERTIES ────────────────────────────────────────────────────
+async function loadProperties() {
+  const d = await apiFetch('/ge/properties');
+  const body = document.getElementById('props-body');
+  if (!Array.isArray(d) || !d.length) { body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">Pipeline vacío</td></tr>'; return; }
+  body.innerHTML = d.map(p => `<tr>
+    <td style="font-weight:600;">${p.direccion || '—'}</td>
+    <td style="color:var(--muted);font-size:.8rem;">${p.tipo || '—'}</td>
+    <td><span class="badge badge-muted">${p.estado || '—'}</span></td>
+    <td style="color:var(--gold);font-weight:700;">$${p.precio || '—'}</td>
+    <td style="font-size:.8rem;">${p.propietario || '—'}</td>
+    <td style="font-size:.76rem;color:var(--muted);">${p.createdAt ? new Date(p.createdAt).toLocaleDateString('es-AR') : '—'}</td>
+    <td><button class="btn btn-ghost btn-sm" style="color:var(--danger);border-color:rgba(255,123,123,.2);" onclick="deleteProperty(${p.id})">✕</button></td>
+  </tr>`).join('');
+}
+async function createProperty() {
+  const body = { direccion: document.getElementById('p-direccion').value.trim(), tipo: document.getElementById('p-tipo').value, estado: document.getElementById('p-estado').value, precio: document.getElementById('p-precio').value, propietario: document.getElementById('p-propietario').value, notas: document.getElementById('p-notas').value };
+  if (!body.direccion) return toast('La dirección es requerida', 'err');
+  const d = await apiFetch('/ge/property', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  if (d?.ok) { hideModal('modal-prop'); toast('✅ Propiedad agregada'); loadProperties(); }
+  else toast('Error', 'err');
+}
+async function deleteProperty(id) {
+  if (!confirm('¿Eliminar esta propiedad del pipeline?')) return;
+  // For now, just reload — full delete endpoint can be added later
+  toast('Función de eliminación pendiente', 'warn');
+}
+
+// ── HUE ───────────────────────────────────────────────────────────
+async function loadHue() {
+  const d = await apiFetch('/smart-home/hue');
+  if (!d?.available) {
+    document.getElementById('hue-lights').style.display = 'none';
+    document.getElementById('hue-setup').style.display = '';
+    document.getElementById('hue-sub').textContent = 'Bridge no configurado';
+    document.getElementById('hue-badge').textContent = 'Sin configurar';
+    return;
+  }
+  document.getElementById('hue-badge').textContent = d.total + ' luces';
+  document.getElementById('hue-badge').className = 'badge badge-ok';
+  document.getElementById('hue-sub').textContent = d.total + ' dispositivos encontrados';
+  document.getElementById('hue-lights').innerHTML = (d.lights || []).map(l =>
+    `<div class="docker-item" style="cursor:pointer;" onclick="toggleHue(${l.id}, ${!l.on})">
+      <div class="d-name"><span class="dot ${l.on && l.reachable ? 'ok' : l.reachable ? 'err' : 'warn'}"></span>${l.name}</div>
+      <div class="d-status" style="color:${l.on?'var(--gold)':'var(--muted)'};">${l.on ? '💡 ON' : '○ OFF'} · ${Math.round((l.brightness||0)/2.55)}%</div>
+    </div>`).join('');
+}
+async function toggleHue(id, on) {
+  await apiFetch('/smart-home/hue/toggle', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ type: 'light', id, state: { on } }) });
+  loadHue();
+}
+
+// ── CANARIAN ──────────────────────────────────────────────────────
+function checkCanaSession() {
+  const stored = sessionStorage.getItem('cana_pin');
+  const ts = parseInt(sessionStorage.getItem('cana_ts') || '0');
+  if (stored && (Date.now() - ts) < 300000) { unlockWithPin(stored); }
+  else { document.getElementById('canarian-lock').style.display = ''; document.getElementById('canarian-content').style.display = 'none'; }
+}
+async function unlockCanarian() {
+  const pin = document.getElementById('pin-input').value;
+  if (!pin) return;
+  await unlockWithPin(pin);
+}
+async function unlockWithPin(pin) {
+  const d = await fetch(API + '/canarian/ledger', { headers: { 'X-Canarian-Pin': pin } });
+  if (d.status === 401) {
+    document.getElementById('pin-error').textContent = 'PIN incorrecto';
+    document.getElementById('pin-input').classList.add('pin-shake');
+    setTimeout(() => document.getElementById('pin-input').classList.remove('pin-shake'), 500);
+    return;
+  }
+  const data = await d.json();
+  canarianPin = pin;
+  sessionStorage.setItem('cana_pin', pin);
+  sessionStorage.setItem('cana_ts', Date.now().toString());
+  document.getElementById('canarian-lock').style.display = 'none';
+  document.getElementById('canarian-content').style.display = '';
+  document.getElementById('pin-error').textContent = '';
+  renderLedger(data.entries || []);
+  startLockTimer();
+}
+function lockCanarian() {
+  canarianPin = null;
+  sessionStorage.removeItem('cana_pin');
+  sessionStorage.removeItem('cana_ts');
+  clearInterval(lockTimer);
+  document.getElementById('pin-input').value = '';
+  document.getElementById('canarian-lock').style.display = '';
+  document.getElementById('canarian-content').style.display = 'none';
+}
+function startLockTimer() {
+  clearInterval(lockTimer);
+  lockSecondsLeft = 300;
+  lockTimer = setInterval(() => {
+    lockSecondsLeft--;
+    const m = Math.floor(lockSecondsLeft / 60);
+    const s = lockSecondsLeft % 60;
+    const el = document.getElementById('lock-timer');
+    if (el) el.textContent = m + ':' + s.toString().padStart(2,'0');
+    if (lockSecondsLeft <= 0) lockCanarian();
+  }, 1000);
+}
+// Reset timer on activity in canarian section
+document.addEventListener('click', () => { if (canarianPin && document.getElementById('view-canarian')?.classList.contains('active')) { lockSecondsLeft = 300; sessionStorage.setItem('cana_ts', Date.now().toString()); } });
+
+function renderLedger(entries) {
+  const typeLabel = { ingreso_usdt:'↑ USDT', egreso_usdt:'↓ USDT', ingreso_usd:'↑ USD', egreso_usd:'↓ USD', ingreso_ars:'↑ ARS', egreso_ars:'↓ ARS', comision:'💼 Comisión', wire:'🏦 Wire' };
+  const body = document.getElementById('ledger-body');
+  if (!entries.length) { body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">Sin movimientos</td></tr>'; return; }
+  // Calculate balances
+  let usdt = 0, usd = 0, ars = 0;
+  entries.forEach(e => {
+    const sign = e.tipo?.startsWith('ingreso') || e.tipo === 'comision' ? 1 : -1;
+    const amt = parseFloat(e.monto) || 0;
+    if (e.moneda === 'USDT') usdt += sign * amt;
+    else if (e.moneda === 'USD') usd += sign * amt;
+    else if (e.moneda === 'ARS') ars += sign * amt;
+  });
+  document.getElementById('c-usdt').textContent = (usdt >= 0 ? '+' : '') + usdt.toLocaleString('es-AR', {minimumFractionDigits:2}) + ' USDT';
+  document.getElementById('c-usd').textContent  = (usd >= 0 ? '+' : '') + usd.toLocaleString('es-AR', {minimumFractionDigits:2}) + ' USD';
+  document.getElementById('c-ars').textContent  = (ars >= 0 ? '+' : '') + ars.toLocaleString('es-AR', {maximumFractionDigits:0}) + ' ARS';
+  body.innerHTML = entries.map(e => {
+    const isIn = e.tipo?.startsWith('ingreso') || e.tipo === 'comision';
+    return `<tr>
+      <td style="font-family:var(--mono);font-size:.78rem;color:var(--muted);">${e.date || e.createdAt?.substring(0,10) || '—'}</td>
+      <td style="font-size:.78rem;">${typeLabel[e.tipo] || e.tipo || '—'}</td>
+      <td style="font-weight:700;color:${isIn ? 'var(--ok)' : 'var(--danger)'};">${isIn ? '+' : '-'}${parseFloat(e.monto||0).toLocaleString('es-AR', {minimumFractionDigits:2})}</td>
+      <td style="font-size:.78rem;">${e.moneda || '—'}</td>
+      <td style="font-size:.78rem;color:var(--muted);">${e.contraparte || '—'}</td>
+      <td style="font-size:.78rem;color:var(--muted);">${e.nota || '—'}</td>
+      <td><button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="deleteLedger(${e.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+async function createLedgerEntry() {
+  const body = { date: document.getElementById('c-fecha').value || new Date().toISOString().substring(0,10), tipo: document.getElementById('c-tipo').value, monto: document.getElementById('c-monto').value, moneda: document.getElementById('c-moneda').value, contraparte: document.getElementById('c-contraparte').value, nota: document.getElementById('c-nota').value };
+  if (!body.monto || !body.tipo) return toast('Monto y tipo son requeridos', 'err');
+  const d = await fetch(API + '/canarian/ledger', { method: 'POST', headers: {'Content-Type':'application/json', 'X-Canarian-Pin': canarianPin}, body: JSON.stringify(body) });
+  if (d.ok) { hideModal('modal-canarian'); const data = await d.json(); toast('✅ Movimiento registrado'); const fresh = await fetch(API + '/canarian/ledger', {headers:{'X-Canarian-Pin':canarianPin}}); const fdata = await fresh.json(); renderLedger(fdata.entries || []); }
+  else toast('Error al registrar', 'err');
+}
+async function deleteLedger(id) {
+  if (!confirm('¿Eliminar este movimiento?')) return;
+  const d = await fetch(API + '/canarian/ledger/' + id, { method: 'DELETE', headers: {'X-Canarian-Pin': canarianPin} });
+  if (d.ok) { toast('Movimiento eliminado'); const fresh = await fetch(API + '/canarian/ledger', {headers:{'X-Canarian-Pin':canarianPin}}); const fdata = await fresh.json(); renderLedger(fdata.entries || []); }
+  else toast('Error al eliminar', 'err');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadSystemBar();
+  loadTelemetry();
+  loadDocker();
+  setInterval(loadSystemBar, 60000);
+  setInterval(loadDocker, 120000);
+});
+</script>
+</body>
+</html>

@@ -22,6 +22,14 @@
   to = "/.netlify/functions/telemetry"
   status = 200
 
+# Gringo Office — proxy transparente al bridge VPS (puerto 3002)
+# Todos los /office/api/* se reenvían server-side al bridge interno
+[[redirects]]
+  from = "/office/api/*"
+  to = "http://209.126.82.189:3002/api/:splat"
+  status = 200
+  force = true
+
 # Security headers para todos los recursos
 [[headers]]
   for = "/*"
