@@ -154,13 +154,35 @@
     }
   }
 
+  /* ─── HOME SUB-TAB SWITCHER ─────────────────────────────────────── */
+  var HOME_TABS = ['negocio', 'labs', 'operaciones'];
+  function homeTab(which) {
+    HOME_TABS.forEach(function (t) {
+      var sv  = document.getElementById('hv-' + t);
+      var btn = document.getElementById('htab-' + t);
+      if (sv)  sv.classList.toggle('active', t === which);
+      if (btn) {
+        btn.classList.toggle('active', t === which);
+        btn.setAttribute('aria-selected', t === which ? 'true' : 'false');
+      }
+    });
+    // Lazy-load per tab
+    if (which === 'labs')        { loadGauges(); loadDocker(); loadBambiOps(); }
+    if (which === 'operaciones') { loadOpsTab(); loadOpsPipeline(); }
+  }
+  window.homeTab = homeTab;
+
   /* ─── LOAD HOME (orchestrates all home loaders) ─────────────────── */
   function loadHome() {
     loadSystemBar();
-    loadGauges();
     loadProfitability();
     loadOccupancy();
+    loadExpenses();
+    // Labs loaders (gauges/docker) only triggered when that sub-tab is active
+    // but we pre-load them too for the KPI strip
+    loadGauges();
     loadDocker();
+    loadBambiOps();
   }
   window.loadHome = loadHome;
 
@@ -202,10 +224,22 @@
       prom('wispy_current_session_tokens{kind="total"}'),
       prom('wispy_current_session_cost_usd')
     ]);
+    var tokStr  = tokens !== null ? Math.round(tokens).toLocaleString('es-AR') : '—';
+    var costStr = cost   !== null ? '$' + parseFloat(cost).toFixed(4) : '$—';
+    var gwStr   = gwOnline === 1 ? 'Online' : (gwOnline === null ? '—' : 'Offline');
+
     var kpiTok = document.getElementById('kpi-tokens');
-    if (kpiTok) kpiTok.textContent = tokens !== null ? Math.round(tokens).toLocaleString('es-AR') : '—';
+    if (kpiTok) kpiTok.textContent = tokStr;
     var kpiCost = document.getElementById('kpi-cost');
-    if (kpiCost) kpiCost.textContent = cost !== null ? '$' + parseFloat(cost).toFixed(4) : '$—';
+    if (kpiCost) kpiCost.textContent = costStr;
+
+    // Mirror into Labs sub-tab KPIs
+    var labsTok = document.getElementById('kpi-tokens-labs');
+    if (labsTok) labsTok.textContent = tokStr;
+    var labsCost = document.getElementById('kpi-cost-labs');
+    if (labsCost) labsCost.textContent = costStr;
+    var labsGw = document.getElementById('kpi-gateway-labs');
+    if (labsGw) { labsGw.textContent = gwStr; labsGw.style.color = gwOnline === 1 ? 'var(--ok)' : 'var(--warn)'; }
   }
 
   /* ─── GAUGES ─────────────────────────────────────────────────────── */
@@ -994,6 +1028,192 @@
     }
   }
   window.deleteLedger = deleteLedger;
+
+  /* ─── LOAD EXPENSES ─────────────────────────────────────────────── */
+  async function loadExpenses() {
+    var el = document.getElementById('expenses-content');
+    var periodEl = document.getElementById('expenses-period');
+    if (!el) return;
+
+    // Show skeleton while loading
+    el.innerHTML = '<div class="skeleton skeleton-block" style="height:160px;"></div>';
+
+    var d = await apiFetch('/business/profitability?empresa=all');
+    if (!d || d.__error || !d.expenses) {
+      el.innerHTML = '<span style="color:var(--muted);font-size:.82rem;">Sin datos de gastos</span>';
+      if (periodEl) periodEl.textContent = 'sin datos';
+      return;
+    }
+    var exp = d.expenses;
+    if (periodEl) periodEl.textContent = (exp.mes || '—') + ' · ' + (exp.count || 0) + ' registros';
+
+    var cats = (exp.byCategory || []).slice().sort(function (a, b) { return (b.usd || 0) - (a.usd || 0); });
+    var total = exp.totalUSD || 0;
+    var maxVal = cats.length ? (cats[0].usd || 1) : 1;
+
+    // Palette: alternate gold/teal
+    var palette = ['#d4a640', '#4dde95', '#7ec8e3', '#a78bfa', '#ffbb55', '#5b9cf6', '#ff7b7b'];
+
+    var headHtml = '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px;">' +
+      '<span style="font-family:var(--mono);font-size:1.6rem;font-weight:800;color:var(--gold);">$' +
+        Math.round(total).toLocaleString('es-AR') + '</span>' +
+      '<span style="font-size:.76rem;color:var(--muted);">USD · ' + (exp.count || 0) + ' registros</span>' +
+    '</div>';
+
+    var barsHtml = '<div class="expense-bar-chart">' +
+      cats.map(function (c, i) {
+        var pct = maxVal ? Math.round((c.usd || 0) * 100 / maxVal) : 0;
+        var color = palette[i % palette.length];
+        return '<div class="expense-row">' +
+          '<span class="expense-label" title="' + escHtml(c.cat || '') + '">' + escHtml(c.cat || '—') + '</span>' +
+          '<div class="expense-track"><div class="expense-fill" style="width:' + pct + '%;background:' + color + ';opacity:.75;"></div></div>' +
+          '<span class="expense-val">$' + Math.round(c.usd || 0).toLocaleString('es-AR') + '</span>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+
+    el.innerHTML = headHtml + barsHtml;
+  }
+  window.loadExpenses = loadExpenses;
+
+  /* ─── LOAD BAMBI OPS ─────────────────────────────────────────────── */
+  async function loadBambiOps() {
+    var el = document.getElementById('bambi-ops-content');
+    if (!el) return;
+
+    el.innerHTML = '<div class="skeleton skeleton-block" style="height:80px;"></div>';
+
+    var d = await apiFetch('/agents/bambi-analytics');
+    if (!d || d.__error || !d.ok) {
+      el.innerHTML = '<span style="color:var(--muted);font-size:.82rem;">Sin datos de Bambi</span>';
+      return;
+    }
+
+    var retPct = parseFloat(d.retentionPct || 0);
+
+    // Stat tiles
+    var tilesHtml = '<div class="bambi-tiles">' +
+      '<div class="bambi-tile"><span>Resueltos</span><strong style="color:var(--ok);">' + (d.resolved || 0) + '</strong></div>' +
+      '<div class="bambi-tile"><span>Escalados</span><strong style="color:var(--warn);">' + (d.escalated || 0) + '</strong></div>' +
+      '<div class="bambi-tile"><span>Takeover</span><strong style="color:var(--blue);">' + (d.takeover || 0) + '</strong></div>' +
+      '<div class="bambi-tile"><span>Retención</span><strong style="color:var(--gold);">' + retPct.toFixed(1) + '%</strong></div>' +
+    '</div>';
+
+    // Mini retention gauge using Canvas
+    var gaugeHtml = '<div style="display:flex;align-items:center;gap:16px;margin-top:4px;">' +
+      '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">' +
+        '<canvas id="g-bambi-ret" width="72" height="72"></canvas>' +
+        '<div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;">Retención</div>' +
+      '</div>' +
+      '<div style="font-size:.76rem;color:var(--muted);line-height:1.6;">' +
+        'Muestra: <strong style="color:var(--text);">' + (d.responseSamples || 0) + '</strong> conversaciones analizadas.<br>' +
+        'Total gestionado: <strong style="color:var(--text);">' + ((d.resolved || 0) + (d.escalated || 0)) + '</strong> · ' +
+        'Tasa takeover: <strong style="color:var(--text);">' +
+          (((d.resolved || 0) + (d.escalated || 0)) > 0
+            ? Math.round((d.takeover || 0) * 100 / ((d.resolved || 0) + (d.escalated || 0))) + '%'
+            : '—') +
+        '</strong>' +
+      '</div>' +
+    '</div>';
+
+    el.innerHTML = tilesHtml + gaugeHtml;
+
+    // Draw the gauge after DOM is updated
+    setTimeout(function () {
+      setGauge('g-bambi-ret', null, retPct, 'Retención', true);
+      var gv = document.getElementById('g-bambi-ret');
+      if (gv) {
+        // Draw the value text directly on the canvas since there's no separate val element
+        var canvas = gv;
+        var ctx = canvas.getContext('2d');
+        var W = canvas.width;
+        ctx.font = 'bold 11px "JetBrains Mono", monospace';
+        ctx.fillStyle = '#d4a640';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(retPct.toFixed(0) + '%', W / 2, W * 0.55);
+      }
+    }, 50);
+  }
+  window.loadBambiOps = loadBambiOps;
+
+  /* ─── OPERACIONES TAB ────────────────────────────────────────────── */
+  async function loadOpsTab() {
+    var el = document.getElementById('ops-tasks-content');
+    if (!el) return;
+    el.innerHTML = '<div class="skeleton skeleton-block" style="height:100px;"></div>';
+
+    var d = await apiFetch('/tasks');
+    var tasks = (d && d.all) ? d.all : [];
+    if (!tasks.length) {
+      el.innerHTML = '<span style="color:var(--muted);font-size:.82rem;">Sin tareas activas</span>';
+      return;
+    }
+    var prioColor = { Urgente: 'var(--danger)', Alta: 'var(--warn)', Media: 'var(--ok)', Baja: 'var(--muted)' };
+    var colorMap  = { Pamela: '#d4a640', Augusto: '#4dde95', Marcelo: '#5b9cf6', Franco: '#ff7b7b' };
+
+    // Group by status
+    var byStatus = {};
+    tasks.forEach(function (t) {
+      var s = t.status || 'Sin estado';
+      if (!byStatus[s]) byStatus[s] = 0;
+      byStatus[s]++;
+    });
+    var statusRows = Object.keys(byStatus).map(function (s) {
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:.78rem;">' +
+        '<span style="color:var(--muted);">' + escHtml(s) + '</span>' +
+        '<strong style="color:var(--gold);font-family:var(--mono);">' + byStatus[s] + '</strong>' +
+      '</div>';
+    }).join('');
+
+    // Recent urgent tasks
+    var urgent = tasks.filter(function (t) {
+      return (t.priority || t.prioridad || '').toLowerCase() === 'urgente';
+    }).slice(0, 3);
+    var urgentHtml = urgent.length
+      ? '<div style="margin-top:10px;font-size:.72rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">Urgentes</div>' +
+        urgent.map(function (t) {
+          var r = t.responsable || '';
+          var col = colorMap[r] || 'var(--muted)';
+          return '<div style="display:flex;justify-content:space-between;align-items:center;font-size:.78rem;padding:4px 0;">' +
+            '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;">' + escHtml(t.title || '—') + '</span>' +
+            '<span style="background:' + col + '22;color:' + col + ';padding:1px 6px;border-radius:6px;font-size:.72rem;flex-shrink:0;">' + escHtml(r || '—') + '</span>' +
+          '</div>';
+        }).join('')
+      : '';
+
+    el.innerHTML = '<div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;"><strong style="color:var(--text);font-size:.95rem;">' + tasks.length + '</strong> tareas en total</div>' +
+      '<div style="display:grid;gap:4px;">' + statusRows + '</div>' + urgentHtml;
+  }
+  window.loadOpsTab = loadOpsTab;
+
+  async function loadOpsPipeline() {
+    var el = document.getElementById('ops-pipeline-content');
+    if (!el) return;
+    el.innerHTML = '<div class="skeleton skeleton-block" style="height:100px;"></div>';
+
+    var d = await apiFetch('/ge/properties');
+    if (!Array.isArray(d) || !d.length) {
+      el.innerHTML = '<span style="color:var(--muted);font-size:.82rem;">Pipeline vacío</span>';
+      return;
+    }
+    // Count by status
+    var byStatus = {};
+    d.forEach(function (p) {
+      var s = p.status || p.estado || 'Sin estado';
+      if (!byStatus[s]) byStatus[s] = 0;
+      byStatus[s]++;
+    });
+
+    var html = '<div style="font-size:.72rem;color:var(--muted);margin-bottom:10px;"><strong style="color:var(--text);font-size:.95rem;">' + d.length + '</strong> propiedades en cartera</div>' +
+      '<div class="ops-pipeline">' +
+      Object.keys(byStatus).map(function (s) {
+        return '<div class="ops-pipe-item"><span>' + escHtml(s) + '</span><strong>' + byStatus[s] + '</strong></div>';
+      }).join('') +
+      '</div>';
+    el.innerHTML = html;
+  }
+  window.loadOpsPipeline = loadOpsPipeline;
 
   /* ─── UTIL ───────────────────────────────────────────────────────── */
   function escHtml(s) {
