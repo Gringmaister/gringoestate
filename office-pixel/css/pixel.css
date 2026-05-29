@@ -1,0 +1,73 @@
+/* Gringo Office Pixel — tema oro/negro, fuente pixel, overlays sobre canvas */
+:root{
+  --bg:#0c0b0a; --bg2:#141210; --panel:#181512; --panel2:#1f1b16;
+  --gold:#d4a640; --gold-soft:#e8c873; --ink:#f3ead6; --muted:#9b8f78;
+  --ok:#5bbf6a; --warn:#e0a23a; --bad:#d6584e; --metro:#7ea6d4; --line:#3a3328;
+}
+*{ box-sizing:border-box; }
+html,body{ margin:0; height:100%; background:var(--bg); color:var(--ink);
+  font-family:"Press Start 2P", ui-monospace, monospace; overflow:hidden; }
+canvas#office{ display:block; width:100vw; height:100vh; image-rendering:pixelated; cursor:default; }
+
+/* HUD */
+#hud{ position:fixed; top:0; left:0; right:0; height:42px; display:flex; align-items:center;
+  gap:14px; padding:0 12px; background:linear-gradient(#000a, #0000); pointer-events:none; z-index:5; }
+#hud-brand{ font-size:11px; color:var(--gold); letter-spacing:1px; text-shadow:2px 2px 0 #000; }
+#hud-brand span{ color:var(--ink); }
+#hud-kpis{ display:flex; gap:10px; flex:1; overflow:hidden; }
+.hud-kpi{ font-size:8px; color:var(--muted); white-space:nowrap; }
+.hud-kpi b{ color:var(--gold-soft); }
+#clock{ font-size:9px; color:var(--gold-soft); text-shadow:2px 2px 0 #000; }
+
+/* Overlay */
+#overlay{ position:fixed; inset:0; background:#000b; display:flex; align-items:center;
+  justify-content:center; z-index:20; padding:18px; }
+#overlay.hidden{ display:none; }
+#overlay-card{ position:relative; width:min(960px,96vw); max-height:90vh; overflow:auto;
+  background:var(--panel); border:3px solid var(--gold); border-radius:6px;
+  box-shadow:0 0 0 3px #000, 8px 8px 0 #0008; padding:18px 18px 24px; }
+#overlay-title{ font-size:13px; color:var(--gold); margin:2px 0 14px; letter-spacing:1px; }
+#overlay-close{ position:absolute; top:10px; right:10px; background:var(--bad); color:#fff;
+  border:2px solid #000; border-radius:4px; font-family:inherit; font-size:10px; padding:6px 8px; cursor:pointer; }
+#overlay-close:hover{ filter:brightness(1.15); }
+
+/* Grids / cards dentro del overlay */
+.grid{ display:grid; gap:12px; }
+.g-kpis{ grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }
+.g-cards{ grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); }
+.card{ background:var(--panel2); border:2px solid var(--line); border-radius:5px; padding:12px; }
+.card h4{ margin:0 0 8px; font-size:9px; color:var(--muted); letter-spacing:1px; }
+.kpi-val{ font-size:16px; color:var(--gold-soft); text-shadow:2px 2px 0 #000; }
+.kpi-sub{ font-size:7px; color:var(--muted); margin-top:6px; line-height:1.5; }
+.card.metro{ border-color:var(--metro); }
+.card.metro .kpi-val{ color:var(--metro); }
+.row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.tag{ font-size:7px; padding:3px 5px; border-radius:3px; border:1px solid var(--line); color:var(--muted); }
+.tag.ok{ color:var(--ok); border-color:var(--ok); }
+.tag.bad{ color:var(--bad); border-color:var(--bad); }
+
+/* Barras y gauges simples */
+.bar{ height:10px; background:#000; border:1px solid var(--line); border-radius:2px; overflow:hidden; margin-top:6px; }
+.bar > i{ display:block; height:100%; background:var(--gold); }
+.bar.cpu > i{ background:var(--metro); } .bar.bad > i{ background:var(--bad); }
+.unit-list{ font-size:8px; color:var(--ink); line-height:1.8; }
+.unit-list .u{ display:flex; justify-content:space-between; border-bottom:1px solid #0006; padding:2px 0; }
+.muted{ color:var(--muted); } .small{ font-size:7px; } .err{ color:var(--bad); font-size:8px; }
+.gauge-wrap{ display:flex; gap:14px; flex-wrap:wrap; }
+.gauge{ text-align:center; } .gauge canvas{ image-rendering:auto; }
+.gauge .lbl{ font-size:7px; color:var(--muted); margin-top:4px; }
+
+/* Toast */
+#toast{ position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:40;
+  background:var(--panel); border:2px solid var(--gold); color:var(--ink); font-size:9px;
+  padding:10px 14px; border-radius:5px; box-shadow:4px 4px 0 #0008; }
+#toast.hidden{ display:none; }
+
+/* PIN canarian */
+.pin-row{ display:flex; gap:8px; margin-top:10px; }
+.pin-row input{ font-family:inherit; font-size:12px; background:#000; color:var(--gold-soft);
+  border:2px solid var(--line); border-radius:4px; padding:8px; width:140px; letter-spacing:3px; text-align:center; }
+.btn{ font-family:inherit; font-size:9px; background:var(--gold); color:#1a1407; border:2px solid #000;
+  border-radius:4px; padding:8px 12px; cursor:pointer; }
+.btn:hover{ filter:brightness(1.1); }
+.shake{ animation:shk .3s; } @keyframes shk{ 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }

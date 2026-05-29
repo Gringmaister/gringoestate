@@ -4,19 +4,21 @@
  * Captura todos los requests a /office/api/* y los reenvía al bridge
  * VPS vía Cloudflare Tunnel (evita restricciones de firewall del CDN).
  *
- * BRIDGE_URL se configura como env var en Netlify. Si el tunnel cambia
- * de URL (restart cloudflared), actualizar OFFICE_BRIDGE_URL en Netlify UI.
+ * BRIDGE_URL: ahora hay Named Tunnel con URL FIJA (https://bridge.gringo.estate),
+ * así que el default ya no es un Quick Tunnel volátil. La env var OFFICE_BRIDGE_URL
+ * en Netlify la sobreescribe si está seteada — para usar la URL fija, setearla a
+ * https://bridge.gringo.estate (o borrarla para caer en este default).
  *
  * Los datos sensibles (canarian) siguen protegidos por PIN-gate en el
  * bridge (header X-Canarian-Pin). Este proxy pasa headers y body tal cual.
  */
 
-const BRIDGE_URL = process.env.OFFICE_BRIDGE_URL || 'https://factory-lift-win-leader.trycloudflare.com';
+const BRIDGE_URL = process.env.OFFICE_BRIDGE_URL || 'https://bridge.gringo.estate';
 
 exports.handler = async (event) => {
   try {
-    // event.path = "/office/api/wispy/status"  →  "/api/wispy/status"
-    const apiPath = event.path.replace(/^\/office\/api/, '/api');
+    // event.path = "/office/api/wispy/status" o "/office-pixel/api/..."  →  "/api/..."
+    const apiPath = event.path.replace(/^\/office(?:-pixel)?\/api/, '/api');
 
     // Query string
     const qs = event.rawQuery ? `?${event.rawQuery}` : '';

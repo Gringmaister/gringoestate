@@ -30,6 +30,13 @@
   status = 200
   force = true
 
+# Gringo Office PIXEL — mismo proxy/bridge que el office clásico
+[[redirects]]
+  from = "/office-pixel/api/*"
+  to = "/.netlify/functions/office-bridge"
+  status = 200
+  force = true
+
 # Security headers para todos los recursos
 [[headers]]
   for = "/*"

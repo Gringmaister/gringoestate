@@ -1,0 +1,22 @@
+# Secrets — NUNCA commitear (gringoestate pushea a GitHub)
+.env
+.env.*
+*.env
+*.pem
+*.key
+secrets/
+*-oauth.json
+*oauth-token*.json
+*credentials*.json
+
+# Backups / temporales
+*.bak
+*.bak.*
+*.save
+*~
+*.log
+
+# Node / SO
+node_modules/
+.DS_Store
+.netlify/
