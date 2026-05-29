@@ -57,11 +57,6 @@
     // pared superior
     ctx.fillStyle = '#0e0c0a'; ctx.fillRect(0, 44, W, 36);
     ctx.fillStyle = '#241e16'; ctx.fillRect(0, 78, W, 4);
-    // alfombra central
-    const rw = Math.min(520, W * 0.6), rh = Math.min(150, H * 0.22);
-    const rx = (W - rw) / 2, ry = 96;
-    ctx.fillStyle = '#1c1813'; ctx.fillRect(rx, ry, rw, rh);
-    ctx.strokeStyle = '#3a2f1c'; ctx.lineWidth = 2; ctx.strokeRect(rx + 4, ry + 4, rw - 8, rh - 8);
     // título sobre la pared
     ctx.fillStyle = '#d4a640'; ctx.font = '10px "Press Start 2P", monospace'; ctx.textAlign = 'center';
     ctx.fillText('· GRINGO LABS · CONTROL ROOM ·', W / 2, 68);
@@ -113,7 +108,7 @@
     zones = [];
     const n = AGENTS.length;
     const slotW = Math.min(220, (W - 40) / n);
-    const baseY = Math.min(H * 0.52, 300);
+    const baseY = Math.max(200, Math.min(Math.round(H * 0.46), H - 200));
     AGENTS.forEach((a, i) => {
       const cx = W / 2 + (i - (n - 1) / 2) * slotW;
       zones.push({ x: cx - 36, y: baseY - 70, w: 72, h: 120, type: 'agent', ref: a, cx, cy: baseY });
@@ -144,7 +139,7 @@
         ctx.globalAlpha = 1;
         plate(z.cx, z.cy + 28, a.name, a.soon ? '#7a7a7a' : '#d4a640');
         if (hovered && !a.soon) { ctx.strokeStyle = '#e8c873'; ctx.lineWidth = 1; ctx.strokeRect(z.x, z.y, z.w, z.h); }
-        if (a.soon) { ctx.fillStyle = '#7a7a7a'; ctx.font = '6px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.fillText('PRÓXIMAMENTE', z.cx, z.cy + 44); }
+        if (a.soon) { ctx.fillStyle = '#7a7a7a'; ctx.font = '6px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.fillText('PRÓXIMAMENTE', z.cx, z.cy + 56); }
       } else {
         drawDoorZone(z.ref, z.x, z.y, z.w, z.h, hovered);
       }
@@ -311,7 +306,8 @@
     if (a.key === 'wispy') {
       const s = await apiFetch('/wispy/status');
       if (s && !s.__error) {
-        html += kcard('Estado WhatsApp', s.wa_status || '—', 'modelo: ' + (s.model || '—'));
+        const wa = s.wa_status && s.wa_status !== 'unknown' ? ('WhatsApp: ' + s.wa_status) : 'agente activo';
+        html += kcard('Modelo', s.model || '—', wa);
       } else html += '<div class="err">Estado no disponible (' + (s && s.__error) + ')</div>';
     } else if (a.key === 'bambi') {
       const m = await apiFetch('/bambi/api/mode');
