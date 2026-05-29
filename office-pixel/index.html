@@ -1,37 +1,621 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>Gringo Office · Pixel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gringo Office</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#070707" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/pixel.css" />
 </head>
 <body>
-  <!-- La oficina pixel (Canvas 2D) -->
-  <canvas id="office" aria-label="Gringo Office Pixel"></canvas>
 
-  <!-- HUD superior: reloj + KPIs headline -->
-  <div id="hud">
-    <div id="hud-brand">GRINGO<span>OFFICE</span></div>
-    <div id="hud-kpis"></div>
-    <div id="clock">--:--</div>
+<!-- ── SYSTEM BAR ──────────────────────────────────────────────────── -->
+<div class="system-bar">
+  <div class="system-brand">
+    <strong>GRINGO OFFICE</strong>
+    <span>centro de mando</span>
   </div>
-
-  <!-- Overlay para paneles (Home, agente, etc.) sobre el canvas -->
-  <div id="overlay" class="hidden" role="dialog" aria-modal="true">
-    <div id="overlay-card">
-      <button id="overlay-close" aria-label="Cerrar">✕</button>
-      <div id="overlay-title">·</div>
-      <div id="overlay-body"></div>
+  <div class="sys-tiles">
+    <div class="sys-tile">
+      <span>Gateway</span>
+      <strong id="sb-gateway"><span class="dot"></span>—</strong>
+    </div>
+    <div class="sys-tile">
+      <span>Containers</span>
+      <strong id="sb-docker"><span class="dot"></span>—</strong>
+    </div>
+    <div class="sys-tile">
+      <span>Ocupación</span>
+      <strong id="sb-ocup">—</strong>
+    </div>
+    <div class="sys-tile">
+      <span>Sesiones IA</span>
+      <strong id="sb-sessions">—</strong>
     </div>
   </div>
+  <div class="sys-clock" id="sys-clock">ARG —:—</div>
+</div>
 
-  <div id="toast" class="hidden"></div>
+<!-- ── WORKSPACE ───────────────────────────────────────────────────── -->
+<div class="workspace">
 
-  <script src="js/api.js"></script>
-  <script src="js/app.js"></script>
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Principal</div>
+      <button class="nav-btn active" onclick="nav('home')" id="nav-home">
+        <span class="nav-icon">⚡</span>
+        <span>HOME <small class="nav-sub">Command / Overview</small></span>
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Stack IA</div>
+      <button class="nav-btn" onclick="nav('agentes')" id="nav-agentes">
+        <span class="nav-icon">🤖</span>
+        <span>AGENTES <small class="nav-sub">Wispy · Bambi · Leonardo</small></span>
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operaciones</div>
+      <button class="nav-btn" onclick="nav('ambbi')" id="nav-ambbi">
+        <span class="nav-icon">🏢</span>
+        <span>AMBBI <small class="nav-sub">Tareas · Huéspedes · Ocupación</small></span>
+      </button>
+      <button class="nav-btn" onclick="nav('gebroker')" id="nav-gebroker">
+        <span class="nav-icon">🏘️</span>
+        <span>GE BROKER <small class="nav-sub">Pipeline · CRM</small></span>
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Infraestructura</div>
+      <button class="nav-btn" onclick="nav('smarthome')" id="nav-smarthome">
+        <span class="nav-icon">💡</span>
+        <span>SMART HOME <small class="nav-sub">Hue · Google · Xiaomi</small></span>
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Confidencial</div>
+      <button class="nav-btn" onclick="nav('canarian')" id="nav-canarian">
+        <span class="nav-icon">🔒</span>
+        <span>CANARIAN <small class="nav-sub">Ledger · LLC · Ops</small></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- ════════════════ HOME ════════════════ -->
+    <div class="view active" id="view-home">
+      <div class="section-head">
+        <h1>HOME CENTER</h1>
+        <span class="badge badge-gold" id="home-date">—</span>
+      </div>
+
+      <!-- KPI Row -->
+      <div class="kpi-grid" style="grid-template-columns:repeat(6,minmax(0,1fr));margin-bottom:18px;">
+        <div class="kpi accent">
+          <span>Gateway</span>
+          <strong id="kpi-gateway" style="font-size:1.1rem;">—</strong>
+          <small id="kpi-sessions">sesiones: —</small>
+        </div>
+        <div class="kpi">
+          <span>Tokens sesión</span>
+          <strong id="kpi-tokens">—</strong>
+          <small id="kpi-cost">$—</small>
+        </div>
+        <div class="kpi">
+          <span>Containers</span>
+          <strong id="kpi-docker">—</strong>
+          <small>running / total</small>
+        </div>
+        <div class="kpi">
+          <span>Ocupación 30d</span>
+          <strong id="kpi-ocup">—</strong>
+          <small>iCal agregado</small>
+        </div>
+        <div class="kpi">
+          <span>Margen Ambbi</span>
+          <strong id="kpi-margen-ambbi" style="color:var(--gold)">—</strong>
+          <small id="kpi-ingresos-ambbi">—</small>
+        </div>
+        <div class="kpi">
+          <span>Margen Metro</span>
+          <strong id="kpi-margen-metro" style="color:var(--metro)">—</strong>
+          <small id="kpi-ingresos-metro">—</small>
+        </div>
+      </div>
+
+      <!-- Gauges -->
+      <div class="card" style="margin-bottom:18px;padding:16px;">
+        <div class="card-head" style="margin-bottom:12px;">
+          <div class="card-title">Infraestructura — Recursos del Servidor</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadGauges()">↻</button>
+        </div>
+        <div class="gauge-grid">
+          <div class="gauge-wrap">
+            <canvas id="g-cpu" width="90" height="90"></canvas>
+            <div class="gauge-val" id="gv-cpu">—</div>
+            <div class="gauge-label">CPU</div>
+          </div>
+          <div class="gauge-wrap">
+            <canvas id="g-ram" width="90" height="90"></canvas>
+            <div class="gauge-val" id="gv-ram">—</div>
+            <div class="gauge-label">RAM</div>
+          </div>
+          <div class="gauge-wrap">
+            <canvas id="g-disk" width="90" height="90"></canvas>
+            <div class="gauge-val" id="gv-disk">—</div>
+            <div class="gauge-label">Disco</div>
+          </div>
+          <div class="gauge-wrap">
+            <canvas id="g-cache" width="90" height="90"></canvas>
+            <div class="gauge-val" id="gv-cache">—</div>
+            <div class="gauge-label">Cache Hit</div>
+          </div>
+          <div class="gauge-wrap">
+            <canvas id="g-ocup" width="90" height="90"></canvas>
+            <div class="gauge-val" id="gv-ocup">—</div>
+            <div class="gauge-label">Ocupación</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rentabilidad -->
+      <div class="card" style="margin-bottom:18px;">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Rentabilidad — Mes en Curso</div>
+            <div class="card-sub" id="profit-period">cargando…</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadProfitability()">↻</button>
+        </div>
+        <div class="profit-grid" id="profit-grid">
+          <div style="color:var(--muted);font-size:.82rem;">cargando…</div>
+        </div>
+        <div id="profit-units-wrap" style="display:none;margin-top:16px;">
+          <div class="sub-tabs">
+            <button class="sub-tab active" onclick="profitTab('ambbi')">Ambbi — por unidad</button>
+            <button class="sub-tab" onclick="profitTab('metro')">Metropolitan — por unidad</button>
+          </div>
+          <div class="sub-view active" id="pv-ambbi"></div>
+          <div class="sub-view" id="pv-metro"></div>
+        </div>
+      </div>
+
+      <!-- Ocupación + Próximas reservas -->
+      <div class="grid-2" style="margin-bottom:18px;">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Ocupación Próxima (iCal)</div>
+              <div class="card-sub">calendarios Airbnb / Booking en tiempo real</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="loadOccupancy()">↻</button>
+          </div>
+          <div id="ocup-detail" style="color:var(--muted);font-size:.82rem;">cargando…</div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Próximas Reservas</div>
+          </div>
+          <div id="upcoming-list" style="display:grid;gap:6px;">
+            <div style="color:var(--muted);font-size:.82rem;">cargando…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Docker containers -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Containers Docker</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadDocker()">↻</button>
+        </div>
+        <div class="docker-grid" id="docker-grid">
+          <div style="color:var(--muted);font-size:.82rem;">cargando…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ AGENTES ════════════════ -->
+    <div class="view" id="view-agentes">
+      <div class="section-head">
+        <h1>AGENTES</h1>
+        <span class="badge badge-ok">Stack IA Activo</span>
+      </div>
+
+      <div class="agent-grid">
+
+        <!-- WISPY -->
+        <div class="agent-card">
+          <div class="agent-header">
+            <div>
+              <div class="agent-name" style="color:var(--gold)">WISPY</div>
+              <div style="font-size:.74rem;color:var(--muted)">AI Gateway · OpenClaw</div>
+            </div>
+            <span class="badge badge-ok" id="wispy-wa-badge">—</span>
+          </div>
+          <div class="agent-body">
+            <div class="stats-row">
+              <div class="stat-item"><span>Modelo</span><strong id="w-model">—</strong></div>
+              <div class="stat-item"><span>WA Status</span><strong id="w-wa">—</strong></div>
+            </div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">
+              Motor principal del stack. Gestiona WhatsApp, tareas Notion, finanzas CFO y rutinas automáticas del ecosistema Gringo Labs.
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="loadWispy()">↻ Actualizar</button>
+          </div>
+        </div>
+
+        <!-- BAMBI -->
+        <div class="agent-card">
+          <div class="agent-header">
+            <div>
+              <div class="agent-name" style="color:#a8d8b8">BAMBI</div>
+              <div style="font-size:.74rem;color:var(--muted)">Anfitrión AMBBI · Runtime Unificado</div>
+            </div>
+            <span class="badge badge-warn" id="bambi-status-badge">En migración</span>
+          </div>
+          <div class="agent-body">
+            <div class="placeholder-block" style="padding:18px;">
+              <div class="ph-icon" style="font-size:1.6rem;">🔄</div>
+              <h3 style="font-size:1rem;">Runtime Unificado</h3>
+              <p style="font-size:.78rem;margin-top:4px;color:var(--muted);">
+                Bambi fue migrado al runtime unificado
+                <code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;">gringo_agents</code>.
+                Status en migración — disponible desde el gateway principal.
+              </p>
+            </div>
+            <div id="bambi-live-wrap" style="display:none;">
+              <div class="stats-row" id="bambi-stats-row"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEONARDO -->
+        <div class="agent-card" style="opacity:.6;">
+          <div class="agent-header">
+            <div>
+              <div class="agent-name" style="color:var(--purple)">LEONARDO</div>
+              <div style="font-size:.74rem;color:var(--muted)">CRM · Ventas · GE Broker</div>
+            </div>
+            <span class="badge badge-muted">Próximamente</span>
+          </div>
+          <div class="agent-body">
+            <div class="placeholder-block" style="padding:20px;">
+              <div class="ph-icon">🧠</div>
+              <h3>En Desarrollo</h3>
+              <p style="font-size:.8rem;margin-top:4px;">CRM de leads, pipeline de propiedades y automatización de ventas para Gringo Estate.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONFIG EDITOR -->
+        <div class="agent-card" style="opacity:.5;">
+          <div class="agent-header">
+            <div>
+              <div class="agent-name" style="color:var(--muted)">CONFIG</div>
+              <div style="font-size:.74rem;color:var(--muted)">Editor · Prompt · system.md</div>
+            </div>
+            <span class="badge badge-muted">Fase 2</span>
+          </div>
+          <div class="agent-body">
+            <div class="placeholder-block" style="padding:18px;">
+              <div class="ph-icon" style="font-size:1.6rem;">⚙️</div>
+              <h3 style="font-size:1rem;">Editor Próximamente</h3>
+              <p style="font-size:.78rem;margin-top:4px;">Editor de
+                <code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;">agent.config.json</code> y
+                <code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;">prompts/system.md</code> por agente.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════════════ AMBBI ════════════════ -->
+    <div class="view" id="view-ambbi">
+      <div class="section-head">
+        <h1>AMBBI</h1>
+        <span class="badge badge-gold">Operaciones</span>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" onclick="ambiTab('tareas')">Tareas</button>
+        <button class="sub-tab" onclick="ambiTab('huespedes')">Huéspedes</button>
+        <button class="sub-tab" onclick="ambiTab('ocupacion')">Ocupación por Unidad</button>
+      </div>
+
+      <!-- TAREAS -->
+      <div class="sub-view active" id="at-tareas">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" onclick="filterTasks('all')">Todas</button>
+            <button class="btn btn-ghost btn-sm" onclick="filterTasks('urgente')">Urgentes</button>
+            <button class="btn btn-ghost btn-sm" onclick="filterTasks('delegado')">Delegadas</button>
+          </div>
+          <button class="btn btn-gold btn-sm" onclick="showModal('modal-task')">+ Nueva tarea</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table class="data-table">
+            <thead><tr>
+              <th>Título</th><th>Responsable</th><th>Estado</th><th>Prioridad</th><th>Área</th>
+            </tr></thead>
+            <tbody id="tasks-body">
+              <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- HUÉSPEDES -->
+      <div class="sub-view" id="at-huespedes">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div class="stats-row">
+            <div class="stat-item"><span>Total DB</span><strong id="h-total">—</strong></div>
+            <div class="stat-item"><span>Con email</span><strong id="h-email">—</strong></div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadGuests()">↻ Cargar</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table class="data-table">
+            <thead><tr>
+              <th>Nombre</th><th>Teléfono</th><th>Email</th><th>Unidad</th><th>Plataforma</th><th>Último contacto</th>
+            </tr></thead>
+            <tbody id="guests-body">
+              <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Presioná "Cargar" para ver huéspedes</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- OCUPACIÓN POR UNIDAD -->
+      <div class="sub-view" id="at-ocupacion">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-size:.72rem;color:var(--muted);">Fuente: iCal · calendarios de Airbnb / Booking</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadAmbiOcup()">↻</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table class="data-table">
+            <thead><tr>
+              <th>Unidad</th><th>Alias</th><th>Noches</th><th>Ocupación</th><th>Próx. reserva</th>
+            </tr></thead>
+            <tbody id="ambbi-ocup-body">
+              <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ GE BROKER ════════════════ -->
+    <div class="view" id="view-gebroker">
+      <div class="section-head">
+        <h1>GE BROKER</h1>
+        <span class="badge badge-gold">Pipeline Activo</span>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <button class="btn btn-gold btn-sm" onclick="showModal('modal-prop')">+ Nueva propiedad</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:18px;">
+        <table class="data-table">
+          <thead><tr>
+            <th>Dirección</th><th>Tipo</th><th>Estado</th><th>Precio</th><th>Propietario</th><th>Fecha</th><th></th>
+          </tr></thead>
+          <tbody id="props-body">
+            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">Pipeline vacío — agregá la primera propiedad</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Leonardo CRM</div><span class="badge badge-muted">Próximamente</span></div>
+        <div class="placeholder-block" style="padding:18px;">
+          <div class="ph-icon">📊</div>
+          <h3>CRM de Leads</h3>
+          <p style="font-size:.82rem;">Gestión de leads, seguimiento de compradores y automatización de ventas vía Leonardo.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ SMART HOME ════════════════ -->
+    <div class="view" id="view-smarthome">
+      <div class="section-head">
+        <h1>SMART HOME</h1>
+        <span class="badge badge-muted" id="hue-badge">Sin configurar</span>
+      </div>
+      <div class="stack">
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title">Philips Hue</div><div class="card-sub" id="hue-sub">Cargando estado…</div></div>
+          </div>
+          <div id="hue-lights" class="docker-grid"></div>
+          <div id="hue-setup" class="placeholder-block" style="display:none;">
+            <div class="ph-icon">💡</div>
+            <h3>Conectar Philips Hue</h3>
+            <p style="font-size:.82rem;margin-top:4px;">Configurá
+              <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:6px;">HUE_BRIDGE_IP</code> y
+              <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:6px;">HUE_USERNAME</code>
+              en <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:6px;">wispy-stack/.env</code> y rebuild del bridge.
+            </p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="placeholder-block">
+            <div class="ph-icon">🏠</div>
+            <h3>Google Home</h3>
+            <p style="font-size:.8rem;">OAuth pendiente de configuración</p>
+          </div>
+          <div class="placeholder-block">
+            <div class="ph-icon">📷</div>
+            <h3>Xiaomi / Mi Home</h3>
+            <p style="font-size:.8rem;">Token de cámara pendiente</p>
+          </div>
+          <div class="placeholder-block">
+            <div class="ph-icon">⚡</div>
+            <h3>Samsung SmartLife</h3>
+            <p style="font-size:.8rem;">App key pendiente</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ CANARIAN ════════════════ -->
+    <div class="view" id="view-canarian">
+      <div class="section-head">
+        <h1>CANARIAN</h1>
+        <span class="badge badge-gold">Confidencial · LLC Wyoming</span>
+      </div>
+
+      <!-- PIN LOCK -->
+      <div id="canarian-lock">
+        <div class="lock-card">
+          <div class="lock-icon">🔒</div>
+          <h2>Canarian Finance</h2>
+          <p>Ingresá tu PIN para acceder al ledger confidencial</p>
+          <input class="pin-input" id="pin-input" type="password" inputmode="numeric" maxlength="8"
+            placeholder="••••" onkeydown="if(event.key==='Enter')unlockCanarian()">
+          <div class="pin-error" id="pin-error"></div>
+          <button class="btn btn-gold" style="width:100%;margin-top:16px;" onclick="unlockCanarian()">Acceder</button>
+        </div>
+      </div>
+
+      <!-- LEDGER (hidden until unlocked) -->
+      <div id="canarian-content" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <div class="stats-row">
+            <div class="stat-item"><span>Balance USDT</span><strong id="c-usdt" style="color:var(--ok)">$0</strong></div>
+            <div class="stat-item"><span>Balance USD</span><strong id="c-usd">$0</strong></div>
+            <div class="stat-item"><span>Balance ARS</span><strong id="c-ars">$0</strong></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-gold btn-sm" onclick="showModal('modal-canarian')">+ Movimiento</button>
+            <button class="btn btn-danger btn-sm" onclick="lockCanarian()">🔒 Bloquear</button>
+          </div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table class="data-table">
+            <thead><tr>
+              <th>Fecha</th><th>Tipo</th><th>Monto</th><th>Moneda</th><th>Contraparte</th><th>Nota</th><th></th>
+            </tr></thead>
+            <tbody id="ledger-body">
+              <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">Sin movimientos registrados</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:10px;">
+          Auto-bloqueo en <span id="lock-timer">5:00</span> min · PIN nunca expuesto en logs ni grupos de WA
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ════════ MODALES ════════════════════════════════════════════════ -->
+
+<!-- Modal nueva tarea -->
+<div class="modal-overlay hidden" id="modal-task">
+  <div class="modal">
+    <h3>Nueva Tarea</h3>
+    <div class="stack">
+      <input class="input" id="t-title" placeholder="Título de la tarea">
+      <div class="grid-2">
+        <select class="input" id="t-responsable">
+          <option value="">Responsable…</option>
+          <option>Pamela</option><option>Augusto</option>
+          <option>Marcelo</option><option>Franco</option>
+        </select>
+        <select class="input" id="t-area">
+          <option value="">Área…</option>
+          <option>Ambbi</option><option>Mantenimiento</option>
+          <option>Limpieza</option><option>Administración</option><option>GE</option>
+        </select>
+      </div>
+      <select class="input" id="t-prioridad">
+        <option value="Media">Prioridad Media</option>
+        <option value="Alta">Alta</option>
+        <option value="Baja">Baja</option>
+        <option value="Urgente">Urgente</option>
+      </select>
+      <textarea class="input" id="t-notas" placeholder="Notas adicionales…" style="min-height:60px;"></textarea>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="hideModal('modal-task')">Cancelar</button>
+        <button class="btn btn-gold" onclick="createTask()">Crear + Notificar WA</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal nueva propiedad -->
+<div class="modal-overlay hidden" id="modal-prop">
+  <div class="modal">
+    <h3>Nueva Propiedad</h3>
+    <div class="stack">
+      <input class="input" id="p-address" placeholder="Dirección completa">
+      <div class="grid-2">
+        <select class="input" id="p-type">
+          <option>Departamento</option><option>PH</option>
+          <option>Casa</option><option>Local</option><option>Edificio</option>
+        </select>
+        <select class="input" id="p-status">
+          <option>Captación</option><option>En cartera</option>
+          <option>En proceso</option><option>Cerrado</option>
+        </select>
+      </div>
+      <input class="input" id="p-price" placeholder="Precio (USD)">
+      <input class="input" id="p-contact" placeholder="Propietario / Contacto">
+      <textarea class="input" id="p-notes" placeholder="Notas…" style="min-height:60px;"></textarea>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="hideModal('modal-prop')">Cancelar</button>
+        <button class="btn btn-gold" onclick="createProperty()">Agregar al pipeline</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal movimiento Canarian -->
+<div class="modal-overlay hidden" id="modal-canarian">
+  <div class="modal">
+    <h3>Nuevo Movimiento</h3>
+    <div class="stack">
+      <div class="grid-2">
+        <input class="input" id="c-fecha" type="date">
+        <select class="input" id="c-tipo">
+          <option value="ingreso_usdt">Ingreso USDT</option>
+          <option value="egreso_usdt">Egreso USDT</option>
+          <option value="ingreso_usd">Ingreso USD</option>
+          <option value="egreso_usd">Egreso USD</option>
+          <option value="ingreso_ars">Ingreso ARS</option>
+          <option value="egreso_ars">Egreso ARS</option>
+          <option value="comision">Comisión</option>
+          <option value="wire">Wire transfer</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <input class="input" id="c-monto" type="number" placeholder="Monto">
+        <select class="input" id="c-moneda">
+          <option>USDT</option><option>USD</option><option>ARS</option>
+        </select>
+      </div>
+      <input class="input" id="c-contraparte" placeholder="Contraparte (nombre / alias)">
+      <textarea class="input" id="c-nota" placeholder="Nota…" style="min-height:60px;"></textarea>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="hideModal('modal-canarian')">Cancelar</button>
+        <button class="btn btn-gold" onclick="createLedgerEntry()">Registrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Scripts -->
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

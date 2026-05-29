@@ -1,328 +1,1018 @@
-/* Gringo Office Pixel — oficina en Canvas 2D + overlay Home (Fase 1).
- * Sin dependencias externas. Look pixel via image-rendering:pixelated + dibujo blocky.
- * Agentes: Wispy (oro), Bambi (teal), Leonardo (gris, "Próximamente").
- * Puertas: Home (default), AMBBI, GE Broker, Smart Home, Canarian (candado). */
+/* Gringo Office Pixel — SPA futurista (S19 rewrite)
+ * Reemplaza el Canvas/pixel lobby. Diseño: oro/negro glassmorphism.
+ * Usa window.GO de api.js (apiFetch, prom, promAll, isLocal).
+ * Sin dependencias externas — gauges dibujados con Canvas 2D nativo.
+ * CSP-safe: sin cdn.jsdelivr.net, sin chart.js, connect-src same-origin.
+ */
 (function () {
   'use strict';
-  const { apiFetch, prom } = window.GO;
-  const cv = document.getElementById('office');
-  const ctx = cv.getContext('2d');
-  const overlay = document.getElementById('overlay');
-  const oTitle = document.getElementById('overlay-title');
-  const oBody = document.getElementById('overlay-body');
-  document.getElementById('overlay-close').onclick = closeOverlay;
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeOverlay(); });
 
-  // ---- Paletas pixel de personajes ----
-  const PAL = {
-    wispy:    { skin:'#e7c9a0', hair:'#3a2c1a', body:'#d4a640', body2:'#b6892f' },
-    bambi:    { skin:'#e7c9a0', hair:'#2a1d12', body:'#3aa0a0', body2:'#2c7d7d' },
-    leonardo: { skin:'#9a9a9a', hair:'#5a5a5a', body:'#6a6a6a', body2:'#525252' }
+  const { apiFetch, prom, promAll } = window.GO;
+
+  /* ─── STATE ────────────────────────────────────────────────────── */
+  let canarianPin = null;
+  let lockTimer   = null;
+  let lockSecondsLeft = 300;
+  let allTasks    = [];
+  let profitData  = null;       // cached profitability response
+  let occupancyData = null;     // cached occupancy response
+
+  /* ─── CLOCK ────────────────────────────────────────────────────── */
+  function tick() {
+    const now = new Date();
+    const arg = now.toLocaleString('es-AR', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+    var el = document.getElementById('sys-clock');
+    if (el) el.textContent = 'ARG ' + arg;
+    var dateEl = document.getElementById('home-date');
+    if (dateEl) dateEl.textContent = now.toLocaleDateString('es-AR', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      weekday: 'short', day: 'numeric', month: 'short'
+    });
+  }
+  setInterval(tick, 1000);
+  tick();
+
+  /* ─── TOAST ────────────────────────────────────────────────────── */
+  function toast(msg, type) {
+    type = type || 'ok';
+    var t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.className = 'show ' + type;
+    setTimeout(function () { t.className = ''; }, 3200);
+  }
+
+  /* ─── MODAL ────────────────────────────────────────────────────── */
+  function showModal(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('hidden');
+  }
+  function hideModal(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay').forEach(function (m) {
+        m.classList.add('hidden');
+      });
+    }
+  });
+  // expose for inline onclick
+  window.showModal = showModal;
+  window.hideModal = hideModal;
+  window.toast = toast;
+
+  /* ─── NAVIGATION ────────────────────────────────────────────────── */
+  function nav(section) {
+    document.querySelectorAll('.view').forEach(function (v) { v.classList.remove('active'); });
+    document.querySelectorAll('.nav-btn').forEach(function (b) { b.classList.remove('active'); });
+    var view = document.getElementById('view-' + section);
+    if (view) view.classList.add('active');
+    var btn  = document.getElementById('nav-' + section);
+    if (btn)  btn.classList.add('active');
+
+    if (section === 'home')      { loadHome(); }
+    if (section === 'agentes')   { loadWispy(); loadBambi(); }
+    if (section === 'ambbi')     { loadTasks(); }
+    if (section === 'gebroker')  { loadProperties(); }
+    if (section === 'smarthome') { loadHue(); }
+    if (section === 'canarian')  { checkCanaSession(); }
+  }
+  window.nav = nav;
+
+  /* ─── GAUGE (native Canvas 2D) ──────────────────────────────────
+   * Draws a semi-circle arc gauge (left to right, bottom pivot).
+   * pct: 0–100, color: stroke color string.
+   */
+  function drawGauge(canvasId, pct, color) {
+    var canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width;
+    var H = canvas.height;
+    var cx = W / 2;
+    var cy = H * 0.72;
+    var r  = W * 0.38;
+    var startAngle = Math.PI;          // left (180°)
+    var endAngle   = 2 * Math.PI;     // right (360°)
+    var fillAngle  = startAngle + (Math.PI * Math.min(Math.max(pct, 0), 100) / 100);
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Track
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, startAngle, endAngle);
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 10;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // Fill
+    if (pct > 0) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, startAngle, fillAngle);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 10;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // Glow
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, startAngle, fillAngle);
+      ctx.strokeStyle = color.replace(')', ', 0.3)').replace('rgb(', 'rgba(').replace('#', '');
+      // fallback: just shadow
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 12;
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  // Color by threshold
+  function gaugeColor(pct) {
+    if (pct >= 85) return '#ff7b7b';   // danger
+    if (pct >= 65) return '#ffbb55';   // warn
+    return '#4dde95';                   // ok
+  }
+  // Occupancy and cache use gold
+  function gaugeColorAccent(pct) {
+    return '#d4a640';
+  }
+
+  function setGauge(id, valId, pct, label, accentMode) {
+    var color = accentMode ? gaugeColorAccent(pct) : gaugeColor(pct);
+    drawGauge(id, pct, color);
+    var el = document.getElementById(valId);
+    if (el) {
+      el.textContent = (pct !== null && pct !== undefined) ? Math.round(pct) + '%' : '—';
+      el.style.color = (pct !== null) ? color : 'var(--muted)';
+    }
+  }
+
+  /* ─── LOAD HOME (orchestrates all home loaders) ─────────────────── */
+  function loadHome() {
+    loadSystemBar();
+    loadGauges();
+    loadProfitability();
+    loadOccupancy();
+    loadDocker();
+  }
+  window.loadHome = loadHome;
+
+  /* ─── SYSTEM BAR ─────────────────────────────────────────────────── */
+  async function loadSystemBar() {
+    // Gateway / sessions from Prometheus
+    var [gwOnline, sessActive, docker] = await Promise.all([
+      prom('wispy_gateway_online'),
+      prom('wispy_sessions_active'),
+      apiFetch('/docker')
+    ]);
+
+    // Gateway status
+    var sbGw = document.getElementById('sb-gateway');
+    if (sbGw) {
+      var gwOk = gwOnline === 1;
+      sbGw.innerHTML = '<span class="dot ' + (gwOk ? 'ok' : 'err') + '"></span>' + (gwOk ? 'Online' : 'Offline');
+    }
+    var kpiGw = document.getElementById('kpi-gateway');
+    if (kpiGw) kpiGw.textContent = gwOnline === 1 ? 'Online' : (gwOnline === null ? '—' : 'Offline');
+    var kpiSess = document.getElementById('kpi-sessions');
+    if (kpiSess) kpiSess.textContent = 'sesiones: ' + (sessActive !== null ? sessActive : '—');
+    var sbSess = document.getElementById('sb-sessions');
+    if (sbSess) sbSess.textContent = sessActive !== null ? sessActive : '—';
+
+    // Docker
+    if (docker && (docker.summary || docker.containers)) {
+      var running = docker.summary ? docker.summary.running
+        : docker.containers.filter(function (c) { return (c.status || '').toLowerCase().includes('up'); }).length;
+      var total = docker.summary ? docker.summary.total : docker.containers.length;
+      var sbDock = document.getElementById('sb-docker');
+      if (sbDock) sbDock.innerHTML = '<span class="dot ' + (running === total ? 'ok' : 'warn') + '"></span>' + running + '/' + total;
+      var kpiDock = document.getElementById('kpi-docker');
+      if (kpiDock) kpiDock.textContent = running + ' / ' + total;
+    }
+
+    // Tokens + cost from Prometheus
+    var [tokens, cost] = await Promise.all([
+      prom('wispy_current_session_tokens{kind="total"}'),
+      prom('wispy_current_session_cost_usd')
+    ]);
+    var kpiTok = document.getElementById('kpi-tokens');
+    if (kpiTok) kpiTok.textContent = tokens !== null ? Math.round(tokens).toLocaleString('es-AR') : '—';
+    var kpiCost = document.getElementById('kpi-cost');
+    if (kpiCost) kpiCost.textContent = cost !== null ? '$' + parseFloat(cost).toFixed(4) : '$—';
+  }
+
+  /* ─── GAUGES ─────────────────────────────────────────────────────── */
+  async function loadGauges() {
+    var [cpu, ramAvail, ramTotal, diskAvail, diskTotal, cache] = await Promise.all([
+      prom('100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)'),
+      prom('node_memory_MemAvailable_bytes'),
+      prom('node_memory_MemTotal_bytes'),
+      prom('node_filesystem_avail_bytes{mountpoint="/"}'),
+      prom('node_filesystem_size_bytes{mountpoint="/"}'),
+      prom('wispy_cache_efficiency_percent')
+    ]);
+
+    var ramPct  = (ramAvail !== null && ramTotal) ? (100 * (1 - ramAvail / ramTotal)) : null;
+    var diskPct = (diskAvail !== null && diskTotal) ? (100 - diskAvail * 100 / diskTotal) : null;
+
+    setGauge('g-cpu',   'gv-cpu',   cpu,     'CPU');
+    setGauge('g-ram',   'gv-ram',   ramPct,  'RAM');
+    setGauge('g-disk',  'gv-disk',  diskPct, 'Disco');
+    setGauge('g-cache', 'gv-cache', cache,   'Cache',  true);
+
+    // Occupancy gauge uses cached data if available, otherwise fetch
+    if (occupancyData) {
+      var ocupPct = occupancyData.occupancyPct !== undefined
+        ? occupancyData.occupancyPct * 100
+        : (occupancyData.occupancy30d || null);
+      setGauge('g-ocup', 'gv-ocup', ocupPct, 'Ocup', true);
+    } else {
+      var oData = await apiFetch('/occupancy?days=30&company=all');
+      if (oData && !oData.__error) {
+        occupancyData = oData;
+        var pctVal = oData.occupancyPct !== undefined
+          ? oData.occupancyPct * 100
+          : (oData.occupancy30d || null);
+        setGauge('g-ocup', 'gv-ocup', pctVal, 'Ocup', true);
+        // update KPI bar
+        var sbOcup = document.getElementById('sb-ocup');
+        if (sbOcup && pctVal !== null) sbOcup.textContent = Math.round(pctVal) + '%';
+        var kpiOcup = document.getElementById('kpi-ocup');
+        if (kpiOcup && pctVal !== null) kpiOcup.textContent = Math.round(pctVal) + '%';
+      } else {
+        setGauge('g-ocup', 'gv-ocup', null, 'Ocup', true);
+      }
+    }
+  }
+  window.loadGauges = loadGauges;
+
+  /* ─── DOCKER ─────────────────────────────────────────────────────── */
+  async function loadDocker() {
+    var d = await apiFetch('/docker');
+    var grid = document.getElementById('docker-grid');
+    if (!grid) return;
+    if (!d || !d.containers) {
+      grid.innerHTML = '<span style="color:var(--muted);font-size:.82rem;">Sin datos de Docker</span>';
+      return;
+    }
+    var containers = d.containers;
+    var running = containers.filter(function (c) { return (c.status || '').toLowerCase().includes('up'); }).length;
+
+    // Update KPIs
+    var kpiDock = document.getElementById('kpi-docker');
+    if (kpiDock) kpiDock.textContent = running + ' / ' + containers.length;
+    var sbDock = document.getElementById('sb-docker');
+    if (sbDock) sbDock.innerHTML = '<span class="dot ' + (running === containers.length ? 'ok' : 'warn') + '"></span>' + running + '/' + containers.length + ' UP';
+
+    grid.innerHTML = containers.map(function (c) {
+      var ok = (c.status || '').toLowerCase().includes('up');
+      return '<div class="docker-item">' +
+        '<div class="d-name"><span class="dot ' + (ok ? 'ok' : 'err') + '"></span>' + escHtml(c.name || '—') + '</div>' +
+        '<div class="d-status" style="color:' + (ok ? 'var(--ok)' : 'var(--danger)') + '">' +
+        escHtml((c.status || '—').split(' ').slice(0, 3).join(' ')) + '</div>' +
+        '</div>';
+    }).join('');
+  }
+  window.loadDocker = loadDocker;
+
+  /* ─── PROFITABILITY ──────────────────────────────────────────────── */
+  async function loadProfitability() {
+    var d = await apiFetch('/business/profitability?empresa=all');
+    var grid = document.getElementById('profit-grid');
+    var periodEl = document.getElementById('profit-period');
+    if (!d || d.__error || !d.companies) {
+      if (grid) grid.innerHTML = '<span style="color:var(--muted);font-size:.82rem;">Sin datos de rentabilidad — ejecutá el snapshot CFO.</span>';
+      return;
+    }
+    profitData = d;
+
+    // Period label
+    var ambbi = d.companies.Ambbi || {};
+    var metro = d.companies.Metropolitan || {};
+    if (periodEl) {
+      var mes  = ambbi.mes  || metro.mes  || '—';
+      var anio = ambbi.anio || metro.anio || '';
+      periodEl.textContent = mes + ' ' + anio;
+    }
+
+    // Update sidebar KPIs
+    function fmtMargen(v) {
+      if (v === null || v === undefined) return '—';
+      // ratio <= 1 means it's a decimal fraction
+      var pct = Math.abs(v) <= 1 ? (v * 100) : v;
+      return (pct >= 0 ? '' : '') + Math.round(pct) + '%';
+    }
+    function fmtUSD(v) {
+      if (v === null || v === undefined) return '—';
+      return '$' + parseFloat(v).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+    function colorMargen(v) {
+      if (v === null || v === undefined) return 'var(--muted)';
+      var pct = Math.abs(v) <= 1 ? (v * 100) : v;
+      return pct >= 15 ? 'var(--ok)' : pct >= 0 ? 'var(--warn)' : 'var(--danger)';
+    }
+
+    var kpiMA = document.getElementById('kpi-margen-ambbi');
+    if (kpiMA) { kpiMA.textContent = fmtMargen(ambbi.margenPct); kpiMA.style.color = colorMargen(ambbi.margenPct); }
+    var kpiIA = document.getElementById('kpi-ingresos-ambbi');
+    if (kpiIA) kpiIA.textContent = 'ingresos: ' + fmtUSD(ambbi.ingresosUSD);
+
+    var kpiMM = document.getElementById('kpi-margen-metro');
+    if (kpiMM) { kpiMM.textContent = fmtMargen(metro.margenPct); kpiMM.style.color = colorMargen(metro.margenPct); }
+    var kpiIM = document.getElementById('kpi-ingresos-metro');
+    if (kpiIM) kpiIM.textContent = 'ingresos: ' + fmtUSD(metro.ingresosUSD);
+
+    // Render company cards
+    if (grid) {
+      grid.innerHTML = '';
+
+      // Ambbi card
+      grid.innerHTML += buildProfitCard('AMBBI', ambbi, '#d4a640', 'card-gold', fmtUSD, fmtMargen, colorMargen);
+      // Metropolitan card
+      grid.innerHTML += buildProfitCard('METROPOLITAN', metro, '#7ec8e3', 'card-metro', fmtUSD, fmtMargen, colorMargen);
+    }
+
+    // Render unit breakdowns
+    var unitsWrap = document.getElementById('profit-units-wrap');
+    if (unitsWrap) {
+      var hasUnits = d.byUnit && (d.byUnit.Ambbi || d.byUnit.Metropolitan);
+      if (hasUnits) {
+        unitsWrap.style.display = '';
+        renderUnitTable('pv-ambbi', d.byUnit.Ambbi || [], '#d4a640', fmtUSD);
+        renderUnitTable('pv-metro', d.byUnit.Metropolitan || [], '#7ec8e3', fmtUSD);
+      }
+    }
+  }
+  window.loadProfitability = loadProfitability;
+
+  function buildProfitCard(label, co, accent, cardClass, fmtUSD, fmtMargen, colorMargen) {
+    var margenPct = co.margenPct !== undefined ? co.margenPct : null;
+    var margenV = margenPct !== null && Math.abs(margenPct) <= 1 ? margenPct * 100 : margenPct;
+    var ebitdaSign = (co.ebitdaUSD || 0) >= 0 ? '' : '-';
+    return '<div class="card ' + cardClass + '">' +
+      '<div class="card-head" style="margin-bottom:10px;">' +
+      '<div class="card-title" style="color:' + accent + '">' + label + '</div>' +
+      '<span class="badge" style="background:' + accent + '18;color:' + accent + ';border:1px solid ' + accent + '30;font-size:.68rem;">' +
+        (co.nUnidActivas || 0) + ' unidades</span>' +
+      '</div>' +
+      '<div class="profit-kpi-row">' +
+        kpiBox('Ingresos', fmtUSD(co.ingresosUSD), 'neutral', accent) +
+        kpiBox('EBITDA', fmtUSD(co.ebitdaUSD), (co.ebitdaUSD || 0) >= 0 ? 'pos' : 'neg', accent) +
+        kpiBox('Margen', fmtMargen(margenPct), margenV >= 15 ? 'pos' : margenV >= 0 ? 'neutral' : 'neg', accent) +
+      '</div>' +
+      '<div class="profit-kpi-row">' +
+        kpiBox('ADR', fmtUSD(co.adrUSD), 'neutral', accent) +
+        kpiBox('RevPAR', fmtUSD(co.revparUSD), 'neutral', accent) +
+        kpiBox('Ocup.', co.ocupacionPct !== undefined ? (co.ocupacionPct <= 1 ? Math.round(co.ocupacionPct * 100) : Math.round(co.ocupacionPct)) + '%' : '—', 'neutral', accent) +
+      '</div>' +
+      '<div style="font-size:.72rem;color:var(--muted);margin-top:4px;">' +
+        (co.nReservas || 0) + ' reservas · período: ' + (co.mes || '—') + ' ' + (co.anio || '') +
+      '</div>' +
+    '</div>';
+  }
+
+  function kpiBox(label, value, cls, accent) {
+    return '<div class="profit-kpi ' + cls + '">' +
+      '<span>' + label + '</span>' +
+      '<strong>' + (value || '—') + '</strong>' +
+    '</div>';
+  }
+
+  function renderUnitTable(containerId, units, accent, fmtUSD) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    if (!units || !units.length) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:.82rem;padding:10px;">Sin datos por unidad</div>';
+      return;
+    }
+    // Sort by revenue descending
+    var sorted = units.slice().sort(function (a, b) { return (b.ingresosUSD || 0) - (a.ingresosUSD || 0); });
+    var maxIng = sorted[0] ? (sorted[0].ingresosUSD || 1) : 1;
+
+    el.innerHTML = '<div style="display:grid;gap:6px;margin-top:4px;">' +
+      sorted.map(function (u) {
+        var barPct = maxIng ? Math.round((u.ingresosUSD || 0) * 100 / maxIng) : 0;
+        var resSign = (u.resultadoUSD || 0) >= 0;
+        return '<div class="unit-row">' +
+          '<span style="min-width:90px;font-size:.78rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + escHtml(u.nombre || u.unidad || '') + '">' +
+            escHtml(u.nombre || u.unidad || '—') + '</span>' +
+          '<div class="unit-bar-track"><div class="unit-bar-fill" style="width:' + barPct + '%;background:' + accent + ';opacity:.7;"></div></div>' +
+          '<span style="font-family:var(--mono);font-size:.74rem;min-width:60px;text-align:right;">' + fmtUSD(u.ingresosUSD) + '</span>' +
+          '<span style="font-size:.74rem;min-width:56px;text-align:right;color:' + (resSign ? 'var(--ok)' : 'var(--danger)') + ';">' +
+            fmtUSD(u.resultadoUSD) + '</span>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  function profitTab(which) {
+    var tabs = document.querySelectorAll('#profit-units-wrap .sub-tab');
+    var views = document.querySelectorAll('#profit-units-wrap .sub-view');
+    tabs.forEach(function (t) { t.classList.remove('active'); });
+    views.forEach(function (v) { v.classList.remove('active'); });
+    var targetView = document.getElementById('pv-' + which);
+    if (targetView) targetView.classList.add('active');
+    // activate matching tab
+    tabs.forEach(function (t) {
+      if (t.getAttribute('onclick') && t.getAttribute('onclick').includes(which)) t.classList.add('active');
+    });
+  }
+  window.profitTab = profitTab;
+
+  /* ─── OCCUPANCY ──────────────────────────────────────────────────── */
+  async function loadOccupancy() {
+    var d = await apiFetch('/occupancy?days=30&company=all');
+    if (!d || d.__error) {
+      var el = document.getElementById('ocup-detail');
+      if (el) el.innerHTML = '<span style="color:var(--muted);">Sin datos de ocupación</span>';
+      return;
+    }
+    occupancyData = d;
+
+    var pct = d.occupancyPct !== undefined
+      ? (d.occupancyPct <= 1 ? d.occupancyPct * 100 : d.occupancyPct)
+      : (d.occupancy30d || null);
+
+    // System bar + KPI
+    var sbOcup = document.getElementById('sb-ocup');
+    if (sbOcup && pct !== null) sbOcup.textContent = Math.round(pct) + '%';
+    var kpiOcup = document.getElementById('kpi-ocup');
+    if (kpiOcup && pct !== null) kpiOcup.textContent = Math.round(pct) + '%';
+
+    // Gauge update
+    setGauge('g-ocup', 'gv-ocup', pct, 'Ocup', true);
+
+    // Detail card
+    var detailEl = document.getElementById('ocup-detail');
+    if (detailEl) {
+      detailEl.innerHTML =
+        '<div class="stats-row" style="margin-bottom:12px;">' +
+        '<div class="stat-item"><span>Ocupación 30d</span><strong style="color:var(--gold)">' + (pct !== null ? Math.round(pct) + '%' : '—') + '</strong></div>' +
+        '<div class="stat-item"><span>Noches ocupadas</span><strong>' + (d.busyNights != null ? d.busyNights : '—') + '</strong></div>' +
+        '<div class="stat-item"><span>Unidades</span><strong>' + (d.unitsCounted != null ? d.unitsCounted : '—') + '</strong></div>' +
+        '</div>' +
+        '<div style="font-size:.72rem;color:var(--muted);">Distinto a rentabilidad contable (CFO). Fuente: iCal Airbnb / Booking.</div>';
+    }
+
+    // Upcoming reservations
+    var upcoming = d.upcoming || [];
+    var upEl = document.getElementById('upcoming-list');
+    if (upEl) {
+      if (!upcoming.length) {
+        upEl.innerHTML = '<div style="color:var(--muted);font-size:.82rem;">Sin reservas próximas</div>';
+      } else {
+        upEl.innerHTML = upcoming.slice(0, 8).map(function (r) {
+          var startDate = r.start ? new Date(r.start).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' }) : '—';
+          var endDate   = r.end   ? new Date(r.end).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' }) : '—';
+          return '<div class="reserva-item">' +
+            '<span class="reserva-alias">' + escHtml(r.alias || r.id || '—') + '</span>' +
+            '<span class="reserva-dates">' + startDate + ' → ' + endDate + '</span>' +
+            '<span class="reserva-nights">' + (r.nights || '—') + 'n</span>' +
+            '</div>';
+        }).join('');
+      }
+    }
+  }
+  window.loadOccupancy = loadOccupancy;
+
+  /* ─── WISPY STATUS ───────────────────────────────────────────────── */
+  async function loadWispy() {
+    var d = await apiFetch('/wispy/status');
+    if (!d || d.__error) {
+      var badge = document.getElementById('wispy-wa-badge');
+      if (badge) { badge.textContent = 'Sin datos'; badge.className = 'badge badge-muted'; }
+      return;
+    }
+    var ok = d.wa_status === 'WORKING';
+    var badge = document.getElementById('wispy-wa-badge');
+    if (badge) {
+      badge.textContent = d.wa_status || '—';
+      badge.className = 'badge ' + (ok ? 'badge-ok' : 'badge-warn');
+    }
+    var wModel = document.getElementById('w-model');
+    if (wModel) wModel.textContent = d.model || '—';
+    var wWa = document.getElementById('w-wa');
+    if (wWa) {
+      wWa.textContent = d.wa_status || '—';
+      wWa.style.color = ok ? 'var(--ok)' : 'var(--warn)';
+    }
+    // Update system bar gateway dot
+    var sbGw = document.getElementById('sb-gateway');
+    if (sbGw) sbGw.innerHTML = '<span class="dot ' + (ok ? 'ok' : 'warn') + '"></span>' + (d.wa_status || '—');
+  }
+  window.loadWispy = loadWispy;
+
+  /* ─── BAMBI STATUS ───────────────────────────────────────────────── */
+  async function loadBambi() {
+    // Bambi container was removed; the gringo_agents runtime replaced it.
+    // Try the endpoint gracefully and show appropriate message.
+    var d = await apiFetch('/bambi/api/mode');
+    var badge = document.getElementById('bambi-status-badge');
+    if (!d || d.__error) {
+      if (badge) { badge.textContent = 'Runtime unificado'; badge.className = 'badge badge-warn'; }
+      return;
+    }
+    if (badge) {
+      badge.textContent = (d.mode || 'unknown').toUpperCase();
+      badge.className = 'badge ' + (d.mode === 'live' ? 'badge-ok' : 'badge-warn');
+    }
+    // If live data is available, show it
+    var liveWrap = document.getElementById('bambi-live-wrap');
+    var statsRow = document.getElementById('bambi-stats-row');
+    if (liveWrap && statsRow && d.mode) {
+      liveWrap.style.display = '';
+      statsRow.innerHTML =
+        '<div class="stat-item"><span>Modo</span><strong style="color:' + (d.mode === 'live' ? 'var(--ok)' : 'var(--warn)') + '">' + (d.mode || '—').toUpperCase() + '</strong></div>' +
+        '<div class="stat-item"><span>Kill switch</span><strong>' + (d.kill ? '🔴 ON' : '🟢 OFF') + '</strong></div>';
+    }
+  }
+  window.loadBambi = loadBambi;
+
+  /* ─── TASKS ──────────────────────────────────────────────────────── */
+  async function loadTasks() {
+    var d = await apiFetch('/tasks');
+    allTasks = (d && d.all) ? d.all : [];
+    renderTasks(allTasks);
+  }
+  window.loadTasks = loadTasks;
+
+  function renderTasks(tasks) {
+    var colorMap = { Pamela: '#d4a640', Augusto: '#4dde95', Marcelo: '#5b9cf6', Franco: '#ff7b7b' };
+    var prioColor = { Urgente: 'var(--danger)', Alta: 'var(--warn)', Media: 'var(--ok)', Baja: 'var(--muted)' };
+    var body = document.getElementById('tasks-body');
+    if (!body) return;
+    if (!tasks || !tasks.length) {
+      body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">Sin tareas</td></tr>';
+      return;
+    }
+    body.innerHTML = tasks.slice(0, 40).map(function (t) {
+      var r  = t.responsable || '—';
+      var col = colorMap[r] || 'var(--muted)';
+      var pc  = prioColor[t.priority] || prioColor[t.prioridad] || 'var(--muted)';
+      var prio = t.priority || t.prioridad || '—';
+      return '<tr>' +
+        '<td style="font-weight:600;">' + escHtml(t.title || '—') + '</td>' +
+        '<td><span style="background:' + col + '22;color:' + col + ';padding:2px 8px;border-radius:8px;font-size:.76rem;font-weight:700;">' + escHtml(r) + '</span></td>' +
+        '<td><span style="color:var(--muted);font-size:.78rem;">' + escHtml(t.status || '—') + '</span></td>' +
+        '<td><span style="color:' + pc + ';font-size:.78rem;font-weight:700;">' + escHtml(prio) + '</span></td>' +
+        '<td style="color:var(--muted);font-size:.78rem;">' + escHtml(t.area || '—') + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function filterTasks(f) {
+    if (f === 'all') return renderTasks(allTasks);
+    renderTasks(allTasks.filter(function (t) {
+      var s = ((t.status || '') + (t.priority || '') + (t.prioridad || '')).toLowerCase();
+      return s.includes(f.toLowerCase());
+    }));
+  }
+  window.filterTasks = filterTasks;
+
+  async function createTask() {
+    var title      = document.getElementById('t-title');
+    var respSelect = document.getElementById('t-responsable');
+    var areaSelect = document.getElementById('t-area');
+    var prioSelect = document.getElementById('t-prioridad');
+    var notasArea  = document.getElementById('t-notas');
+    if (!title || !title.value.trim()) return toast('El título es requerido', 'err');
+    var body = {
+      title:      title.value.trim(),
+      responsable: respSelect ? respSelect.value : '',
+      area:       areaSelect  ? areaSelect.value  : '',
+      priority:   prioSelect  ? prioSelect.value  : 'Media',
+      notes:      notasArea   ? notasArea.value   : ''
+    };
+    var d = await apiFetch('/tasks/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (d && d.ok) {
+      hideModal('modal-task');
+      toast('Tarea creada' + (body.responsable ? ' + WA a ' + body.responsable : ''), 'ok');
+      loadTasks();
+    } else {
+      toast('Error al crear la tarea', 'err');
+    }
+  }
+  window.createTask = createTask;
+
+  /* ─── GUESTS ─────────────────────────────────────────────────────── */
+  async function loadGuests() {
+    var d = await apiFetch('/notion/guests?limit=30');
+    var body = document.getElementById('guests-body');
+    if (!body) return;
+    var guests = (d && d.guests) ? d.guests : [];
+    if (!guests.length) {
+      body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">Sin datos</td></tr>';
+      return;
+    }
+    var hTotal = document.getElementById('h-total');
+    var hEmail = document.getElementById('h-email');
+    if (hTotal) hTotal.textContent = d.count || guests.length;
+    if (hEmail) hEmail.textContent = guests.filter(function (g) { return g.email; }).length + '+';
+    body.innerHTML = guests.map(function (g) {
+      return '<tr>' +
+        '<td style="font-weight:600;">' + escHtml(g.nombre || '—') + '</td>' +
+        '<td style="font-family:var(--mono);font-size:.76rem;color:var(--muted);">' + escHtml(g.telefono || '—') + '</td>' +
+        '<td style="font-size:.78rem;">' + escHtml(g.email || '—') + '</td>' +
+        '<td><span style="background:rgba(91,156,246,0.12);color:var(--blue);padding:2px 6px;border-radius:6px;font-size:.74rem;">' + escHtml(g.unidad || '—') + '</span></td>' +
+        '<td style="font-size:.78rem;color:var(--muted);">' + escHtml(g.plataforma || '—') + '</td>' +
+        '<td style="font-size:.76rem;color:var(--muted);">' + (g.ultimoContacto ? new Date(g.ultimoContacto).toLocaleDateString('es-AR') : '—') + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+  window.loadGuests = loadGuests;
+
+  /* ─── AMBBI OCCUPANCY BY UNIT ────────────────────────────────────── */
+  async function loadAmbiOcup() {
+    var d = await apiFetch('/occupancy?company=Ambbi');
+    var body = document.getElementById('ambbi-ocup-body');
+    if (!body) return;
+    var byUnit = (d && d.byUnit) ? d.byUnit : [];
+    if (!byUnit.length) {
+      body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">Sin datos por unidad</td></tr>';
+      return;
+    }
+    body.innerHTML = byUnit.map(function (u) {
+      var ocPct = (u.occupancyPct !== undefined && u.occupancyPct !== null)
+        ? Math.round(u.occupancyPct <= 1 ? u.occupancyPct * 100 : u.occupancyPct)
+        : '—';
+      var next = (u.upcoming && u.upcoming[0] && u.upcoming[0].start)
+        ? new Date(u.upcoming[0].start).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })
+        : '—';
+      return '<tr>' +
+        '<td style="font-family:var(--mono);font-size:.78rem;color:var(--muted);">' + escHtml(u.id || '—') + '</td>' +
+        '<td style="font-weight:600;">' + escHtml(u.alias || '—') + '</td>' +
+        '<td>' + (u.busyNights != null ? u.busyNights : '—') + '</td>' +
+        '<td><span style="color:' + (ocPct >= 60 ? 'var(--ok)' : ocPct >= 30 ? 'var(--warn)' : 'var(--danger)') + ';font-weight:700;">' + ocPct + (ocPct !== '—' ? '%' : '') + '</span></td>' +
+        '<td style="color:var(--gold);font-family:var(--mono);font-size:.8rem;">' + next + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+  window.loadAmbiOcup = loadAmbiOcup;
+
+  /* ─── AMBBI TAB SWITCHER ─────────────────────────────────────────── */
+  function ambiTab(which) {
+    var prefixes = ['tareas', 'huespedes', 'ocupacion'];
+    prefixes.forEach(function (p) {
+      var sv = document.getElementById('at-' + p);
+      if (sv) sv.classList.remove('active');
+    });
+    var sv = document.getElementById('at-' + which);
+    if (sv) sv.classList.add('active');
+    // Sync tab buttons
+    var tabs = document.querySelectorAll('#view-ambbi .sub-tab');
+    tabs.forEach(function (t) { t.classList.remove('active'); });
+    var idx = prefixes.indexOf(which);
+    if (tabs[idx]) tabs[idx].classList.add('active');
+    // Lazy load
+    if (which === 'huespedes') loadGuests();
+    if (which === 'ocupacion') loadAmbiOcup();
+    if (which === 'tareas')    loadTasks();
+  }
+  window.ambiTab = ambiTab;
+
+  /* ─── PROPERTIES ─────────────────────────────────────────────────── */
+  async function loadProperties() {
+    var d = await apiFetch('/ge/properties');
+    var body = document.getElementById('props-body');
+    if (!body) return;
+    if (!Array.isArray(d) || !d.length) {
+      body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">Pipeline vacío</td></tr>';
+      return;
+    }
+    body.innerHTML = d.map(function (p) {
+      return '<tr>' +
+        '<td style="font-weight:600;">' + escHtml(p.address || p.direccion || '—') + '</td>' +
+        '<td style="color:var(--muted);font-size:.8rem;">' + escHtml(p.type || p.tipo || '—') + '</td>' +
+        '<td><span class="badge badge-muted">' + escHtml(p.status || p.estado || '—') + '</span></td>' +
+        '<td style="color:var(--gold);font-weight:700;">$' + escHtml(String(p.price || p.precio || '—')) + '</td>' +
+        '<td style="font-size:.8rem;">' + escHtml(p.contact || p.propietario || '—') + '</td>' +
+        '<td style="font-size:.76rem;color:var(--muted);">' + (p.createdAt ? new Date(p.createdAt).toLocaleDateString('es-AR') : '—') + '</td>' +
+        '<td><button class="btn btn-danger btn-sm" onclick="deleteProperty(' + (p.id || 0) + ')">✕</button></td>' +
+      '</tr>';
+    }).join('');
+  }
+  window.loadProperties = loadProperties;
+
+  async function createProperty() {
+    var addrEl   = document.getElementById('p-address');
+    var typeEl   = document.getElementById('p-type');
+    var statusEl = document.getElementById('p-status');
+    var priceEl  = document.getElementById('p-price');
+    var contEl   = document.getElementById('p-contact');
+    var notesEl  = document.getElementById('p-notes');
+    if (!addrEl || !addrEl.value.trim()) return toast('La dirección es requerida', 'err');
+    var body = {
+      address: addrEl.value.trim(),
+      type:    typeEl  ? typeEl.value  : '',
+      status:  statusEl ? statusEl.value : '',
+      price:   priceEl ? priceEl.value : '',
+      contact: contEl  ? contEl.value  : '',
+      notes:   notesEl ? notesEl.value : ''
+    };
+    var d = await apiFetch('/ge/property', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (d && d.ok) {
+      hideModal('modal-prop');
+      toast('Propiedad agregada al pipeline', 'ok');
+      loadProperties();
+    } else {
+      toast('Error al agregar propiedad', 'err');
+    }
+  }
+  window.createProperty = createProperty;
+
+  async function deleteProperty(id) {
+    if (!confirm('Eliminar esta propiedad del pipeline?')) return;
+    toast('Función de eliminación pendiente en el bridge', 'warn');
+  }
+  window.deleteProperty = deleteProperty;
+
+  /* ─── HUE ────────────────────────────────────────────────────────── */
+  async function loadHue() {
+    var d = await apiFetch('/smart-home/hue');
+    var lightsEl = document.getElementById('hue-lights');
+    var setupEl  = document.getElementById('hue-setup');
+    var badgeEl  = document.getElementById('hue-badge');
+    var subEl    = document.getElementById('hue-sub');
+
+    if (!d || !d.available) {
+      if (lightsEl) lightsEl.style.display = 'none';
+      if (setupEl)  setupEl.style.display  = '';
+      if (subEl)    subEl.textContent = 'Bridge no configurado';
+      if (badgeEl)  badgeEl.textContent = 'Sin configurar';
+      return;
+    }
+    if (setupEl)  setupEl.style.display = 'none';
+    if (lightsEl) lightsEl.style.display = '';
+    if (badgeEl)  { badgeEl.textContent = d.total + ' luces'; badgeEl.className = 'badge badge-ok'; }
+    if (subEl)    subEl.textContent = d.total + ' dispositivos encontrados';
+
+    var lights = d.lights || [];
+    if (lightsEl) {
+      lightsEl.innerHTML = lights.map(function (l) {
+        var dotCls = l.on && l.reachable ? 'ok' : l.reachable ? 'err' : 'warn';
+        return '<div class="docker-item" style="cursor:pointer;" onclick="toggleHue(' + l.id + ',' + (!l.on) + ')">' +
+          '<div class="d-name"><span class="dot ' + dotCls + '"></span>' + escHtml(l.name || '—') + '</div>' +
+          '<div class="d-status" style="color:' + (l.on ? 'var(--gold)' : 'var(--muted)') + ';">' +
+            (l.on ? 'ON' : 'OFF') + ' · ' + Math.round((l.brightness || 0) / 2.55) + '%' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+  }
+  window.loadHue = loadHue;
+
+  async function toggleHue(id, on) {
+    await apiFetch('/smart-home/hue/toggle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'light', id: id, state: { on: on } })
+    });
+    loadHue();
+  }
+  window.toggleHue = toggleHue;
+
+  /* ─── CANARIAN ────────────────────────────────────────────────────── */
+  function checkCanaSession() {
+    var stored = sessionStorage.getItem('cana_pin');
+    var ts = parseInt(sessionStorage.getItem('cana_ts') || '0');
+    if (stored && (Date.now() - ts) < 300000) {
+      unlockWithPin(stored);
+    } else {
+      showLock();
+    }
+  }
+
+  function showLock() {
+    var lockEl = document.getElementById('canarian-lock');
+    var contentEl = document.getElementById('canarian-content');
+    if (lockEl)    lockEl.style.display = '';
+    if (contentEl) contentEl.style.display = 'none';
+  }
+
+  async function unlockCanarian() {
+    var pinEl = document.getElementById('pin-input');
+    if (!pinEl || !pinEl.value) return;
+    await unlockWithPin(pinEl.value);
+  }
+  window.unlockCanarian = unlockCanarian;
+
+  async function unlockWithPin(pin) {
+    // Use the ledger endpoint directly with the PIN header (same as office/index.html)
+    var { API } = window.GO;
+    var errEl = document.getElementById('pin-error');
+    try {
+      var r = await fetch(API + '/canarian/ledger', {
+        headers: { Accept: 'application/json', 'X-Canarian-Pin': pin }
+      });
+      if (r.status === 401) {
+        if (errEl) errEl.textContent = 'PIN incorrecto';
+        var pinEl = document.getElementById('pin-input');
+        if (pinEl) {
+          pinEl.classList.add('pin-shake');
+          setTimeout(function () { pinEl.classList.remove('pin-shake'); }, 500);
+        }
+        return;
+      }
+      var data = await r.json();
+      canarianPin = pin;
+      sessionStorage.setItem('cana_pin', pin);
+      sessionStorage.setItem('cana_ts', Date.now().toString());
+      var lockEl    = document.getElementById('canarian-lock');
+      var contentEl = document.getElementById('canarian-content');
+      if (lockEl)    lockEl.style.display = 'none';
+      if (contentEl) contentEl.style.display = '';
+      if (errEl)     errEl.textContent = '';
+      renderLedger(data.entries || []);
+      startLockTimer();
+    } catch (e) {
+      if (errEl) errEl.textContent = 'Error de red';
+    }
+  }
+
+  function lockCanarian() {
+    canarianPin = null;
+    sessionStorage.removeItem('cana_pin');
+    sessionStorage.removeItem('cana_ts');
+    clearInterval(lockTimer);
+    lockTimer = null;
+    var pinEl = document.getElementById('pin-input');
+    if (pinEl) pinEl.value = '';
+    showLock();
+  }
+  window.lockCanarian = lockCanarian;
+
+  function startLockTimer() {
+    clearInterval(lockTimer);
+    lockSecondsLeft = 300;
+    lockTimer = setInterval(function () {
+      lockSecondsLeft--;
+      var m = Math.floor(lockSecondsLeft / 60);
+      var s = lockSecondsLeft % 60;
+      var timerEl = document.getElementById('lock-timer');
+      if (timerEl) timerEl.textContent = m + ':' + String(s).padStart(2, '0');
+      if (lockSecondsLeft <= 0) lockCanarian();
+    }, 1000);
+  }
+
+  // Reset timer on any click while in canarian view
+  document.addEventListener('click', function () {
+    if (canarianPin) {
+      var view = document.getElementById('view-canarian');
+      if (view && view.classList.contains('active')) {
+        lockSecondsLeft = 300;
+        sessionStorage.setItem('cana_ts', Date.now().toString());
+      }
+    }
+  });
+
+  var TYPE_LABEL = {
+    ingreso_usdt: 'Ingreso USDT', egreso_usdt: 'Egreso USDT',
+    ingreso_usd:  'Ingreso USD',  egreso_usd:  'Egreso USD',
+    ingreso_ars:  'Ingreso ARS',  egreso_ars:  'Egreso ARS',
+    comision: 'Comisión', wire: 'Wire transfer'
   };
 
-  const AGENTS = [
-    { key:'wispy', name:'WISPY', role:'Asistente / Scrum', pal:PAL.wispy },
-    { key:'bambi', name:'BAMBI', role:'Anfitrión 24/7 AMBBI', pal:PAL.bambi },
-    { key:'leonardo', name:'LEONARDO', role:'Marketing & Ventas (pronto)', pal:PAL.leonardo, soon:true }
-  ];
-  const DOORS = [
-    { key:'home', label:'HOME', color:'#d4a640' },
-    { key:'ambbi', label:'AMBBI', color:'#cf9b54' },
-    { key:'gebroker', label:'GE BROKER', color:'#cf9b54' },
-    { key:'smarthome', label:'SMART HOME', color:'#cf9b54' },
-    { key:'canarian', label:'CANARIAN', color:'#8a7b50', lock:true }
-  ];
-
-  let zones = [];     // hit-testing: {x,y,w,h,type,ref}
-  let hover = null;
-  let DPR = 1, W = 0, H = 0;
-
-  function resize() {
-    DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-    W = cv.clientWidth; H = cv.clientHeight;
-    cv.width = Math.floor(W * DPR); cv.height = Math.floor(H * DPR);
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    ctx.imageSmoothingEnabled = false;
-  }
-  window.addEventListener('resize', resize);
-
-  // ---- Dibujo ----
-  function drawRoom() {
-    // piso
-    ctx.fillStyle = '#15120e'; ctx.fillRect(0, 0, W, H);
-    const t = 32;
-    ctx.strokeStyle = '#1d1813'; ctx.lineWidth = 1;
-    for (let x = 0; x < W; x += t) { ctx.beginPath(); ctx.moveTo(x, 44); ctx.lineTo(x, H); ctx.stroke(); }
-    for (let y = 44; y < H; y += t) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
-    // pared superior
-    ctx.fillStyle = '#0e0c0a'; ctx.fillRect(0, 44, W, 36);
-    ctx.fillStyle = '#241e16'; ctx.fillRect(0, 78, W, 4);
-    // título sobre la pared
-    ctx.fillStyle = '#d4a640'; ctx.font = '10px "Press Start 2P", monospace'; ctx.textAlign = 'center';
-    ctx.fillText('· GRINGO LABS · CONTROL ROOM ·', W / 2, 68);
-  }
-
-  function drawCharacter(x, y, s, pal, bob) {
-    const yo = bob || 0;
-    // sombra
-    ctx.fillStyle = '#0006'; ctx.fillRect(x - 9 * s, y + 1, 18 * s, 3 * s);
-    // cuerpo
-    ctx.fillStyle = pal.body; ctx.fillRect(x - 8 * s, y - 16 * s + yo, 16 * s, 14 * s);
-    ctx.fillStyle = pal.body2; ctx.fillRect(x - 8 * s, y - 6 * s + yo, 16 * s, 4 * s);
-    // brazos
-    ctx.fillStyle = pal.body2; ctx.fillRect(x - 11 * s, y - 15 * s + yo, 3 * s, 11 * s); ctx.fillRect(x + 8 * s, y - 15 * s + yo, 3 * s, 11 * s);
-    // cabeza
-    ctx.fillStyle = pal.skin; ctx.fillRect(x - 6 * s, y - 28 * s + yo, 12 * s, 12 * s);
-    // pelo
-    ctx.fillStyle = pal.hair; ctx.fillRect(x - 6 * s, y - 28 * s + yo, 12 * s, 4 * s);
-    // ojos
-    ctx.fillStyle = '#11100e'; ctx.fillRect(x - 3 * s, y - 22 * s + yo, 2 * s, 2 * s); ctx.fillRect(x + 1 * s, y - 22 * s + yo, 2 * s, 2 * s);
-  }
-
-  function drawDesk(x, y, w) {
-    ctx.fillStyle = '#241b10'; ctx.fillRect(x - w / 2, y, w, 14);
-    ctx.fillStyle = '#3a2c19'; ctx.fillRect(x - w / 2, y, w, 4);
-    ctx.fillStyle = '#0c0a08'; ctx.fillRect(x - w / 2 + 3, y + 14, 4, 14); ctx.fillRect(x + w / 2 - 7, y + 14, 4, 14);
-    // monitorcito
-    ctx.fillStyle = '#11150f'; ctx.fillRect(x - 9, y - 12, 18, 12);
-    ctx.fillStyle = '#3a6f4a'; ctx.fillRect(x - 7, y - 10, 14, 8);
-  }
-
-  function plate(x, y, text, color) {
-    ctx.font = '7px "Press Start 2P", monospace'; ctx.textAlign = 'center';
-    const w = Math.max(56, text.length * 7 + 12);
-    ctx.fillStyle = '#0c0a08'; ctx.fillRect(x - w / 2, y, w, 14);
-    ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.strokeRect(x - w / 2, y, w, 14);
-    ctx.fillStyle = color; ctx.fillText(text, x, y + 10);
-  }
-
-  function drawDoorZone(d, x, y, w, h, hovered) {
-    ctx.fillStyle = hovered ? '#221b10' : '#171309';
-    ctx.fillRect(x, y, w, h);
-    ctx.strokeStyle = d.color; ctx.lineWidth = hovered ? 3 : 2; ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
-    ctx.fillStyle = d.color; ctx.font = '7px "Press Start 2P", monospace'; ctx.textAlign = 'center';
-    ctx.fillText((d.lock ? '🔒 ' : '') + d.label, x + w / 2, y + h / 2 + 3);
-  }
-
-  function layout() {
-    zones = [];
-    const n = AGENTS.length;
-    const slotW = Math.min(220, (W - 40) / n);
-    const baseY = Math.max(200, Math.min(Math.round(H * 0.46), H - 200));
-    AGENTS.forEach((a, i) => {
-      const cx = W / 2 + (i - (n - 1) / 2) * slotW;
-      zones.push({ x: cx - 36, y: baseY - 70, w: 72, h: 120, type: 'agent', ref: a, cx, cy: baseY });
-    });
-    // puertas en una fila inferior
-    const dy = Math.min(H - 92, baseY + 120);
-    const dw = Math.min(150, (W - 40) / DOORS.length - 10), dh = 56, gap = 10;
-    const totalW = DOORS.length * dw + (DOORS.length - 1) * gap;
-    let dx = (W - totalW) / 2;
-    DOORS.forEach((d) => {
-      zones.push({ x: dx, y: dy, w: dw, h: dh, type: 'door', ref: d });
-      dx += dw + gap;
-    });
-  }
-
-  let tAnim = 0;
-  function render() {
-    tAnim += 0.05;
-    drawRoom();
-    for (const z of zones) {
-      const hovered = hover === z;
-      if (z.type === 'agent') {
-        const a = z.ref;
-        drawDesk(z.cx, z.cy + 6, 96);
-        const bob = Math.sin(tAnim + (a.key.length)) * 2;
-        ctx.globalAlpha = a.soon ? 0.55 : 1;
-        drawCharacter(z.cx, z.cy, 1.5, a.pal, bob);
-        ctx.globalAlpha = 1;
-        plate(z.cx, z.cy + 28, a.name, a.soon ? '#7a7a7a' : '#d4a640');
-        if (hovered && !a.soon) { ctx.strokeStyle = '#e8c873'; ctx.lineWidth = 1; ctx.strokeRect(z.x, z.y, z.w, z.h); }
-        if (a.soon) { ctx.fillStyle = '#7a7a7a'; ctx.font = '6px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.fillText('PRÓXIMAMENTE', z.cx, z.cy + 56); }
-      } else {
-        drawDoorZone(z.ref, z.x, z.y, z.w, z.h, hovered);
-      }
-    }
-    requestAnimationFrame(render);
-  }
-
-  // ---- Interacción ----
-  function pick(mx, my) {
-    for (const z of zones) if (mx >= z.x && mx <= z.x + z.w && my >= z.y && my <= z.y + z.h) return z;
-    return null;
-  }
-  cv.addEventListener('mousemove', (e) => {
-    const r = cv.getBoundingClientRect();
-    hover = pick(e.clientX - r.left, e.clientY - r.top);
-    cv.style.cursor = hover && !(hover.type === 'agent' && hover.ref.soon) ? 'pointer' : 'default';
-  });
-  cv.addEventListener('click', (e) => {
-    const r = cv.getBoundingClientRect();
-    const z = pick(e.clientX - r.left, e.clientY - r.top);
-    if (!z) return;
-    if (z.type === 'agent') {
-      if (z.ref.soon) return toast('Leonardo: próximamente 🛠️');
-      openAgent(z.ref);
-    } else openDoor(z.ref);
-  });
-
-  function openDoor(d) {
-    if (d.key === 'home') return openHome();
-    // Otras salas (Fase 3): por ahora reusan el office clásico que ya funciona.
-    const sec = { ambbi: 'ambbi', gebroker: 'gebroker', smarthome: 'smarthome', canarian: 'canarian' }[d.key];
-    const base = window.GO.isLocal ? 'https://gringo.estate/office/' : '/office/';
-    window.open(base + (sec ? '#' + sec : ''), '_blank');
-    toast('Abriendo ' + d.label + ' (panel clásico)…');
-  }
-
-  // ---- HUD ----
-  function fmtClock() {
-    try { return new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' }); }
-    catch { return new Date().toTimeString().slice(0, 5); }
-  }
-  function tickClock() { document.getElementById('clock').textContent = fmtClock(); }
-  setInterval(tickClock, 1000); tickClock();
-
-  async function refreshHud() {
-    const el = document.getElementById('hud-kpis');
-    const [gw, docker, occ] = await Promise.all([
-      prom('wispy_gateway_online'),
-      apiFetch('/docker'),
-      apiFetch('/occupancy?days=30&company=all')
-    ]);
-    const up = docker && docker.summary ? (docker.summary.running ?? '?') : '?';
-    const total = docker && docker.summary ? (docker.summary.total ?? '?') : '?';
-    const occPct = occ && occ.occupancyPct != null ? Math.round(occ.occupancyPct * 100) + '%' : '—';
-    el.innerHTML =
-      kpiChip('Gateway', gw === 1 ? 'ONLINE' : (gw === 0 ? 'OFFLINE' : '—')) +
-      kpiChip('Containers', up + '/' + total) +
-      kpiChip('Ocupación 30d', occPct);
-  }
-  const kpiChip = (k, v) => `<span class="hud-kpi">${k}: <b>${v}</b></span>`;
-
-  // ---- Overlay base ----
-  function openOverlay(title) { oTitle.textContent = title; overlay.classList.remove('hidden'); }
-  function closeOverlay() { overlay.classList.add('hidden'); oBody.innerHTML = ''; }
-  function toast(msg) {
-    const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('hidden');
-    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.add('hidden'), 2600);
-  }
-
-  // ---- Gauge pixel ----
-  function gauge(pct, color, label) {
-    pct = Math.max(0, Math.min(100, pct || 0));
-    const wrap = document.createElement('div'); wrap.className = 'gauge';
-    const c = document.createElement('canvas'); c.width = 84; c.height = 84;
-    const x = c.getContext('2d'); const cx = 42, cy = 42, rad = 32;
-    const a0 = Math.PI * 0.75, a1 = Math.PI * 2.25;
-    x.lineWidth = 9; x.lineCap = 'round';
-    x.strokeStyle = '#000'; x.beginPath(); x.arc(cx, cy, rad, a0, a1); x.stroke();
-    x.strokeStyle = color; x.beginPath(); x.arc(cx, cy, rad, a0, a0 + (a1 - a0) * pct / 100); x.stroke();
-    x.fillStyle = color; x.font = '13px "Press Start 2P", monospace'; x.textAlign = 'center';
-    x.fillText(Math.round(pct) + '', cx, cy + 5);
-    wrap.appendChild(c);
-    const l = document.createElement('div'); l.className = 'lbl'; l.textContent = label; wrap.appendChild(l);
-    return wrap.outerHTML;
-  }
-
-  const fmtUSD = (n) => (n == null ? '—' : (n < 0 ? '-$' : '$') + Math.abs(Math.round(n)).toLocaleString('es-AR'));
-  const asPct = (n) => (n == null ? null : (Math.abs(n) <= 1 ? n * 100 : n));
-
-  // ---- HOME ----
-  async function openHome() {
-    openOverlay('🏠 HOME · Métricas de Gringo Labs');
-    oBody.innerHTML = '<div class="muted small">Cargando métricas…</div>';
-    const [cpu, mem, disk, cache, sess, tok, cost, docker, prof, occ] = await Promise.all([
-      prom('100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)'),
-      prom('100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))'),
-      prom('100 - (node_filesystem_avail_bytes{mountpoint="/"} * 100 / node_filesystem_size_bytes{mountpoint="/"})'),
-      prom('wispy_cache_efficiency_percent'),
-      prom('wispy_sessions_active'),
-      prom('wispy_current_session_tokens{kind="total"}'),
-      prom('wispy_current_session_cost_usd'),
-      apiFetch('/docker'),
-      apiFetch('/business/profitability?empresa=all'),
-      apiFetch('/occupancy?days=30&company=all')
-    ]);
-
-    const up = docker && docker.summary ? docker.summary.running : null;
-    const total = docker && docker.summary ? docker.summary.total : null;
-
-    let html = '';
-    // KPIs
-    html += '<div class="grid g-kpis" style="margin-bottom:14px">';
-    html += kcard('Gateway IA', (await prom('wispy_gateway_online')) === 1 ? 'ONLINE' : 'OFF', 'sesiones activas: ' + (sess ?? '—'));
-    html += kcard('Tokens sesión', tok != null ? Math.round(tok).toLocaleString('es-AR') : '—', 'costo: ' + (cost != null ? '$' + cost.toFixed(3) : '—'));
-    html += kcard('Containers', (up != null ? up : '—') + ' / ' + (total != null ? total : '—'), 'docker activos');
-    html += kcard('Ocupación 30d', occ && occ.occupancyPct != null ? Math.round(occ.occupancyPct * 100) + '%' : '—', (occ && occ.unitsCounted != null ? occ.unitsCounted + ' unidades' : ''));
-    html += '</div>';
-
-    // Gauges servidor + IA
-    html += '<div class="card" style="margin-bottom:14px"><h4>SERVIDOR · MOTOR IA</h4><div class="gauge-wrap">';
-    html += gauge(cpu, '#7ea6d4', 'CPU %');
-    html += gauge(mem, '#d4a640', 'RAM %');
-    html += gauge(disk, '#cf9b54', 'DISCO %');
-    if (cache != null) html += gauge(cache, '#5bbf6a', 'CACHE %');
-    if (occ && occ.occupancyPct != null) html += gauge(occ.occupancyPct * 100, '#e8c873', 'OCUP %');
-    html += '</div></div>';
-
-    // Rentabilidad
-    html += '<div class="grid g-cards" style="margin-bottom:14px">';
-    if (prof && prof.companies) {
-      for (const [emp, c] of Object.entries(prof.companies)) {
-        const metro = emp.toLowerCase() === 'metropolitan';
-        const m = asPct(c.margenPct);
-        html += `<div class="card ${metro ? 'metro' : ''}">
-          <div class="row"><h4>${emp}</h4><span class="tag">${c.mes || ''} ${c.anio || ''}</span></div>
-          <div class="kpi-val">${fmtUSD(c.ebitdaUSD)}</div>
-          <div class="kpi-sub">EBITDA · ingresos ${fmtUSD(c.ingresosUSD)} · margen ${m != null ? m.toFixed(1) + '%' : '—'}<br>
-          ADR ${fmtUSD(c.adrUSD)} · RevPAR ${fmtUSD(c.revparUSD)} · ${(prof.byUnit && prof.byUnit[emp] ? prof.byUnit[emp].length : 0)} unidades</div>
-        </div>`;
-      }
-    } else {
-      html += '<div class="card err">Rentabilidad no disponible' + (prof && prof.__error ? ' (' + prof.__error + ')' : '') + '</div>';
-    }
-    html += '</div>';
-
-    // Ocupación: próximas reservas
-    html += '<div class="card"><h4>PRÓXIMAS RESERVAS (iCal · 30d)</h4><div class="unit-list">';
-    if (occ && occ.upcoming && occ.upcoming.length) {
-      occ.upcoming.slice(0, 8).forEach((r) => {
-        html += `<div class="u"><span>${(r.alias || r.id || '?')}</span><span class="muted">${r.start} → ${r.end} · ${r.nights}n</span></div>`;
+  function renderLedger(entries) {
+    var body = document.getElementById('ledger-body');
+    if (!body) return;
+    if (!entries || !entries.length) {
+      body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">Sin movimientos</td></tr>';
+      // Zero balances
+      ['c-usdt', 'c-usd', 'c-ars'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = '$0';
       });
-    } else html += '<div class="muted small">Sin reservas próximas o iCal no disponible.</div>';
-    html += '</div><div class="kpi-sub" style="margin-top:8px">Ocupación próxima (iCal) ≠ ocupación contable del cierre CFO.</div></div>';
-
-    oBody.innerHTML = html;
-  }
-  const kcard = (h, v, sub) => `<div class="card"><h4>${h}</h4><div class="kpi-val">${v}</div><div class="kpi-sub">${sub || ''}</div></div>`;
-
-  // ---- AGENTE ----
-  async function openAgent(a) {
-    openOverlay('🤖 ' + a.name + ' · ' + a.role);
-    oBody.innerHTML = '<div class="muted small">Cargando estado…</div>';
-    let html = '';
-    if (a.key === 'wispy') {
-      const s = await apiFetch('/wispy/status');
-      if (s && !s.__error) {
-        const wa = s.wa_status && s.wa_status !== 'unknown' ? ('WhatsApp: ' + s.wa_status) : 'agente activo';
-        html += kcard('Modelo', s.model || '—', wa);
-      } else html += '<div class="err">Estado no disponible (' + (s && s.__error) + ')</div>';
-    } else if (a.key === 'bambi') {
-      const m = await apiFetch('/bambi/api/mode');
-      if (m && !m.__error) html += kcard('Modo', (m.mode || '—'), 'kill: ' + (m.kill ? 'SÍ' : 'no'));
-      else html += '<div class="card"><h4>Bambi</h4><div class="kpi-sub">Estado en vivo no disponible — el runtime único (gringo_agents) reemplazó al contenedor bambi. Repunte del proxy: Fase 2.</div></div>';
+      return;
     }
-    html += '<div class="card" style="margin-top:12px"><h4>Editar prompt / config</h4><div class="kpi-sub">Ver y editar el system.md + agent.config.json de cada agente llega en <b>Fase 2</b> (editor cableado a /api/files con reload del runtime).</div></div>';
-    oBody.innerHTML = html;
+    // Calculate balances
+    var usdt = 0, usd = 0, ars = 0;
+    entries.forEach(function (e) {
+      var sign = (e.tipo && (e.tipo.startsWith('ingreso') || e.tipo === 'comision')) ? 1 : -1;
+      var amt  = parseFloat(e.monto) || 0;
+      if (e.moneda === 'USDT') usdt += sign * amt;
+      else if (e.moneda === 'USD') usd += sign * amt;
+      else if (e.moneda === 'ARS') ars += sign * amt;
+    });
+    function fmtBal(v, suffix) {
+      return (v >= 0 ? '+' : '') + v.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' ' + suffix;
+    }
+    var cusdtEl = document.getElementById('c-usdt');
+    var cusdEl  = document.getElementById('c-usd');
+    var carsEl  = document.getElementById('c-ars');
+    if (cusdtEl) cusdtEl.textContent = fmtBal(usdt, 'USDT');
+    if (cusdEl)  cusdEl.textContent  = fmtBal(usd, 'USD');
+    if (carsEl)  carsEl.textContent  = (ars >= 0 ? '+' : '') + ars.toLocaleString('es-AR', { maximumFractionDigits: 0 }) + ' ARS';
+
+    body.innerHTML = entries.map(function (e) {
+      var isIn = e.tipo && (e.tipo.startsWith('ingreso') || e.tipo === 'comision');
+      var dateStr = e.date || (e.createdAt ? e.createdAt.substring(0, 10) : '—');
+      return '<tr>' +
+        '<td style="font-family:var(--mono);font-size:.78rem;color:var(--muted);">' + escHtml(dateStr) + '</td>' +
+        '<td style="font-size:.78rem;">' + escHtml(TYPE_LABEL[e.tipo] || e.tipo || '—') + '</td>' +
+        '<td style="font-weight:700;color:' + (isIn ? 'var(--ok)' : 'var(--danger)') + ';">' +
+          (isIn ? '+' : '-') + parseFloat(e.monto || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 }) +
+        '</td>' +
+        '<td style="font-size:.78rem;">' + escHtml(e.moneda || '—') + '</td>' +
+        '<td style="font-size:.78rem;color:var(--muted);">' + escHtml(e.contraparte || '—') + '</td>' +
+        '<td style="font-size:.78rem;color:var(--muted);">' + escHtml(e.nota || '—') + '</td>' +
+        '<td><button class="btn btn-danger btn-sm" onclick="deleteLedger(' + (e.id || 0) + ')">✕</button></td>' +
+      '</tr>';
+    }).join('');
   }
 
-  // ---- Boot ----
-  function frame() { resize(); layout(); }
-  window.addEventListener('resize', () => { resize(); layout(); });
-  resize(); layout(); render();
-  refreshHud(); setInterval(refreshHud, 60000);
-  // Abrir Home por default
-  setTimeout(openHome, 400);
+  async function createLedgerEntry() {
+    var { API } = window.GO;
+    var fechaEl  = document.getElementById('c-fecha');
+    var tipoEl   = document.getElementById('c-tipo');
+    var montoEl  = document.getElementById('c-monto');
+    var monedaEl = document.getElementById('c-moneda');
+    var ctrEl    = document.getElementById('c-contraparte');
+    var notaEl   = document.getElementById('c-nota');
+    var body = {
+      date:        fechaEl  ? (fechaEl.value  || new Date().toISOString().substring(0, 10)) : new Date().toISOString().substring(0, 10),
+      tipo:        tipoEl   ? tipoEl.value   : '',
+      monto:       montoEl  ? montoEl.value  : '',
+      moneda:      monedaEl ? monedaEl.value : 'USDT',
+      contraparte: ctrEl    ? ctrEl.value    : '',
+      nota:        notaEl   ? notaEl.value   : ''
+    };
+    if (!body.monto || !body.tipo) return toast('Monto y tipo son requeridos', 'err');
+    try {
+      var r = await fetch(API + '/canarian/ledger', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Canarian-Pin': canarianPin },
+        body: JSON.stringify(body)
+      });
+      if (r.ok) {
+        hideModal('modal-canarian');
+        toast('Movimiento registrado', 'ok');
+        var fresh = await fetch(API + '/canarian/ledger', { headers: { 'X-Canarian-Pin': canarianPin } });
+        var fdata = await fresh.json();
+        renderLedger(fdata.entries || []);
+      } else {
+        toast('Error al registrar (' + r.status + ')', 'err');
+      }
+    } catch (e) {
+      toast('Error de red', 'err');
+    }
+  }
+  window.createLedgerEntry = createLedgerEntry;
+
+  async function deleteLedger(id) {
+    if (!confirm('Eliminar este movimiento?')) return;
+    var { API } = window.GO;
+    try {
+      var r = await fetch(API + '/canarian/ledger/' + id, {
+        method: 'DELETE',
+        headers: { 'X-Canarian-Pin': canarianPin }
+      });
+      if (r.ok) {
+        toast('Movimiento eliminado', 'ok');
+        var fresh = await fetch(API + '/canarian/ledger', { headers: { 'X-Canarian-Pin': canarianPin } });
+        var fdata = await fresh.json();
+        renderLedger(fdata.entries || []);
+      } else {
+        toast('Error al eliminar', 'err');
+      }
+    } catch (e) {
+      toast('Error de red', 'err');
+    }
+  }
+  window.deleteLedger = deleteLedger;
+
+  /* ─── UTIL ───────────────────────────────────────────────────────── */
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /* ─── INIT ───────────────────────────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', function () {
+    // Initial load: home view is active by default
+    loadHome();
+
+    // Periodic refresh
+    setInterval(loadSystemBar, 60000);   // system bar every 60s
+    setInterval(loadDocker,    120000);  // docker every 2min
+    setInterval(loadGauges,    90000);   // gauges every 90s
+  });
+
 })();
