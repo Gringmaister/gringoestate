@@ -1573,41 +1573,76 @@
     container.scrollTop = container.scrollHeight;
   }
 
-  /* ─── AGENT CONFIG VIEWER ─────────────────────────────────────────── */
+  /* ─── AGENT CONFIG EDITOR (ver + editar persona/config + reload en caliente) ─── */
+  var AE_LABEL = 'font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px;';
   async function toggleAgentConfig(agent) {
     var el = document.getElementById(agent + '-config-area');
     if (!el) return;
-    if (el.style.display !== 'none') {
-      el.style.display = 'none';
-      return;
-    }
+    if (el.style.display !== 'none') { el.style.display = 'none'; return; }
     el.style.display = '';
-    el.textContent = 'Cargando configuración…';
+    el.innerHTML = '<div class="skeleton skeleton-block" style="height:90px;"></div>';
 
-    var d = await apiFetch('/agents');
-    if (!d || d.__error) {
-      el.textContent = 'Configuración — edición en vivo: próximamente. El endpoint /api/agents retornó error.';
+    // configs/personas vivos del runtime (MADRE_FILES: <agent>-config / <agent>-system)
+    var res = await Promise.all([
+      apiFetch('/files/' + agent + '-config'),
+      apiFetch('/files/' + agent + '-system')
+    ]);
+    var cfg = res[0], sys = res[1];
+    var cfgText = (cfg && !cfg.__error && typeof cfg.content === 'string') ? cfg.content : '';
+    var sysText = (sys && !sys.__error && typeof sys.content === 'string') ? sys.content : '';
+    if (!cfgText && !sysText) {
+      el.innerHTML = '<div class="err">No se pudo cargar la config de ' + escHtml(agent) + ' (¿bridge / agente sin archivos?).</div>';
       return;
     }
-
-    var agentData = null;
-    if (Array.isArray(d)) {
-      agentData = d.find(function (a) { return a && (a.name || '').toLowerCase() === agent.toLowerCase(); });
-    } else if (d[agent]) {
-      agentData = d[agent];
-    } else {
-      agentData = d;
-    }
-
-    if (agentData) {
-      el.textContent = JSON.stringify(agentData, null, 2);
-    } else {
-      el.textContent = 'Agente "' + agent + '" no encontrado en /api/agents.\n' +
-        'Edición en vivo: próximamente.\n' +
-        'Resultado API: ' + JSON.stringify(d).substring(0, 120) + '…';
-    }
+    el.innerHTML =
+      '<div style="' + AE_LABEL + '">Config — agent.config.json (modelo · voz · tools · allowlist)</div>' +
+      '<textarea class="input" id="ae-cfg-' + agent + '" spellcheck="false" style="min-height:140px;font-family:var(--mono);font-size:.72rem;">' + escHtml(cfgText) + '</textarea>' +
+      '<div style="' + AE_LABEL + 'margin-top:10px;">Persona — system.md (personalidad / "GPT" del agente)</div>' +
+      '<textarea class="input" id="ae-sys-' + agent + '" spellcheck="false" style="min-height:170px;font-size:.78rem;">' + escHtml(sysText) + '</textarea>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center;">' +
+        '<button class="btn btn-ghost btn-sm" onclick="saveAgentFile(\'' + agent + '\',\'config\')">Guardar config</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="saveAgentFile(\'' + agent + '\',\'system\')">Guardar persona</button>' +
+        '<button class="btn btn-gold btn-sm" onclick="reloadAgentRuntime(\'' + agent + '\')">Aplicar (reload)</button>' +
+        '<span id="ae-status-' + agent + '" class="small muted"></span>' +
+      '</div>' +
+      '<div class="small muted" style="margin-top:6px;">Cada guardado hace backup automático. "Aplicar" recarga el agente en caliente (afecta al agente vivo).</div>';
   }
   window.toggleAgentConfig = toggleAgentConfig;
+
+  async function saveAgentFile(agent, which) {
+    var isCfg = which === 'config';
+    var key = agent + '-' + (isCfg ? 'config' : 'system');
+    var ta = document.getElementById('ae-' + (isCfg ? 'cfg' : 'sys') + '-' + agent);
+    var st = document.getElementById('ae-status-' + agent);
+    if (!ta) return;
+    if (isCfg) {
+      try { JSON.parse(ta.value); }
+      catch (e) { if (st) { st.textContent = '❌ JSON inválido: ' + e.message; st.style.color = 'var(--danger)'; } return; }
+    }
+    if (st) { st.textContent = 'Guardando…'; st.style.color = 'var(--muted)'; }
+    var r = await apiFetch('/files/' + key, { method: 'POST', body: JSON.stringify({ content: ta.value }) });
+    if (r && !r.__error && !r.error) {
+      if (st) { st.textContent = '✅ Guardado (con backup). Aplicá "reload" para activar.'; st.style.color = 'var(--ok)'; }
+      toast('Guardado ' + key, 'ok');
+    } else {
+      if (st) { st.textContent = '❌ ' + ((r && (r.error || r.__error)) || 'error'); st.style.color = 'var(--danger)'; }
+    }
+  }
+  window.saveAgentFile = saveAgentFile;
+
+  async function reloadAgentRuntime(agent) {
+    if (!window.confirm('¿Aplicar los cambios y recargar ' + agent + ' en caliente? Afecta al agente productivo.')) return;
+    var st = document.getElementById('ae-status-' + agent);
+    if (st) { st.textContent = 'Recargando runtime…'; st.style.color = 'var(--muted)'; }
+    var r = await apiFetch('/agents/reload/' + agent, { method: 'POST', body: JSON.stringify({}) });
+    if (r && r.ok) {
+      if (st) { st.textContent = '✅ ' + agent + ' recargado (' + (r.mode || 'live') + ')'; st.style.color = 'var(--ok)'; }
+      toast(agent + ' recargado en caliente', 'ok');
+    } else {
+      if (st) { st.textContent = '❌ ' + ((r && (r.error || r.detail || r.__error)) || 'error'); st.style.color = 'var(--danger)'; }
+    }
+  }
+  window.reloadAgentRuntime = reloadAgentRuntime;
 
   /* ─── BAMBI AGENT (for agentes view) ─────────────────────────────── */
   async function loadBambiAgent() {
