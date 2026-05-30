@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Gringo Office · Pixel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+</head>
+<body>
+  <!-- La oficina pixel (Canvas 2D) -->
+  <canvas id="office" aria-label="Gringo Office Pixel"></canvas>
+
+  <!-- HUD superior: reloj + KPIs headline -->
+  <div id="hud">
+    <div id="hud-brand">GRINGO<span>OFFICE</span></div>
+    <div id="hud-kpis"></div>
+    <div id="clock">--:--</div>
+  </div>
+
+  <!-- Overlay para paneles (Home, agente, etc.) sobre el canvas -->
+  <div id="overlay" class="hidden" role="dialog" aria-modal="true">
+    <div id="overlay-card">
+      <button id="overlay-close" aria-label="Cerrar">✕</button>
+      <div id="overlay-title">·</div>
+      <div id="overlay-body"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="hidden"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
