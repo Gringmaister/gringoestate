@@ -76,7 +76,7 @@
     if (btn)  btn.classList.add('active');
 
     if (section === 'home')      { loadHome(); }
-    if (section === 'agentes')   { loadWispy(); loadBambi(); }
+    if (section === 'agentes')   { loadWispy(); loadBambiAgent(); }
     if (section === 'ambbi')     { loadTasks(); }
     if (section === 'gebroker')  { loadProperties(); }
     if (section === 'smarthome') { loadHue(); }
@@ -154,37 +154,344 @@
     }
   }
 
-  /* ─── HOME SUB-TAB SWITCHER ─────────────────────────────────────── */
-  var HOME_TABS = ['negocio', 'labs', 'operaciones'];
-  function homeTab(which) {
-    HOME_TABS.forEach(function (t) {
-      var sv  = document.getElementById('hv-' + t);
-      var btn = document.getElementById('htab-' + t);
-      if (sv)  sv.classList.toggle('active', t === which);
-      if (btn) {
-        btn.classList.toggle('active', t === which);
-        btn.setAttribute('aria-selected', t === which ? 'true' : 'false');
-      }
-    });
-    // Lazy-load per tab
-    if (which === 'labs')        { loadGauges(); loadDocker(); loadBambiOps(); }
-    if (which === 'operaciones') { loadOpsTab(); loadOpsPipeline(); }
-  }
-  window.homeTab = homeTab;
-
-  /* ─── LOAD HOME (orchestrates all home loaders) ─────────────────── */
+  /* ─── LOAD HOME (flat — everything visible, Promise.all) ─────────── */
   function loadHome() {
-    loadSystemBar();
-    loadProfitability();
-    loadOccupancy();
-    loadExpenses();
-    // Labs loaders (gauges/docker) only triggered when that sub-tab is active
-    // but we pre-load them too for the KPI strip
-    loadGauges();
-    loadDocker();
-    loadBambiOps();
+    // Fire all loaders in parallel — flat layout means all sections always visible
+    Promise.all([
+      loadSystemBar(),
+      loadProfitability(),
+      loadOccupancy(),
+      loadExpenses(),
+      loadGauges(),
+      loadDocker(),
+      loadBambiOps(),
+      loadOpsTab(),
+      loadOpsPipeline(),
+      loadIAChart(),
+      loadModelBars(),
+      loadPulso(),
+      loadBrainCard()
+    ]).catch(function () {}); // individual loaders already handle errors
   }
   window.loadHome = loadHome;
+
+  /* ─── NOTIFICATION BELL ─────────────────────────────────────────── */
+  var notifItems = [];
+  function toggleNotif() {
+    var dd   = document.getElementById('notif-dropdown');
+    var btn  = document.getElementById('notif-btn');
+    if (!dd) return;
+    var isOpen = !dd.classList.contains('hidden');
+    dd.classList.toggle('hidden', isOpen);
+    if (btn) btn.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+    if (!isOpen) renderNotifDropdown();
+  }
+  window.toggleNotif = toggleNotif;
+
+  // Close notif dropdown when clicking elsewhere
+  document.addEventListener('click', function (e) {
+    var dd = document.getElementById('notif-dropdown');
+    var btn = document.getElementById('notif-btn');
+    if (dd && btn && !dd.contains(e.target) && !btn.contains(e.target)) {
+      dd.classList.add('hidden');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  function addNotif(title, body, type) {
+    notifItems.unshift({ title: title, body: body, type: type || 'info', ts: Date.now() });
+    if (notifItems.length > 12) notifItems = notifItems.slice(0, 12);
+    var badge = document.getElementById('notif-count');
+    if (badge) badge.textContent = notifItems.length;
+  }
+  window.addNotif = addNotif;
+
+  function renderNotifDropdown() {
+    var el = document.getElementById('notif-list');
+    if (!el) return;
+    if (!notifItems.length) {
+      el.innerHTML = '<div class="notif-empty">Sin notificaciones pendientes</div>';
+      return;
+    }
+    var colorMap = { warn: 'var(--warn)', err: 'var(--danger)', ok: 'var(--ok)', info: 'var(--muted)' };
+    el.innerHTML = notifItems.map(function (n) {
+      var ago = Math.round((Date.now() - n.ts) / 60000);
+      var agoStr = ago < 1 ? 'ahora' : ago + ' min atrás';
+      return '<div class="notif-item">' +
+        '<strong style="color:' + (colorMap[n.type] || 'var(--text)') + '">' + escHtml(n.title) + '</strong>' +
+        '<p>' + escHtml(n.body) + ' <span style="opacity:.5;font-size:.68rem;">' + agoStr + '</span></p>' +
+        '</div>';
+    }).join('');
+  }
+
+  /* ─── PULSO EJECUTIVO ───────────────────────────────────────────── */
+  async function loadPulso() {
+    // Derive pulso from the data already being fetched
+    // We just read cached values after other loaders complete
+    // If no cached data yet, fetch minimal needed
+    var pctEl  = document.getElementById('kpi-ocup');
+    var pctStr = pctEl ? pctEl.textContent : '';
+    var ocup   = pctStr && pctStr !== '—' ? pctStr : null;
+
+    // Bambi escalated from bambi-ops if already loaded
+    var bambiTile = document.querySelector('.bambi-tile strong[style*="warn"]');
+    var escalated = bambiTile ? bambiTile.textContent : null;
+
+    // Build pulso signals
+    var focoEl = document.getElementById('pulso-foco');
+    var proxEl = document.getElementById('pulso-proximo');
+    var riskEl = document.getElementById('pulso-riesgo');
+    var descEl = document.getElementById('pulso-desc');
+
+    if (focoEl) focoEl.textContent = ocup ? 'Ocupación ' + ocup : 'Brief ejecutivo · cargando datos…';
+    if (proxEl) proxEl.textContent = 'Cierre mensual CFO · sincronización iCal';
+    if (riskEl) {
+      var esc = escalated ? parseInt(escalated) : null;
+      riskEl.textContent = esc !== null && esc > 0 ? 'Bambi escalados: ' + esc : 'Sin alertas activas';
+      if (riskEl) riskEl.style.color = (esc && esc > 0) ? 'var(--warn)' : 'var(--ok)';
+    }
+    if (descEl) descEl.textContent = 'Pulso del ecosistema Gringo Labs · ' + new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+  window.loadPulso = loadPulso;
+
+  /* ─── BRAIN CARD (Cerebro de Wispy) ─────────────────────────────── */
+  async function loadBrainCard() {
+    var status = await apiFetch('/wispy/status');
+    var ahora  = document.getElementById('brain-ahora');
+    var ejec   = document.getElementById('brain-ejecutando');
+    var superv = document.getElementById('brain-supervisando');
+    var ultimo = document.getElementById('brain-ultimo');
+
+    if (!status || status.__error) {
+      if (ahora)  ahora.innerHTML  = '<span class="warn-text">Sin conexión al bridge</span>';
+      if (ejec)   ejec.textContent  = '—';
+      if (superv) superv.textContent = '—';
+      if (ultimo) ultimo.textContent = '—';
+      return;
+    }
+
+    var model    = status.model || 'desconocido';
+    var waStatus = status.wa_status || '—';
+    var isOnline = waStatus === 'WORKING';
+
+    if (ahora)  ahora.innerHTML  = '<span class="highlight">' + escHtml(model) + '</span> · WA <span class="' + (isOnline ? 'ok-text' : 'warn-text') + '">' + escHtml(waStatus) + '</span>';
+    if (ejec)   ejec.textContent  = 'Procesando mensajes WhatsApp · rutinas automáticas';
+    if (superv) superv.innerHTML  = 'iCal calendarios · CFO snapshot · tareas Notion';
+    if (ultimo) {
+      var seriesArr = status['series_72h'] || null;
+      if (seriesArr && seriesArr.length) {
+        var last = seriesArr[seriesArr.length - 1];
+        ultimo.textContent = 'tokens: ' + (last.tokens ? Math.round(last.tokens).toLocaleString('es-AR') : '—');
+      } else {
+        ultimo.textContent = 'Bridge online · sincronizado';
+      }
+    }
+    addNotif('Wispy activo', 'WA: ' + waStatus + ' · Modelo: ' + model, isOnline ? 'ok' : 'warn');
+  }
+  window.loadBrainCard = loadBrainCard;
+
+  /* ─── IA CHART — 72h Line Chart (native Canvas 2D) ─────────────── */
+  function drawLineChart(canvasId, series, opts) {
+    var canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    var parent = canvas.parentElement;
+    var W = parent ? parent.clientWidth - 20 : 400;
+    var H = parent ? parent.clientHeight - 20 : 160;
+    if (H < 60) H = 160;
+    canvas.width  = W;
+    canvas.height = H;
+    var ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+
+    var padL = 36, padR = 10, padT = 12, padB = 28;
+    var cW = W - padL - padR;
+    var cH = H - padT - padB;
+
+    if (!series || !series.length) {
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.font = '11px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Sin datos de serie temporal', W / 2, H / 2);
+      return;
+    }
+
+    var vals = series.map(function (p) { return p.v; });
+    var maxV = Math.max.apply(null, vals) || 1;
+    var minV = Math.min.apply(null, vals);
+    var range = maxV - minV || 1;
+
+    // Grid lines
+    var gridLines = 4;
+    for (var g = 0; g <= gridLines; g++) {
+      var gy = padT + cH - (cH * g / gridLines);
+      ctx.beginPath();
+      ctx.moveTo(padL, gy);
+      ctx.lineTo(padL + cW, gy);
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      // Y label
+      var yVal = minV + (range * g / gridLines);
+      ctx.fillStyle = 'rgba(159,152,141,0.7)';
+      ctx.font = '9px JetBrains Mono, monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(Math.round(yVal).toLocaleString('es-AR'), padL - 4, gy + 3);
+    }
+
+    // X axis labels (sample every nth)
+    var step = Math.max(1, Math.floor(series.length / 6));
+    series.forEach(function (p, i) {
+      if (i % step !== 0 && i !== series.length - 1) return;
+      var x = padL + (cW * i / (series.length - 1 || 1));
+      var label = p.label || '';
+      ctx.fillStyle = 'rgba(159,152,141,0.6)';
+      ctx.font = '9px JetBrains Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, x, H - 6);
+    });
+
+    // Line + fill
+    var color = opts && opts.color ? opts.color : '#d4a640';
+    ctx.beginPath();
+    series.forEach(function (p, i) {
+      var x = padL + (cW * i / (series.length - 1 || 1));
+      var y = padT + cH - (cH * (p.v - minV) / range);
+      if (i === 0) ctx.moveTo(x, y);
+      else         ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // Gradient fill
+    var grad = ctx.createLinearGradient(0, padT, 0, padT + cH);
+    grad.addColorStop(0,   color.replace(')', ',0.18)').replace('rgb(','rgba(').replace('#d4a640','rgba(212,166,64,0.18)'));
+    grad.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.beginPath();
+    series.forEach(function (p, i) {
+      var x = padL + (cW * i / (series.length - 1 || 1));
+      var y = padT + cH - (cH * (p.v - minV) / range);
+      if (i === 0) ctx.moveTo(x, y);
+      else         ctx.lineTo(x, y);
+    });
+    ctx.lineTo(padL + cW, padT + cH);
+    ctx.lineTo(padL, padT + cH);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+  }
+
+  async function loadIAChart() {
+    // Try /telemetry first, then /wispy/status for series_72h
+    var tel = await apiFetch('/telemetry');
+    var series = null;
+
+    if (tel && !tel.__error && tel.series) {
+      series = tel.series;
+    } else {
+      var ws = await apiFetch('/wispy/status');
+      if (ws && !ws.__error && ws['series_72h']) series = ws['series_72h'];
+    }
+
+    // Normalize series to [{v, label}]
+    var normalized = [];
+    if (Array.isArray(series) && series.length) {
+      series.forEach(function (p, i) {
+        var v = typeof p === 'number' ? p : (p.tokens || p.value || p.v || 0);
+        var ts = p.ts || p.timestamp || p.time || null;
+        var label = '';
+        if (ts) {
+          var d = new Date(typeof ts === 'number' && ts < 1e12 ? ts * 1000 : ts);
+          label = d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+        } else {
+          label = (i % 8 === 0) ? (Math.round(i * 72 / (series.length || 1)) + 'h') : '';
+        }
+        normalized.push({ v: v, label: label });
+      });
+    } else {
+      // Fallback: generate flat placeholder data so chart still renders
+      for (var i2 = 0; i2 < 24; i2++) {
+        normalized.push({ v: 0, label: i2 % 4 === 0 ? (i2 * 3 + 'h') : '' });
+      }
+    }
+
+    // Resize canvas to parent before drawing
+    var canvas = document.getElementById('chart-ia-72h');
+    if (canvas) {
+      var parent = canvas.closest('.chart-stage');
+      if (parent) {
+        canvas.style.height = (parent.clientHeight - 20) + 'px';
+      }
+    }
+
+    drawLineChart('chart-ia-72h', normalized, { color: '#d4a640' });
+
+    // Update KPIs
+    var [tokens, cost] = await Promise.all([
+      prom('wispy_current_session_tokens{kind="total"}'),
+      prom('wispy_current_session_cost_usd')
+    ]);
+    var labsTok  = document.getElementById('kpi-tokens-labs');
+    var labsCost = document.getElementById('kpi-cost-labs');
+    var labsGw   = document.getElementById('kpi-gateway-labs');
+    if (labsTok)  labsTok.textContent  = tokens !== null ? Math.round(tokens).toLocaleString('es-AR') : '—';
+    if (labsCost) labsCost.textContent = cost   !== null ? '$' + parseFloat(cost).toFixed(4) : '$—';
+    var gwOnline = await prom('wispy_gateway_online');
+    if (labsGw) {
+      labsGw.textContent = gwOnline === 1 ? 'Online' : (gwOnline === null ? '—' : 'Offline');
+      labsGw.style.color = gwOnline === 1 ? 'var(--ok)' : 'var(--warn)';
+    }
+  }
+  window.loadIAChart = loadIAChart;
+
+  /* ─── MODEL BARS (horizontal sorted bar chart) ───────────────────── */
+  async function loadModelBars() {
+    var el = document.getElementById('model-bars-content');
+    if (!el) return;
+    el.innerHTML = '<div class="skeleton skeleton-block" style="height:160px;"></div>';
+
+    // Try Prometheus promAll for per-model tokens
+    var byModel = await promAll('wispy_model_total_tokens');
+
+    // Fallback: try telemetry endpoint
+    if (!byModel || !byModel.length) {
+      var tel = await apiFetch('/telemetry');
+      if (tel && !tel.__error && tel.byModel) {
+        byModel = Object.keys(tel.byModel).map(function (k) {
+          return { labels: { model: k }, value: tel.byModel[k] };
+        });
+      }
+    }
+
+    if (!byModel || !byModel.length) {
+      el.innerHTML = '<span style="color:var(--muted);font-size:.82rem;">Sin datos por modelo · Prometheus sin métricas wispy_model_total_tokens</span>';
+      return;
+    }
+
+    // Sort descending by value
+    var sorted = byModel.slice().sort(function (a, b) { return b.value - a.value; });
+    var maxVal = sorted[0] ? sorted[0].value : 1;
+    var palette = ['#d4a640', '#4dde95', '#7ec8e3', '#a78bfa', '#ffbb55', '#5b9cf6', '#ff7b7b'];
+
+    el.innerHTML = '<div style="display:grid;gap:8px;margin-top:4px;">' +
+      sorted.map(function (m, i) {
+        var label = (m.labels && (m.labels.model || m.labels.name)) || ('modelo-' + i);
+        var pct = maxVal ? Math.round(m.value * 100 / maxVal) : 0;
+        var color = palette[i % palette.length];
+        var valStr = m.value >= 1000
+          ? Math.round(m.value / 1000).toLocaleString('es-AR') + 'k'
+          : Math.round(m.value).toLocaleString('es-AR');
+        return '<div class="expense-row">' +
+          '<span class="expense-label" title="' + escHtml(label) + '">' + escHtml(label) + '</span>' +
+          '<div class="expense-track"><div class="expense-fill" style="width:' + pct + '%;background:' + color + ';opacity:.8;"></div></div>' +
+          '<span class="expense-val" style="color:' + color + ';">' + valStr + '</span>' +
+          '</div>';
+      }).join('') +
+    '</div>';
+  }
+  window.loadModelBars = loadModelBars;
 
   /* ─── SYSTEM BAR ─────────────────────────────────────────────────── */
   async function loadSystemBar() {
@@ -1215,6 +1522,121 @@
   }
   window.loadOpsPipeline = loadOpsPipeline;
 
+  /* ─── AGENT CHAT ─────────────────────────────────────────────────── */
+  async function sendAgentChat(agent) {
+    var inputEl = document.getElementById('chat-in-' + agent);
+    var msgsEl  = document.getElementById('chat-msgs-' + agent);
+    if (!inputEl || !msgsEl) return;
+    var text = (inputEl.value || '').trim();
+    if (!text) return;
+    inputEl.value = '';
+
+    // Render user message
+    appendChatMsg(msgsEl, text, 'user');
+
+    // Show typing indicator
+    var typingId = 'typing-' + agent + '-' + Date.now();
+    appendChatMsg(msgsEl, '…', 'agent', typingId);
+
+    try {
+      var d = await apiFetch('/agents/chat/' + agent, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text })
+      });
+      // Remove typing indicator
+      var typingEl = document.getElementById(typingId);
+      if (typingEl) typingEl.remove();
+
+      if (!d || d.__error) {
+        // Graceful fallback
+        appendChatMsg(msgsEl, 'Chat en preparación — el endpoint /agents/chat/' + agent + ' está siendo conectado. Pronto disponible.', 'system');
+      } else {
+        var reply = (typeof d === 'string') ? d : (d.reply || d.text || d.response || JSON.stringify(d));
+        appendChatMsg(msgsEl, reply, 'agent');
+      }
+    } catch (err) {
+      var typingEl2 = document.getElementById(typingId);
+      if (typingEl2) typingEl2.remove();
+      appendChatMsg(msgsEl, 'Chat en preparación — endpoint en construcción.', 'system');
+    }
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+  window.sendAgentChat = sendAgentChat;
+
+  function appendChatMsg(container, text, role, id) {
+    var div = document.createElement('div');
+    div.className = 'chat-msg ' + (role || 'agent');
+    if (id) div.id = id;
+    div.textContent = text;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  /* ─── AGENT CONFIG VIEWER ─────────────────────────────────────────── */
+  async function toggleAgentConfig(agent) {
+    var el = document.getElementById(agent + '-config-area');
+    if (!el) return;
+    if (el.style.display !== 'none') {
+      el.style.display = 'none';
+      return;
+    }
+    el.style.display = '';
+    el.textContent = 'Cargando configuración…';
+
+    var d = await apiFetch('/agents');
+    if (!d || d.__error) {
+      el.textContent = 'Configuración — edición en vivo: próximamente. El endpoint /api/agents retornó error.';
+      return;
+    }
+
+    var agentData = null;
+    if (Array.isArray(d)) {
+      agentData = d.find(function (a) { return a && (a.name || '').toLowerCase() === agent.toLowerCase(); });
+    } else if (d[agent]) {
+      agentData = d[agent];
+    } else {
+      agentData = d;
+    }
+
+    if (agentData) {
+      el.textContent = JSON.stringify(agentData, null, 2);
+    } else {
+      el.textContent = 'Agente "' + agent + '" no encontrado en /api/agents.\n' +
+        'Edición en vivo: próximamente.\n' +
+        'Resultado API: ' + JSON.stringify(d).substring(0, 120) + '…';
+    }
+  }
+  window.toggleAgentConfig = toggleAgentConfig;
+
+  /* ─── BAMBI AGENT (for agentes view) ─────────────────────────────── */
+  async function loadBambiAgent() {
+    // Reuse existing loadBambi + load analytics for the agent view
+    var d = await apiFetch('/agents/bambi-analytics');
+    var badge = document.getElementById('bambi-status-badge');
+    var statsRow = document.getElementById('bambi-stats-row');
+    var liveWrap = document.getElementById('bambi-live-wrap');
+
+    if (!d || d.__error || !d.ok) {
+      if (badge) { badge.textContent = 'Sin datos analíticos'; badge.className = 'badge badge-warn'; }
+      return;
+    }
+
+    if (badge) { badge.textContent = 'Live analytics'; badge.className = 'badge badge-ok'; }
+    if (statsRow) {
+      var retPct = parseFloat(d.retentionPct || 0);
+      statsRow.innerHTML =
+        '<div class="stat-item"><span>Resueltos</span><strong style="color:var(--ok);">' + (d.resolved || 0) + '</strong></div>' +
+        '<div class="stat-item"><span>Escalados</span><strong style="color:var(--warn);">' + (d.escalated || 0) + '</strong></div>' +
+        '<div class="stat-item"><span>Retención</span><strong style="color:var(--gold);">' + retPct.toFixed(1) + '%</strong></div>';
+    }
+    if (liveWrap) liveWrap.style.display = '';
+  }
+  window.loadBambiAgent = loadBambiAgent;
+
+  // Keep old loadBambi for backward compat (called nowhere critical but exposed)
+  window.loadBambi = loadBambiAgent;
+
   /* ─── UTIL ───────────────────────────────────────────────────────── */
   function escHtml(s) {
     return String(s)
@@ -1229,10 +1651,26 @@
     // Initial load: home view is active by default
     loadHome();
 
+    // Update home-date badge with current date
+    var dateEl = document.getElementById('home-date');
+    if (dateEl) {
+      var now = new Date();
+      dateEl.textContent = 'v0.3 · ' + now.toLocaleDateString('es-AR', {
+        timeZone: 'America/Argentina/Buenos_Aires',
+        day: 'numeric', month: 'short'
+      });
+    }
+
+    // Refresh pulso signals after other data loads (brief delay)
+    setTimeout(loadPulso, 4000);
+
     // Periodic refresh
     setInterval(loadSystemBar, 60000);   // system bar every 60s
     setInterval(loadDocker,    120000);  // docker every 2min
     setInterval(loadGauges,    90000);   // gauges every 90s
+    setInterval(loadPulso,     120000);  // pulso every 2min (reads cached DOM values)
+    setInterval(loadBrainCard, 180000);  // brain card every 3min
+    setInterval(loadIAChart,   300000);  // IA chart every 5min
   });
 
 })();

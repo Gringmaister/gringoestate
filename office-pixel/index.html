@@ -39,6 +39,10 @@
   </div>
   <div class="sys-clock" id="sys-clock">ARG —:—</div>
 </div>
+<!-- ── NOTIFICATION DROPDOWN (shared) ──────────────────────────── -->
+<div class="notif-dropdown hidden" id="notif-dropdown" role="region" aria-label="Notificaciones">
+  <div id="notif-list"><div class="notif-empty">Sin notificaciones pendientes</div></div>
+</div>
 
 <!-- ── WORKSPACE ───────────────────────────────────────────────────── -->
 <div class="workspace">
@@ -103,13 +107,27 @@
 
     <!-- ════════════════ HOME ════════════════ -->
     <div class="view active" id="view-home">
-      <div class="section-head">
-        <h1>HOME CENTER</h1>
-        <span class="badge badge-gold" id="home-date">—</span>
-      </div>
 
-      <!-- KPI Strip (always visible above sub-tabs) -->
-      <div class="kpi-grid" style="grid-template-columns:repeat(6,minmax(0,1fr));margin-bottom:18px;">
+      <!-- 1. BRAND HEADER -->
+      <header class="brand-header" role="banner">
+        <img src="/images/isologo.webp" alt="Gringo Estate" class="brand-logo" width="52" height="52">
+        <div class="brand-copy">
+          <h1><span>GRINGO</span> OFFICE <small style="font-size:1.1rem;letter-spacing:0.04em;color:var(--muted);">·</small> <span style="color:var(--muted);font-size:1.2rem;font-family:'Bebas Neue',sans-serif;letter-spacing:0.06em;">centro de comando</span></h1>
+          <p>Gringo Labs · stack completo en tiempo real</p>
+        </div>
+        <div class="brand-actions">
+          <span class="version-badge" id="home-date">v0.3 · office</span>
+          <div class="notif-wrap">
+            <button class="notif-btn" onclick="toggleNotif()" aria-label="Notificaciones" aria-expanded="false" id="notif-btn" aria-haspopup="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="notif-badge" id="notif-count" aria-label="notificaciones pendientes">0</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- 2. KPI STRIP -->
+      <div class="kpi-grid" style="grid-template-columns:repeat(6,minmax(0,1fr));margin-bottom:18px;" role="region" aria-label="Indicadores clave">
         <div class="kpi accent">
           <span>Gateway</span>
           <strong id="kpi-gateway" style="font-size:1.1rem;">—</strong>
@@ -142,186 +160,290 @@
         </div>
       </div>
 
-      <!-- Home sub-tabs -->
-      <div class="home-sub-tabs">
-        <div class="sub-tabs" role="tablist" aria-label="Secciones del Home">
-          <button class="sub-tab active" role="tab" aria-selected="true"  aria-controls="hv-negocio"   id="htab-negocio"   onclick="homeTab('negocio')">Negocio</button>
-          <button class="sub-tab"        role="tab" aria-selected="false" aria-controls="hv-labs"      id="htab-labs"      onclick="homeTab('labs')">Gringo Labs</button>
-          <button class="sub-tab"        role="tab" aria-selected="false" aria-controls="hv-operaciones" id="htab-operaciones" onclick="homeTab('operaciones')">Operaciones</button>
+      <!-- 3. PULSO EJECUTIVO + CEREBRO DE WISPY -->
+      <div class="pulso-band" role="region" aria-label="Pulso ejecutivo">
+        <div class="pulso-card">
+          <div class="pulso-kicker">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Pulso Ejecutivo · Centro de mando con foco y acción
+          </div>
+          <h2 id="pulso-title">PULSO <span>EJECUTIVO</span></h2>
+          <p id="pulso-desc" style="color:var(--muted);font-size:.84rem;line-height:1.55;">Cargando estado del sistema…</p>
+          <div class="pulso-signals" id="pulso-signals">
+            <div class="pulso-signal">
+              <strong>Foco dominante</strong>
+              <p id="pulso-foco">—</p>
+            </div>
+            <div class="pulso-signal">
+              <strong>Próximo</strong>
+              <p id="pulso-proximo">—</p>
+            </div>
+            <div class="pulso-signal">
+              <strong>Riesgo</strong>
+              <p id="pulso-riesgo" style="color:var(--warn);">—</p>
+            </div>
+          </div>
+        </div>
+        <div class="brain-card" role="region" aria-label="El Cerebro de Wispy">
+          <div class="brain-head">
+            <span class="brain-head-title">El Cerebro de Wispy</span>
+            <button class="btn btn-ghost btn-sm" onclick="loadBrainCard()" aria-label="Actualizar cerebro">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+            </button>
+          </div>
+          <div class="brain-stream" id="brain-stream">
+            <div class="brain-line">
+              <span class="brain-label">Ahora</span>
+              <span class="brain-value" id="brain-ahora"><span class="skeleton skeleton-block" style="height:14px;width:80%;"></span></span>
+            </div>
+            <div class="brain-line">
+              <span class="brain-label">Ejecutando</span>
+              <span class="brain-value" id="brain-ejecutando"><span class="skeleton skeleton-block" style="height:14px;width:60%;"></span></span>
+            </div>
+            <div class="brain-line">
+              <span class="brain-label">Supervisando</span>
+              <span class="brain-value" id="brain-supervisando"><span class="skeleton skeleton-block" style="height:14px;width:70%;"></span></span>
+            </div>
+            <div class="brain-line">
+              <span class="brain-label">Último evento</span>
+              <span class="brain-value" id="brain-ultimo"><span class="skeleton skeleton-block" style="height:14px;width:50%;"></span></span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- ── SUB-VIEW: NEGOCIO ── -->
-      <div class="sub-view active" id="hv-negocio" role="tabpanel" aria-labelledby="htab-negocio">
-
-        <!-- Rentabilidad -->
-        <div class="card" style="margin-bottom:18px;">
-          <div class="card-head">
-            <div>
-              <h2 class="card-title">Rentabilidad — Mes en Curso</h2>
-              <div class="card-sub" id="profit-period">cargando…</div>
-            </div>
-            <button class="btn btn-ghost btn-sm" onclick="loadProfitability()" aria-label="Actualizar rentabilidad">↻</button>
+      <!-- 4. INFRAESTRUCTURA -->
+      <div class="home-section-divider" aria-hidden="true">
+        <span class="home-section-label">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Infraestructura
+        </span>
+      </div>
+      <div class="card" style="margin-bottom:14px;padding:16px;" role="region" aria-label="Recursos del servidor">
+        <div class="card-head" style="margin-bottom:12px;">
+          <h2 class="card-title">Recursos del Servidor</h2>
+          <button class="btn btn-ghost btn-sm" onclick="loadGauges()" aria-label="Actualizar métricas del servidor">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+          </button>
+        </div>
+        <div class="gauge-grid">
+          <div class="gauge-wrap">
+            <canvas id="g-cpu" width="90" height="90" aria-label="CPU"></canvas>
+            <div class="gauge-val" id="gv-cpu" aria-live="polite">—</div>
+            <div class="gauge-label">CPU</div>
           </div>
-          <div class="profit-grid" id="profit-grid">
-            <div class="skeleton skeleton-block" style="height:120px;"></div>
-            <div class="skeleton skeleton-block" style="height:120px;"></div>
+          <div class="gauge-wrap">
+            <canvas id="g-ram" width="90" height="90" aria-label="RAM"></canvas>
+            <div class="gauge-val" id="gv-ram" aria-live="polite">—</div>
+            <div class="gauge-label">RAM</div>
           </div>
-          <div id="profit-units-wrap" style="display:none;margin-top:16px;">
-            <div class="sub-tabs">
-              <button class="sub-tab active" onclick="profitTab('ambbi')">Ambbi — por unidad</button>
-              <button class="sub-tab" onclick="profitTab('metro')">Metropolitan — por unidad</button>
-            </div>
-            <div class="sub-view active" id="pv-ambbi"></div>
-            <div class="sub-view" id="pv-metro"></div>
+          <div class="gauge-wrap">
+            <canvas id="g-disk" width="90" height="90" aria-label="Disco"></canvas>
+            <div class="gauge-val" id="gv-disk" aria-live="polite">—</div>
+            <div class="gauge-label">Disco</div>
+          </div>
+          <div class="gauge-wrap">
+            <canvas id="g-cache" width="90" height="90" aria-label="Cache Hit"></canvas>
+            <div class="gauge-val" id="gv-cache" aria-live="polite">—</div>
+            <div class="gauge-label">Cache Hit</div>
+          </div>
+          <div class="gauge-wrap">
+            <canvas id="g-ocup" width="90" height="90" aria-label="Ocupación"></canvas>
+            <div class="gauge-val" id="gv-ocup" aria-live="polite">—</div>
+            <div class="gauge-label">Ocupación</div>
           </div>
         </div>
+      </div>
 
-        <!-- Ocupación + Próximas reservas -->
-        <div class="grid-2" style="margin-bottom:18px;">
-          <div class="card">
-            <div class="card-head">
-              <div>
-                <h2 class="card-title">Ocupación Próxima (iCal)</h2>
-                <div class="card-sub">calendarios Airbnb / Booking en tiempo real</div>
-              </div>
-              <button class="btn btn-ghost btn-sm" onclick="loadOccupancy()" aria-label="Actualizar ocupación">↻</button>
-            </div>
-            <div id="ocup-detail">
-              <div class="skeleton skeleton-block" style="height:68px;"></div>
-            </div>
+      <!-- Containers Docker -->
+      <div class="card" style="margin-bottom:18px;" role="region" aria-label="Containers Docker">
+        <div class="card-head">
+          <h2 class="card-title">Containers Docker</h2>
+          <button class="btn btn-ghost btn-sm" onclick="loadDocker()" aria-label="Actualizar estado Docker">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+          </button>
+        </div>
+        <div class="docker-grid" id="docker-grid">
+          <div class="skeleton skeleton-block" style="height:52px;"></div>
+          <div class="skeleton skeleton-block" style="height:52px;"></div>
+          <div class="skeleton skeleton-block" style="height:52px;"></div>
+          <div class="skeleton skeleton-block" style="height:52px;"></div>
+        </div>
+      </div>
+
+      <!-- 5. MOTOR IA -->
+      <div class="home-section-divider" aria-hidden="true">
+        <span class="home-section-label">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+          Motor IA
+        </span>
+      </div>
+      <div class="ia-motor-grid" role="region" aria-label="Motor de inteligencia artificial">
+        <!-- 72h Line chart -->
+        <div class="chart-card">
+          <div class="chart-head">
+            <span class="chart-title">Tokens / Costo — 72 horas</span>
+            <button class="btn btn-ghost btn-sm" onclick="loadIAChart()" aria-label="Actualizar gráfico IA">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+            </button>
           </div>
-          <div class="card">
-            <div class="card-head">
-              <h2 class="card-title">Próximas Reservas</h2>
+          <div class="chart-stage" style="height:180px;">
+            <canvas id="chart-ia-72h" aria-label="Gráfico de líneas de tokens en 72 horas"></canvas>
+          </div>
+          <div class="chart-footer">
+            <div class="chart-stat">
+              <span>Tokens sesión</span>
+              <strong id="kpi-tokens-labs">—</strong>
             </div>
-            <div id="upcoming-list" style="display:grid;gap:6px;">
-              <div class="skeleton skeleton-block" style="height:38px;"></div>
-              <div class="skeleton skeleton-block" style="height:38px;"></div>
-              <div class="skeleton skeleton-block" style="height:38px;"></div>
+            <div class="chart-stat">
+              <span>Costo USD</span>
+              <strong id="kpi-cost-labs">—</strong>
+            </div>
+            <div class="chart-stat">
+              <span>Gateway</span>
+              <strong id="kpi-gateway-labs">—</strong>
             </div>
           </div>
         </div>
-
-        <!-- NEW: Gastos del mes -->
-        <div class="card" id="card-expenses" style="margin-bottom:18px;">
-          <div class="card-head">
-            <div>
-              <h2 class="card-title">Gastos del Mes</h2>
-              <div class="card-sub" id="expenses-period">cargando…</div>
-            </div>
-            <button class="btn btn-ghost btn-sm" onclick="loadExpenses()" aria-label="Actualizar gastos">↻</button>
+        <!-- By-model bars -->
+        <div class="chart-card">
+          <div class="chart-head">
+            <span class="chart-title">Tokens por modelo</span>
+            <button class="btn btn-ghost btn-sm" onclick="loadModelBars()" aria-label="Actualizar distribución de modelos">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+            </button>
           </div>
-          <div id="expenses-content">
+          <div id="model-bars-content">
             <div class="skeleton skeleton-block" style="height:160px;"></div>
           </div>
         </div>
-
       </div>
 
-      <!-- ── SUB-VIEW: GRINGO LABS ── -->
-      <div class="sub-view" id="hv-labs" role="tabpanel" aria-labelledby="htab-labs">
-
-        <!-- Server Gauges -->
-        <div class="card" style="margin-bottom:18px;padding:16px;">
-          <div class="card-head" style="margin-bottom:12px;">
-            <h2 class="card-title">Infraestructura — Recursos del Servidor</h2>
-            <button class="btn btn-ghost btn-sm" onclick="loadGauges()" aria-label="Actualizar gauges">↻</button>
+      <!-- 6. RENTABILIDAD -->
+      <div class="home-section-divider" aria-hidden="true">
+        <span class="home-section-label">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Rentabilidad
+        </span>
+      </div>
+      <div class="card" style="margin-bottom:14px;" role="region" aria-label="Rentabilidad del mes">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">Rentabilidad — Mes en Curso</h2>
+            <div class="card-sub" id="profit-period">cargando…</div>
           </div>
-          <div class="gauge-grid">
-            <div class="gauge-wrap">
-              <canvas id="g-cpu" width="90" height="90"></canvas>
-              <div class="gauge-val" id="gv-cpu">—</div>
-              <div class="gauge-label">CPU</div>
-            </div>
-            <div class="gauge-wrap">
-              <canvas id="g-ram" width="90" height="90"></canvas>
-              <div class="gauge-val" id="gv-ram">—</div>
-              <div class="gauge-label">RAM</div>
-            </div>
-            <div class="gauge-wrap">
-              <canvas id="g-disk" width="90" height="90"></canvas>
-              <div class="gauge-val" id="gv-disk">—</div>
-              <div class="gauge-label">Disco</div>
-            </div>
-            <div class="gauge-wrap">
-              <canvas id="g-cache" width="90" height="90"></canvas>
-              <div class="gauge-val" id="gv-cache">—</div>
-              <div class="gauge-label">Cache Hit</div>
-            </div>
-            <div class="gauge-wrap">
-              <canvas id="g-ocup" width="90" height="90"></canvas>
-              <div class="gauge-val" id="gv-ocup">—</div>
-              <div class="gauge-label">Ocupación</div>
-            </div>
-          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadProfitability()" aria-label="Actualizar rentabilidad">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+          </button>
         </div>
-
-        <!-- AI / Global Metrics -->
-        <div class="grid-2" style="margin-bottom:18px;">
-          <div class="card">
-            <div class="card-head">
-              <h2 class="card-title">Sesión IA Activa</h2>
-            </div>
-            <div class="stats-row" style="flex-wrap:wrap;gap:14px;">
-              <div class="stat-item"><span>Tokens</span><strong id="kpi-tokens-labs">—</strong></div>
-              <div class="stat-item"><span>Costo USD</span><strong id="kpi-cost-labs">—</strong></div>
-              <div class="stat-item"><span>Gateway</span><strong id="kpi-gateway-labs">—</strong></div>
-            </div>
-          </div>
-
-          <!-- NEW: Bambi 24/7 -->
-          <div class="card" id="card-bambi-ops">
-            <div class="card-head">
-              <h2 class="card-title">Bambi — Operación 24/7</h2>
-              <button class="btn btn-ghost btn-sm" onclick="loadBambiOps()" aria-label="Actualizar Bambi analytics">↻</button>
-            </div>
-            <div id="bambi-ops-content">
-              <div class="skeleton skeleton-block" style="height:80px;"></div>
-            </div>
-          </div>
+        <div class="profit-grid" id="profit-grid">
+          <div class="skeleton skeleton-block" style="height:120px;"></div>
+          <div class="skeleton skeleton-block" style="height:120px;"></div>
         </div>
+        <div id="profit-units-wrap" style="display:none;margin-top:16px;">
+          <div class="sub-tabs">
+            <button class="sub-tab active" onclick="profitTab('ambbi')">Ambbi — por unidad</button>
+            <button class="sub-tab" onclick="profitTab('metro')">Metropolitan — por unidad</button>
+          </div>
+          <div class="sub-view active" id="pv-ambbi"></div>
+          <div class="sub-view" id="pv-metro"></div>
+        </div>
+      </div>
 
-        <!-- Docker containers -->
+      <!-- Gastos del mes -->
+      <div class="card" id="card-expenses" style="margin-bottom:18px;" role="region" aria-label="Gastos del mes">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">Gastos del Mes</h2>
+            <div class="card-sub" id="expenses-period">cargando…</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadExpenses()" aria-label="Actualizar gastos">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+          </button>
+        </div>
+        <div id="expenses-content">
+          <div class="skeleton skeleton-block" style="height:160px;"></div>
+        </div>
+      </div>
+
+      <!-- 7. OCUPACIÓN + PRÓXIMAS RESERVAS -->
+      <div class="home-section-divider" aria-hidden="true">
+        <span class="home-section-label">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Ocupación
+        </span>
+      </div>
+      <div class="grid-2" style="margin-bottom:18px;" role="region" aria-label="Ocupación y reservas próximas">
         <div class="card">
           <div class="card-head">
-            <h2 class="card-title">Containers Docker</h2>
-            <button class="btn btn-ghost btn-sm" onclick="loadDocker()" aria-label="Actualizar Docker">↻</button>
+            <div>
+              <h2 class="card-title">Ocupación Próxima (iCal)</h2>
+              <div class="card-sub">calendarios Airbnb / Booking en tiempo real</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="loadOccupancy()" aria-label="Actualizar ocupación">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+            </button>
           </div>
-          <div class="docker-grid" id="docker-grid">
-            <div class="skeleton skeleton-block" style="height:52px;"></div>
-            <div class="skeleton skeleton-block" style="height:52px;"></div>
-            <div class="skeleton skeleton-block" style="height:52px;"></div>
-            <div class="skeleton skeleton-block" style="height:52px;"></div>
+          <div id="ocup-detail">
+            <div class="skeleton skeleton-block" style="height:68px;"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <h2 class="card-title">Próximas Reservas</h2>
+          </div>
+          <div id="upcoming-list" style="display:grid;gap:6px;">
+            <div class="skeleton skeleton-block" style="height:38px;"></div>
+            <div class="skeleton skeleton-block" style="height:38px;"></div>
+            <div class="skeleton skeleton-block" style="height:38px;"></div>
           </div>
         </div>
       </div>
 
-      <!-- ── SUB-VIEW: OPERACIONES ── -->
-      <div class="sub-view" id="hv-operaciones" role="tabpanel" aria-labelledby="htab-operaciones">
-        <div class="grid-2" style="margin-bottom:18px;">
-
-          <!-- Tasks summary -->
-          <div class="card">
-            <div class="card-head">
-              <h2 class="card-title">Tareas Activas</h2>
-              <button class="btn btn-ghost btn-sm" onclick="loadOpsTab()" aria-label="Actualizar tareas">↻</button>
-            </div>
-            <div id="ops-tasks-content">
-              <div class="skeleton skeleton-block" style="height:100px;"></div>
-            </div>
+      <!-- 8. BAMBI OPS + TAREAS + PIPELINE -->
+      <div class="home-section-divider" aria-hidden="true">
+        <span class="home-section-label">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 3v4M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+          Bambi · Operaciones
+        </span>
+      </div>
+      <div class="grid-2" style="margin-bottom:18px;" role="region" aria-label="Operaciones y tareas">
+        <!-- Bambi 24/7 -->
+        <div class="card" id="card-bambi-ops">
+          <div class="card-head">
+            <h2 class="card-title">Bambi — Operación 24/7</h2>
+            <button class="btn btn-ghost btn-sm" onclick="loadBambiOps()" aria-label="Actualizar Bambi analytics">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+            </button>
           </div>
-
-          <!-- GE Pipeline by status -->
-          <div class="card">
-            <div class="card-head">
-              <h2 class="card-title">GE Pipeline</h2>
-              <button class="btn btn-ghost btn-sm" onclick="loadOpsPipeline()" aria-label="Actualizar pipeline">↻</button>
-            </div>
-            <div id="ops-pipeline-content">
-              <div class="skeleton skeleton-block" style="height:100px;"></div>
-            </div>
+          <div id="bambi-ops-content">
+            <div class="skeleton skeleton-block" style="height:80px;"></div>
           </div>
+        </div>
+        <!-- Tareas activas -->
+        <div class="card">
+          <div class="card-head">
+            <h2 class="card-title">Tareas Activas</h2>
+            <button class="btn btn-ghost btn-sm" onclick="loadOpsTab()" aria-label="Actualizar tareas">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+            </button>
+          </div>
+          <div id="ops-tasks-content">
+            <div class="skeleton skeleton-block" style="height:100px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GE Pipeline -->
+      <div class="card" style="margin-bottom:18px;" role="region" aria-label="GE Pipeline">
+        <div class="card-head">
+          <h2 class="card-title">GE Pipeline</h2>
+          <button class="btn btn-ghost btn-sm" onclick="loadOpsPipeline()" aria-label="Actualizar pipeline">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+          </button>
+        </div>
+        <div id="ops-pipeline-content">
+          <div class="skeleton skeleton-block" style="height:80px;"></div>
         </div>
       </div>
 
@@ -331,97 +453,184 @@
     <div class="view" id="view-agentes">
       <div class="section-head">
         <h1>AGENTES</h1>
-        <span class="badge badge-ok">Stack IA Activo</span>
+        <span class="badge badge-ok" id="agentes-stack-badge">Stack IA Activo</span>
       </div>
 
-      <div class="agent-grid">
+      <div class="agent-grid-v2" role="list">
 
         <!-- WISPY -->
-        <div class="agent-card">
-          <div class="agent-header">
-            <div>
-              <div class="agent-name" style="color:var(--gold)">WISPY</div>
-              <div style="font-size:.74rem;color:var(--muted)">AI Gateway · OpenClaw</div>
+        <article class="agent-card-v2" role="listitem" aria-label="Agente Wispy">
+          <div class="agent-avatar-wrap">
+            <div class="avatar-ring" aria-hidden="true">
+              <img src="/images/wispy-avatar.jpg" alt="Avatar de Wispy" width="120" height="120">
             </div>
-            <span class="badge badge-ok" id="wispy-wa-badge">—</span>
+            <div class="agent-meta-head" style="width:100%;padding:0 18px;">
+              <div>
+                <div class="agent-meta-name" style="color:var(--gold)">WISPY</div>
+                <div class="agent-meta-role">AI Gateway · OpenClaw · Gringo Labs</div>
+              </div>
+              <span class="badge badge-ok" id="wispy-wa-badge">—</span>
+            </div>
           </div>
-          <div class="agent-body">
+          <div class="agent-stats">
             <div class="stats-row">
               <div class="stat-item"><span>Modelo</span><strong id="w-model">—</strong></div>
               <div class="stat-item"><span>WA Status</span><strong id="w-wa">—</strong></div>
             </div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.55;">
               Motor principal del stack. Gestiona WhatsApp, tareas Notion, finanzas CFO y rutinas automáticas del ecosistema Gringo Labs.
             </div>
-            <button class="btn btn-ghost btn-sm" onclick="loadWispy()">↻ Actualizar</button>
+            <div id="wispy-config-area" class="agent-config-area" style="display:none;" aria-live="polite"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-ghost btn-sm" onclick="loadWispy()" aria-label="Actualizar estado de Wispy">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+                Actualizar
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="toggleAgentConfig('wispy')" aria-label="Ver configuración de Wispy">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+                Ver config
+              </button>
+            </div>
           </div>
-        </div>
+          <div class="agent-chat-area" aria-label="Chat con Wispy">
+            <div class="chat-messages" id="chat-msgs-wispy" aria-live="polite" aria-relevant="additions"></div>
+            <div class="chat-input-row">
+              <label for="chat-in-wispy" class="sr-only">Mensaje para Wispy</label>
+              <input id="chat-in-wispy" type="text" placeholder="Escribí un mensaje a Wispy…"
+                onkeydown="if(event.key==='Enter')sendAgentChat('wispy')">
+              <button class="chat-send-btn" onclick="sendAgentChat('wispy')" aria-label="Enviar mensaje a Wispy">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+          </div>
+        </article>
 
         <!-- BAMBI -->
-        <div class="agent-card">
-          <div class="agent-header">
-            <div>
-              <div class="agent-name" style="color:#a8d8b8">BAMBI</div>
-              <div style="font-size:.74rem;color:var(--muted)">Anfitrión AMBBI · Runtime Unificado</div>
+        <article class="agent-card-v2" role="listitem" aria-label="Agente Bambi">
+          <div class="agent-avatar-wrap">
+            <div class="avatar-ring ring-bambi" aria-hidden="true">
+              <div class="avatar-placeholder" style="background:rgba(168,216,184,0.06);border-color:rgba(168,216,184,0.18);">
+                <span class="avatar-initial" style="color:#a8d8b8;">B</span>
+              </div>
             </div>
-            <span class="badge badge-warn" id="bambi-status-badge">En migración</span>
+            <p class="avatar-caption">avatar 3D / foto — próximamente</p>
+            <div class="agent-meta-head" style="width:100%;padding:0 18px;">
+              <div>
+                <div class="agent-meta-name" style="color:#a8d8b8">BAMBI</div>
+                <div class="agent-meta-role">Anfitrión AMBBI · Runtime Unificado</div>
+              </div>
+              <span class="badge badge-warn" id="bambi-status-badge">Runtime unificado</span>
+            </div>
           </div>
-          <div class="agent-body">
-            <div class="placeholder-block" style="padding:18px;">
-              <div class="ph-icon" style="font-size:1.6rem;">🔄</div>
-              <h3 style="font-size:1rem;">Runtime Unificado</h3>
-              <p style="font-size:.78rem;margin-top:4px;color:var(--muted);">
-                Bambi fue migrado al runtime unificado
-                <code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;">gringo_agents</code>.
-                Status en migración — disponible desde el gateway principal.
-              </p>
-            </div>
+          <div class="agent-stats">
+            <div id="bambi-stats-row" class="stats-row"></div>
             <div id="bambi-live-wrap" style="display:none;">
-              <div class="stats-row" id="bambi-stats-row"></div>
+              <div class="bambi-tiles" style="margin-top:4px;" id="bambi-tiles-agent"></div>
+            </div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.55;">
+              Anfitrión 24/7 de AMBBI. Responde consultas de huéspedes, escala a Franco cuando es necesario y opera en modo shadow/live sobre el runtime
+              <code style="background:rgba(255,255,255,0.07);padding:1px 5px;border-radius:4px;">gringo_agents</code>.
+            </div>
+            <div id="bambi-config-area" class="agent-config-area" style="display:none;" aria-live="polite"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-ghost btn-sm" onclick="loadBambiAgent()" aria-label="Actualizar estado de Bambi">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+                Actualizar
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="toggleAgentConfig('bambi')" aria-label="Ver configuración de Bambi">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+                Ver config
+              </button>
             </div>
           </div>
-        </div>
+          <div class="agent-chat-area" aria-label="Chat con Bambi">
+            <div class="chat-messages" id="chat-msgs-bambi" aria-live="polite" aria-relevant="additions"></div>
+            <div class="chat-input-row">
+              <label for="chat-in-bambi" class="sr-only">Mensaje para Bambi</label>
+              <input id="chat-in-bambi" type="text" placeholder="Escribí un mensaje a Bambi…"
+                onkeydown="if(event.key==='Enter')sendAgentChat('bambi')">
+              <button class="chat-send-btn" onclick="sendAgentChat('bambi')" aria-label="Enviar mensaje a Bambi">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+          </div>
+        </article>
 
-        <!-- LEONARDO -->
-        <div class="agent-card" style="opacity:.6;">
-          <div class="agent-header">
-            <div>
-              <div class="agent-name" style="color:var(--purple)">LEONARDO</div>
-              <div style="font-size:.74rem;color:var(--muted)">CRM · Ventas · GE Broker</div>
+        <!-- LEONARDO (dimmed — próximamente) -->
+        <article class="agent-card-v2 dimmed" role="listitem" aria-label="Agente Leonardo — próximamente">
+          <div class="agent-avatar-wrap">
+            <div class="avatar-ring ring-leo" aria-hidden="true">
+              <div class="avatar-placeholder" style="background:rgba(167,139,250,0.05);border-color:rgba(167,139,250,0.14);">
+                <span class="avatar-initial" style="color:var(--purple);">L</span>
+              </div>
             </div>
-            <span class="badge badge-muted">Próximamente</span>
-          </div>
-          <div class="agent-body">
-            <div class="placeholder-block" style="padding:20px;">
-              <div class="ph-icon">🧠</div>
-              <h3>En Desarrollo</h3>
-              <p style="font-size:.8rem;margin-top:4px;">CRM de leads, pipeline de propiedades y automatización de ventas para Gringo Estate.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- CONFIG EDITOR -->
-        <div class="agent-card" style="opacity:.5;">
-          <div class="agent-header">
-            <div>
-              <div class="agent-name" style="color:var(--muted)">CONFIG</div>
-              <div style="font-size:.74rem;color:var(--muted)">Editor · Prompt · system.md</div>
-            </div>
-            <span class="badge badge-muted">Fase 2</span>
-          </div>
-          <div class="agent-body">
-            <div class="placeholder-block" style="padding:18px;">
-              <div class="ph-icon" style="font-size:1.6rem;">⚙️</div>
-              <h3 style="font-size:1rem;">Editor Próximamente</h3>
-              <p style="font-size:.78rem;margin-top:4px;">Editor de
-                <code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;">agent.config.json</code> y
-                <code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;">prompts/system.md</code> por agente.
-              </p>
+            <p class="avatar-caption">avatar 3D / foto — próximamente</p>
+            <div class="agent-meta-head" style="width:100%;padding:0 18px;">
+              <div>
+                <div class="agent-meta-name" style="color:var(--purple)">LEONARDO</div>
+                <div class="agent-meta-role">CRM · Ventas · GE Broker</div>
+              </div>
+              <span class="badge badge-muted">Próximamente</span>
             </div>
           </div>
-        </div>
+          <div class="agent-stats">
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.55;">
+              CRM de leads, pipeline de propiedades y automatización de ventas para Gringo Estate. En desarrollo — sesión dedicada futura.
+            </div>
+          </div>
+          <div class="agent-chat-area" aria-label="Chat con Leonardo — no disponible">
+            <div class="chat-messages" id="chat-msgs-leonardo" style="min-height:40px;">
+              <div class="chat-msg system">Chat disponible cuando el agente esté activo.</div>
+            </div>
+            <div class="chat-input-row">
+              <label for="chat-in-leonardo" class="sr-only">Mensaje para Leonardo</label>
+              <input id="chat-in-leonardo" type="text" placeholder="Leonardo — próximamente…" disabled>
+              <button class="chat-send-btn" disabled aria-disabled="true" style="opacity:.4;" aria-label="Enviar mensaje a Leonardo — no disponible">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+          </div>
+        </article>
 
       </div>
+
+      <!-- Agentes futuros -->
+      <div class="agents-future-section" aria-label="Agentes futuros">
+        <div class="agents-future-title">
+          <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Agentes futuros — en roadmap
+        </div>
+        <div class="grid-3">
+          <div class="agent-future-card">
+            <div class="future-avatar">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;color:var(--muted);">CFO AGENT</div>
+              <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">Automatización financiera avanzada</div>
+            </div>
+          </div>
+          <div class="agent-future-card">
+            <div class="future-avatar">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;color:var(--muted);">MARKETING AGENT</div>
+              <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">Redes, publicaciones, leads</div>
+            </div>
+          </div>
+          <div class="agent-future-card">
+            <div class="future-avatar">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;color:var(--muted);">PROPERTY AGENT</div>
+              <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">Gestión autónoma de propiedades</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- ════════════════ AMBBI ════════════════ -->
