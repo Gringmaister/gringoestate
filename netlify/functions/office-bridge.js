@@ -24,12 +24,15 @@ exports.handler = async (event) => {
     const qs = event.rawQuery ? `?${event.rawQuery}` : '';
     const targetUrl = `${BRIDGE_URL}${apiPath}${qs}`;
 
-    // Headers pasados al upstream
-    const forwardHeaders = { 'Content-Type': 'application/json' };
+    // Headers pasados al upstream. OJO: usar SOLO 'content-type' en minúscula (sin
+    // duplicar con 'Content-Type' mayúscula) — el header duplicado rompía el parseo
+    // de JSON en el bridge y los bodies de POST llegaban vacíos por el camino público.
+    const forwardHeaders = {};
     const passThrough = ['x-canarian-pin', 'authorization', 'content-type', 'accept'];
     for (const h of passThrough) {
       if (event.headers[h]) forwardHeaders[h] = event.headers[h];
     }
+    if (!forwardHeaders['content-type']) forwardHeaders['content-type'] = 'application/json';
 
     const fetchOpts = { method: event.httpMethod || 'GET', headers: forwardHeaders };
     if (!['GET', 'HEAD'].includes(event.httpMethod) && event.body) {

@@ -8,10 +8,13 @@
 
   async function apiFetch(path, opts = {}) {
     try {
-      const r = await fetch(API + path, {
-        headers: { Accept: 'application/json', ...(opts.headers || {}) },
-        ...opts
-      });
+      // Merge de headers robusto: el body de POST necesita Content-Type JSON, y
+      // headers debe ir DESPUÉS de ...opts para no ser pisado por opts.
+      var headers = { Accept: 'application/json', ...(opts.headers || {}) };
+      if (opts.body != null && !headers['Content-Type'] && !headers['content-type']) {
+        headers['Content-Type'] = 'application/json';
+      }
+      const r = await fetch(API + path, { ...opts, headers });
       if (!r.ok) return { __error: r.status };
       const ct = r.headers.get('content-type') || '';
       return ct.includes('json') ? await r.json() : await r.text();
