@@ -1092,8 +1092,7 @@ input:focus:not(:focus-visible) { outline: none; }
   line-height: 1.6;
 }
 
-/* ── Actividad de agente (KPIs de uso de tools) ── */
-.agent-activity { padding: 0 18px; }
+/* ── Actividad de agente (KPIs de uso de tools) — vive dentro de .agent-stats (ya padeado) ── */
 .agent-activity:empty { display: none; }
 .act-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .act-chip {
