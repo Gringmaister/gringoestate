@@ -462,7 +462,8 @@
         <article class="agent-card-v2" role="listitem" aria-label="Agente Wispy">
           <div class="agent-avatar-wrap">
             <div class="avatar-ring" aria-hidden="true">
-              <img src="/images/wispy-avatar.jpg" alt="Avatar de Wispy" width="120" height="120">
+              <img src="/images/wispy-avatar.webp" alt="Avatar de Wispy" width="120" height="120"
+                   onerror="this.onerror=null;this.src='/images/wispy-avatar.jpg';">
             </div>
             <div class="agent-meta-head" style="width:100%;padding:0 18px;">
               <div>
@@ -558,15 +559,17 @@
           </div>
         </article>
 
-        <!-- LEONARDO (dimmed — próximamente) -->
-        <article class="agent-card-v2 dimmed" role="listitem" aria-label="Agente Leonardo — próximamente">
+        <!-- LEONARDO (avatar live; agente próximamente) -->
+        <article class="agent-card-v2" role="listitem" aria-label="Agente Leonardo — próximamente">
           <div class="agent-avatar-wrap">
             <div class="avatar-ring ring-leo" aria-hidden="true">
-              <div class="avatar-placeholder" style="background:rgba(167,139,250,0.05);border-color:rgba(167,139,250,0.14);">
+              <img src="/images/leonardo-avatar.webp" alt="Avatar de Leonardo" width="120" height="120"
+                   onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+              <div class="avatar-placeholder" style="display:none;background:rgba(167,139,250,0.05);border-color:rgba(167,139,250,0.14);">
                 <span class="avatar-initial" style="color:var(--purple);">L</span>
               </div>
             </div>
-            <p class="avatar-caption">avatar 3D / foto — próximamente</p>
+            <p class="avatar-caption">Tortuga ninja de ventas &amp; marketing</p>
             <div class="agent-meta-head" style="width:100%;padding:0 18px;">
               <div>
                 <div class="agent-meta-name" style="color:var(--purple)">LEONARDO</div>
