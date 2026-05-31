@@ -76,7 +76,7 @@
     if (btn)  btn.classList.add('active');
 
     if (section === 'home')      { loadHome(); }
-    if (section === 'agentes')   { loadWispy(); loadBambiAgent(); }
+    if (section === 'agentes')   { loadWispy(); loadBambiAgent(); loadAgentActivity('wispy'); }
     if (section === 'ambbi')     { loadTasks(); }
     if (section === 'gebroker')  { loadProperties(); }
     if (section === 'smarthome') { loadHue(); }
@@ -1671,6 +1671,172 @@
 
   // Keep old loadBambi for backward compat (called nowhere critical but exposed)
   window.loadBambi = loadBambiAgent;
+
+  /* ─── AGENT TOOLS · CAPACIDADES + ACTIVIDAD + DISPARO CON CONFIRMACIÓN ─── */
+  var AGENT_SPECS = {}; // cache: agent → { toolName → {name, description, parameters} }
+  // Metadata visual de cada tool (icono + label corto + nivel de riesgo).
+  var TOOL_META = {
+    notion_search:      { icon: '🔍', label: 'Buscar en Notion',  risk: 'read'  },
+    notion_create_task: { icon: '✅', label: 'Crear tarea',        risk: 'write' },
+    notion_update_task: { icon: '✏️', label: 'Actualizar tarea',   risk: 'write' },
+    generate_pdf:       { icon: '📄', label: 'Generar PDF',        risk: 'write' },
+    save_to_drive:      { icon: '☁️', label: 'Guardar en Drive',   risk: 'write' },
+    send_mail:          { icon: '✉️', label: 'Enviar email',       risk: 'send'  },
+    send_document:      { icon: '📎', label: 'Enviar documento',   risk: 'send'  },
+    presupuesto:        { icon: '🏷️', label: 'Presupuesto AMBBI',  risk: 'send'  },
+    burn_sheet_writer:  { icon: '💸', label: 'Cargar gasto',       risk: 'write' },
+    burn_sheet_edit:    { icon: '🧮', label: 'Editar gasto',       risk: 'write' },
+    burn_sheet_cancel:  { icon: '🚫', label: 'Anular gasto',       risk: 'write' }
+  };
+  var RISK_META = {
+    read:  { color: 'var(--ok)',   tag: 'lectura'   },
+    write: { color: 'var(--gold)', tag: 'escritura' },
+    send:  { color: 'var(--warn)', tag: 'envío'     }
+  };
+
+  // KPIs de actividad real (contadores Redis escritos por el runtime al disparar tools).
+  async function loadAgentActivity(agent) {
+    var el = document.getElementById(agent + '-activity');
+    if (!el) return;
+    var d = await apiFetch('/agents/activity/' + agent);
+    if (!d || d.__error || !d.ok) { el.innerHTML = ''; return; }
+    var top = Object.keys(d.total || {}).map(function (k) { return [k, d.total[k]]; })
+      .sort(function (a, b) { return b[1] - a[1]; }).slice(0, 4);
+    var topHtml = top.length
+      ? top.map(function (t) {
+          var m = TOOL_META[t[0]] || { icon: '🔧', label: t[0] };
+          return '<span class="act-chip">' + m.icon + ' ' + escHtml(m.label) + ' <b>' + t[1] + '</b></span>';
+        }).join('')
+      : '<span class="small muted">Sin acciones registradas todavía</span>';
+    el.innerHTML =
+      '<div class="stats-row" style="margin-bottom:8px;">' +
+        '<div class="stat-item"><span>Acciones hoy</span><strong style="color:var(--gold)">' + (d.todayTotal || 0) + '</strong></div>' +
+        '<div class="stat-item"><span>Acciones total</span><strong>' + (d.grandTotal || 0) + '</strong></div>' +
+      '</div>' +
+      '<div class="act-chips">' + topHtml + '</div>';
+  }
+  window.loadAgentActivity = loadAgentActivity;
+
+  // Panel de capacidades: lista las tools del agente (con SPEC) + botón "Disparar".
+  async function toggleAgentTools(agent) {
+    var el = document.getElementById(agent + '-tools-area');
+    if (!el) return;
+    if (el.style.display !== 'none') { el.style.display = 'none'; return; }
+    el.style.display = '';
+    el.innerHTML = '<div class="skeleton skeleton-block" style="height:60px;"></div>';
+    var d = await apiFetch('/agents/tools/' + agent);
+    var tools = (d && !d.__error && d.ok && Array.isArray(d.tools)) ? d.tools : [];
+    AGENT_SPECS[agent] = {};
+    tools.forEach(function (t) { AGENT_SPECS[agent][t.name] = t; });
+    if (!tools.length) {
+      el.innerHTML = '<div class="small muted" style="line-height:1.6;">' +
+        (agent === 'bambi'
+          ? '🦌 Bambi es <b>conversacional</b>: no usa herramientas del registry. Sus capacidades: atención 24/7 a huéspedes, escalado a Franco y transcripción de audios (Whisper). Probalo desde el chat de abajo.'
+          : 'Este agente no tiene herramientas habilitadas.') + '</div>';
+      return;
+    }
+    el.innerHTML =
+      '<div style="' + AE_LABEL + '">Herramientas habilitadas (' + tools.length + ') — «Disparar» las ejecuta de verdad, con confirmación</div>' +
+      '<div class="tools-list">' + tools.map(function (t) {
+        var m = TOOL_META[t.name] || { icon: '🔧', label: t.name, risk: 'write' };
+        var rk = RISK_META[m.risk] || RISK_META.write;
+        var desc = (t.description || '').split('\n')[0].slice(0, 120);
+        return '<div class="tool-row">' +
+            '<div class="tool-row-main">' +
+              '<span class="tool-ico">' + m.icon + '</span>' +
+              '<div><div class="tool-name">' + escHtml(m.label) +
+                ' <span class="tool-risk" style="color:' + rk.color + ';border-color:' + rk.color + '">' + rk.tag + '</span></div>' +
+                '<div class="tool-desc">' + escHtml(desc) + '</div></div>' +
+            '</div>' +
+            '<button class="btn btn-ghost btn-sm" onclick="openToolForm(\'' + agent + '\',\'' + t.name + '\')">Disparar</button>' +
+          '</div>';
+      }).join('') + '</div>';
+  }
+  window.toggleAgentTools = toggleAgentTools;
+
+  // Arma el form del modal a partir del SPEC.parameters de la tool.
+  function openToolForm(agent, name) {
+    var spec = (AGENT_SPECS[agent] && AGENT_SPECS[agent][name]) || null;
+    var m = TOOL_META[name] || { icon: '🔧', label: name, risk: 'write' };
+    var params = (spec && spec.parameters) || { properties: {}, required: [] };
+    var props = params.properties || {};
+    var required = params.required || [];
+    var fields = Object.keys(props).map(function (key) {
+      var p = props[key] || {};
+      var req = required.indexOf(key) >= 0;
+      var hint = escHtml(p.description || '');
+      var id = 'tf-' + agent + '-' + name + '-' + key;
+      var input;
+      if (Array.isArray(p.enum)) {
+        input = '<select class="input" id="' + id + '" data-key="' + key + '" data-type="string">' +
+          (req ? '' : '<option value="">—</option>') +
+          p.enum.map(function (o) { return '<option>' + escHtml(o) + '</option>'; }).join('') + '</select>';
+      } else if (p.type === 'boolean') {
+        input = '<select class="input" id="' + id + '" data-key="' + key + '" data-type="boolean"><option value="">—</option><option value="true">true</option><option value="false">false</option></select>';
+      } else if (p.type === 'integer' || p.type === 'number') {
+        input = '<input class="input" id="' + id + '" data-key="' + key + '" data-type="number" type="number" placeholder="' + hint + '">';
+      } else {
+        input = '<input class="input" id="' + id + '" data-key="' + key + '" data-type="string" placeholder="' + hint + '">';
+      }
+      return '<div style="margin-bottom:8px;"><label class="tf-label" for="' + id + '">' + escHtml(key) +
+        (req ? ' <span style="color:var(--danger)">*</span>' : '') + '</label>' + input +
+        (hint ? '<div class="tf-hint">' + hint + '</div>' : '') + '</div>';
+    }).join('') || '<div class="small muted">Esta herramienta no requiere parámetros.</div>';
+
+    var warn = (m.risk === 'send')
+      ? '<div class="tool-warn">⚠️ Acción real. Cualquier envío de WhatsApp va a <b>tu número</b> (nunca a un cliente). El email se arma como <b>borrador</b> y no sale hasta confirmar.</div>'
+      : (m.risk === 'write')
+        ? '<div class="tool-warn">⚠️ Acción real — escribe en tus sistemas (Notion / Drive / Sheet). Pide confirmación.</div>'
+        : '<div class="tool-ok">🔍 Solo lectura — seguro.</div>';
+
+    var body = document.getElementById('modal-tool-body');
+    body.innerHTML =
+      '<h3 style="margin-top:0;">' + m.icon + ' ' + escHtml(m.label) + ' <span class="small muted">· ' + escHtml(agent) + '</span></h3>' +
+      '<div class="small muted" style="margin-bottom:10px;line-height:1.5;">' + escHtml((spec && spec.description || '').slice(0, 240)) + '</div>' +
+      warn +
+      '<div class="stack" id="tf-fields-' + agent + '-' + name + '" style="margin-top:10px;">' + fields + '</div>' +
+      '<div id="tool-result" class="tool-result" style="display:none;"></div>' +
+      '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">' +
+        '<button class="btn btn-ghost" onclick="hideModal(\'modal-tool\')">Cancelar</button>' +
+        '<button class="btn btn-gold" id="tf-run" onclick="submitToolForm(\'' + agent + '\',\'' + name + '\',' + (m.risk !== 'read') + ')">Ejecutar</button>' +
+      '</div>';
+    showModal('modal-tool');
+  }
+  window.openToolForm = openToolForm;
+
+  async function submitToolForm(agent, name, needsConfirm) {
+    var wrap = document.getElementById('tf-fields-' + agent + '-' + name);
+    if (!wrap) return;
+    var args = {};
+    wrap.querySelectorAll('[data-key]').forEach(function (inp) {
+      var key = inp.getAttribute('data-key'), type = inp.getAttribute('data-type');
+      var v = (inp.value || '').trim();
+      if (v === '') return;
+      if (type === 'number') { var n = parseFloat(v); if (!isNaN(n)) args[key] = n; }
+      else if (type === 'boolean') { args[key] = (v === 'true'); }
+      else args[key] = v;
+    });
+    if (needsConfirm && !window.confirm('¿Ejecutar «' + name + '» en ' + agent + '? Es una acción real.')) return;
+    var runBtn = document.getElementById('tf-run');
+    var resEl = document.getElementById('tool-result');
+    if (runBtn) { runBtn.disabled = true; runBtn.textContent = 'Ejecutando…'; }
+    var d = await apiFetch('/agents/tool/' + agent, { method: 'POST', body: JSON.stringify({ tool: name, args: args }) });
+    if (runBtn) { runBtn.disabled = false; runBtn.textContent = 'Ejecutar'; }
+    if (!resEl) return;
+    resEl.style.display = '';
+    if (!d || d.__error || !d.ok) {
+      resEl.className = 'tool-result err';
+      resEl.textContent = '❌ ' + ((d && (d.error || d.detail || d.__error)) || 'error');
+      return;
+    }
+    var r = d.result || {};
+    var okRun = r.ok !== false;
+    resEl.className = 'tool-result ' + (okRun ? 'ok' : 'warn');
+    resEl.innerHTML = (okRun ? '✅ Ejecutado' : '⚠️ ' + escHtml(r.error || r.stage || 'no completado')) +
+      '<pre>' + escHtml(JSON.stringify(r, null, 2).slice(0, 1200)) + '</pre>';
+    if (okRun) { toast(name + ' ejecutado', 'ok'); loadAgentActivity(agent); }
+  }
+  window.submitToolForm = submitToolForm;
 
   /* ─── UTIL ───────────────────────────────────────────────────────── */
   function escHtml(s) {

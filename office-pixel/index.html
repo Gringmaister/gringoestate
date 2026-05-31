@@ -478,9 +478,11 @@
               <div class="stat-item"><span>Modelo</span><strong id="w-model">—</strong></div>
               <div class="stat-item"><span>WA Status</span><strong id="w-wa">—</strong></div>
             </div>
+            <div id="wispy-activity" class="agent-activity"></div>
             <div style="font-size:.78rem;color:var(--muted);line-height:1.55;">
               Motor principal del stack. Gestiona WhatsApp, tareas Notion, finanzas CFO y rutinas automáticas del ecosistema Gringo Labs.
             </div>
+            <div id="wispy-tools-area" class="agent-config-area" style="display:none;" aria-live="polite"></div>
             <div id="wispy-config-area" class="agent-config-area" style="display:none;" aria-live="polite"></div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
               <button class="btn btn-ghost btn-sm" onclick="loadWispy()" aria-label="Actualizar estado de Wispy">
@@ -490,6 +492,10 @@
               <button class="btn btn-ghost btn-sm" onclick="toggleAgentConfig('wispy')" aria-label="Ver configuración de Wispy">
                 <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
                 Ver config
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="toggleAgentTools('wispy')" aria-label="Herramientas de Wispy">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.3 2.3-2.7-.7-.7-2.7z"/></svg>
+                Herramientas
               </button>
             </div>
           </div>
@@ -534,6 +540,7 @@
               Anfitrión 24/7 de AMBBI. Responde consultas de huéspedes, escala a Franco cuando es necesario y opera en modo shadow/live sobre el runtime
               <code style="background:rgba(255,255,255,0.07);padding:1px 5px;border-radius:4px;">gringo_agents</code>.
             </div>
+            <div id="bambi-tools-area" class="agent-config-area" style="display:none;" aria-live="polite"></div>
             <div id="bambi-config-area" class="agent-config-area" style="display:none;" aria-live="polite"></div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
               <button class="btn btn-ghost btn-sm" onclick="loadBambiAgent()" aria-label="Actualizar estado de Bambi">
@@ -543,6 +550,10 @@
               <button class="btn btn-ghost btn-sm" onclick="toggleAgentConfig('bambi')" aria-label="Ver configuración de Bambi">
                 <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
                 Ver config
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="toggleAgentTools('bambi')" aria-label="Capacidades de Bambi">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.3 2.3-2.7-.7-.7-2.7z"/></svg>
+                Capacidades
               </button>
             </div>
           </div>
@@ -929,6 +940,11 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- Modal disparar herramienta de agente (form auto-generado desde el SPEC) -->
+<div class="modal-overlay hidden" id="modal-tool">
+  <div class="modal" id="modal-tool-body"><!-- poblado por openToolForm() --></div>
 </div>
 
 <!-- Toast -->
