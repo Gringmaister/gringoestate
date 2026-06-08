@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 
-const FALLBACK_PANEL_PASSWORD = 'Clippy10!';
+const FALLBACK_PANEL_PASSWORD = '0909';
 
 function getSecret() {
   return process.env.WISPY_PANEL_SECRET || process.env.WISPY_PANEL_PASSWORD || 'wispy-gringoestate-dev';
