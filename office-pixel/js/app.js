@@ -80,6 +80,7 @@
     if (section === 'ambbi')     { loadTasks(); }
     if (section === 'gebroker')  { loadProperties(); }
     if (section === 'smarthome') { loadHue(); }
+    if (section === 'infra')     { loadDocker(); }
     if (section === 'canarian')  { checkCanaSession(); }
   }
   window.nav = nav;
@@ -170,7 +171,9 @@
       loadIAChart(),
       loadModelBars(),
       loadPulso(),
-      loadBrainCard()
+      loadBrainCard(),
+      load3Pilares(),
+      loadAlerts()
     ]).catch(function () {}); // individual loaders already handle errors
   }
   window.loadHome = loadHome;
@@ -622,6 +625,76 @@
     }).join('');
   }
   window.loadDocker = loadDocker;
+
+  /* ─── 3 PILARES (GringoLabs / AMBBI / Metropolitan) ─── */
+  async function load3Pilares() {
+    function fmtM(v) { if (v == null) return '—'; var p = Math.abs(v) <= 1 ? v * 100 : v; return Math.round(p) + '%'; }
+    function fmtU(v) { if (v == null) return '—'; return '$' + parseFloat(v).toLocaleString('es-AR', { maximumFractionDigits: 0 }); }
+    // GringoLabs: stack (containers UP) + tokens
+    try {
+      var dk = await apiFetch('/docker');
+      var st = await apiFetch('/wispy/status');
+      var labs = document.getElementById('pil-labs'), sub = document.getElementById('pil-labs-sub');
+      if (labs) {
+        if (dk && !dk.__error && dk.containers && dk.containers.length) {
+          var up = dk.containers.filter(function (c) { return (((c.status || '') + '').toLowerCase()).indexOf('up') >= 0; }).length;
+          labs.textContent = '🟢 ' + up + '/' + dk.containers.length;
+        } else { labs.textContent = '🟢 Online'; }
+      }
+      if (sub) {
+        var md = (st && !st.__error && st.model) ? st.model : 'gpt-5.5';
+        var tt = (st && !st.__error) ? (st.tokens_total || 0) : 0;
+        var tStr = tt >= 1e6 ? (Math.round(tt / 1e6) + 'M') : Number(tt).toLocaleString('es-AR');
+        sub.textContent = md + ' · ' + tStr + ' tok';
+      }
+    } catch (e) {}
+    // AMBBI + Metropolitan: rentabilidad (misma forma que loadProfitability)
+    try {
+      var d = await apiFetch('/business/profitability?empresa=all');
+      var co = (d && !d.__error && d.companies) ? d.companies : {};
+      var a = co.Ambbi || {}, m = co.Metropolitan || {};
+      var ea = document.getElementById('pil-ambbi'), eas = document.getElementById('pil-ambbi-sub');
+      if (ea) ea.textContent = fmtM(a.margenPct);
+      if (eas) eas.textContent = 'ingresos ' + fmtU(a.ingresosUSD);
+      var em = document.getElementById('pil-metro'), ems = document.getElementById('pil-metro-sub');
+      if (em) em.textContent = fmtM(m.margenPct);
+      if (ems) ems.textContent = 'ingresos ' + fmtU(m.ingresosUSD);
+    } catch (e) {}
+  }
+  window.load3Pilares = load3Pilares;
+
+  /* ─── ALERTAS URGENTES (reusa bambi-analytics + wispy/status + tasks) ─── */
+  async function loadAlerts() {
+    var el = document.getElementById('alerts-list');
+    if (!el) return;
+    var items = [];
+    try {
+      var b = await apiFetch('/agents/bambi-analytics');
+      if (b && !b.__error && (b.escalated || 0) > 0)
+        items.push({ ico: '🔴', txt: b.escalated + ' huésped(es) escalado(s) a Mano Derecha (Bambi)', col: 'var(--danger)' });
+    } catch (e) {}
+    try {
+      var st = await apiFetch('/wispy/status');
+      if (st && !st.__error && st.wa_status && st.wa_status !== 'connected' && st.wa_status !== 'unknown')
+        items.push({ ico: '⚠️', txt: 'WhatsApp: ' + st.wa_status + ' — revisar conexión', col: 'var(--warn)' });
+    } catch (e) {}
+    try {
+      var t = await apiFetch('/tasks');
+      var urg = 0;
+      if (t && !t.__error) {
+        if (Array.isArray(t.all)) urg = t.all.filter(function (x) { return ((x.prioridad || x.priority || '') + '').toLowerCase() === 'urgente'; }).length;
+        if (!urg && Array.isArray(t.urgent_personal)) urg = t.urgent_personal.length;
+      }
+      if (urg > 0) items.push({ ico: '🔥', txt: urg + ' tarea(s) urgente(s) en TASK OS', col: 'var(--gold)' });
+    } catch (e) {}
+
+    if (!items.length) { el.innerHTML = '<div class="small muted">✅ Sin alertas urgentes ahora.</div>'; return; }
+    el.innerHTML = items.map(function (a) {
+      return '<div style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);">' +
+        '<span>' + a.ico + '</span><span style="color:' + a.col + ';font-size:.85rem;">' + a.txt + '</span></div>';
+    }).join('');
+  }
+  window.loadAlerts = loadAlerts;
 
   /* ─── PROFITABILITY ──────────────────────────────────────────────── */
   async function loadProfitability() {

@@ -84,6 +84,12 @@
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Infraestructura</div>
+      <button class="nav-btn" onclick="nav('infra')" id="nav-infra" aria-label="INFRA — Stack, Containers, Servidor">
+        <span class="nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+        </span>
+        <span>INFRA <small class="nav-sub">Stack · Containers · Servidor</small></span>
+      </button>
       <button class="nav-btn" onclick="nav('smarthome')" id="nav-smarthome" aria-label="SMART HOME — Hue, Google, Xiaomi">
         <span class="nav-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M15 14a5 5 0 0 0-6 0"/><path d="M17.66 11a8 8 0 0 0-11.32 0"/><path d="M6.34 8.34a12 12 0 0 1 11.32 0"/><line x1="12" y1="20" x2="12.01" y2="20" stroke-width="3" stroke-linecap="round"/></svg>
@@ -160,6 +166,17 @@
         </div>
       </div>
 
+      <!-- ALERTAS URGENTES -->
+      <div class="card" style="margin-bottom:18px;border-color:rgba(255,150,90,0.30);" role="region" aria-label="Alertas urgentes">
+        <div class="card-head">
+          <h2 class="card-title" style="color:var(--warn);">🔔 Alertas urgentes</h2>
+          <button class="btn btn-ghost btn-sm" onclick="loadAlerts()" aria-label="Actualizar alertas">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+          </button>
+        </div>
+        <div id="alerts-list"><div class="skeleton skeleton-block" style="height:40px;"></div></div>
+      </div>
+
       <!-- 3. PULSO EJECUTIVO + CEREBRO DE WISPY -->
       <div class="pulso-band" role="region" aria-label="Pulso ejecutivo">
         <div class="pulso-card">
@@ -216,7 +233,7 @@
       <div class="home-section-divider" aria-hidden="true">
         <span class="home-section-label">
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          Infraestructura
+          Recursos del VPS
         </span>
       </div>
       <div class="card" style="margin-bottom:14px;padding:16px;" role="region" aria-label="Recursos del servidor">
@@ -255,19 +272,18 @@
         </div>
       </div>
 
-      <!-- Containers Docker -->
-      <div class="card" style="margin-bottom:18px;" role="region" aria-label="Containers Docker">
+      <!-- 3 PILARES (GringoLabs / AMBBI / Metropolitan) -->
+      <div class="card" style="margin-bottom:18px;" role="region" aria-label="Los 3 pilares del holding">
         <div class="card-head">
-          <h2 class="card-title">Containers Docker</h2>
-          <button class="btn btn-ghost btn-sm" onclick="loadDocker()" aria-label="Actualizar estado Docker">
+          <h2 class="card-title">Los 3 pilares</h2>
+          <button class="btn btn-ghost btn-sm" onclick="load3Pilares()" aria-label="Actualizar pilares">
             <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
           </button>
         </div>
-        <div class="docker-grid" id="docker-grid">
-          <div class="skeleton skeleton-block" style="height:52px;"></div>
-          <div class="skeleton skeleton-block" style="height:52px;"></div>
-          <div class="skeleton skeleton-block" style="height:52px;"></div>
-          <div class="skeleton skeleton-block" style="height:52px;"></div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));" id="pilares-grid">
+          <div class="kpi accent"><span>🧠 Gringo Labs</span><strong id="pil-labs">—</strong><small id="pil-labs-sub">stack</small></div>
+          <div class="kpi"><span>🏨 AMBBI</span><strong id="pil-ambbi" style="color:var(--gold)">—</strong><small id="pil-ambbi-sub">—</small></div>
+          <div class="kpi"><span>🏛 Metropolitan</span><strong id="pil-metro" style="color:var(--metro)">—</strong><small id="pil-metro-sub">—</small></div>
         </div>
       </div>
 
@@ -877,6 +893,28 @@
         </div>
         <div style="font-size:.72rem;color:var(--muted);margin-top:10px;">
           Auto-bloqueo en <span id="lock-timer">5:00</span> min · PIN nunca expuesto en logs ni grupos de WA
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ INFRA ════════════════ -->
+    <div class="view" id="view-infra">
+      <header class="brand-header" role="banner">
+        <div class="brand-copy">
+          <h1><span>INFRA</span> · STACK</h1>
+          <p>Servidor · containers Docker · observabilidad</p>
+        </div>
+      </header>
+      <div class="card" style="margin-bottom:18px;" role="region" aria-label="Containers Docker">
+        <div class="card-head">
+          <h2 class="card-title">Containers Docker</h2>
+          <button class="btn btn-ghost btn-sm" onclick="loadDocker()" aria-label="Actualizar estado Docker">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+          </button>
+        </div>
+        <div class="docker-grid" id="docker-grid">
+          <div class="skeleton skeleton-block" style="height:52px;"></div>
+          <div class="skeleton skeleton-block" style="height:52px;"></div>
         </div>
       </div>
     </div>
