@@ -335,6 +335,22 @@
         </div>
       </div>
 
+      <!-- TOKENS · MEDIDORES (O2) -->
+      <div class="card" style="margin-bottom:18px;" role="region" aria-label="Tokens por origen">
+        <div class="card-head">
+          <h2 class="card-title">Tokens · Wispy · Bambi · Claude Code</h2>
+          <button class="btn btn-ghost btn-sm" onclick="loadTokenMeters()" aria-label="Actualizar medidores de tokens">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+          </button>
+        </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));">
+          <div class="kpi accent"><span>🤖 Wispy (gpt-5.5)</span><strong id="tok-wispy">—</strong><small id="tok-wispy-sub">gateway</small></div>
+          <div class="kpi"><span>🦌 Bambi (local)</span><strong id="tok-bambi">—</strong><small id="tok-bambi-sub">ollama · sin costo</small></div>
+          <div class="kpi"><span>🧠 Claude Code (dev)</span><strong id="tok-cc" style="color:var(--gold)">—</strong><small id="tok-cc-sub">cc-stats</small></div>
+        </div>
+        <div style="margin-top:10px;font-size:.72rem;color:var(--muted);" id="token-meters-foot">—</div>
+      </div>
+
       <!-- 6. RENTABILIDAD -->
       <div class="home-section-divider" aria-hidden="true">
         <span class="home-section-label">

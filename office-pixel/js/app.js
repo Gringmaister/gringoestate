@@ -173,7 +173,8 @@
       loadPulso(),
       loadBrainCard(),
       load3Pilares(),
-      loadAlerts()
+      loadAlerts(),
+      loadTokenMeters()
     ]).catch(function () {}); // individual loaders already handle errors
   }
   window.loadHome = loadHome;
@@ -695,6 +696,46 @@
     }).join('');
   }
   window.loadAlerts = loadAlerts;
+
+  /* ─── TOKENS · MEDIDORES (Motor IA O2) ─── */
+  function fmtTok(n) { n = Number(n) || 0; if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B'; if (n >= 1e6) return Math.round(n / 1e6) + 'M'; if (n >= 1e3) return Math.round(n / 1e3) + 'k'; return '' + n; }
+  async function loadTokenMeters() {
+    // Wispy gateway (gpt-5.5) — tokens reales del entorno (= total GringoLabs)
+    try {
+      var st = await apiFetch('/wispy/status');
+      var w = document.getElementById('tok-wispy'), ws = document.getElementById('tok-wispy-sub');
+      if (st && !st.__error) {
+        if (w) w.textContent = fmtTok(st.tokens_total || 0) + ' tok';
+        if (ws) ws.textContent = (st.model || 'gpt-5.5') + ' · total GringoLabs';
+      }
+    } catch (e) {}
+    // Bambi + actividad por agente (history-db) — turnos reales (tokens locales/ollama = sin costo)
+    try {
+      var at = await apiFetch('/agent-tokens');
+      var ags = (at && !at.__error && at.agents) ? at.agents : [];
+      var bambi = ags.find(function (a) { return a.agent === 'bambi'; });
+      var wisp = ags.find(function (a) { return a.agent === 'wispy'; });
+      var b = document.getElementById('tok-bambi'), bs = document.getElementById('tok-bambi-sub');
+      if (b) b.textContent = (bambi ? bambi.turns : 0) + ' turnos';
+      if (bs) bs.textContent = 'ollama local · sin costo';
+      var foot = document.getElementById('token-meters-foot');
+      if (foot) foot.innerHTML = 'Actividad runtime: 🤖 Wispy <b>' + (wisp ? wisp.turns : 0) + '</b> · 🦌 Bambi <b>' + (bambi ? bambi.turns : 0) + '</b> turnos · <span style="opacity:.7">tokens exactos por agente = próximo (O2b)</span>';
+    } catch (e) {}
+    // Claude Code (dev) — cc-stats
+    try {
+      var cc = await apiFetch('/stats/cc');
+      var c = document.getElementById('tok-cc'), cs = document.getElementById('tok-cc-sub');
+      if (cc && !cc.__error && cc.summary) {
+        var tot = cc.summary.tokensTotal || 0;
+        var out = cc.summary.tokens ? (cc.summary.tokens.output || 0) : 0;
+        var cr = cc.summary.tokens ? (cc.summary.tokens.cacheRead || 0) : 0;
+        var cachePct = tot ? Math.round(cr / tot * 100) : 0;
+        if (c) c.textContent = fmtTok(tot) + ' tok';
+        if (cs) cs.textContent = 'output real ' + fmtTok(out) + ' · ' + cachePct + '% cache';
+      }
+    } catch (e) {}
+  }
+  window.loadTokenMeters = loadTokenMeters;
 
   /* ─── PROFITABILITY ──────────────────────────────────────────────── */
   async function loadProfitability() {
