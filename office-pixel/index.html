@@ -591,7 +591,7 @@
         </article>
 
         <!-- HERMES (agente broker — próximamente) -->
-        <article class="agent-card-v2" role="listitem" aria-label="Agente Hermes — próximamente">
+        <article class="agent-card-v2" role="listitem" aria-label="Agente Hermes">
           <div class="agent-avatar-wrap">
             <div class="avatar-ring ring-hermes" aria-hidden="true">
               <img src="/images/hermes-avatar.webp" alt="Avatar de Hermes" width="120" height="120"
@@ -604,24 +604,22 @@
             <div class="agent-meta-head" style="width:100%;padding:0 18px;">
               <div>
                 <div class="agent-meta-name" style="color:#5ec8d8">HERMES</div>
-                <div class="agent-meta-role">Broker · Seguimiento · GE Broker</div>
+                <div class="agent-meta-role">Broker · Gringo CRM · línea laboral</div>
               </div>
-              <span class="badge badge-muted">Próximamente</span>
+              <span class="badge badge-ok">Live · Shadow</span>
             </div>
           </div>
           <div class="agent-stats">
             <div style="font-size:.78rem;color:var(--muted);line-height:1.55;">
-              Seguimiento de broker punta a punta: conectado al WhatsApp laboral, etiqueta y refina contactos, corre el pipeline de compradores y propietarios y gestiona el documental. En desarrollo — sesión dedicada futura.
+              🪽 Conectado a la línea laboral de Franco en <b>modo SHADOW</b>: clasifica cada mensaje entrante (lead propietario / comprador / inquilino) y lo registra en el Gringo CRM con etiqueta A/B/C/D sugerida. <b>No responde a nadie</b> hasta que Franco lo active. Probalo desde el chat de abajo.
             </div>
           </div>
-          <div class="agent-chat-area" aria-label="Chat con Hermes — no disponible">
-            <div class="chat-messages" id="chat-msgs-hermes" style="min-height:40px;">
-              <div class="chat-msg system">Chat disponible cuando el agente esté activo.</div>
-            </div>
+          <div class="agent-chat-area" aria-label="Chat con Hermes">
+            <div class="chat-messages" id="chat-msgs-hermes" style="min-height:40px;"></div>
             <div class="chat-input-row">
               <label for="chat-in-hermes" class="sr-only">Mensaje para Hermes</label>
-              <input id="chat-in-hermes" type="text" placeholder="Hermes — próximamente…" disabled>
-              <button class="chat-send-btn" disabled aria-disabled="true" style="opacity:.4;" aria-label="Enviar mensaje a Hermes — no disponible">
+              <input id="chat-in-hermes" type="text" placeholder="Escribí un mensaje a Hermes…" onkeydown="if(event.key==='Enter')sendAgentChat('hermes')">
+              <button class="chat-send-btn" onclick="sendAgentChat('hermes')" aria-label="Enviar mensaje a Hermes">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
               </button>
             </div>
