@@ -1247,6 +1247,63 @@ input:focus:not(:focus-visible) { outline: none; }
 /* ── AGENT GRID V2 ──────────────────────────────────────────────── */
 .agent-grid-v2 {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
   gap: 20px;
 }
+
+/* ─── INFRA · Mapa del stack (capas + nodos con micro-bars) ─── */
+.stack-layer { margin-bottom: 18px; }
+.stack-layer-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.02rem;
+  letter-spacing: .14em;
+  color: var(--muted);
+  margin-bottom: 9px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.stack-layer-label em { font-style: normal; color: var(--gold); font-size: .9rem; }
+.stack-layer-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+.stack-nodes { display: grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)); gap: 10px; }
+.stack-node {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.02);
+  transition: border-color .2s;
+}
+.stack-node:hover { border-color: rgba(212,166,64,0.45); }
+.sn-head { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+.sn-name { font-family: var(--mono); font-size: .74rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.sn-up { font-size: .64rem; color: var(--muted); flex-shrink: 0; }
+.sn-bar { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.sn-bar span { font-size: .58rem; color: var(--muted); width: 26px; letter-spacing: .06em; }
+.sn-bar b { font-size: .62rem; font-family: var(--mono); color: var(--text); width: 46px; text-align: right; font-weight: 500; }
+.mb { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.06); overflow: hidden; }
+.mb i { display: block; height: 100%; border-radius: 2px; background: var(--gold); transition: width .3s; }
+.mb.mb-metro i { background: var(--metro); }
+
+/* ─── AGENTES · Tools como chips compactos ─── */
+.tools-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.tool-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 11px;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: rgba(255,255,255,0.02);
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  font: inherit;
+  color: var(--text);
+  position: relative;
+  text-align: left;
+}
+.tool-chip:hover { border-color: rgba(212,166,64,0.55); background: rgba(212,166,64,0.06); }
+.tool-chip:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.tc-ico { font-size: 1rem; flex-shrink: 0; }
+.tc-label { font-size: .73rem; font-weight: 600; line-height: 1.25; flex: 1; }
+.tc-risk { width: 6px; height: 6px; border-radius: 50%; position: absolute; top: 8px; right: 8px; }

@@ -77,7 +77,7 @@
 
     if (section === 'home')      { loadHome(); }
     if (section === 'agentes')   { loadWispy(); loadBambiAgent(); loadAgentActivity('wispy'); }
-    if (section === 'ambbi')     { loadTasks(); }
+    if (section === 'ambbi')     { loadAmbbiResumen(); renderPortfolio(); loadTasks(); }
     if (section === 'gebroker')  { loadProperties(); }
     if (section === 'smarthome') { loadHue(); }
     if (section === 'infra')     { loadDocker(); }
@@ -616,14 +616,48 @@
     var sbDock = document.getElementById('sb-docker');
     if (sbDock) sbDock.innerHTML = '<span class="dot ' + (running === containers.length ? 'ok' : 'warn') + '"></span>' + running + '/' + containers.length + ' UP';
 
-    grid.innerHTML = containers.map(function (c) {
+    // Resumen del stack
+    var cpuSum = containers.reduce(function (s, c) { return s + (c.cpuPercent || 0); }, 0);
+    var memSum = containers.reduce(function (s, c) { return s + ((c.memory && c.memory.usageMiB) || 0); }, 0);
+    var sumEl = document.getElementById('stack-summary');
+    if (sumEl) sumEl.innerHTML =
+      '<div class="stat-item"><span>Contenedores</span><strong style="color:' + (running === containers.length ? 'var(--ok)' : 'var(--warn)') + '">' + running + ' / ' + containers.length + ' UP</strong></div>' +
+      '<div class="stat-item"><span>CPU total</span><strong>' + cpuSum.toFixed(1) + '%</strong></div>' +
+      '<div class="stat-item"><span>Memoria usada</span><strong>' + (memSum >= 1024 ? (memSum / 1024).toFixed(1) + ' GiB' : Math.round(memSum) + ' MiB') + '</strong></div>';
+
+    // Mapa por capas
+    var LAYERS = [
+      { label: 'IA & Agentes',     re: /gringo_agents|wispy_core|ollama|whisper|robohost/i },
+      { label: 'WhatsApp & Comms', re: /evolution|outbound/i },
+      { label: 'Web & Bridge',     re: /bridge|cloudflared|n8n|miami/i },
+      { label: 'Datos & Sync',     re: /redis|postgres|syncthing|notes/i },
+      { label: 'Observabilidad',   re: /grafana|prometheus|cadvisor|exporter|dozzle/i }
+    ];
+    var maxMem = Math.max.apply(null, containers.map(function (c) { return (c.memory && c.memory.usageMiB) || 0; }).concat([1]));
+    function nodeHtml(c) {
       var ok = /up|running/.test((c.status || '').toLowerCase());
-      return '<div class="docker-item">' +
-        '<div class="d-name"><span class="dot ' + (ok ? 'ok' : 'err') + '"></span>' + escHtml(c.name || '—') + '</div>' +
-        '<div class="d-status" style="color:' + (ok ? 'var(--ok)' : 'var(--danger)') + '">' +
-        escHtml((c.status || '—').split(' ').slice(0, 3).join(' ')) + '</div>' +
-        '</div>';
-    }).join('');
+      var cpu = c.cpuPercent || 0;
+      var memMiB = (c.memory && c.memory.usageMiB) || 0;
+      var cpuW = Math.max(cpu > 0 ? 2 : 0, Math.min(100, cpu));
+      var memW = Math.max(memMiB > 0 ? 2 : 0, Math.round(memMiB / maxMem * 100));
+      var memStr = memMiB >= 1024 ? (memMiB / 1024).toFixed(1) + 'G' : Math.round(memMiB) + 'M';
+      return '<div class="stack-node">' +
+        '<div class="sn-head"><span class="dot ' + (ok ? 'ok' : 'err') + '"></span><span class="sn-name" title="' + escHtml(c.name || '') + '">' + escHtml((c.name || '—').replace(/^wispy_|^gringo_/, '')) + '</span><span class="sn-up">' + escHtml(c.uptime || '') + '</span></div>' +
+        '<div class="sn-bar"><span>CPU</span><div class="mb"><i style="width:' + cpuW + '%"></i></div><b>' + cpu.toFixed(1) + '%</b></div>' +
+        '<div class="sn-bar"><span>MEM</span><div class="mb mb-metro"><i style="width:' + memW + '%"></i></div><b>' + memStr + '</b></div>' +
+      '</div>';
+    }
+    var assigned = {};
+    var html = '';
+    LAYERS.forEach(function (L) {
+      var nodes = containers.filter(function (c) { return !assigned[c.name] && L.re.test(c.name || ''); });
+      nodes.forEach(function (n) { assigned[n.name] = true; });
+      if (!nodes.length) return;
+      html += '<div class="stack-layer"><div class="stack-layer-label">' + L.label + ' <em>' + nodes.length + '</em></div><div class="stack-nodes">' + nodes.map(nodeHtml).join('') + '</div></div>';
+    });
+    var rest = containers.filter(function (c) { return !assigned[c.name]; });
+    if (rest.length) html += '<div class="stack-layer"><div class="stack-layer-label">Otros <em>' + rest.length + '</em></div><div class="stack-nodes">' + rest.map(nodeHtml).join('') + '</div></div>';
+    grid.innerHTML = html;
   }
   window.loadDocker = loadDocker;
 
@@ -707,6 +741,10 @@
       if (st && !st.__error) {
         if (w) w.textContent = fmtTok(st.tokens_total || 0) + ' tok';
         if (ws) ws.textContent = (st.model || 'gpt-5.5') + ' · total GringoLabs';
+        var w24 = document.getElementById('tok-wispy-24h');
+        if (w24) w24.textContent = fmtTok(st.tokens_24h || 0) + ' tok';
+        var wc = document.getElementById('tok-wispy-cost');
+        if (wc) wc.textContent = 'costo $' + (st.cost_24h != null ? Number(st.cost_24h).toFixed(2) : '0.00') + ' · ' + (st.iterations_24h || 0) + ' iteraciones';
       }
     } catch (e) {}
     // Bambi + actividad por agente (history-db) — mensajes reales (tokens locales/ollama = sin costo)
@@ -732,6 +770,16 @@
         var cachePct = tot ? Math.round(cr / tot * 100) : 0;
         if (c) c.textContent = fmtTok(tot) + ' tok';
         if (cs) cs.textContent = 'output real ' + fmtTok(out) + ' · ' + cachePct + '% cache';
+        var el2 = document.getElementById('tok-cc-out');
+        if (el2) el2.textContent = fmtTok(out) + ' tok';
+        el2 = document.getElementById('tok-cc-cache');
+        if (el2) el2.textContent = fmtTok(cr) + ' tok';
+        el2 = document.getElementById('tok-cc-cachepct');
+        if (el2) el2.textContent = cachePct + '% del total (barato, contexto releído)';
+        el2 = document.getElementById('tok-cc-sessions');
+        if (el2) el2.textContent = (cc.summary.sessions || 0);
+        el2 = document.getElementById('tok-cc-days');
+        if (el2) el2.textContent = (cc.summary.activeDays || 0) + ' días activos · racha ' + (cc.summary.currentStreak || 0);
       }
     } catch (e) {}
   }
@@ -1097,6 +1145,7 @@
       body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">Sin datos por unidad</td></tr>';
       return;
     }
+    byUnit = byUnit.slice().sort(function (x, y) { return (y.occupancyPct || 0) - (x.occupancyPct || 0); });
     body.innerHTML = byUnit.map(function (u) {
       var ocPct = (u.occupancyPct !== undefined && u.occupancyPct !== null)
         ? Math.round(u.occupancyPct <= 1 ? u.occupancyPct * 100 : u.occupancyPct)
@@ -1104,16 +1153,107 @@
       var next = (u.upcoming && u.upcoming[0] && u.upcoming[0].start)
         ? new Date(u.upcoming[0].start).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })
         : '—';
+      var barCol = ocPct >= 60 ? 'var(--ok)' : ocPct >= 30 ? 'var(--warn)' : 'var(--danger)';
+      var barW = (ocPct === '—') ? 0 : Math.min(100, ocPct);
       return '<tr>' +
         '<td style="font-family:var(--mono);font-size:.78rem;color:var(--muted);">' + escHtml(u.id || '—') + '</td>' +
         '<td style="font-weight:600;">' + escHtml(u.alias || '—') + '</td>' +
         '<td>' + (u.busyNights != null ? u.busyNights : '—') + '</td>' +
-        '<td><span style="color:' + (ocPct >= 60 ? 'var(--ok)' : ocPct >= 30 ? 'var(--warn)' : 'var(--danger)') + ';font-weight:700;">' + ocPct + (ocPct !== '—' ? '%' : '') + '</span></td>' +
+        '<td><div style="display:flex;align-items:center;gap:8px;min-width:120px;">' +
+          '<div style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.07);overflow:hidden;"><div style="height:100%;width:' + barW + '%;border-radius:3px;background:' + barCol + ';"></div></div>' +
+          '<span style="color:' + barCol + ';font-weight:700;font-family:var(--mono);font-size:.78rem;width:38px;text-align:right;">' + ocPct + (ocPct !== '—' ? '%' : '') + '</span>' +
+        '</div></td>' +
         '<td style="color:var(--gold);font-family:var(--mono);font-size:.8rem;">' + next + '</td>' +
       '</tr>';
     }).join('');
   }
   window.loadAmbiOcup = loadAmbiOcup;
+
+  /* ─── AMBBI · RESUMEN DEL NEGOCIO (KPIs + ocupación diaria) ─── */
+  async function loadAmbbiResumen() {
+    try {
+      var d = await apiFetch('/occupancy?days=30&company=Ambbi');
+      if (!d || d.__error || !d.ok) return;
+      var pct = Math.round((d.occupancyPct || 0) * 100);
+      var el = document.getElementById('ar-ocup');
+      if (el) { el.textContent = pct + '%'; el.style.color = pct >= 60 ? 'var(--ok)' : pct >= 30 ? 'var(--warn)' : 'var(--danger)'; }
+      el = document.getElementById('ar-ocup-sub');
+      if (el) el.textContent = (d.busyNights || 0) + ' / ' + (d.availableNights || 0) + ' noches';
+      var today = (d.daily && d.daily[0]) ? d.daily[0] : null;
+      el = document.getElementById('ar-hoy');
+      if (el) el.textContent = today ? (today.busy + ' / ' + today.total) : '—';
+      var todayISO = new Date().toISOString().slice(0, 10);
+      var in7 = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+      var checkins = (d.upcoming || []).filter(function (r) { return r.start >= todayISO && r.start <= in7; }).length;
+      el = document.getElementById('ar-checkins');
+      if (el) el.textContent = checkins;
+      el = document.getElementById('ar-units');
+      if (el) el.textContent = (d.unitsCounted || 0) + ' / ' + (d.unitsTotal || 0);
+      if (d.daily && d.daily.length) {
+        var series = d.daily.map(function (x) {
+          var p = x.date.split('-');
+          return { v: Math.round((x.pct || 0) * 100), label: parseInt(p[2]) + '/' + parseInt(p[1]) };
+        });
+        drawLineChart('chart-ambbi-daily', series, { color: '#d4a640' });
+      }
+    } catch (e) {}
+  }
+  window.loadAmbbiResumen = loadAmbbiResumen;
+
+  /* ─── PORTFOLIO (toggle AMBBI / Metropolitan / ambas) ─── */
+  var pfCurrent = 'ambbi';
+  function portfolioTab(which) {
+    pfCurrent = which;
+    ['ambbi', 'metro', 'all'].forEach(function (k) {
+      var b = document.getElementById('pf-tab-' + k);
+      if (b) b.classList.toggle('active', k === which);
+    });
+    renderPortfolio();
+  }
+  window.portfolioTab = portfolioTab;
+
+  async function renderPortfolio() {
+    function fU(v) { return (v == null) ? '—' : '$' + Math.round(Number(v)).toLocaleString('es-AR'); }
+    function fM(v) { if (v == null) return '—'; var p = Math.abs(v) <= 1 ? v * 100 : v; return Math.round(p) + '%'; }
+    try {
+      var results = await Promise.all([
+        apiFetch('/business/profitability?empresa=all'),
+        apiFetch('/occupancy?days=30&company=' + (pfCurrent === 'ambbi' ? 'Ambbi' : pfCurrent === 'metro' ? 'Metropolitan' : 'all'))
+      ]);
+      var prof = results[0], oc = results[1];
+      var co = (prof && !prof.__error && prof.companies) ? prof.companies : {};
+      var a = co.Ambbi || {}, m = co.Metropolitan || {};
+      var sel;
+      if (pfCurrent === 'ambbi') sel = a;
+      else if (pfCurrent === 'metro') sel = m;
+      else sel = {
+        ingresosUSD: (a.ingresosUSD || 0) + (m.ingresosUSD || 0),
+        ebitdaUSD: (a.ebitdaUSD || 0) + (m.ebitdaUSD || 0),
+        margenPct: ((a.ingresosUSD || 0) + (m.ingresosUSD || 0)) ? ((a.ebitdaUSD || 0) + (m.ebitdaUSD || 0)) / ((a.ingresosUSD || 0) + (m.ingresosUSD || 0)) : null,
+        adrUSD: a.adrUSD || m.adrUSD || null,
+        mes: a.mes || m.mes, anio: a.anio || m.anio
+      };
+      var byU = (oc && !oc.__error && oc.byUnit) ? oc.byUnit : [];
+      var el = document.getElementById('pf-units'); if (el) el.textContent = byU.length || '—';
+      el = document.getElementById('pf-units-sub');
+      if (el) {
+        if (pfCurrent === 'all') {
+          var na = byU.filter(function (u) { return (u.empresa || '').toLowerCase() === 'ambbi'; }).length;
+          el.textContent = na + ' AMBBI · ' + (byU.length - na) + ' Metro';
+        } else { el.textContent = 'con calendario activo'; }
+      }
+      el = document.getElementById('pf-ingresos'); if (el) el.textContent = fU(sel.ingresosUSD);
+      el = document.getElementById('pf-ebitda');
+      if (el) { el.textContent = fU(sel.ebitdaUSD); el.style.color = (sel.ebitdaUSD || 0) >= 0 ? 'var(--ok)' : 'var(--danger)'; }
+      el = document.getElementById('pf-margen'); if (el) el.textContent = fM(sel.margenPct);
+      el = document.getElementById('pf-adr'); if (el) el.textContent = fU(sel.adrUSD);
+      el = document.getElementById('pf-ocup');
+      if (el) el.textContent = (oc && !oc.__error) ? Math.round((oc.occupancyPct || 0) * 100) + '%' : '—';
+      el = document.getElementById('pf-period');
+      if (el && (sel.mes || sel.anio)) el.textContent = 'unidades + rentabilidad · ' + (sel.mes || '') + ' ' + (sel.anio || '');
+    } catch (e) {}
+  }
+  window.renderPortfolio = renderPortfolio;
 
   /* ─── AMBBI TAB SWITCHER ─────────────────────────────────────────── */
   function ambiTab(which) {
@@ -1124,8 +1264,8 @@
     });
     var sv = document.getElementById('at-' + which);
     if (sv) sv.classList.add('active');
-    // Sync tab buttons
-    var tabs = document.querySelectorAll('#view-ambbi .sub-tab');
+    // Sync tab buttons (scoped al contenedor operativo — el Portfolio tiene sus propios tabs)
+    var tabs = document.querySelectorAll('#ambbi-op-tabs .sub-tab');
     tabs.forEach(function (t) { t.classList.remove('active'); });
     var idx = prefixes.indexOf(which);
     if (tabs[idx]) tabs[idx].classList.add('active');
@@ -1835,21 +1975,22 @@
       return;
     }
     el.innerHTML =
-      '<div style="' + AE_LABEL + '">Herramientas habilitadas (' + tools.length + ') — «Disparar» las ejecuta de verdad, con confirmación</div>' +
-      '<div class="tools-list">' + tools.map(function (t) {
+      '<div style="' + AE_LABEL + '">Herramientas (' + tools.length + ') — tocá una para dispararla (pide confirmación)</div>' +
+      '<div class="tools-chips">' + tools.map(function (t) {
         var m = TOOL_META[t.name] || { icon: '🔧', label: t.name, risk: 'write' };
         var rk = RISK_META[m.risk] || RISK_META.write;
-        var desc = (t.description || '').split('\n')[0].slice(0, 120);
-        return '<div class="tool-row">' +
-            '<div class="tool-row-main">' +
-              '<span class="tool-ico">' + m.icon + '</span>' +
-              '<div><div class="tool-name">' + escHtml(m.label) +
-                ' <span class="tool-risk" style="color:' + rk.color + ';border-color:' + rk.color + '">' + rk.tag + '</span></div>' +
-                '<div class="tool-desc">' + escHtml(desc) + '</div></div>' +
-            '</div>' +
-            '<button class="btn btn-ghost btn-sm" onclick="openToolForm(\'' + agent + '\',\'' + t.name + '\')">Disparar</button>' +
-          '</div>';
-      }).join('') + '</div>';
+        var desc = (t.description || '').split('\n')[0].slice(0, 140);
+        return '<button class="tool-chip" onclick="openToolForm(\'' + agent + '\',\'' + t.name + '\')" title="' + escHtml(desc) + ' · ' + rk.tag + '" aria-label="' + escHtml(m.label) + '">' +
+            '<span class="tc-ico">' + m.icon + '</span>' +
+            '<span class="tc-label">' + escHtml(m.label) + '</span>' +
+            '<span class="tc-risk" style="background:' + rk.color + '" aria-hidden="true"></span>' +
+          '</button>';
+      }).join('') + '</div>' +
+      '<div class="small muted" style="margin-top:8px;display:flex;gap:12px;font-size:.66rem;">' +
+        '<span><i style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ok);margin-right:4px;"></i>lectura</span>' +
+        '<span><i style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:4px;"></i>escritura</span>' +
+        '<span><i style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--warn);margin-right:4px;"></i>envío</span>' +
+      '</div>';
   }
   window.toggleAgentTools = toggleAgentTools;
 

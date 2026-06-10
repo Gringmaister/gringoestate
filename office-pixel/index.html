@@ -75,11 +75,11 @@
         </span>
         <span>AMBBI <small class="nav-sub">Tareas · Huéspedes · Ocupación</small></span>
       </button>
-      <button class="nav-btn" onclick="nav('gebroker')" id="nav-gebroker" aria-label="GE BROKER — Pipeline, CRM">
+      <button class="nav-btn" onclick="nav('gebroker')" id="nav-gebroker" aria-label="GRINGO CRM — Brokerage, Pipeline">
         <span class="nav-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M2 20h20M4 20V10l8-7 8 7v10"/><path d="M8 20v-6h3v6M13 20v-6h3v6"/></svg>
         </span>
-        <span>GE BROKER <small class="nav-sub">Pipeline · CRM</small></span>
+        <span>GRINGO CRM <small class="nav-sub">Brokerage · Pipeline</small></span>
       </button>
     </div>
     <div class="sidebar-section">
@@ -118,8 +118,8 @@
       <header class="brand-header" role="banner">
         <img src="/images/isologo.webp" alt="Gringo Estate" class="brand-logo" width="52" height="52">
         <div class="brand-copy">
-          <h1><span>GRINGO</span> OFFICE <small style="font-size:1.1rem;letter-spacing:0.04em;color:var(--muted);">·</small> <span style="color:var(--muted);font-size:1.2rem;font-family:'Bebas Neue',sans-serif;letter-spacing:0.06em;">centro de comando</span></h1>
-          <p>Gringo Labs · stack completo en tiempo real</p>
+          <h1><span>GRINGO</span> OFFICE</h1>
+          <p style="font-family:'Bebas Neue',sans-serif;letter-spacing:.18em;font-size:.92rem;">CENTRO DE MANDO · GRINGO LABS</p>
         </div>
         <div class="brand-actions">
           <span class="version-badge" id="home-date">v0.3 · office</span>
@@ -348,6 +348,12 @@
           <div class="kpi"><span>🦌 Bambi (local)</span><strong id="tok-bambi">—</strong><small id="tok-bambi-sub">ollama · sin costo</small></div>
           <div class="kpi"><span>🧠 Claude Code (dev)</span><strong id="tok-cc" style="color:var(--gold)">—</strong><small id="tok-cc-sub">cc-stats</small></div>
         </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));margin-top:10px;">
+          <div class="kpi"><span>Wispy hoy (24h)</span><strong id="tok-wispy-24h">—</strong><small id="tok-wispy-cost">—</small></div>
+          <div class="kpi"><span>CC · output real</span><strong id="tok-cc-out">—</strong><small>tokens generados</small></div>
+          <div class="kpi"><span>CC · cache leído</span><strong id="tok-cc-cache">—</strong><small id="tok-cc-cachepct">—</small></div>
+          <div class="kpi"><span>CC · sesiones 30d</span><strong id="tok-cc-sessions">—</strong><small id="tok-cc-days">—</small></div>
+        </div>
         <div style="margin-top:10px;font-size:.72rem;color:var(--muted);" id="token-meters-foot">—</div>
       </div>
 
@@ -410,10 +416,10 @@
         </div>
       </div>
 
-      <!-- GE Pipeline -->
-      <div class="card" style="margin-bottom:18px;" role="region" aria-label="GE Pipeline">
+      <!-- Gringo CRM · Pipeline -->
+      <div class="card" style="margin-bottom:18px;" role="region" aria-label="Pipeline de Gringo CRM">
         <div class="card-head">
-          <h2 class="card-title">GE Pipeline</h2>
+          <h2 class="card-title">Gringo CRM · Pipeline</h2>
           <button class="btn btn-ghost btn-sm" onclick="loadOpsPipeline()" aria-label="Actualizar pipeline">
             <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
           </button>
@@ -669,7 +675,56 @@
         <h1>AMBBI</h1>
         <span class="badge badge-gold">Operaciones</span>
       </div>
-      <div class="sub-tabs">
+
+      <!-- RESUMEN DEL NEGOCIO -->
+      <div class="card" style="margin-bottom:14px;" role="region" aria-label="Resumen del negocio AMBBI">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">Resumen del negocio</h2>
+            <div class="card-sub">ocupación en tiempo real · iCal Airbnb/Booking</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadAmbbiResumen()" aria-label="Actualizar resumen AMBBI">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+          </button>
+        </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:14px;">
+          <div class="kpi accent"><span>Ocupación 30d</span><strong id="ar-ocup" style="font-size:1.6rem;">—</strong><small id="ar-ocup-sub">—</small></div>
+          <div class="kpi"><span>Hoy</span><strong id="ar-hoy" style="font-size:1.6rem;">—</strong><small>unidades ocupadas</small></div>
+          <div class="kpi"><span>Check-ins 7 días</span><strong id="ar-checkins" style="font-size:1.6rem;color:var(--gold)">—</strong><small>entradas próximas</small></div>
+          <div class="kpi"><span>Unidades</span><strong id="ar-units" style="font-size:1.6rem;">—</strong><small>con calendario activo</small></div>
+        </div>
+        <div class="chart-head" style="margin-bottom:6px;">
+          <span class="chart-title">Ocupación diaria — próximos 30 días</span>
+        </div>
+        <div class="chart-stage" style="height:160px;">
+          <canvas id="chart-ambbi-daily" aria-label="Ocupación diaria próximos 30 días"></canvas>
+        </div>
+      </div>
+
+      <!-- PORTFOLIO -->
+      <div class="card" style="margin-bottom:14px;" role="region" aria-label="Portfolio de unidades">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">Portfolio</h2>
+            <div class="card-sub" id="pf-period">unidades + rentabilidad del mes</div>
+          </div>
+          <div class="sub-tabs" style="margin:0;">
+            <button class="sub-tab active" id="pf-tab-ambbi" onclick="portfolioTab('ambbi')">AMBBI</button>
+            <button class="sub-tab" id="pf-tab-metro" onclick="portfolioTab('metro')">Metropolitan</button>
+            <button class="sub-tab" id="pf-tab-all" onclick="portfolioTab('all')">Ambas</button>
+          </div>
+        </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(6,minmax(0,1fr));">
+          <div class="kpi accent"><span>Unidades</span><strong id="pf-units">—</strong><small id="pf-units-sub">—</small></div>
+          <div class="kpi"><span>Ingresos</span><strong id="pf-ingresos">—</strong><small>mes en curso</small></div>
+          <div class="kpi"><span>EBITDA</span><strong id="pf-ebitda">—</strong><small>resultado</small></div>
+          <div class="kpi"><span>Margen</span><strong id="pf-margen">—</strong><small>%</small></div>
+          <div class="kpi"><span>ADR</span><strong id="pf-adr">—</strong><small>tarifa promedio</small></div>
+          <div class="kpi"><span>Ocupación</span><strong id="pf-ocup">—</strong><small>iCal 30d</small></div>
+        </div>
+      </div>
+
+      <div class="sub-tabs" id="ambbi-op-tabs">
         <button class="sub-tab active" onclick="ambiTab('tareas')">Tareas</button>
         <button class="sub-tab" onclick="ambiTab('huespedes')">Huéspedes</button>
         <button class="sub-tab" onclick="ambiTab('ocupacion')">Ocupación por Unidad</button>
@@ -737,11 +792,11 @@
       </div>
     </div>
 
-    <!-- ════════════════ GE BROKER ════════════════ -->
+    <!-- ════════════════ GRINGO CRM ════════════════ -->
     <div class="view" id="view-gebroker">
       <div class="section-head">
-        <h1>GE BROKER</h1>
-        <span class="badge badge-gold">Pipeline Activo</span>
+        <h1>GRINGO CRM</h1>
+        <span class="badge badge-gold">Brokerage</span>
       </div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
         <button class="btn btn-gold btn-sm" onclick="showModal('modal-prop')">+ Nueva propiedad</button>
@@ -757,11 +812,11 @@
         </table>
       </div>
       <div class="card">
-        <div class="card-head"><div class="card-title">Leonardo CRM</div><span class="badge badge-muted">Próximamente</span></div>
+        <div class="card-head"><div class="card-title">Hermes · CRM relacional</div><span class="badge badge-muted">Próximamente</span></div>
         <div class="placeholder-block" style="padding:18px;">
           <div class="ph-icon">📊</div>
-          <h3>CRM de Leads</h3>
-          <p style="font-size:.82rem;">Gestión de leads, seguimiento de compradores y automatización de ventas vía Leonardo.</p>
+          <h3>DB relacional ~250 + documental</h3>
+          <p style="font-size:.82rem;">Contactos trabajables (regla Magnin) · seguimiento de compradores y propietarios · propiedades comercializadas + módulo documental · Hermes en WhatsApp.</p>
         </div>
       </div>
     </div>
@@ -865,16 +920,20 @@
           <p>Servidor · containers Docker · observabilidad</p>
         </div>
       </header>
-      <div class="card" style="margin-bottom:18px;" role="region" aria-label="Containers Docker">
+      <div class="card" style="margin-bottom:18px;" role="region" aria-label="Mapa del stack Gringo Labs">
         <div class="card-head">
-          <h2 class="card-title">Containers Docker</h2>
-          <button class="btn btn-ghost btn-sm" onclick="loadDocker()" aria-label="Actualizar estado Docker">
+          <div>
+            <h2 class="card-title">Mapa del stack</h2>
+            <div class="card-sub">contenedores por capa · CPU y memoria en vivo</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadDocker()" aria-label="Actualizar estado del stack">
             <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
           </button>
         </div>
-        <div class="docker-grid" id="docker-grid">
-          <div class="skeleton skeleton-block" style="height:52px;"></div>
-          <div class="skeleton skeleton-block" style="height:52px;"></div>
+        <div class="stats-row" id="stack-summary" style="margin-bottom:14px;"></div>
+        <div id="docker-grid">
+          <div class="skeleton skeleton-block" style="height:90px;"></div>
+          <div class="skeleton skeleton-block" style="height:90px;"></div>
         </div>
       </div>
     </div>
