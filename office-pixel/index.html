@@ -798,18 +798,55 @@
         <h1>GRINGO CRM</h1>
         <span class="badge badge-gold">Brokerage</span>
       </div>
-      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
-        <button class="btn btn-gold btn-sm" onclick="showModal('modal-prop')">+ Nueva propiedad</button>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px;">
+        <button class="btn btn-ghost btn-sm" onclick="loadCrm()">↻ Actualizar</button>
+        <button class="btn btn-gold btn-sm" onclick="showModal('modal-contacto')">+ Contacto / Lead</button>
+        <button class="btn btn-gold btn-sm" onclick="showModal('modal-prop')">+ Propiedad</button>
       </div>
-      <div class="card" style="padding:0;overflow:hidden;margin-bottom:18px;">
-        <table class="data-table">
-          <thead><tr>
-            <th>Dirección</th><th>Tipo</th><th>Estado</th><th>Precio</th><th>Propietario</th><th>Fecha</th><th></th>
-          </tr></thead>
-          <tbody id="props-body">
-            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">Pipeline vacío — agregá la primera propiedad</td></tr>
-          </tbody>
-        </table>
+
+      <!-- EMBUDO CAPTACIÓN -->
+      <div class="card" style="margin-bottom:14px;" role="region" aria-label="Embudo de captación">
+        <div class="card-head">
+          <div><h2 class="card-title">🏠 Embudo Captación</h2><div class="card-sub">propietarios interesados → propiedad publicada</div></div>
+          <span class="badge badge-gold" id="crm-cap-total">—</span>
+        </div>
+        <div class="crm-funnel" id="crm-captacion"><div class="skeleton skeleton-block" style="height:110px;"></div></div>
+      </div>
+
+      <!-- EMBUDO DEMANDA -->
+      <div class="card" style="margin-bottom:14px;" role="region" aria-label="Embudo de demanda">
+        <div class="card-head">
+          <div><h2 class="card-title">🛒 Embudo Demanda</h2><div class="card-sub">compradores e inquilinos → cierre</div></div>
+          <span class="badge badge-gold" id="crm-dem-total">—</span>
+        </div>
+        <div class="crm-funnel" id="crm-demanda"><div class="skeleton skeleton-block" style="height:110px;"></div></div>
+      </div>
+
+      <!-- LOS 250 + SEGUIMIENTOS -->
+      <div class="grid-2" style="margin-bottom:14px;">
+        <div class="card" role="region" aria-label="Los 250 contactos trabajables">
+          <div class="card-head"><h2 class="card-title">⭐ Los 250</h2><span class="badge badge-muted" id="crm-250-total">—</span></div>
+          <div class="kpi-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));" id="crm-250-grid">
+            <div class="kpi"><span>A</span><strong id="crm-250-A" style="color:var(--ok)">—</strong><small>top</small></div>
+            <div class="kpi"><span>B</span><strong id="crm-250-B" style="color:var(--gold)">—</strong><small>activos</small></div>
+            <div class="kpi"><span>C</span><strong id="crm-250-C" style="color:var(--warn)">—</strong><small>tibios</small></div>
+            <div class="kpi"><span>D</span><strong id="crm-250-D" style="color:var(--muted)">—</strong><small>fríos</small></div>
+          </div>
+          <div class="small muted" style="margin-top:8px;">Regla Magnin: se labura bien sobre ~250 contactos. Hermes etiqueta y retroalimenta.</div>
+        </div>
+        <div class="card" role="region" aria-label="Seguimientos pendientes">
+          <div class="card-head"><h2 class="card-title">⏰ Seguimientos</h2></div>
+          <div id="crm-seguimientos"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
+        </div>
+      </div>
+
+      <!-- PROPIEDADES + DOCUMENTAL -->
+      <div class="card" style="margin-bottom:18px;" role="region" aria-label="Propiedades y documental">
+        <div class="card-head">
+          <div><h2 class="card-title">📐 Propiedades & Documental</h2><div class="card-sub">docs guardadas + pipeline de publicación</div></div>
+          <span class="badge badge-muted" id="crm-props-total">—</span>
+        </div>
+        <div id="crm-propiedades"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
       </div>
       <div class="card">
         <div class="card-head"><div class="card-title">Hermes · CRM relacional</div><span class="badge badge-muted">Próximamente</span></div>
@@ -979,25 +1016,58 @@
 <!-- Modal nueva propiedad -->
 <div class="modal-overlay hidden" id="modal-prop">
   <div class="modal">
-    <h3>Nueva Propiedad</h3>
+    <h3>Nueva Propiedad (→ Notion)</h3>
     <div class="stack">
-      <input class="input" id="p-address" placeholder="Dirección completa">
+      <input class="input" id="p-address" placeholder="Dirección / título (ej: Santa Fe 2125 4ºB)">
       <div class="grid-2">
-        <select class="input" id="p-type">
-          <option>Departamento</option><option>PH</option>
-          <option>Casa</option><option>Local</option><option>Edificio</option>
+        <select class="input" id="p-type" aria-label="Tipo de propiedad">
+          <option>Departamento</option><option>Oficina</option><option>Local</option>
+          <option>Cochera</option><option>Casa</option><option>Terreno</option>
         </select>
-        <select class="input" id="p-status">
-          <option>Captación</option><option>En cartera</option>
-          <option>En proceso</option><option>Cerrado</option>
+        <select class="input" id="p-operacion" aria-label="Operación">
+          <option>Venta</option><option>Alquiler</option><option>Venta/Alquiler</option>
         </select>
       </div>
-      <input class="input" id="p-price" placeholder="Precio (USD)">
-      <input class="input" id="p-contact" placeholder="Propietario / Contacto">
+      <input class="input" id="p-price" placeholder="Valor pedido (ej: USD 120.000)">
+      <input class="input" id="p-zonaprop" placeholder="Link Zonaprop (opcional)">
       <textarea class="input" id="p-notes" placeholder="Notas…" style="min-height:60px;"></textarea>
       <div style="display:flex;gap:10px;justify-content:flex-end;">
         <button class="btn btn-ghost" onclick="hideModal('modal-prop')">Cancelar</button>
-        <button class="btn btn-gold" onclick="createProperty()">Agregar al pipeline</button>
+        <button class="btn btn-gold" onclick="createCrmPropiedad()">Crear en el CRM</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modal-contacto">
+  <div class="modal">
+    <h3>Nuevo Contacto / Lead (→ Notion)</h3>
+    <div class="stack">
+      <input class="input" id="c-nombre" placeholder="Nombre completo">
+      <div class="grid-2">
+        <select class="input" id="c-tipo" aria-label="Tipo de contacto">
+          <option>Propietario</option><option>Comprador</option><option>Inquilino</option>
+          <option>Inversor</option><option>Colega/Referidor</option>
+        </select>
+        <select class="input" id="c-etiqueta" aria-label="Etiqueta">
+          <option value="">Etiqueta —</option><option>A</option><option>B</option><option>C</option><option>D</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <input class="input" id="c-telefono" placeholder="Teléfono (54911…)">
+        <select class="input" id="c-origen" aria-label="Origen">
+          <option value="">Origen —</option><option>Referido</option><option>Zonaprop</option><option>Tokko</option>
+          <option>WhatsApp</option><option>Cartel</option><option>Conocido</option><option>Otro</option>
+        </select>
+      </div>
+      <input class="input" id="c-busca" placeholder="Qué busca (si es comprador/inquilino): zona, presupuesto, tipología">
+      <textarea class="input" id="c-notas" placeholder="Notas…" style="min-height:50px;"></textarea>
+      <label style="display:flex;gap:8px;align-items:center;font-size:.8rem;color:var(--muted);cursor:pointer;">
+        <input type="checkbox" id="c-250"> Sumar a “Los 250” (trabajables)
+      </label>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="hideModal('modal-contacto')">Cancelar</button>
+        <button class="btn btn-gold" onclick="createCrmContacto()">Crear en el CRM</button>
       </div>
     </div>
   </div>

@@ -78,7 +78,7 @@
     if (section === 'home')      { loadHome(); }
     if (section === 'agentes')   { loadWispy(); loadBambiAgent(); loadAgentActivity('wispy'); }
     if (section === 'ambbi')     { loadAmbbiResumen(); renderPortfolio(); loadTasks(); }
-    if (section === 'gebroker')  { loadProperties(); }
+    if (section === 'gebroker')  { loadCrm(); }
     if (section === 'smarthome') { loadHue(); }
     if (section === 'infra')     { loadDocker(); }
     if (section === 'canarian')  { checkCanaSession(); }
@@ -1276,65 +1276,115 @@
   }
   window.ambiTab = ambiTab;
 
-  /* ─── PROPERTIES ─────────────────────────────────────────────────── */
-  async function loadProperties() {
-    var d = await apiFetch('/ge/properties');
-    var body = document.getElementById('props-body');
-    if (!body) return;
-    if (!Array.isArray(d) || !d.length) {
-      body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">Pipeline vacío</td></tr>';
-      return;
-    }
-    body.innerHTML = d.map(function (p) {
-      return '<tr>' +
-        '<td style="font-weight:600;">' + escHtml(p.address || p.direccion || '—') + '</td>' +
-        '<td style="color:var(--muted);font-size:.8rem;">' + escHtml(p.type || p.tipo || '—') + '</td>' +
-        '<td><span class="badge badge-muted">' + escHtml(p.status || p.estado || '—') + '</span></td>' +
-        '<td style="color:var(--gold);font-weight:700;">$' + escHtml(String(p.price || p.precio || '—')) + '</td>' +
-        '<td style="font-size:.8rem;">' + escHtml(p.contact || p.propietario || '—') + '</td>' +
-        '<td style="font-size:.76rem;color:var(--muted);">' + (p.createdAt ? new Date(p.createdAt).toLocaleDateString('es-AR') : '—') + '</td>' +
-        '<td><button class="btn btn-danger btn-sm" onclick="deleteProperty(' + (p.id || 0) + ')">✕</button></td>' +
-      '</tr>';
-    }).join('');
+  /* ─── GRINGO CRM (banco Notion) ─────────────────────────────────── */
+  var CRM_ETIQ_COLOR = { A: 'var(--ok)', B: 'var(--gold)', C: 'var(--warn)', D: 'var(--muted)' };
+  function crmFunnelHtml(etapas) {
+    var max = Math.max.apply(null, etapas.map(function (e) { return e.count; }).concat([1]));
+    return '<div class="crm-cols">' + etapas.map(function (e) {
+      var h = Math.max(e.count > 0 ? 14 : 4, Math.round(e.count / max * 64));
+      return '<div class="crm-col" title="' + escHtml(e.etapa) + ': ' + e.count + '">' +
+        '<strong>' + e.count + '</strong>' +
+        '<div class="crm-bar"><i style="height:' + h + 'px"></i></div>' +
+        '<span>' + escHtml(e.etapa) + '</span>' +
+        (e.cards && e.cards.length ? '<div class="crm-cards">' + e.cards.slice(0, 3).map(function (c) {
+          var col = CRM_ETIQ_COLOR[c.etiqueta] || 'var(--muted)';
+          return '<div class="crm-card" style="border-left-color:' + col + '">' + escHtml(c.nombre) + '</div>';
+        }).join('') + (e.cards.length > 3 ? '<div class="small muted">+' + (e.cards.length - 3) + '</div>' : '') + '</div>' : '') +
+      '</div>';
+    }).join('') + '</div>';
   }
-  window.loadProperties = loadProperties;
 
-  async function createProperty() {
-    var addrEl   = document.getElementById('p-address');
-    var typeEl   = document.getElementById('p-type');
-    var statusEl = document.getElementById('p-status');
-    var priceEl  = document.getElementById('p-price');
-    var contEl   = document.getElementById('p-contact');
-    var notesEl  = document.getElementById('p-notes');
-    if (!addrEl || !addrEl.value.trim()) return toast('La dirección es requerida', 'err');
-    var body = {
-      address: addrEl.value.trim(),
-      type:    typeEl  ? typeEl.value  : '',
-      status:  statusEl ? statusEl.value : '',
-      price:   priceEl ? priceEl.value : '',
-      contact: contEl  ? contEl.value  : '',
-      notes:   notesEl ? notesEl.value : ''
-    };
-    var d = await apiFetch('/ge/property', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+  async function loadCrm() {
+    try {
+      var d = await apiFetch('/crm/pipeline');
+      if (!d || d.__error || !d.ok) {
+        var c1 = document.getElementById('crm-captacion');
+        if (c1) c1.innerHTML = '<span class="small muted">No pude leer el CRM (bridge /api/crm/pipeline).</span>';
+        return;
+      }
+      var cap = document.getElementById('crm-captacion');
+      if (cap) cap.innerHTML = crmFunnelHtml(d.captacion || []);
+      var capTotal = (d.captacion || []).reduce(function (s, e) { return s + e.count; }, 0);
+      var el = document.getElementById('crm-cap-total'); if (el) el.textContent = capTotal + ' propietarios';
+      var dem = document.getElementById('crm-demanda');
+      if (dem) dem.innerHTML = crmFunnelHtml(d.demanda || []);
+      var demTotal = (d.demanda || []).reduce(function (s, e) { return s + e.count; }, 0);
+      el = document.getElementById('crm-dem-total'); if (el) el.textContent = demTotal + ' leads';
+      // Los 250
+      el = document.getElementById('crm-250-total'); if (el) el.textContent = (d.los250?.total || 0) + ' / 250';
+      (d.los250?.porEtiqueta || []).forEach(function (x) {
+        var e = document.getElementById('crm-250-' + x.etiqueta);
+        if (e) e.textContent = x.count;
+      });
+      // Propiedades + documental
+      el = document.getElementById('crm-props-total'); if (el) el.textContent = (d.propiedades?.total || 0) + ' propiedades';
+      var pr = document.getElementById('crm-propiedades');
+      if (pr) {
+        var items = d.propiedades?.items || [];
+        pr.innerHTML = items.length ? items.map(function (p) {
+          var docsCol = p.docsPct >= 100 ? 'var(--ok)' : p.docsPct >= 50 ? 'var(--gold)' : 'var(--warn)';
+          return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);">' +
+            '<span style="flex:1;font-weight:600;font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(p.propiedad) + '</span>' +
+            '<span class="badge badge-muted">' + escHtml(p.operacion || '—') + '</span>' +
+            '<span style="color:var(--gold);font-family:var(--mono);font-size:.78rem;">' + escHtml(p.valorPedido || '—') + '</span>' +
+            '<div style="display:flex;align-items:center;gap:6px;width:130px;">' +
+              '<div style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.07);overflow:hidden;"><div style="height:100%;width:' + p.docsPct + '%;background:' + docsCol + ';border-radius:3px;"></div></div>' +
+              '<span style="font-size:.7rem;font-family:var(--mono);color:' + docsCol + ';width:54px;">docs ' + p.docsPct + '%</span>' +
+            '</div>' +
+            '<span class="badge ' + (p.estado === 'Publicada' ? 'badge-ok' : 'badge-muted') + '">' + escHtml(p.estado || '—') + '</span>' +
+          '</div>';
+        }).join('') : '<span class="small muted">Sin propiedades todavía — cargá la primera con «+ Propiedad».</span>';
+      }
+      loadCrmSeguimientos();
+    } catch (e) {}
+  }
+  window.loadCrm = loadCrm;
+
+  async function loadCrmSeguimientos() {
+    var el = document.getElementById('crm-seguimientos');
+    if (!el) return;
+    var d = await apiFetch('/crm/seguimientos');
+    if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">—</span>'; return; }
+    var items = [];
+    (d.reportesVencidos || []).forEach(function (r) {
+      items.push('<div style="display:flex;gap:8px;align-items:center;padding:5px 0;font-size:.8rem;"><span>📨</span><span style="flex:1;">Reporte 21d vencido: <b>' + escHtml(r.propiedad) + '</b></span><span class="small muted">' + (r.ultimoReporte || 'nunca') + '</span></div>');
     });
-    if (d && d.ok) {
-      hideModal('modal-prop');
-      toast('Propiedad agregada al pipeline', 'ok');
-      loadProperties();
-    } else {
-      toast('Error al agregar propiedad', 'err');
-    }
+    (d.followupsVencidos || []).forEach(function (f) {
+      items.push('<div style="display:flex;gap:8px;align-items:center;padding:5px 0;font-size:.8rem;"><span>🔁</span><span style="flex:1;">Seguir a <b>' + escHtml(f.nombre) + '</b> (' + escHtml(f.tipo || '—') + ')</span><span class="small muted">' + (f.proximoSeguimiento || '') + '</span></div>');
+    });
+    el.innerHTML = items.length ? items.join('') : '<span class="small muted">✅ Sin seguimientos vencidos.</span>';
   }
-  window.createProperty = createProperty;
+  window.loadCrmSeguimientos = loadCrmSeguimientos;
 
-  async function deleteProperty(id) {
-    if (!confirm('Eliminar esta propiedad del pipeline?')) return;
-    toast('Función de eliminación pendiente en el bridge', 'warn');
+  async function createCrmPropiedad() {
+    var v = function (id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
+    if (!v('p-address')) return toast('La dirección/título es requerida', 'err');
+    var d = await apiFetch('/crm/propiedad', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ propiedad: v('p-address'), tipoPropiedad: v('p-type'), operacion: v('p-operacion'), valorPedido: v('p-price'), linkZonaprop: v('p-zonaprop') || undefined, notas: v('p-notes') })
+    });
+    if (d && d.ok) { hideModal('modal-prop'); toast('Propiedad creada en el CRM (Notion)', 'ok'); loadCrm(); }
+    else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
   }
-  window.deleteProperty = deleteProperty;
+  window.createCrmPropiedad = createCrmPropiedad;
+
+  async function createCrmContacto() {
+    var v = function (id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
+    if (!v('c-nombre')) return toast('El nombre es requerido', 'err');
+    var tipo = v('c-tipo');
+    var body = {
+      nombre: v('c-nombre'), tipo: tipo,
+      etiqueta: v('c-etiqueta') || undefined, telefono: v('c-telefono') || undefined,
+      origen: v('c-origen') || undefined, busca: v('c-busca') || undefined, notas: v('c-notas') || undefined,
+      en250: !!(document.getElementById('c-250') || {}).checked
+    };
+    if (tipo === 'Propietario') body.etapaCaptacion = 'Lead propietario';
+    else if (tipo === 'Comprador' || tipo === 'Inquilino') body.etapaDemanda = 'Consulta';
+    var d = await apiFetch('/crm/contacto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (d && d.ok) { hideModal('modal-contacto'); toast('Contacto creado en el CRM (Notion)', 'ok'); loadCrm(); }
+    else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
+  }
+  window.createCrmContacto = createCrmContacto;
 
   /* ─── HUE ────────────────────────────────────────────────────────── */
   async function loadHue() {
@@ -1738,20 +1788,15 @@
     if (!el) return;
     el.innerHTML = '<div class="skeleton skeleton-block" style="height:100px;"></div>';
 
-    var d = await apiFetch('/ge/properties');
-    if (!Array.isArray(d) || !d.length) {
-      el.innerHTML = '<span style="color:var(--muted);font-size:.82rem;">Pipeline vacío</span>';
+    var d = await apiFetch('/crm/pipeline');
+    if (!d || d.__error || !d.ok || !(d.propiedades && d.propiedades.total)) {
+      el.innerHTML = '<span style="color:var(--muted);font-size:.82rem;">Pipeline vacío — cargá propiedades en GRINGO CRM</span>';
       return;
     }
-    // Count by status
-    var byStatus = {};
-    d.forEach(function (p) {
-      var s = p.status || p.estado || 'Sin estado';
-      if (!byStatus[s]) byStatus[s] = 0;
-      byStatus[s]++;
-    });
+    var byStatus = d.propiedades.byEstado || {};
+    var total = d.propiedades.total;
 
-    var html = '<div style="font-size:.72rem;color:var(--muted);margin-bottom:10px;"><strong style="color:var(--text);font-size:.95rem;">' + d.length + '</strong> propiedades en cartera</div>' +
+    var html = '<div style="font-size:.72rem;color:var(--muted);margin-bottom:10px;"><strong style="color:var(--text);font-size:.95rem;">' + total + '</strong> propiedades en cartera</div>' +
       '<div class="ops-pipeline">' +
       Object.keys(byStatus).map(function (s) {
         return '<div class="ops-pipe-item"><span>' + escHtml(s) + '</span><strong>' + byStatus[s] + '</strong></div>';

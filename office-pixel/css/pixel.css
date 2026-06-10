@@ -1284,6 +1284,16 @@ input:focus:not(:focus-visible) { outline: none; }
 .mb i { display: block; height: 100%; border-radius: 2px; background: var(--gold); transition: width .3s; }
 .mb.mb-metro i { background: var(--metro); }
 
+/* ─── GRINGO CRM · Embudos ─── */
+.crm-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; align-items: end; }
+.crm-col { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.crm-col strong { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--gold); line-height: 1; }
+.crm-bar { width: 100%; height: 64px; display: flex; align-items: flex-end; }
+.crm-bar i { display: block; width: 100%; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, rgba(212,166,64,0.85), rgba(212,166,64,0.25)); transition: height .3s; }
+.crm-col span { font-size: .64rem; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; line-height: 1.25; }
+.crm-cards { width: 100%; display: grid; gap: 3px; margin-top: 2px; }
+.crm-card { font-size: .68rem; text-align: left; padding: 3px 6px; border-left: 2px solid var(--muted); background: rgba(255,255,255,0.03); border-radius: 0 5px 5px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 /* ─── AGENTES · Tools como chips compactos ─── */
 .tools-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .tool-chip {
