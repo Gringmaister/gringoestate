@@ -522,7 +522,7 @@
     // Docker
     if (docker && (docker.summary || docker.containers)) {
       var running = docker.summary ? docker.summary.running
-        : docker.containers.filter(function (c) { return (c.status || '').toLowerCase().includes('up'); }).length;
+        : docker.containers.filter(function (c) { return /up|running/.test((c.status || '').toLowerCase()); }).length;
       var total = docker.summary ? docker.summary.total : docker.containers.length;
       var sbDock = document.getElementById('sb-docker');
       if (sbDock) sbDock.innerHTML = '<span class="dot ' + (running === total ? 'ok' : 'warn') + '"></span>' + running + '/' + total;
@@ -608,7 +608,7 @@
       return;
     }
     var containers = d.containers;
-    var running = containers.filter(function (c) { return (c.status || '').toLowerCase().includes('up'); }).length;
+    var running = containers.filter(function (c) { return /up|running/.test((c.status || '').toLowerCase()); }).length;
 
     // Update KPIs
     var kpiDock = document.getElementById('kpi-docker');
@@ -617,7 +617,7 @@
     if (sbDock) sbDock.innerHTML = '<span class="dot ' + (running === containers.length ? 'ok' : 'warn') + '"></span>' + running + '/' + containers.length + ' UP';
 
     grid.innerHTML = containers.map(function (c) {
-      var ok = (c.status || '').toLowerCase().includes('up');
+      var ok = /up|running/.test((c.status || '').toLowerCase());
       return '<div class="docker-item">' +
         '<div class="d-name"><span class="dot ' + (ok ? 'ok' : 'err') + '"></span>' + escHtml(c.name || '—') + '</div>' +
         '<div class="d-status" style="color:' + (ok ? 'var(--ok)' : 'var(--danger)') + '">' +
@@ -638,14 +638,14 @@
       var labs = document.getElementById('pil-labs'), sub = document.getElementById('pil-labs-sub');
       if (labs) {
         if (dk && !dk.__error && dk.containers && dk.containers.length) {
-          var up = dk.containers.filter(function (c) { return (((c.status || '') + '').toLowerCase()).indexOf('up') >= 0; }).length;
+          var up = dk.containers.filter(function (c) { return /up|running/.test(((c.status || '') + '').toLowerCase()); }).length;
           labs.textContent = '🟢 ' + up + '/' + dk.containers.length;
         } else { labs.textContent = '🟢 Online'; }
       }
       if (sub) {
         var md = (st && !st.__error && st.model) ? st.model : 'gpt-5.5';
         var tt = (st && !st.__error) ? (st.tokens_total || 0) : 0;
-        var tStr = tt >= 1e6 ? (Math.round(tt / 1e6) + 'M') : Number(tt).toLocaleString('es-AR');
+        var tStr = Number(tt).toLocaleString('es-AR');
         sub.textContent = md + ' · ' + tStr + ' tok';
       }
     } catch (e) {}
@@ -698,7 +698,7 @@
   window.loadAlerts = loadAlerts;
 
   /* ─── TOKENS · MEDIDORES (Motor IA O2) ─── */
-  function fmtTok(n) { n = Number(n) || 0; if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B'; if (n >= 1e6) return Math.round(n / 1e6) + 'M'; if (n >= 1e3) return Math.round(n / 1e3) + 'k'; return '' + n; }
+  function fmtTok(n) { return (Number(n) || 0).toLocaleString('es-AR'); }
   async function loadTokenMeters() {
     // Wispy gateway (gpt-5.5) — tokens reales del entorno (= total GringoLabs)
     try {
@@ -709,17 +709,17 @@
         if (ws) ws.textContent = (st.model || 'gpt-5.5') + ' · total GringoLabs';
       }
     } catch (e) {}
-    // Bambi + actividad por agente (history-db) — turnos reales (tokens locales/ollama = sin costo)
+    // Bambi + actividad por agente (history-db) — mensajes reales (tokens locales/ollama = sin costo)
     try {
       var at = await apiFetch('/agent-tokens');
       var ags = (at && !at.__error && at.agents) ? at.agents : [];
       var bambi = ags.find(function (a) { return a.agent === 'bambi'; });
       var wisp = ags.find(function (a) { return a.agent === 'wispy'; });
       var b = document.getElementById('tok-bambi'), bs = document.getElementById('tok-bambi-sub');
-      if (b) b.textContent = (bambi ? bambi.turns : 0) + ' turnos';
+      if (b) b.textContent = (bambi ? bambi.turns : 0) + ' mensajes';
       if (bs) bs.textContent = 'ollama local · sin costo';
       var foot = document.getElementById('token-meters-foot');
-      if (foot) foot.innerHTML = 'Actividad runtime: 🤖 Wispy <b>' + (wisp ? wisp.turns : 0) + '</b> · 🦌 Bambi <b>' + (bambi ? bambi.turns : 0) + '</b> turnos · <span style="opacity:.7">tokens exactos por agente = próximo (O2b)</span>';
+      if (foot) foot.innerHTML = 'Actividad runtime: 🤖 Wispy <b>' + (wisp ? wisp.turns : 0) + '</b> · 🦌 Bambi <b>' + (bambi ? bambi.turns : 0) + '</b> mensajes · <span style="opacity:.7">tokens exactos por agente = próximo (O2b)</span>';
     } catch (e) {}
     // Claude Code (dev) — cc-stats
     try {
@@ -1573,38 +1573,23 @@
     var prioColor = { Urgente: 'var(--danger)', Alta: 'var(--warn)', Media: 'var(--ok)', Baja: 'var(--muted)' };
     var colorMap  = { Pamela: '#d4a640', Augusto: '#4dde95', Marcelo: '#5b9cf6', Franco: '#ff7b7b' };
 
-    // Group by status
-    var byStatus = {};
-    tasks.forEach(function (t) {
-      var s = t.status || 'Sin estado';
-      if (!byStatus[s]) byStatus[s] = 0;
-      byStatus[s]++;
-    });
-    var statusRows = Object.keys(byStatus).map(function (s) {
-      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:.78rem;">' +
-        '<span style="color:var(--muted);">' + escHtml(s) + '</span>' +
-        '<strong style="color:var(--gold);font-family:var(--mono);">' + byStatus[s] + '</strong>' +
-      '</div>';
-    }).join('');
-
-    // Recent urgent tasks
+    // Solo tareas URGENTES (pedido Franco)
     var urgent = tasks.filter(function (t) {
       return (t.priority || t.prioridad || '').toLowerCase() === 'urgente';
-    }).slice(0, 3);
-    var urgentHtml = urgent.length
-      ? '<div style="margin-top:10px;font-size:.72rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">Urgentes</div>' +
-        urgent.map(function (t) {
-          var r = t.responsable || '';
-          var col = colorMap[r] || 'var(--muted)';
-          return '<div style="display:flex;justify-content:space-between;align-items:center;font-size:.78rem;padding:4px 0;">' +
-            '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;">' + escHtml(t.title || '—') + '</span>' +
-            '<span style="background:' + col + '22;color:' + col + ';padding:1px 6px;border-radius:6px;font-size:.72rem;flex-shrink:0;">' + escHtml(r || '—') + '</span>' +
-          '</div>';
-        }).join('')
-      : '';
-
-    el.innerHTML = '<div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;"><strong style="color:var(--text);font-size:.95rem;">' + tasks.length + '</strong> tareas en total</div>' +
-      '<div style="display:grid;gap:4px;">' + statusRows + '</div>' + urgentHtml;
+    });
+    if (!urgent.length) {
+      el.innerHTML = '<span style="color:var(--muted);font-size:.82rem;">✅ Sin tareas urgentes</span>';
+      return;
+    }
+    el.innerHTML = '<div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;"><strong style="color:var(--danger);font-size:.95rem;">' + urgent.length + '</strong> urgentes</div>' +
+      urgent.slice(0, 12).map(function (t) {
+        var r = t.responsable || '';
+        var col = colorMap[r] || 'var(--muted)';
+        return '<div style="display:flex;justify-content:space-between;align-items:center;font-size:.8rem;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);">' +
+          '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">' + escHtml(t.title || '—') + '</span>' +
+          '<span style="background:' + col + '22;color:' + col + ';padding:1px 6px;border-radius:6px;font-size:.72rem;flex-shrink:0;">' + escHtml(r || '—') + '</span>' +
+        '</div>';
+      }).join('');
   }
   window.loadOpsTab = loadOpsTab;
 
