@@ -1375,6 +1375,7 @@
       loadCrmResumen();
       loadCrmHigiene();
       loadPlanSemanal();
+      loadCrmMatching();
     } catch (e) {}
   }
   window.loadCrm = loadCrm;
@@ -1581,6 +1582,33 @@
     else toast('Error al crear la tarea', 'err');
   }
   window.crearTareaContacto = crearTareaContacto;
+
+  /* ─── C4: Matching demanda↔propiedad ─── */
+  async function loadCrmMatching() {
+    var el = document.getElementById('crm-matching');
+    if (!el) return;
+    var d = await apiFetch('/crm/matching');
+    if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">No pude calcular matches.</span>'; return; }
+    var cnt = document.getElementById('crm-match-count');
+    if (cnt) cnt.textContent = d.count + ' matches';
+    el.innerHTML = (d.matches || []).length ? d.matches.slice(0, 10).map(function (m) {
+      return '<div style="border:1px solid var(--border);border-radius:10px;padding:9px 12px;margin-bottom:7px;">' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+          '<strong style="font-size:.84rem;">' + escHtml(m.contacto) + '</strong>' +
+          '<span style="color:var(--muted);">↔</span>' +
+          '<span style="font-size:.82rem;">' + escHtml(m.propiedad) + '</span>' +
+          '<span style="margin-left:auto;font-family:var(--mono);font-size:.7rem;color:var(--gold);">' + m.score + '%</span>' +
+        '</div>' +
+        '<div style="font-size:.74rem;color:var(--muted);margin:3px 0 7px;">' + m.razones.map(escHtml).join(' · ') + ' · etapa: ' + escHtml(m.etapa || '—') + '</div>' +
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+          '<button class="btn btn-gold btn-sm" onclick="copiarBorrador(this)" data-msg="' + escHtml(m.borrador) + '">📋 Copiar mensaje</button>' +
+          (m.telefono ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="https://wa.me/' + String(m.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') +
+          '<button class="btn btn-ghost btn-sm" onclick="abrirContactoEdit(\'' + m.contactoId + '\')">✏️</button>' +
+        '</div>' +
+      '</div>';
+    }).join('') : '<span class="small muted">Sin matches todavía — aparecen cuando una propiedad activa encaja con lo que busca un lead (operación + zona + presupuesto).</span>';
+  }
+  window.loadCrmMatching = loadCrmMatching;
 
   /* ─── C3.2: Vista 360 — los 3 procesos en un pantallazo ─── */
   function renderVista360() {
