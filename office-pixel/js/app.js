@@ -1641,6 +1641,7 @@
           '<span style="font-family:var(--mono);font-size:.74rem;color:var(--muted);">' + (t.m2Pond || '—') + ' m² pond.' + (t.cochera ? ' + 🚗' : '') + '</span>' +
           '<span style="margin-left:auto;"></span>' +
           '<button class="btn btn-gold btn-sm" onclick="calcularTasacion(\'' + t.id + '\')">🧮 Calcular</button>' +
+          (t.tasacionUsd ? '<button class="btn btn-gold btn-sm" onclick="pdfTasacion(\'' + t.id + '\')">📄 PDF Baigún</button>' : '') +
         '</div>' +
         (t.tasacionUsd ? '<div style="border:1px solid var(--ok);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.86rem;">💰 <b>TASACIÓN: USD ' + t.tasacionUsd.toLocaleString('es-AR') + '</b> <span style="color:var(--muted);font-size:.76rem;">(USD/m² zona: ' + (t.usdM2Zona || '—') + ' · rango ' + (t.rangoDesde || 0).toLocaleString('es-AR') + '–' + (t.rangoHasta || 0).toLocaleString('es-AR') + ')</span></div>' : '') +
         '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">' +
@@ -1686,6 +1687,17 @@
     } else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
   }
   window.calcularTasacion = calcularTasacion;
+
+  async function pdfTasacion(id) {
+    toast('Generando PDF brandeado… (~15s)', 'ok');
+    var d = await apiFetch('/crm/tasacion/pdf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+    if (d && d.ok) {
+      toast('📄 PDF listo' + (d.whatsappEnviado ? ' — te lo mandé por WhatsApp' : '') + (d.drive && d.drive.link ? ' · guardado en Drive/TASACIONES' : ''), 'ok');
+      if (d.drive && d.drive.link) window.open(d.drive.link, '_blank');
+      abrirTasacion(id); loadTasaciones();
+    } else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
+  }
+  window.pdfTasacion = pdfTasacion;
 
   /* ─── C4: Matching demanda↔propiedad ─── */
   async function loadCrmMatching() {
