@@ -1518,6 +1518,31 @@
         });
         cv.innerHTML = chips.length ? '<div style="font-size:.68rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Conversión por etapa</div><div style="display:flex;gap:6px;flex-wrap:wrap;">' + chips.join('') + '</div>' : '';
       }
+      // Benchmarks Magnin + plan semanal 40-5-5-1
+      var bm = document.getElementById('cm-benchmarks');
+      if (bm && m.benchmarks) {
+        var b = m.benchmarks;
+        var reunionesSem = (a.reuniones && a.reuniones.semana) || 0;
+        var cafeOk = reunionesSem >= b.semanal.cafes;
+        bm.innerHTML =
+          (m.carteraAlerta ? '<div style="font-size:.78rem;color:var(--warn);padding:6px 0;">' + escHtml(m.carteraAlerta) + '</div>' : '') +
+          '<div style="font-size:.68rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Plan semanal Magnin (40-5-5-1)</div>' +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">' +
+            '<span class="badge badge-muted">40 contactos personalizados</span>' +
+            '<span class="badge ' + (cafeOk ? 'badge-ok' : 'badge-muted') + '">5 cafés/reuniones — llevás ' + reunionesSem + (cafeOk ? ' ✓' : '') + '</span>' +
+            '<span class="badge badge-muted">5 ítems de valor</span>' +
+            '<span class="badge badge-muted">1 envío masivo</span>' +
+          '</div>' +
+          '<div style="font-size:.68rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Referencias Magnin</div>' +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+            '<span class="badge badge-muted" title="Captar 1 de cada 3 tasaciones; antes, descartar la mitad de los pedidos que no califican">Tasación→Captada: <b style="color:var(--gold);">33%</b></span>' +
+            '<span class="badge badge-muted" title="2 captaciones en cartera por cada venta">Captación→Venta: <b style="color:var(--gold);">50%</b></span>' +
+            '<span class="badge badge-muted" title="600 clics → 30 consultas → 15 visitas → 1 reserva (reserva→venta 1:1)">15 visitas = <b style="color:var(--gold);">1 reserva</b></span>' +
+            '<span class="badge badge-muted" title="Cartera chica y rotativa, marketing de altísima calidad">Cartera: <b style="color:var(--gold);">máx 5</b></span>' +
+            '<span class="badge badge-muted" title="12 contactos diarios prospectando = 12 ventas/año">12 contactos/día</span>' +
+            '<span class="badge badge-muted" title="Responder en menos de 1 minuto; 2-3hs ya es tarde">Speed-to-lead: <b style="color:var(--gold);">&lt;1 min</b></span>' +
+          '</div>';
+      }
     }
     var hh = await apiFetch('/crm/hablar-hoy');
     var el = document.getElementById('crm-hablar-hoy');
