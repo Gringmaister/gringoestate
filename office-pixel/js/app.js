@@ -1603,7 +1603,7 @@
         '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
           '<button class="btn btn-gold btn-sm" onclick="copiarBorrador(this)" data-msg="' + escHtml(m.borrador) + '">📋 Copiar mensaje</button>' +
           (m.telefono ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="https://wa.me/' + String(m.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') +
-          '<button class="btn btn-ghost btn-sm" onclick="abrirContactoEdit(\'' + m.contactoId + '\')">✏️</button>' +
+          (m.contactoId ? '<button class="btn btn-ghost btn-sm" onclick="abrirContactoEdit(\'' + m.contactoId + '\')">✏️</button>' : '') +
         '</div>' +
       '</div>';
     }).join('') : '<span class="small muted">Sin matches todavía — aparecen cuando una propiedad activa encaja con lo que busca un lead (operación + zona + presupuesto).</span>';
