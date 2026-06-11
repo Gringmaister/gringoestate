@@ -1288,7 +1288,8 @@
         '<span>' + escHtml(e.etapa) + '</span>' +
         (e.cards && e.cards.length ? '<div class="crm-cards">' + e.cards.slice(0, 3).map(function (c) {
           var col = CRM_ETIQ_COLOR[c.etiqueta] || 'var(--muted)';
-          return '<div class="crm-card" style="border-left-color:' + col + '">' + escHtml(c.nombre) + '</div>';
+          var click = c.id ? ' onclick="abrirContactoEdit(\'' + c.id + '\')" style="cursor:pointer;border-left-color:' + col + '"' : ' style="border-left-color:' + col + '"';
+          return '<div class="crm-card"' + click + ' title="Click para editar (etapas, NURC/PUFA)">' + escHtml(c.nombre) + '</div>';
         }).join('') + (e.cards.length > 3 ? '<div class="small muted">+' + (e.cards.length - 3) + '</div>' : '') + '</div>' : '') +
       '</div>';
     }).join('') + '</div>';
@@ -1327,7 +1328,19 @@
           var docsCol = p.docsPct >= 100 ? 'var(--ok)' : p.docsPct >= 50 ? 'var(--gold)' : 'var(--warn)';
           var valor = p.valorVenta ? ('$' + Number(p.valorVenta).toLocaleString('es-AR')) : p.valorAlquiler ? ('$' + Number(p.valorAlquiler).toLocaleString('es-AR') + '/mes') : (p.valorPedido || '—');
           var specs = [p.tipoPropiedad, p.m2Totales ? p.m2Totales + 'm²' : null, p.ambientes ? p.ambientes + ' amb' : null].filter(Boolean).join(' · ');
+          // 4 semáforos derivados: comercial / documental / marketing / operativo
+          var semComercial = p.estado === 'Publicada' ? 'var(--ok)' : p.estado === 'Reservada' ? 'var(--gold)' : p.estado === 'Cerrada' ? 'var(--metro)' : 'var(--muted)';
+          var semDoc = p.docsPct >= 100 ? 'var(--ok)' : p.docsPct >= 50 ? 'var(--gold)' : 'var(--danger)';
+          var mkCount = (p.pedidosPublicacion || []).length;
+          var semMkt = mkCount >= 4 ? 'var(--ok)' : mkCount >= 2 ? 'var(--gold)' : 'var(--danger)';
+          var semOp = (window.crmOpsByProp && window.crmOpsByProp[p.id]) ? 'var(--ok)' : 'var(--muted)';
+          var semaforos = '<span style="display:inline-flex;gap:3px;flex-shrink:0;" title="Comercial · Documental · Marketing · Operativo">' +
+            ['Comercial:' + (p.estado || '—'), 'Docs ' + p.docsPct + '%', 'Marketing ' + mkCount + '/4', (window.crmOpsByProp && window.crmOpsByProp[p.id]) ? 'Con operación activa' : 'Sin operación'].map(function (tt, i) {
+              var col = [semComercial, semDoc, semMkt, semOp][i];
+              return '<i title="' + escHtml(tt) + '" style="width:8px;height:8px;border-radius:50%;background:' + col + ';display:inline-block;"></i>';
+            }).join('') + '</span>';
           return '<div onclick="abrirFicha(\'' + p.id + '\')" style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer;" title="Click para abrir/editar la ficha">' +
+            semaforos +
             '<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(p.propiedad) + '</div>' +
             (specs ? '<div style="font-size:.68rem;color:var(--muted);">' + escHtml(specs) + '</div>' : '') + '</div>' +
             '<span class="badge badge-muted">' + escHtml(p.operacion || '—') + '</span>' +
@@ -1343,6 +1356,8 @@
       loadCrmSeguimientos();
       loadCrmInbox();
       loadCrmOperaciones();
+      loadCrmResumen();
+      loadCrmHigiene();
     } catch (e) {}
   }
   window.loadCrm = loadCrm;
@@ -1419,22 +1434,189 @@
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename: file.name, base64: String(reader.result) })
       });
-      if (!d || d.__error || !d.ok) return toast('Error: ' + ((d && d.error) || 'no pude procesar la ficha'), 'err');
-      abrirFicha('');
-      var f = d.ficha || {};
-      FICHA_FIELDS.forEach(function (m) {
-        var el = document.getElementById(m[0]);
-        if (!el) return;
-        var val = f[m[1]];
-        if (val !== null && val !== undefined && val !== '') el.value = String(val);
-      });
-      var co = document.getElementById('f-cochera'); if (co) co.checked = !!f.cochera;
-      var t = document.getElementById('f-titulo-modal'); if (t) t.textContent = 'Ficha importada — revisá y guardá';
-      toast('Ficha extraída — revisala antes de guardar', 'ok');
+      procesarImportRespuesta(d);
     };
     reader.readAsDataURL(file);
   }
   window.importarFicha = importarFicha;
+
+  /* ─── C3 PRO ───────────────────────────────────────────────────── */
+  function crmTab(which) {
+    document.querySelectorAll('.crm-tab').forEach(function (t) { t.classList.remove('active'); });
+    var tab = document.getElementById('ct-' + which);
+    if (tab) tab.classList.add('active');
+    document.querySelectorAll('#crm-tabs .sub-tab').forEach(function (b) { b.classList.remove('active'); });
+    var idx = ['resumen', 'captacion', 'demanda', 'operaciones', 'propiedades', 'contactos'].indexOf(which);
+    var btns = document.querySelectorAll('#crm-tabs .sub-tab');
+    if (btns[idx]) btns[idx].classList.add('active');
+  }
+  window.crmTab = crmTab;
+
+  async function loadCrmResumen() {
+    var m = await apiFetch('/crm/metricas');
+    if (m && !m.__error && m.ok) {
+      var set = function (id, v, sub, subId) {
+        var e = document.getElementById(id); if (e) e.textContent = v;
+        if (subId) { var s = document.getElementById(subId); if (s && sub) s.textContent = sub; }
+      };
+      var a = m.actividad || {}, o = m.oportunidades7d || {}, p = m.pipeline || {}, h = m.higieneRapida || {};
+      set('cm-reuniones', (a.reuniones?.semana ?? '—'), 'semana · ' + (a.reuniones?.mes ?? '—') + ' en el mes', 'cm-reuniones-sub');
+      set('cm-visitas', (a.visitas?.semana ?? '—'), 'semana · ' + (a.visitas?.mes ?? '—') + ' en el mes', 'cm-visitas-sub');
+      set('cm-convos', a.conversacionesNuevas7d ?? '—');
+      set('cm-trabajados', a.contactosTrabajados7d ?? '—');
+      set('cm-oport', (o.contactos + o.propiedades + o.operaciones), o.contactos + ' cont · ' + o.propiedades + ' props · ' + o.operaciones + ' ops', 'cm-oport-sub');
+      set('cm-honorarios', '$' + Number(p.honorariosPipeline || 0).toLocaleString('es-AR'));
+      set('cm-absintocar', h.abSinTocar30d ?? '—');
+      set('cm-segvencidos', h.seguimientosVencidos ?? '—');
+    }
+    var hh = await apiFetch('/crm/hablar-hoy');
+    var el = document.getElementById('crm-hablar-hoy');
+    if (el) {
+      var recs = (hh && hh.ok && hh.recomendados) || [];
+      el.innerHTML = recs.length ? recs.map(function (r) {
+        return '<div style="border:1px solid var(--border);border-radius:10px;padding:9px 12px;margin-bottom:7px;background:rgba(255,255,255,0.02);">' +
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+            '<strong style="font-size:.86rem;">' + escHtml(r.nombre) + '</strong>' +
+            (r.etiqueta ? '<span class="badge badge-gold">' + r.etiqueta + '</span>' : '') +
+            '<span class="badge badge-muted">' + escHtml(r.tipo || '—') + '</span>' +
+            '<span style="margin-left:auto;font-family:var(--mono);font-size:.7rem;color:var(--gold);">score ' + r.score + '</span>' +
+          '</div>' +
+          '<div style="font-size:.76rem;color:var(--muted);margin:4px 0 7px;">' + r.motivos.map(escHtml).join(' · ') + (r.busca ? ' · busca: ' + escHtml(r.busca) : '') + '</div>' +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+            (r.telefono ? '<a class="btn btn-gold btn-sm" style="text-decoration:none;" href="https://wa.me/' + String(r.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') +
+            '<button class="btn btn-ghost btn-sm" onclick="marcarContactado(\'' + r.id + '\')">✓ Contactado</button>' +
+            '<button class="btn btn-ghost btn-sm" onclick="abrirContactoEdit(\'' + r.id + '\')">✏️ Editar</button>' +
+          '</div>' +
+        '</div>';
+      }).join('') : '<span class="small muted">Sin recomendaciones todavía — cargá etiquetas/etapas a tus contactos y esto cobra vida.</span>';
+    }
+  }
+  window.loadCrmResumen = loadCrmResumen;
+
+  async function marcarContactado(id) {
+    var d = await apiFetch('/crm/contacto/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, tocado: true }) });
+    if (d && d.ok) { toast('Marcado como contactado hoy', 'ok'); loadCrmResumen(); }
+    else toast('Error al marcar', 'err');
+  }
+  window.marcarContactado = marcarContactado;
+
+  /* Higiene semanal */
+  async function loadCrmHigiene() {
+    var el = document.getElementById('crm-higiene');
+    if (!el) return;
+    var d = await apiFetch('/crm/higiene');
+    if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">No pude leer higiene.</span>'; return; }
+    var cnt = document.getElementById('crm-hig-count');
+    if (cnt) cnt.textContent = d.sinClasificar.count + ' sin clasificar';
+    var html = '';
+    if (d.sinClasificar.top.length) {
+      html += '<div style="font-size:.72rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Sin clasificar (top por mensajes)</div>';
+      html += d.sinClasificar.top.map(function (l) {
+        return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);flex-wrap:wrap;">' +
+          '<span style="flex:1;min-width:140px;font-size:.82rem;font-weight:600;">' + escHtml(l.nombre) + '</span>' +
+          '<span style="font-size:.7rem;color:var(--muted);font-family:var(--mono);">' + (l.mensajes || 0) + ' msgs</span>' +
+          '<button class="btn btn-gold btn-sm" onclick="clasificarLinea(\'' + l.id + '\',\'Promover\')">⭐ Promover</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="clasificarLinea(\'' + l.id + '\',\'AMBBI\')">🏨</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="clasificarLinea(\'' + l.id + '\',\'Personal\')">👤</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="clasificarLinea(\'' + l.id + '\',\'No contactar\')">⛔</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="clasificarLinea(\'' + l.id + '\',\'Descartado\')">🗑</button>' +
+        '</div>';
+      }).join('');
+    } else html += '<div class="small muted">✅ Todo clasificado.</div>';
+    if ((d.duplicados || []).length) {
+      html += '<div style="font-size:.72rem;color:var(--warn);margin:10px 0 6px;text-transform:uppercase;letter-spacing:.06em;">Posibles duplicados en el CRM</div>';
+      html += d.duplicados.map(function (g) {
+        return '<div style="font-size:.78rem;padding:4px 0;">🔁 por ' + g.criterio + ': ' + g.items.map(function (i) { return escHtml(i.nombre); }).join(' ↔ ') + '</div>';
+      }).join('');
+    }
+    if ((d.ultimosEnCrm || []).length) {
+      html += '<div style="font-size:.72rem;color:var(--muted);margin:10px 0 6px;text-transform:uppercase;letter-spacing:.06em;">Últimos en el CRM</div>';
+      html += d.ultimosEnCrm.map(function (u) {
+        return '<div style="display:flex;gap:8px;font-size:.78rem;padding:3px 0;"><span style="flex:1;">' + escHtml(u.nombre) + '</span><span class="badge badge-muted">' + escHtml(u.origenDato || u.tipo || '—') + '</span></div>';
+      }).join('');
+    }
+    el.innerHTML = html;
+  }
+  window.loadCrmHigiene = loadCrmHigiene;
+
+  async function clasificarLinea(id, clasificacion) {
+    var d = await apiFetch('/crm/clasificar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, clasificacion: clasificacion }) });
+    if (d && d.ok) { toast(clasificacion === 'Promover' ? '⭐ Promovido al CRM' : 'Clasificado: ' + clasificacion, 'ok'); loadCrmHigiene(); }
+    else toast('Error al clasificar', 'err');
+  }
+  window.clasificarLinea = clasificarLinea;
+
+  /* Editor de contacto (NURC/PUFA/etapas) */
+  var crmContactosCache = null;
+  async function abrirContactoEdit(id) {
+    if (!crmContactosCache) {
+      var d = await apiFetch('/crm/contactos');
+      crmContactosCache = {};
+      ((d && d.contactos) || []).forEach(function (c) { crmContactosCache[c.id] = c; });
+    }
+    var c = crmContactosCache[id] || {};
+    var t = document.getElementById('ce-titulo'); if (t) t.textContent = '✏️ ' + (c.nombre || 'Contacto');
+    var set = function (eid, v) { var e = document.getElementById(eid); if (e) e.value = (v == null ? '' : String(v)); };
+    set('ce-id', id); set('ce-tipo', c.tipo); set('ce-etiqueta', c.etiqueta);
+    set('ce-etapacap', c.etapaCaptacion); set('ce-etapadem', c.etapaDemanda);
+    set('ce-busca', c.busca); set('ce-seguimiento', c.proximoSeguimiento);
+    ['nurcN', 'nurcU', 'nurcR', 'nurcC', 'pufaP', 'pufaU', 'pufaF', 'pufaA'].forEach(function (k) { set('ce-' + k, ''); });
+    var chk = document.getElementById('ce-250'); if (chk) chk.checked = !!c.en250;
+    showModal('modal-contacto-edit');
+  }
+  window.abrirContactoEdit = abrirContactoEdit;
+
+  async function saveContactoEdit() {
+    var v = function (eid) { var e = document.getElementById(eid); return e ? e.value.trim() : ''; };
+    var id = v('ce-id');
+    if (!id) return;
+    var body = { id: id, tipo: v('ce-tipo') || undefined, etiqueta: v('ce-etiqueta') || undefined, etapaCaptacion: v('ce-etapacap') || undefined, etapaDemanda: v('ce-etapadem') || undefined, busca: v('ce-busca') || undefined, proximoSeguimiento: v('ce-seguimiento') || undefined, nurcN: v('ce-nurcN') || undefined, nurcU: v('ce-nurcU') || undefined, nurcR: v('ce-nurcR') || undefined, nurcC: v('ce-nurcC') || undefined, pufaP: v('ce-pufaP') || undefined, pufaU: v('ce-pufaU') || undefined, pufaF: v('ce-pufaF') || undefined, pufaA: v('ce-pufaA') || undefined };
+    var chk = document.getElementById('ce-250'); body.en250 = !!(chk && chk.checked);
+    var d = await apiFetch('/crm/contacto/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (d && d.ok) { hideModal('modal-contacto-edit'); toast('Contacto actualizado', 'ok'); crmContactosCache = null; loadCrm(); }
+    else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
+  }
+  window.saveContactoEdit = saveContactoEdit;
+
+  /* Import por texto (Zonaprop compartir→copiar) */
+  async function importarTexto() {
+    var ta = document.getElementById('imp-texto');
+    var texto = ta ? ta.value.trim() : '';
+    if (texto.length < 40) return toast('Pegá el texto completo de la publicación', 'err');
+    hideModal('modal-import');
+    toast('Procesando con IA… (~20s)', 'ok');
+    var d = await apiFetch('/crm/ficha-import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ texto: texto }) });
+    if (ta) ta.value = '';
+    procesarImportRespuesta(d);
+  }
+  window.importarTexto = importarTexto;
+
+  function procesarImportRespuesta(d) {
+    if (!d || d.__error || !d.ok) return toast('Error: ' + ((d && d.error) || 'no pude procesar'), 'err');
+    abrirFicha('');
+    var f = d.ficha || {};
+    FICHA_FIELDS.forEach(function (m) {
+      var el = document.getElementById(m[0]);
+      if (!el) return;
+      el.style.background = '';
+      var val = f[m[1]];
+      if (val !== null && val !== undefined && val !== '') el.value = String(val);
+    });
+    var co = document.getElementById('f-cochera'); if (co) co.checked = !!f.cochera;
+    // campos dudosos → amarillo
+    var dudosos = f.camposDudosos || [];
+    var mapa = {}; FICHA_FIELDS.forEach(function (m) { mapa[m[1]] = m[0]; });
+    dudosos.forEach(function (k) {
+      var el = document.getElementById(mapa[k]);
+      if (el) el.style.background = 'rgba(255,200,60,0.14)';
+    });
+    // texto fuente
+    var fw = document.getElementById('f-fuente-wrap'), fp = document.getElementById('f-fuente');
+    if (fw && fp && d.textoFuente) { fp.textContent = d.textoFuente; fw.style.display = ''; }
+    var t = document.getElementById('f-titulo-modal');
+    if (t) t.textContent = 'Ficha importada — revisá' + (dudosos.length ? ' (⚠ ' + dudosos.length + ' campos dudosos en amarillo)' : '') + ' y guardá';
+    toast(dudosos.length ? '⚠ Revisá los ' + dudosos.length + ' campos en amarillo' : 'Ficha extraída — revisala y guardá', 'ok');
+  }
 
   async function createCrmContacto() {
     var v = function (id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
@@ -1509,6 +1691,11 @@
     if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">No pude leer operaciones.</span>'; return; }
     var tot = document.getElementById('crm-ops-total');
     if (tot) tot.textContent = d.activas + ' activas';
+    // cache propiedad→operación activa (para el semáforo operativo)
+    window.crmOpsByProp = {};
+    (d.items || []).forEach(function (o) {
+      if (o.propiedadId && !['Cerrada', 'Caída'].includes(o.etapa)) window.crmOpsByProp[o.propiedadId] = true;
+    });
     el.innerHTML = crmFunnelHtml((d.etapas || []).map(function (e) {
       return { etapa: e.etapa, count: e.count, cards: (e.items || []).map(function (i) { return { nombre: i.operacion + (i.montoTotal ? ' · $' + Number(i.montoTotal).toLocaleString('es-AR') : '') }; }) };
     }));

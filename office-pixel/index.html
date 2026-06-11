@@ -800,9 +800,48 @@
         <button class="btn btn-ghost btn-sm" onclick="loadCrm()">↻ Actualizar</button>
         <button class="btn btn-gold btn-sm" onclick="showModal('modal-contacto')">+ Contacto / Lead</button>
         <button class="btn btn-gold btn-sm" onclick="abrirFicha('')">+ Propiedad</button>
-        <button class="btn btn-gold btn-sm" onclick="document.getElementById('ficha-file').click()">📎 Importar ficha</button>
+        <button class="btn btn-gold btn-sm" onclick="showModal('modal-import')">📥 Import Center</button>
         <input type="file" id="ficha-file" accept=".pdf,.txt" style="display:none;" onchange="importarFicha(this)">
         <button class="btn btn-gold btn-sm" onclick="showModal('modal-operacion')">+ Operación</button>
+      </div>
+
+      <!-- TABS C3 PRO -->
+      <div class="sub-tabs" id="crm-tabs" style="margin-bottom:14px;">
+        <button class="sub-tab active" onclick="crmTab('resumen')">📊 Resumen</button>
+        <button class="sub-tab" onclick="crmTab('captacion')">🏠 Captación</button>
+        <button class="sub-tab" onclick="crmTab('demanda')">🛒 Demanda</button>
+        <button class="sub-tab" onclick="crmTab('operaciones')">💼 Operaciones</button>
+        <button class="sub-tab" onclick="crmTab('propiedades')">🏢 Propiedades</button>
+        <button class="sub-tab" onclick="crmTab('contactos')">⭐ Contactos</button>
+      </div>
+
+      <div class="crm-tab active" id="ct-resumen">
+      <!-- MÉTRICAS -->
+      <div class="card" style="margin-bottom:14px;" role="region" aria-label="Métricas del CRM">
+        <div class="card-head">
+          <div><h2 class="card-title">📈 Actividad & Pipeline</h2><div class="card-sub">lo que genera negocio, no solo cierres</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="loadCrmResumen()" aria-label="Actualizar métricas">↻</button>
+        </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:10px;">
+          <div class="kpi accent"><span>Reuniones</span><strong id="cm-reuniones">—</strong><small id="cm-reuniones-sub">semana / mes</small></div>
+          <div class="kpi"><span>Visitas</span><strong id="cm-visitas">—</strong><small id="cm-visitas-sub">semana / mes</small></div>
+          <div class="kpi"><span>Conversaciones nuevas 7d</span><strong id="cm-convos">—</strong><small>línea laboral</small></div>
+          <div class="kpi"><span>Contactos trabajados 7d</span><strong id="cm-trabajados">—</strong><small>con interacción</small></div>
+        </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));">
+          <div class="kpi"><span>Oportunidades 7d</span><strong id="cm-oport">—</strong><small id="cm-oport-sub">cont · props · ops</small></div>
+          <div class="kpi"><span>Pipeline honorarios</span><strong id="cm-honorarios" style="color:var(--gold)">—</strong><small>por cobrar</small></div>
+          <div class="kpi"><span>A/B sin tocar +30d</span><strong id="cm-absintocar" style="color:var(--warn)">—</strong><small>reactivar</small></div>
+          <div class="kpi"><span>Seguimientos vencidos</span><strong id="cm-segvencidos" style="color:var(--danger)">—</strong><small>al día = 0</small></div>
+        </div>
+      </div>
+
+      <!-- A QUIÉN HABLARLE HOY -->
+      <div class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.35);" role="region" aria-label="A quién hablarle hoy">
+        <div class="card-head">
+          <div><h2 class="card-title" style="color:var(--gold);">🎯 A quién hablarle hoy</h2><div class="card-sub">score compuesto: etiqueta + días sin contacto + etapa caliente + NURC/PUFA</div></div>
+        </div>
+        <div id="crm-hablar-hoy"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
       </div>
 
       <!-- HERMES INBOX (copiloto: la IA propone, Franco decide) -->
@@ -817,6 +856,9 @@
         <div id="crm-inbox"><div class="skeleton skeleton-block" style="height:60px;"></div></div>
       </div>
 
+      </div><!-- /ct-resumen -->
+
+      <div class="crm-tab" id="ct-captacion">
       <!-- EMBUDO CAPTACIÓN -->
       <div class="card" style="margin-bottom:14px;" role="region" aria-label="Embudo de captación">
         <div class="card-head">
@@ -826,6 +868,9 @@
         <div class="crm-funnel" id="crm-captacion"><div class="skeleton skeleton-block" style="height:110px;"></div></div>
       </div>
 
+      </div><!-- /ct-captacion -->
+
+      <div class="crm-tab" id="ct-demanda">
       <!-- EMBUDO DEMANDA -->
       <div class="card" style="margin-bottom:14px;" role="region" aria-label="Embudo de demanda">
         <div class="card-head">
@@ -835,6 +880,9 @@
         <div class="crm-funnel" id="crm-demanda"><div class="skeleton skeleton-block" style="height:110px;"></div></div>
       </div>
 
+      </div><!-- /ct-demanda -->
+
+      <div class="crm-tab" id="ct-operaciones">
       <!-- OPERACIONES (funnel cierre) -->
       <div class="card" style="margin-bottom:14px;" role="region" aria-label="Operaciones — funnel de cierre">
         <div class="card-head">
@@ -846,6 +894,18 @@
         </div>
         <div class="crm-funnel" id="crm-operaciones"><div class="skeleton skeleton-block" style="height:90px;"></div></div>
         <div id="crm-ops-alertas" style="margin-top:10px;"></div>
+      </div>
+
+      </div><!-- /ct-operaciones -->
+
+      <div class="crm-tab" id="ct-contactos">
+      <!-- HIGIENE SEMANAL -->
+      <div class="card" style="margin-bottom:14px;border-color:rgba(126,200,227,0.3);" role="region" aria-label="Higiene semanal de contactos">
+        <div class="card-head">
+          <div><h2 class="card-title" style="color:var(--metro);">🧹 Higiene semanal</h2><div class="card-sub">clasificar la base cruda — el CRM limpio vale más que el CRM lleno</div></div>
+          <span class="badge badge-muted" id="crm-hig-count">—</span>
+        </div>
+        <div id="crm-higiene"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
       </div>
 
       <!-- LOS 250 + SEGUIMIENTOS -->
@@ -866,6 +926,9 @@
         </div>
       </div>
 
+      </div><!-- /ct-contactos -->
+
+      <div class="crm-tab" id="ct-propiedades">
       <!-- PROPIEDADES + DOCUMENTAL -->
       <div class="card" style="margin-bottom:18px;" role="region" aria-label="Propiedades y documental">
         <div class="card-head">
@@ -874,14 +937,7 @@
         </div>
         <div id="crm-propiedades"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
       </div>
-      <div class="card">
-        <div class="card-head"><div class="card-title">Hermes · CRM relacional</div><span class="badge badge-muted">Próximamente</span></div>
-        <div class="placeholder-block" style="padding:18px;">
-          <div class="ph-icon">📊</div>
-          <h3>DB relacional ~250 + documental</h3>
-          <p style="font-size:.82rem;">Contactos trabajables (regla Magnin) · seguimiento de compradores y propietarios · propiedades comercializadas + módulo documental · Hermes en WhatsApp.</p>
-        </div>
-      </div>
+      </div><!-- /ct-propiedades -->
     </div>
 
     <!-- ════════════════ SMART HOME ════════════════ -->
@@ -1094,9 +1150,73 @@
       <input class="input" id="f-zonaprop" placeholder="Link Zonaprop (también la cargás a mano en Tokko)">
       <textarea class="input" id="f-descripcion" placeholder="Descripción (la misma que usás en la publicación)…" style="min-height:70px;"></textarea>
       <textarea class="input" id="f-notas" placeholder="Notas internas…" style="min-height:50px;"></textarea>
+      <details id="f-fuente-wrap" style="display:none;"><summary style="font-size:.74rem;color:var(--muted);cursor:pointer;">📄 Ver texto fuente extraído (para verificar)</summary><pre id="f-fuente" style="font-size:.68rem;white-space:pre-wrap;color:var(--muted);max-height:160px;overflow-y:auto;background:rgba(255,255,255,0.03);padding:8px;border-radius:8px;"></pre></details>
       <div style="display:flex;gap:10px;justify-content:flex-end;">
         <button class="btn btn-ghost" onclick="hideModal('modal-prop')">Cancelar</button>
         <button class="btn btn-gold" id="f-guardar" onclick="saveCrmFicha()">Guardar ficha</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modal-import">
+  <div class="modal">
+    <h3>📥 Import Center — al CRM</h3>
+    <p class="small muted" style="margin:4px 0 12px;">Todo sigue el mismo camino: extraer → revisar → guardar. Nada entra sin tu ojo.</p>
+    <div class="stack">
+      <button class="btn btn-gold" onclick="hideModal('modal-import');document.getElementById('ficha-file').click()">📎 Subir ficha PDF (Zonaprop/Tokko)</button>
+      <div style="font-size:.72rem;color:var(--muted);text-align:center;">— o pegá el texto de la publicación / del lead —</div>
+      <textarea class="input" id="imp-texto" placeholder="Pegá acá el texto (Zonaprop → Compartir → Copiar, o el texto del lead de Tokko)…" style="min-height:110px;"></textarea>
+      <button class="btn btn-gold" onclick="importarTexto()">⚡ Procesar texto con IA</button>
+      <div style="font-size:.72rem;color:var(--muted);text-align:center;">— o a mano —</div>
+      <div style="display:flex;gap:8px;justify-content:center;">
+        <button class="btn btn-ghost btn-sm" onclick="hideModal('modal-import');abrirFicha('')">+ Propiedad manual</button>
+        <button class="btn btn-ghost btn-sm" onclick="hideModal('modal-import');showModal('modal-contacto')">+ Contacto manual</button>
+      </div>
+      <div style="display:flex;justify-content:flex-end;"><button class="btn btn-ghost" onclick="hideModal('modal-import')">Cerrar</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modal-contacto-edit">
+  <div class="modal" style="max-width:640px;width:94vw;max-height:88vh;overflow-y:auto;">
+    <h3 id="ce-titulo">Contacto</h3>
+    <input type="hidden" id="ce-id">
+    <div class="stack">
+      <div class="grid-2">
+        <select class="input" id="ce-tipo"><option value="">Tipo —</option><option>Propietario</option><option>Comprador</option><option>Inquilino</option><option>Inversor</option><option>Colega/Referidor</option></select>
+        <select class="input" id="ce-etiqueta"><option value="">Etiqueta —</option><option>A</option><option>B</option><option>C</option><option>D</option></select>
+      </div>
+      <div class="grid-2">
+        <select class="input" id="ce-etapacap"><option value="">Etapa captación —</option><option>Lead propietario</option><option>Contactado</option><option>Tasación</option><option>Autorización</option><option>Captada</option><option>Publicada</option><option>Descartada</option></select>
+        <select class="input" id="ce-etapadem"><option value="">Etapa demanda —</option><option>Consulta</option><option>Calificado</option><option>Visita coordinada</option><option>Oferta/Reserva</option><option>Cierre</option><option>Perdido</option></select>
+      </div>
+      <div style="font-size:.7rem;color:var(--muted);letter-spacing:.06em;">NURC (solo propietarios) — 1 a 5</div>
+      <div class="grid-2">
+        <select class="input" id="ce-nurcN"><option value="">Necesidad —</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+        <select class="input" id="ce-nurcU"><option value="">Urgencia —</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+      </div>
+      <div class="grid-2">
+        <select class="input" id="ce-nurcR"><option value="">Realismo —</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+        <select class="input" id="ce-nurcC"><option value="">Cap. decisional —</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+      </div>
+      <div style="font-size:.7rem;color:var(--muted);letter-spacing:.06em;">PUFA (compradores/inquilinos) — 1 a 5</div>
+      <div class="grid-2">
+        <select class="input" id="ce-pufaP"><option value="">Presupuesto —</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+        <select class="input" id="ce-pufaU"><option value="">Urgencia —</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+      </div>
+      <div class="grid-2">
+        <select class="input" id="ce-pufaF"><option value="">Fit inventario —</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+        <select class="input" id="ce-pufaA"><option value="">Autoridad —</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+      </div>
+      <input class="input" id="ce-busca" placeholder="Qué busca (zona, presupuesto, tipología)">
+      <div class="grid-2">
+        <input class="input" id="ce-seguimiento" type="date" aria-label="Próximo seguimiento">
+        <label style="display:flex;gap:8px;align-items:center;font-size:.8rem;color:var(--muted);cursor:pointer;"><input type="checkbox" id="ce-250"> En los 250</label>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="hideModal('modal-contacto-edit')">Cancelar</button>
+        <button class="btn btn-gold" onclick="saveContactoEdit()">Guardar</button>
       </div>
     </div>
   </div>

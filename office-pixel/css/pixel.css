@@ -1284,6 +1284,10 @@ input:focus:not(:focus-visible) { outline: none; }
 .mb i { display: block; height: 100%; border-radius: 2px; background: var(--gold); transition: width .3s; }
 .mb.mb-metro i { background: var(--metro); }
 
+/* ─── GRINGO CRM · Tabs C3 PRO ─── */
+.crm-tab { display: none; }
+.crm-tab.active { display: block; }
+
 /* ─── GRINGO CRM · Embudos ─── */
 .crm-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; align-items: end; }
 .crm-col { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px; }
