@@ -1363,6 +1363,7 @@
               '<span style="font-size:.7rem;font-family:var(--mono);color:' + docsCol + ';width:54px;">docs ' + p.docsPct + '%</span>' +
             '</div>' +
             '<span class="badge ' + (p.estado === 'Publicada' ? 'badge-ok' : 'badge-muted') + '">' + escHtml(p.estado || '—') + '</span>' +
+            '<button class="btn btn-ghost btn-sm" title="Subir documentación (escritura, informes…) — copia SIEMPRE al Drive de gringoestate + tick en el checklist" onclick="event.stopPropagation();abrirDocUpload(\'' + p.id + '\')">📎</button>' +
           '</div>';
         }).join('') : '<span class="small muted">Sin propiedades todavía — cargá la primera con «+ Propiedad».</span>';
       }
@@ -1642,6 +1643,43 @@
     if (d && d.ok) loadPlanSemanal();
   }
   window.sumarPlan = sumarPlan;
+
+  /* ─── C3.2: subir documentación de propiedad (panel → Drive gringoestate + tick CRM) ─── */
+  function abrirDocUpload(propId) {
+    var p = crmFichaCache[propId] || {};
+    var t = document.getElementById('du-titulo');
+    if (t) t.textContent = '📎 Documentación — ' + (p.propiedad || 'propiedad');
+    var hid = document.getElementById('du-prop-id'); if (hid) hid.value = propId;
+    var f = document.getElementById('du-file'); if (f) f.value = '';
+    showModal('modal-docupload');
+  }
+  window.abrirDocUpload = abrirDocUpload;
+
+  async function subirDocPropiedad() {
+    var id = (document.getElementById('du-prop-id') || {}).value;
+    var tipo = (document.getElementById('du-tipo') || {}).value;
+    var input = document.getElementById('du-file');
+    var file = input && input.files && input.files[0];
+    if (!id || !file) return toast('Elegí un archivo', 'err');
+    if (file.size > 20 * 1024 * 1024) return toast('Máx 20MB', 'err');
+    var btn = document.getElementById('du-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Subiendo…'; }
+    var reader = new FileReader();
+    reader.onload = async function () {
+      var d = await apiFetch('/crm/propiedad/doc', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, tipoDoc: tipo, filename: file.name, base64: String(reader.result) })
+      });
+      if (btn) { btn.disabled = false; btn.textContent = '☁️ Subir'; }
+      if (d && d.ok) {
+        hideModal('modal-docupload');
+        toast('☁️ Guardado en Drive (' + (d.drive && d.drive.carpeta || '') + ')' + (d.docsPct != null ? ' · docs ' + d.docsPct + '%' : ''), 'ok');
+        loadCrm();
+      } else toast('Error: ' + ((d && d.error) || 'no pude subir'), 'err');
+    };
+    reader.readAsDataURL(file);
+  }
+  window.subirDocPropiedad = subirDocPropiedad;
 
   /* ─── C3.1: modales con ✕, Esc y click-afuera ─── */
   function initModalUX() {

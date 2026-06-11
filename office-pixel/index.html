@@ -1222,6 +1222,26 @@
   </div>
 </div>
 
+<div class="modal-overlay hidden" id="modal-docupload">
+  <div class="modal">
+    <h3 id="du-titulo">📎 Subir documentación</h3>
+    <input type="hidden" id="du-prop-id">
+    <div class="stack">
+      <select class="input" id="du-tipo" aria-label="Tipo de documento">
+        <option>Escritura</option><option>Expensas</option><option>ABL</option><option>Edesur</option>
+        <option>Certif. dominio</option><option>Plano</option>
+        <option>Reserva</option><option>Boleto</option><option>Contrato</option><option>Fotos</option><option>Otro</option>
+      </select>
+      <input type="file" class="input" id="du-file" accept=".pdf,.jpg,.jpeg,.png,.docx">
+      <div style="font-size:.72rem;color:var(--muted);">☁️ Siempre queda una copia en el <b>Drive de gringoestate</b> (WISPY / Propiedades / [propiedad] / Documentación) y, si es un doc del checklist, se tilda automáticamente en el % documental.</div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="hideModal('modal-docupload')">Cancelar</button>
+        <button class="btn btn-gold" id="du-btn" onclick="subirDocPropiedad()">☁️ Subir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay hidden" id="modal-import">
   <div class="modal">
     <h3>📥 Import Center — al CRM</h3>
