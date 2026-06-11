@@ -835,8 +835,17 @@
           <div class="kpi"><span>Seguimientos vencidos</span><strong id="cm-segvencidos" style="color:var(--danger)">—</strong><small>al día = 0</small></div>
         </div>
         <div id="cm-row2-empty" class="small muted" style="display:none;padding:4px 0;">Pipeline sin datos todavía — las métricas de negocio se despliegan cuando cargues contactos, propiedades y operaciones.</div>
+        <div id="cm-plansemanal" style="margin-top:10px;"></div>
         <div id="cm-conversiones" style="margin-top:10px;"></div>
         <div id="cm-benchmarks" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- VISTA 360 — los 3 procesos en un pantallazo -->
+      <div class="card" style="margin-bottom:14px;" role="region" aria-label="Vista 360 de los embudos">
+        <div class="card-head">
+          <div><h2 class="card-title">🌐 Vista 360</h2><div class="card-sub">los 3 procesos de un vistazo — click para entrar a cada uno</div></div>
+        </div>
+        <div id="crm-vista360" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;"><div class="skeleton skeleton-block" style="height:90px;grid-column:1/-1;"></div></div>
       </div>
 
       <!-- A QUIÉN HABLARLE HOY -->
@@ -916,10 +925,10 @@
         <div class="card" role="region" aria-label="Los 250 contactos trabajables">
           <div class="card-head"><h2 class="card-title">⭐ Los 250</h2><span class="badge badge-muted" id="crm-250-total">—</span></div>
           <div class="kpi-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));" id="crm-250-grid">
-            <div class="kpi"><span>A</span><strong id="crm-250-A" style="color:var(--ok)">—</strong><small>top</small></div>
-            <div class="kpi"><span>B</span><strong id="crm-250-B" style="color:var(--gold)">—</strong><small>activos</small></div>
-            <div class="kpi"><span>C</span><strong id="crm-250-C" style="color:var(--warn)">—</strong><small>tibios</small></div>
-            <div class="kpi"><span>D</span><strong id="crm-250-D" style="color:var(--muted)">—</strong><small>fríos</small></div>
+            <div class="kpi" title="Los TOP de la industria: te traen negocio y tratás con ellos"><span>A</span><strong id="crm-250-A" style="color:var(--ok)">—</strong><small>top industria</small></div>
+            <div class="kpi" title="Los que estás trabajando y pueden servir"><span>B</span><strong id="crm-250-B" style="color:var(--gold)">—</strong><small>en trabajo</small></div>
+            <div class="kpi" title="Fríos"><span>C</span><strong id="crm-250-C" style="color:var(--warn)">—</strong><small>fríos</small></div>
+            <div class="kpi" title="Congelados"><span>D</span><strong id="crm-250-D" style="color:var(--muted)">—</strong><small>congelados</small></div>
           </div>
           <div class="small muted" style="margin-top:8px;">Regla Magnin: se labura bien sobre ~250 contactos. Hermes etiqueta y retroalimenta.</div>
         </div>
@@ -939,6 +948,18 @@
           <span class="badge badge-muted" id="crm-props-total">—</span>
         </div>
         <div id="crm-propiedades"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
+      </div>
+      <!-- DOCUMENTAL -->
+      <div class="card" role="region" aria-label="Módulo documental">
+        <div class="card-head">
+          <div><h2 class="card-title">📄 Documental</h2><div class="card-sub">modelos, checklists y estado de documentación por propiedad</div></div>
+          <a class="btn btn-ghost btn-sm" href="https://www.notion.so/37b3ca3891cd81cf80b0dac28236aa5d" target="_blank" rel="noopener" style="text-decoration:none;">📚 Modelos & Checklists →</a>
+        </div>
+        <div class="small muted" style="line-height:1.6;">
+          El <b>% de docs de cada propiedad</b> se ve en su fila de arriba (semáforo 2 + barra) y el detalle en su ficha de Notion.
+          Flujo: <b>pedir → identificar faltantes → procesar (Drive) → contratos Baigún → seguimiento</b> + 4 facilitadores (informes/dominio · fotos+plano · cartel · marketing).
+          Los modelos de reserva/boleto/contrato se cargan arrastrando el docx en la página de Notion ↗.
+        </div>
       </div>
       </div><!-- /ct-propiedades -->
     </div>

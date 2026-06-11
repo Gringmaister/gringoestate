@@ -1366,11 +1366,14 @@
           '</div>';
         }).join('') : '<span class="small muted">Sin propiedades todavía — cargá la primera con «+ Propiedad».</span>';
       }
+      window.crmPipelineCache = d;
+      renderVista360();
       loadCrmSeguimientos();
       loadCrmInbox();
       loadCrmOperaciones();
       loadCrmResumen();
       loadCrmHigiene();
+      loadPlanSemanal();
     } catch (e) {}
   }
   window.loadCrm = loadCrm;
@@ -1521,19 +1524,9 @@
       // Benchmarks Magnin + plan semanal 40-5-5-1
       var bm = document.getElementById('cm-benchmarks');
       if (bm && m.benchmarks) {
-        var b = m.benchmarks;
-        var reunionesSem = (a.reuniones && a.reuniones.semana) || 0;
-        var cafeOk = reunionesSem >= b.semanal.cafes;
         bm.innerHTML =
           (m.carteraAlerta ? '<div style="font-size:.78rem;color:var(--warn);padding:6px 0;">' + escHtml(m.carteraAlerta) + '</div>' : '') +
-          '<div style="font-size:.68rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Plan semanal Magnin (40-5-5-1)</div>' +
-          '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">' +
-            '<span class="badge badge-muted">40 contactos personalizados</span>' +
-            '<span class="badge ' + (cafeOk ? 'badge-ok' : 'badge-muted') + '">5 cafés/reuniones — llevás ' + reunionesSem + (cafeOk ? ' ✓' : '') + '</span>' +
-            '<span class="badge badge-muted">5 ítems de valor</span>' +
-            '<span class="badge badge-muted">1 envío masivo</span>' +
-          '</div>' +
-          '<div style="font-size:.68rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Referencias Magnin</div>' +
+          '<div style="font-size:.68rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Referencias Magnin (benchmarks — para comparar, no automatizan nada)</div>' +
           '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
             '<span class="badge badge-muted" title="Captar 1 de cada 3 tasaciones; antes, descartar la mitad de los pedidos que no califican">Tasación→Captada: <b style="color:var(--gold);">33%</b></span>' +
             '<span class="badge badge-muted" title="2 captaciones en cartera por cada venta">Captación→Venta: <b style="color:var(--gold);">50%</b></span>' +
@@ -1588,6 +1581,68 @@
   }
   window.crearTareaContacto = crearTareaContacto;
 
+  /* ─── C3.2: Vista 360 — los 3 procesos en un pantallazo ─── */
+  function renderVista360() {
+    var el = document.getElementById('crm-vista360');
+    if (!el) return;
+    var pipe = window.crmPipelineCache, ops = window.crmOpsCache;
+    if (!pipe && !ops) return;
+    var col = function (titulo, emoji, tab, etapas, total) {
+      return '<div onclick="crmTab(\'' + tab + '\')" style="cursor:pointer;border:1px solid var(--border);border-radius:10px;padding:10px 12px;" title="Ir a ' + titulo + '">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;"><strong style="font-size:.8rem;">' + emoji + ' ' + titulo + '</strong><span class="badge badge-muted">' + total + '</span></div>' +
+        (etapas || []).map(function (e) {
+          var on = e.count > 0;
+          return '<div style="display:flex;justify-content:space-between;font-size:.72rem;padding:2px 0;color:' + (on ? 'var(--text)' : 'var(--muted)') + ';">' +
+            '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(e.etapa) + '</span>' +
+            '<span style="font-family:var(--mono);color:' + (on ? 'var(--gold)' : 'var(--muted)') + ';">' + e.count + '</span></div>';
+        }).join('') + '</div>';
+    };
+    var html = '';
+    if (pipe) {
+      var capT = (pipe.captacion || []).reduce(function (s, e) { return s + e.count; }, 0);
+      var demT = (pipe.demanda || []).reduce(function (s, e) { return s + e.count; }, 0);
+      html += col('Captación', '🏠', 'captacion', pipe.captacion, capT);
+      html += col('Demanda', '🛒', 'demanda', pipe.demanda, demT);
+    }
+    if (ops) {
+      var activas = (ops.etapas || []).filter(function (e) { return ['Cerrada', 'Caída'].indexOf(e.etapa) < 0; });
+      html += col('Operaciones', '💼', 'operaciones', activas, ops.activas || 0);
+    }
+    if (html) el.innerHTML = html;
+  }
+  window.renderVista360 = renderVista360;
+
+  /* ─── C3.2: Plan semanal 40-5-5-1 MANUAL (vos lo aplicás, nada automático) ─── */
+  async function loadPlanSemanal() {
+    var d = await apiFetch('/crm/plan-semanal');
+    var box = document.getElementById('cm-plansemanal');
+    if (!box || !d || !d.ok) return;
+    var t = d.targets, p = d.plan;
+    var item = function (campo, label, val, target) {
+      var ok = val >= target;
+      return '<div style="display:flex;align-items:center;gap:6px;border:1px solid ' + (ok ? 'var(--ok)' : 'var(--border)') + ';border-radius:10px;padding:6px 10px;">' +
+        '<span style="font-size:.74rem;color:var(--muted);">' + label + '</span>' +
+        '<strong style="font-family:var(--mono);font-size:.85rem;color:' + (ok ? 'var(--ok)' : 'var(--text)') + ';">' + val + '/' + target + (ok ? ' ✓' : '') + '</strong>' +
+        '<button class="btn btn-gold btn-sm" style="padding:1px 8px;" title="Sumar 1 (lo hiciste vos)" onclick="sumarPlan(\'' + campo + '\',1)">+1</button>' +
+        '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;" title="Restar 1 (corrección)" onclick="sumarPlan(\'' + campo + '\',-1)">−</button>' +
+      '</div>';
+    };
+    box.innerHTML = '<div style="font-size:.68rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Plan semanal 40-5-5-1 (' + d.semana + ') — lo marcás VOS a medida que lo hacés</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+        item('contactos', '📞 Contactos', p.contactos, t.contactos) +
+        item('itemsValor', '🎁 Ítems de valor', p.itemsValor, t.itemsValor) +
+        item('cafes', '☕ Cafés/reuniones', p.cafes, t.cafes) +
+        item('masivo', '📣 Envío masivo', p.masivo, t.masivo) +
+      '</div>';
+  }
+  window.loadPlanSemanal = loadPlanSemanal;
+
+  async function sumarPlan(campo, delta) {
+    var d = await apiFetch('/crm/plan-semanal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ campo: campo, delta: delta }) });
+    if (d && d.ok) loadPlanSemanal();
+  }
+  window.sumarPlan = sumarPlan;
+
   /* ─── C3.1: modales con ✕, Esc y click-afuera ─── */
   function initModalUX() {
     document.querySelectorAll('.modal-overlay').forEach(function (ov) {
@@ -1635,18 +1690,27 @@
     if (cnt) cnt.textContent = d.sinClasificar.count + ' sin clasificar';
     var html = '';
     if (d.sinClasificar.top.length) {
-      html += '<div style="font-size:.72rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Sin clasificar (top por mensajes)</div>';
-      html += d.sinClasificar.top.map(function (l) {
-        return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);flex-wrap:wrap;">' +
-          '<span style="flex:1;min-width:140px;font-size:.82rem;font-weight:600;">' + escHtml(l.nombre) + '</span>' +
-          '<span style="font-size:.7rem;color:var(--muted);font-family:var(--mono);">' + (l.mensajes || 0) + ' msgs</span>' +
-          '<button class="btn btn-gold btn-sm" onclick="clasificarLinea(\'' + l.id + '\',\'Promover\')">⭐ Promover</button>' +
-          '<button class="btn btn-ghost btn-sm" onclick="clasificarLinea(\'' + l.id + '\',\'AMBBI\')">🏨</button>' +
-          '<button class="btn btn-ghost btn-sm" onclick="clasificarLinea(\'' + l.id + '\',\'Personal\')">👤</button>' +
-          '<button class="btn btn-ghost btn-sm" onclick="clasificarLinea(\'' + l.id + '\',\'No contactar\')">⛔</button>' +
-          '<button class="btn btn-ghost btn-sm" onclick="clasificarLinea(\'' + l.id + '\',\'Descartado\')">🗑</button>' +
+      window.crmHigieneLista = d.sinClasificar.top;
+      window.crmHigieneVisible = window.crmHigieneVisible || 20;
+      html += '<div style="font-size:.72rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Sin clasificar (top por mensajes) — ¿qué es cada uno?</div>';
+      html += '<div style="max-width:760px;">';
+      html += d.sinClasificar.top.slice(0, window.crmHigieneVisible).map(function (l) {
+        return '<div style="display:grid;grid-template-columns:minmax(150px,1fr) 70px auto;align-items:center;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);">' +
+          '<span style="font-size:.82rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(l.nombre) + '</span>' +
+          '<span style="font-size:.68rem;color:var(--muted);font-family:var(--mono);text-align:right;">' + (l.mensajes || 0) + ' msgs</span>' +
+          '<span style="display:inline-flex;gap:4px;">' +
+            '<button class="btn btn-gold btn-sm" title="Promover al CRM: lo crea como contacto TRABAJABLE en tu base de brokerage (queda en el embudo y en Los 250 si lo marcás)" onclick="clasificarLinea(\'' + l.id + '\',\'Promover\')">⭐ Promover</button>' +
+            '<button class="btn btn-ghost btn-sm" title="Es huésped de AMBBI (alquiler temporario) — no pertenece a este CRM" onclick="clasificarLinea(\'' + l.id + '\',\'AMBBI\')">🏨 AMBBI</button>' +
+            '<button class="btn btn-ghost btn-sm" title="Contacto personal (familia/amigos) — fuera del CRM comercial" onclick="clasificarLinea(\'' + l.id + '\',\'Personal\')">👤 Personal</button>' +
+            '<button class="btn btn-ghost btn-sm" title="No contactar nunca (bloqueado)" onclick="clasificarLinea(\'' + l.id + '\',\'No contactar\')">⛔</button>' +
+            '<button class="btn btn-ghost btn-sm" title="Descartar: basura/spam, no sirve" onclick="clasificarLinea(\'' + l.id + '\',\'Descartado\')">🗑</button>' +
+          '</span>' +
         '</div>';
       }).join('');
+      html += '</div>';
+      if (d.sinClasificar.top.length > window.crmHigieneVisible) {
+        html += '<button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="window.crmHigieneVisible+=20;loadCrmHigiene()">▾ Mostrar 20 más (' + (d.sinClasificar.count - window.crmHigieneVisible) + ' restantes)</button>';
+      }
     } else html += '<div class="small muted">✅ Todo clasificado.</div>';
     if ((d.duplicados || []).length) {
       html += '<div style="font-size:.72rem;color:var(--warn);margin:10px 0 6px;text-transform:uppercase;letter-spacing:.06em;">Posibles duplicados en el CRM</div>';
@@ -1820,11 +1884,13 @@
     if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">No pude leer operaciones.</span>'; return; }
     var tot = document.getElementById('crm-ops-total');
     if (tot) tot.textContent = d.activas + ' activas';
-    // cache propiedad→operación activa (para el semáforo operativo)
+    // cache propiedad→operación activa (para el semáforo operativo) + vista 360
     window.crmOpsByProp = {};
     (d.items || []).forEach(function (o) {
       if (o.propiedadId && !['Cerrada', 'Caída'].includes(o.etapa)) window.crmOpsByProp[o.propiedadId] = true;
     });
+    window.crmOpsCache = d;
+    renderVista360();
     var opsEmpty = !(d.items || []).length;
     el.innerHTML = (opsEmpty
       ? '<div style="border:1px dashed var(--border);border-radius:12px;padding:18px;text-align:center;margin-bottom:12px;"><div style="font-size:.82rem;color:var(--muted);margin-bottom:10px;">Sin operaciones activas. Cuando haya una oferta o reserva en la mesa, cargala acá (o aprobá la sugerencia de Hermes desde el Inbox).</div><button class="btn btn-gold btn-sm" onclick="showModal(\'modal-operacion\')">+ Primera operación</button></div>'
