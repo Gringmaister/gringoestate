@@ -1336,6 +1336,8 @@
         }).join('') : '<span class="small muted">Sin propiedades todavía — cargá la primera con «+ Propiedad».</span>';
       }
       loadCrmSeguimientos();
+      loadCrmInbox();
+      loadCrmOperaciones();
     } catch (e) {}
   }
   window.loadCrm = loadCrm;
@@ -1385,6 +1387,96 @@
     else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
   }
   window.createCrmContacto = createCrmContacto;
+
+  /* ─── HERMES INBOX (copiloto: aprobar/rechazar/posponer) ─── */
+  async function loadCrmInbox() {
+    var el = document.getElementById('crm-inbox');
+    if (!el) return;
+    var d = await apiFetch('/crm/inbox');
+    var cnt = document.getElementById('crm-inbox-count');
+    if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">No pude leer el Inbox.</span>'; return; }
+    if (cnt) cnt.textContent = d.count + ' pendientes';
+    var list = d.sugerencias || [];
+    if (!list.length) { el.innerHTML = '<span class="small muted">✅ Sin sugerencias pendientes — Hermes no detectó nada que requiera tu decisión.</span>'; return; }
+    var confCol = { Alta: 'var(--ok)', Media: 'var(--gold)', Baja: 'var(--warn)' };
+    el.innerHTML = list.slice(0, 8).map(function (s) {
+      return '<div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:rgba(255,255,255,0.02);">' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap;">' +
+          '<span class="badge badge-muted">' + escHtml(s.tipo || '—') + '</span>' +
+          '<strong style="font-size:.85rem;flex:1;">' + escHtml(s.sugerencia) + '</strong>' +
+          '<span style="font-size:.68rem;color:' + (confCol[s.confianza] || 'var(--muted)') + ';">conf. ' + escHtml(s.confianza || '—') + '</span>' +
+        '</div>' +
+        (s.detalle ? '<div style="font-size:.78rem;color:var(--muted);line-height:1.45;margin-bottom:7px;">' + escHtml(s.detalle.slice(0, 220)) + '</div>' : '') +
+        (s.mensajeBorrador ? '<div style="font-size:.76rem;border-left:2px solid #5ec8d8;padding:4px 8px;margin-bottom:7px;color:var(--text);background:rgba(94,200,216,0.05);">💬 ' + escHtml(s.mensajeBorrador.slice(0, 200)) + '</div>' : '') +
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+          '<button class="btn btn-gold btn-sm" onclick="resolverSugerencia(\'' + s.id + '\',\'aprobar\')">✓ Aprobar</button>' +
+          (s.mensajeBorrador ? '<button class="btn btn-ghost btn-sm" onclick="copiarBorrador(this)" data-msg="' + escHtml(s.mensajeBorrador) + '">📋 Copiar mensaje</button>' : '') +
+          '<button class="btn btn-ghost btn-sm" onclick="resolverSugerencia(\'' + s.id + '\',\'posponer\')">⏸ Posponer</button>' +
+          '<button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="resolverSugerencia(\'' + s.id + '\',\'rechazar\')">✕ Descartar</button>' +
+        '</div>' +
+      '</div>';
+    }).join('') + (list.length > 8 ? '<div class="small muted">+' + (list.length - 8) + ' más en Notion → Hermes Inbox</div>' : '');
+  }
+  window.loadCrmInbox = loadCrmInbox;
+
+  async function resolverSugerencia(id, accion) {
+    if (accion === 'aprobar' && !confirm('¿Aprobar esta sugerencia? Si tiene datos estructurados, se aplica al CRM.')) return;
+    var d = await apiFetch('/crm/inbox/resolver', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, accion: accion }) });
+    if (d && d.ok) {
+      toast(accion === 'aprobar' ? (d.aplicado ? 'Aprobada y aplicada (' + d.aplicado.entidad + ')' : 'Aprobada') : accion === 'rechazar' ? 'Descartada' : 'Pospuesta', 'ok');
+      loadCrmInbox(); loadCrm();
+    } else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
+  }
+  window.resolverSugerencia = resolverSugerencia;
+
+  function copiarBorrador(btn) {
+    var msg = btn.getAttribute('data-msg') || '';
+    navigator.clipboard.writeText(msg).then(function () { toast('Mensaje copiado — pegalo en WhatsApp', 'ok'); });
+  }
+  window.copiarBorrador = copiarBorrador;
+
+  /* ─── OPERACIONES (funnel cierre) ─── */
+  async function loadCrmOperaciones() {
+    var el = document.getElementById('crm-operaciones');
+    if (!el) return;
+    var d = await apiFetch('/crm/operaciones');
+    if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">No pude leer operaciones.</span>'; return; }
+    var tot = document.getElementById('crm-ops-total');
+    if (tot) tot.textContent = d.activas + ' activas';
+    el.innerHTML = crmFunnelHtml((d.etapas || []).map(function (e) {
+      return { etapa: e.etapa, count: e.count, cards: (e.items || []).map(function (i) { return { nombre: i.operacion + (i.montoTotal ? ' · $' + Number(i.montoTotal).toLocaleString('es-AR') : '') }; }) };
+    }));
+    var al = document.getElementById('crm-ops-alertas');
+    if (al) {
+      var items = [];
+      var a = d.alertas || {};
+      (a.sinRefuerzo || []).forEach(function (o) { items.push('🟠 <b>' + escHtml(o) + '</b> — reserva sin refuerzo'); });
+      (a.firmasProximas || []).forEach(function (f) { items.push('✍️ <b>' + escHtml(f.operacion) + '</b> — firma el ' + f.fecha); });
+      if ((a.honorariosPendientes || 0) > 0) items.push('💰 Honorarios pendientes de cobro: <b>$' + Number(a.honorariosPendientes).toLocaleString('es-AR') + '</b>');
+      (a.trabadas || []).forEach(function (t) { items.push('🔴 <b>' + escHtml(t.operacion) + '</b> trabada: ' + escHtml(t.bloqueo.slice(0, 80))); });
+      al.innerHTML = items.length
+        ? items.map(function (i) { return '<div style="font-size:.8rem;padding:4px 0;border-top:1px solid rgba(255,255,255,0.05);">' + i + '</div>'; }).join('')
+        : '<div class="small muted">✅ Sin alertas de cierre.</div>';
+    }
+  }
+  window.loadCrmOperaciones = loadCrmOperaciones;
+
+  async function createCrmOperacion() {
+    var v = function (id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
+    if (!v('op-titulo')) return toast('El título es requerido', 'err');
+    var d = await apiFetch('/crm/operacion', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        operacion: v('op-titulo'), tipo: v('op-tipo'), etapa: v('op-etapa'),
+        montoTotal: v('op-monto') || undefined, reserva: v('op-reserva') || undefined,
+        honorariosEsperados: v('op-honorarios') || undefined, fechaFirma: v('op-firma') || undefined,
+        proximoPaso: v('op-paso') || undefined
+      })
+    });
+    if (d && d.ok) { hideModal('modal-operacion'); toast('Operación creada en el CRM', 'ok'); loadCrmOperaciones(); }
+    else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
+  }
+  window.createCrmOperacion = createCrmOperacion;
 
   /* ─── HUE ────────────────────────────────────────────────────────── */
   async function loadHue() {

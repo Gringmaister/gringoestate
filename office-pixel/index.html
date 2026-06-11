@@ -800,6 +800,19 @@
         <button class="btn btn-ghost btn-sm" onclick="loadCrm()">↻ Actualizar</button>
         <button class="btn btn-gold btn-sm" onclick="showModal('modal-contacto')">+ Contacto / Lead</button>
         <button class="btn btn-gold btn-sm" onclick="showModal('modal-prop')">+ Propiedad</button>
+        <button class="btn btn-gold btn-sm" onclick="showModal('modal-operacion')">+ Operación</button>
+      </div>
+
+      <!-- HERMES INBOX (copiloto: la IA propone, Franco decide) -->
+      <div class="card" style="margin-bottom:14px;border-color:rgba(94,200,216,0.35);" role="region" aria-label="Hermes Inbox — sugerencias del copiloto">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title" style="color:#5ec8d8;">📬 Hermes Inbox</h2>
+            <div class="card-sub">la IA propone — vos aprobás, editás o descartás · nada se envía solo</div>
+          </div>
+          <span class="badge badge-muted" id="crm-inbox-count">—</span>
+        </div>
+        <div id="crm-inbox"><div class="skeleton skeleton-block" style="height:60px;"></div></div>
       </div>
 
       <!-- EMBUDO CAPTACIÓN -->
@@ -818,6 +831,19 @@
           <span class="badge badge-gold" id="crm-dem-total">—</span>
         </div>
         <div class="crm-funnel" id="crm-demanda"><div class="skeleton skeleton-block" style="height:110px;"></div></div>
+      </div>
+
+      <!-- OPERACIONES (funnel cierre) -->
+      <div class="card" style="margin-bottom:14px;" role="region" aria-label="Operaciones — funnel de cierre">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">💼 Operaciones</h2>
+            <div class="card-sub">de la oferta al cierre — reservas, firmas y honorarios</div>
+          </div>
+          <span class="badge badge-gold" id="crm-ops-total">—</span>
+        </div>
+        <div class="crm-funnel" id="crm-operaciones"><div class="skeleton skeleton-block" style="height:90px;"></div></div>
+        <div id="crm-ops-alertas" style="margin-top:10px;"></div>
       </div>
 
       <!-- LOS 250 + SEGUIMIENTOS -->
@@ -1032,6 +1058,37 @@
       <div style="display:flex;gap:10px;justify-content:flex-end;">
         <button class="btn btn-ghost" onclick="hideModal('modal-prop')">Cancelar</button>
         <button class="btn btn-gold" onclick="createCrmPropiedad()">Crear en el CRM</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modal-operacion">
+  <div class="modal">
+    <h3>Nueva Operación (→ Notion)</h3>
+    <div class="stack">
+      <input class="input" id="op-titulo" placeholder="Título (ej: Venta Corrientes 1441 — Roberto)">
+      <div class="grid-2">
+        <select class="input" id="op-tipo" aria-label="Tipo de operación">
+          <option>Venta</option><option>Alquiler</option><option>Reserva compra</option><option>Reserva alquiler</option>
+        </select>
+        <select class="input" id="op-etapa" aria-label="Etapa">
+          <option>Oferta</option><option>Reserva</option><option>Refuerzo pendiente</option><option>Documentación</option>
+          <option>Escribanía/Contrato</option><option>Firma coordinada</option><option>Entrega/Posesión</option><option>Honorarios pendientes</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <input class="input" id="op-monto" type="number" placeholder="Monto total USD">
+        <input class="input" id="op-honorarios" type="number" placeholder="Honorarios esperados USD">
+      </div>
+      <div class="grid-2">
+        <input class="input" id="op-reserva" type="number" placeholder="Reserva USD (si hay)">
+        <input class="input" id="op-firma" type="date" aria-label="Fecha de firma">
+      </div>
+      <input class="input" id="op-paso" placeholder="Próximo paso">
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="hideModal('modal-operacion')">Cancelar</button>
+        <button class="btn btn-gold" onclick="createCrmOperacion()">Crear operación</button>
       </div>
     </div>
   </div>
