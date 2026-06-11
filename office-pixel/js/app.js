@@ -1303,13 +1303,26 @@
         if (c1) c1.innerHTML = '<span class="small muted">No pude leer el CRM (bridge /api/crm/pipeline).</span>';
         return;
       }
+      var emptyState = function (msg, botones) {
+        return '<div style="border:1px dashed var(--border);border-radius:12px;padding:18px;text-align:center;margin-bottom:12px;">' +
+          '<div style="font-size:.82rem;color:var(--muted);margin-bottom:10px;">' + msg + '</div>' +
+          '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">' + botones + '</div></div>';
+      };
       var cap = document.getElementById('crm-captacion');
-      if (cap) cap.innerHTML = crmFunnelHtml(d.captacion || []);
       var capTotal = (d.captacion || []).reduce(function (s, e) { return s + e.count; }, 0);
+      if (cap) cap.innerHTML = (capTotal === 0 ? emptyState(
+        'Todavía no hay propietarios en el embudo. Cargá un lead, promové desde tus contactos o importá una ficha.',
+        '<button class="btn btn-gold btn-sm" onclick="showModal(\'modal-contacto\')">+ Lead propietario</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="crmTab(\'contactos\')">⭐ Promover desde contactos</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="showModal(\'modal-import\')">📥 Importar</button>') : '') + crmFunnelHtml(d.captacion || []);
       var el = document.getElementById('crm-cap-total'); if (el) el.textContent = capTotal + ' propietarios';
       var dem = document.getElementById('crm-demanda');
-      if (dem) dem.innerHTML = crmFunnelHtml(d.demanda || []);
       var demTotal = (d.demanda || []).reduce(function (s, e) { return s + e.count; }, 0);
+      if (dem) dem.innerHTML = (demTotal === 0 ? emptyState(
+        'Todavía no hay compradores/inquilinos. Cargá una consulta, mandale el screenshot del lead a Wispy o promové desde contactos.',
+        '<button class="btn btn-gold btn-sm" onclick="showModal(\'modal-contacto\')">+ Lead demanda</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="crmTab(\'contactos\')">⭐ Promover desde contactos</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="showModal(\'modal-import\')">📥 Importar</button>') : '') + crmFunnelHtml(d.demanda || []);
       el = document.getElementById('crm-dem-total'); if (el) el.textContent = demTotal + ' leads';
       // Los 250
       el = document.getElementById('crm-250-total'); if (el) el.textContent = (d.los250?.total || 0) + ' / 250';
@@ -1387,8 +1400,24 @@
     ['f-m2tot', 'm2Totales'], ['f-m2cub', 'm2Cubiertos'], ['f-orientacion', 'orientacion'],
     ['f-ambientes', 'ambientes'], ['f-dormitorios', 'dormitorios'], ['f-banos', 'banos'],
     ['f-pisosedificio', 'pisosEdificio'], ['f-antiguedad', 'antiguedad'], ['f-financiacion', 'financiacion'],
-    ['f-zonaprop', 'linkZonaprop'], ['f-descripcion', 'descripcion'], ['f-notas', 'notas']
+    ['f-zonaprop', 'linkZonaprop'], ['f-descripcion', 'descripcion'], ['f-notas', 'notas'],
+    // C3.1 — ficha completa
+    ['f-barrio', 'barrio'], ['f-disposicion', 'disposicion'], ['f-luminosidad', 'luminosidad'],
+    ['f-m2semi', 'm2Semicubiertos'], ['f-m2desc', 'm2Descubiertos'], ['f-toilettes', 'toilettes'],
+    ['f-estadocons', 'estadoConservacion'], ['f-cocheras', 'cocheras'], ['f-abl', 'ablArs'],
+    ['f-alqars', 'valorAlquilerArs'], ['f-pretendido', 'precioPretendido'], ['f-recomendado', 'precioRecomendado'],
+    ['f-preciomin', 'precioMinimo'], ['f-comision', 'comisionPactada'], ['f-condfin', 'condFinanciacion']
   ];
+  var FICHA_EXTRAS = ['Ascensor', 'Calefacción', 'Aire acondicionado', 'Seguridad', 'Baulera', 'Balcón', 'Terraza', 'Patio', 'Apto profesional', 'Apto comercial', 'Accesibilidad', 'Gas natural', 'Unidad complementaria'];
+  function renderExtras(selected) {
+    var box = document.getElementById('f-extras');
+    if (!box) return;
+    var sel = selected || [];
+    box.innerHTML = '<span style="font-size:.7rem;color:var(--muted);width:100%;">Extras:</span>' + FICHA_EXTRAS.map(function (x) {
+      return '<label style="display:inline-flex;gap:4px;align-items:center;font-size:.72rem;color:var(--muted);cursor:pointer;border:1px solid var(--border);border-radius:14px;padding:3px 9px;">' +
+        '<input type="checkbox" class="f-extra-chk" value="' + x + '"' + (sel.indexOf(x) >= 0 ? ' checked' : '') + '> ' + x + '</label>';
+    }).join('');
+  }
 
   function abrirFicha(id) {
     var f = (id && crmFichaCache[id]) || {};
@@ -1402,6 +1431,8 @@
       el.value = (val === null || val === undefined) ? '' : String(val);
     });
     var co = document.getElementById('f-cochera'); if (co) co.checked = !!f.cochera;
+    renderExtras(f.extras || []);
+    var fw = document.getElementById('f-fuente-wrap'); if (fw && !id) fw.style.display = 'none';
     showModal('modal-prop');
   }
   window.abrirFicha = abrirFicha;
@@ -1412,6 +1443,7 @@
     var body = {};
     FICHA_FIELDS.forEach(function (m) { body[m[1]] = v(m[0]); });
     var co = document.getElementById('f-cochera'); body.cochera = !!(co && co.checked);
+    body.extras = Array.prototype.slice.call(document.querySelectorAll('.f-extra-chk:checked')).map(function (c) { return c.value; });
     var id = v('f-id');
     var url = id ? '/crm/propiedad/actualizar' : '/crm/propiedad';
     if (id) body.id = id;
@@ -1427,7 +1459,8 @@
     if (!file) return;
     input.value = '';
     if (file.size > 15 * 1024 * 1024) return toast('Archivo muy grande (máx 15MB)', 'err');
-    toast('Procesando ficha con IA… (~20s)', 'ok');
+    var esAudio = /^audio\//.test(file.type) || /\.(ogg|opus|mp3|m4a|wav|aac|webm)$/i.test(file.name);
+    toast(esAudio ? '🎙 Transcribiendo y procesando… (~40s)' : 'Procesando ficha con IA… (~20s)', 'ok');
     var reader = new FileReader();
     reader.onload = async function () {
       var d = await apiFetch('/crm/ficha-import', {
@@ -1468,11 +1501,30 @@
       set('cm-honorarios', '$' + Number(p.honorariosPipeline || 0).toLocaleString('es-AR'));
       set('cm-absintocar', h.abSinTocar30d ?? '—');
       set('cm-segvencidos', h.seguimientosVencidos ?? '—');
+      // C3.1: modo compacto cuando el pipeline está vacío
+      var row2vacio = !(o.contactos + o.propiedades + o.operaciones) && !(p.honorariosPipeline) && !(h.abSinTocar30d) && !(h.seguimientosVencidos);
+      var r2 = document.getElementById('cm-row2'), r2e = document.getElementById('cm-row2-empty');
+      if (r2) r2.style.display = row2vacio ? 'none' : '';
+      if (r2e) r2e.style.display = row2vacio ? '' : 'none';
+      // conversiones por embudo (solo cuando hay datos)
+      var cv = document.getElementById('cm-conversiones');
+      if (cv) {
+        var chips = [];
+        ['captacion', 'demanda'].forEach(function (k) {
+          var obj = (m.conversiones || {})[k] || {};
+          Object.keys(obj).forEach(function (par) {
+            if (obj[par] !== null) chips.push('<span class="badge badge-muted" title="' + escHtml(k) + '">' + escHtml(par) + ': <b style="color:var(--gold);">' + obj[par] + '%</b></span>');
+          });
+        });
+        cv.innerHTML = chips.length ? '<div style="font-size:.68rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Conversión por etapa</div><div style="display:flex;gap:6px;flex-wrap:wrap;">' + chips.join('') + '</div>' : '';
+      }
     }
     var hh = await apiFetch('/crm/hablar-hoy');
     var el = document.getElementById('crm-hablar-hoy');
     if (el) {
       var recs = (hh && hh.ok && hh.recomendados) || [];
+      window.crmRecsCache = {};
+      recs.forEach(function (r) { window.crmRecsCache[r.id] = r; });
       el.innerHTML = recs.length ? recs.map(function (r) {
         return '<div style="border:1px solid var(--border);border-radius:10px;padding:9px 12px;margin-bottom:7px;background:rgba(255,255,255,0.02);">' +
           '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
@@ -1481,17 +1533,65 @@
             '<span class="badge badge-muted">' + escHtml(r.tipo || '—') + '</span>' +
             '<span style="margin-left:auto;font-family:var(--mono);font-size:.7rem;color:var(--gold);">score ' + r.score + '</span>' +
           '</div>' +
-          '<div style="font-size:.76rem;color:var(--muted);margin:4px 0 7px;">' + r.motivos.map(escHtml).join(' · ') + (r.busca ? ' · busca: ' + escHtml(r.busca) : '') + '</div>' +
+          '<div style="font-size:.76rem;color:var(--muted);margin:4px 0 7px;"><b style="color:var(--text);">Motivo:</b> ' + r.motivos.map(escHtml).join(' · ') + (r.busca ? ' · busca: ' + escHtml(r.busca) : '') + '</div>' +
           '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
             (r.telefono ? '<a class="btn btn-gold btn-sm" style="text-decoration:none;" href="https://wa.me/' + String(r.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') +
             '<button class="btn btn-ghost btn-sm" onclick="marcarContactado(\'' + r.id + '\')">✓ Contactado</button>' +
+            '<button class="btn btn-ghost btn-sm" onclick="crearTareaContacto(\'' + r.id + '\')">📋 Crear tarea</button>' +
+            '<button class="btn btn-ghost btn-sm" onclick="posponerContacto(\'' + r.id + '\')">⏰ Posponer 3d</button>' +
             '<button class="btn btn-ghost btn-sm" onclick="abrirContactoEdit(\'' + r.id + '\')">✏️ Editar</button>' +
           '</div>' +
         '</div>';
-      }).join('') : '<span class="small muted">Sin recomendaciones todavía — cargá etiquetas/etapas a tus contactos y esto cobra vida.</span>';
+      }).join('') : '<span class="small muted">Sin recomendaciones todavía — el recomendador cobra vida cuando tus contactos tienen etiqueta, etapa o seguimiento. Cargá los primeros desde 🧹 Higiene o el Import Center.</span>';
     }
   }
   window.loadCrmResumen = loadCrmResumen;
+
+  async function posponerContacto(id) {
+    var f = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
+    var d = await apiFetch('/crm/contacto/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, proximoSeguimiento: f }) });
+    if (d && d.ok) { toast('Pospuesto — seguimiento el ' + f, 'ok'); loadCrmResumen(); }
+    else toast('Error al posponer', 'err');
+  }
+  window.posponerContacto = posponerContacto;
+
+  async function crearTareaContacto(id) {
+    var r = (window.crmRecsCache || {})[id] || {};
+    var d = await apiFetch('/tasks/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: 'Contactar ' + (r.nombre || 'contacto CRM'), notes: 'Gringo CRM — ' + ((r.motivos || []).join(' · ') || 'seguimiento') + (r.telefono ? ' · ' + r.telefono : '') }) });
+    if (d && d.ok) toast('Tarea creada en el Task OS', 'ok');
+    else toast('Error al crear la tarea', 'err');
+  }
+  window.crearTareaContacto = crearTareaContacto;
+
+  /* ─── C3.1: modales con ✕, Esc y click-afuera ─── */
+  function initModalUX() {
+    document.querySelectorAll('.modal-overlay').forEach(function (ov) {
+      var m = ov.querySelector('.modal');
+      if (m && !m.querySelector('.modal-x')) {
+        m.style.position = 'relative';
+        var x = document.createElement('button');
+        x.className = 'modal-x';
+        x.innerHTML = '✕';
+        x.setAttribute('aria-label', 'Cerrar');
+        x.style.cssText = 'position:absolute;top:10px;right:12px;background:none;border:none;color:var(--muted);font-size:1.05rem;cursor:pointer;padding:4px;line-height:1;z-index:2;';
+        x.onmouseenter = function () { x.style.color = 'var(--text)'; };
+        x.onmouseleave = function () { x.style.color = 'var(--muted)'; };
+        x.onclick = function () { hideModal(ov.id); };
+        m.appendChild(x);
+      }
+      if (!ov.dataset.uxWired) {
+        ov.dataset.uxWired = '1';
+        ov.addEventListener('click', function (e) { if (e.target === ov) hideModal(ov.id); });
+      }
+    });
+    if (!window.__modalEscWired) {
+      window.__modalEscWired = true;
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(function (ov) { hideModal(ov.id); });
+      });
+    }
+  }
+  initModalUX();
 
   async function marcarContactado(id) {
     var d = await apiFetch('/crm/contacto/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, tocado: true }) });
@@ -1560,8 +1660,10 @@
     set('ce-id', id); set('ce-tipo', c.tipo); set('ce-etiqueta', c.etiqueta);
     set('ce-etapacap', c.etapaCaptacion); set('ce-etapadem', c.etapaDemanda);
     set('ce-busca', c.busca); set('ce-seguimiento', c.proximoSeguimiento);
+    set('ce-estado', c.estadoContacto); set('ce-motivo', c.motivoCongelado); set('ce-prioridad', c.prioridadActual);
     ['nurcN', 'nurcU', 'nurcR', 'nurcC', 'pufaP', 'pufaU', 'pufaF', 'pufaA'].forEach(function (k) { set('ce-' + k, ''); });
     var chk = document.getElementById('ce-250'); if (chk) chk.checked = !!c.en250;
+    var fo = document.getElementById('ce-foco'); if (fo) fo.checked = !!c.enFoco;
     showModal('modal-contacto-edit');
   }
   window.abrirContactoEdit = abrirContactoEdit;
@@ -1570,8 +1672,9 @@
     var v = function (eid) { var e = document.getElementById(eid); return e ? e.value.trim() : ''; };
     var id = v('ce-id');
     if (!id) return;
-    var body = { id: id, tipo: v('ce-tipo') || undefined, etiqueta: v('ce-etiqueta') || undefined, etapaCaptacion: v('ce-etapacap') || undefined, etapaDemanda: v('ce-etapadem') || undefined, busca: v('ce-busca') || undefined, proximoSeguimiento: v('ce-seguimiento') || undefined, nurcN: v('ce-nurcN') || undefined, nurcU: v('ce-nurcU') || undefined, nurcR: v('ce-nurcR') || undefined, nurcC: v('ce-nurcC') || undefined, pufaP: v('ce-pufaP') || undefined, pufaU: v('ce-pufaU') || undefined, pufaF: v('ce-pufaF') || undefined, pufaA: v('ce-pufaA') || undefined };
+    var body = { id: id, tipo: v('ce-tipo') || undefined, etiqueta: v('ce-etiqueta') || undefined, etapaCaptacion: v('ce-etapacap') || undefined, etapaDemanda: v('ce-etapadem') || undefined, busca: v('ce-busca') || undefined, proximoSeguimiento: v('ce-seguimiento') || undefined, nurcN: v('ce-nurcN') || undefined, nurcU: v('ce-nurcU') || undefined, nurcR: v('ce-nurcR') || undefined, nurcC: v('ce-nurcC') || undefined, pufaP: v('ce-pufaP') || undefined, pufaU: v('ce-pufaU') || undefined, pufaF: v('ce-pufaF') || undefined, pufaA: v('ce-pufaA') || undefined, estadoContacto: v('ce-estado') || undefined, motivoCongelado: v('ce-motivo') || undefined, prioridadActual: v('ce-prioridad') || undefined };
     var chk = document.getElementById('ce-250'); body.en250 = !!(chk && chk.checked);
+    var fo = document.getElementById('ce-foco'); body.enFoco = !!(fo && fo.checked);
     var d = await apiFetch('/crm/contacto/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (d && d.ok) { hideModal('modal-contacto-edit'); toast('Contacto actualizado', 'ok'); crmContactosCache = null; loadCrm(); }
     else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
@@ -1603,6 +1706,7 @@
       if (val !== null && val !== undefined && val !== '') el.value = String(val);
     });
     var co = document.getElementById('f-cochera'); if (co) co.checked = !!f.cochera;
+    renderExtras(f.extras || []);
     // campos dudosos → amarillo
     var dudosos = f.camposDudosos || [];
     var mapa = {}; FICHA_FIELDS.forEach(function (m) { mapa[m[1]] = m[0]; });
@@ -1696,7 +1800,10 @@
     (d.items || []).forEach(function (o) {
       if (o.propiedadId && !['Cerrada', 'Caída'].includes(o.etapa)) window.crmOpsByProp[o.propiedadId] = true;
     });
-    el.innerHTML = crmFunnelHtml((d.etapas || []).map(function (e) {
+    var opsEmpty = !(d.items || []).length;
+    el.innerHTML = (opsEmpty
+      ? '<div style="border:1px dashed var(--border);border-radius:12px;padding:18px;text-align:center;margin-bottom:12px;"><div style="font-size:.82rem;color:var(--muted);margin-bottom:10px;">Sin operaciones activas. Cuando haya una oferta o reserva en la mesa, cargala acá (o aprobá la sugerencia de Hermes desde el Inbox).</div><button class="btn btn-gold btn-sm" onclick="showModal(\'modal-operacion\')">+ Primera operación</button></div>'
+      : '') + crmFunnelHtml((d.etapas || []).map(function (e) {
       return { etapa: e.etapa, count: e.count, cards: (e.items || []).map(function (i) { return { nombre: i.operacion + (i.montoTotal ? ' · $' + Number(i.montoTotal).toLocaleString('es-AR') : '') }; }) };
     }));
     var al = document.getElementById('crm-ops-alertas');

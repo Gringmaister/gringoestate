@@ -828,18 +828,20 @@
           <div class="kpi"><span>Conversaciones nuevas 7d</span><strong id="cm-convos">—</strong><small>línea laboral</small></div>
           <div class="kpi"><span>Contactos trabajados 7d</span><strong id="cm-trabajados">—</strong><small>con interacción</small></div>
         </div>
-        <div class="kpi-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));">
+        <div class="kpi-grid" id="cm-row2" style="grid-template-columns:repeat(4,minmax(0,1fr));">
           <div class="kpi"><span>Oportunidades 7d</span><strong id="cm-oport">—</strong><small id="cm-oport-sub">cont · props · ops</small></div>
           <div class="kpi"><span>Pipeline honorarios</span><strong id="cm-honorarios" style="color:var(--gold)">—</strong><small>por cobrar</small></div>
           <div class="kpi"><span>A/B sin tocar +30d</span><strong id="cm-absintocar" style="color:var(--warn)">—</strong><small>reactivar</small></div>
           <div class="kpi"><span>Seguimientos vencidos</span><strong id="cm-segvencidos" style="color:var(--danger)">—</strong><small>al día = 0</small></div>
         </div>
+        <div id="cm-row2-empty" class="small muted" style="display:none;padding:4px 0;">Pipeline sin datos todavía — las métricas de negocio se despliegan cuando cargues contactos, propiedades y operaciones.</div>
+        <div id="cm-conversiones" style="margin-top:10px;"></div>
       </div>
 
       <!-- A QUIÉN HABLARLE HOY -->
       <div class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.35);" role="region" aria-label="A quién hablarle hoy">
         <div class="card-head">
-          <div><h2 class="card-title" style="color:var(--gold);">🎯 A quién hablarle hoy</h2><div class="card-sub">score compuesto: etiqueta + días sin contacto + etapa caliente + NURC/PUFA</div></div>
+          <div><h2 class="card-title" style="color:var(--gold);">🎯 Recomendador diario</h2><div class="card-sub">prioriza según: ⭐ en foco · etiqueta A/B · días sin contacto · etapa caliente · seguimiento vencido · NURC/PUFA · prioridad — congelados y perdidos quedan afuera</div></div>
         </div>
         <div id="crm-hablar-hoy"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
       </div>
@@ -1126,10 +1128,19 @@
       <div class="grid-3">
         <input class="input" id="f-m2tot" type="number" placeholder="M² totales">
         <input class="input" id="f-m2cub" type="number" placeholder="M² cubiertos">
-        <select class="input" id="f-orientacion" aria-label="Orientación">
-          <option value="">Orientación —</option><option>Frente</option><option>Contrafrente</option><option>Lateral</option>
-          <option>Norte</option><option>Sur</option><option>Este</option><option>Oeste</option>
-          <option>NE</option><option>NO</option><option>SE</option><option>SO</option>
+        <input class="input" id="f-barrio" placeholder="Barrio (ej: Recoleta)">
+      </div>
+      <div class="grid-3">
+        <select class="input" id="f-disposicion" aria-label="Disposición">
+          <option value="">Disposición —</option><option>Frente</option><option>Contrafrente</option><option>Lateral</option>
+          <option>Interno</option><option>Pulmón</option><option>Abierto</option><option>Vista abierta</option>
+        </select>
+        <select class="input" id="f-orientacion" aria-label="Orientación cardinal">
+          <option value="">Orientación —</option><option>Norte</option><option>Noreste</option><option>Este</option><option>Sudeste</option>
+          <option>Sur</option><option>Sudoeste</option><option>Oeste</option><option>Noroeste</option>
+        </select>
+        <select class="input" id="f-luminosidad" aria-label="Luminosidad">
+          <option value="">Luminosidad —</option><option>Muy luminoso</option><option>Luminoso</option><option>Normal</option><option>Poco luminoso</option>
         </select>
       </div>
       <div class="grid-3">
@@ -1144,6 +1155,36 @@
           <option value="">Financiación —</option><option>Sí</option><option>No</option>
         </select>
       </div>
+      <details style="border:1px solid var(--border);border-radius:10px;padding:8px 12px;">
+        <summary style="font-size:.78rem;color:var(--gold);cursor:pointer;">📐 Ficha completa (superficies, extras, comercial)</summary>
+        <div class="stack" style="margin-top:10px;">
+          <div class="grid-3">
+            <input class="input" id="f-m2semi" type="number" placeholder="M² semicubiertos">
+            <input class="input" id="f-m2desc" type="number" placeholder="M² descubiertos">
+            <input class="input" id="f-toilettes" type="number" placeholder="Toilettes">
+          </div>
+          <div class="grid-3">
+            <select class="input" id="f-estadocons" aria-label="Estado de conservación">
+              <option value="">Estado conserv. —</option><option>Excelente</option><option>Muy bueno</option><option>Bueno</option><option>Regular</option><option>A reciclar</option>
+            </select>
+            <input class="input" id="f-cocheras" type="number" placeholder="Cocheras (cant.)">
+            <input class="input" id="f-abl" type="number" placeholder="ABL (ARS)">
+          </div>
+          <div id="f-extras" style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span style="font-size:.7rem;color:var(--muted);width:100%;">Extras:</span>
+          </div>
+          <div class="grid-3">
+            <input class="input" id="f-alqars" type="number" placeholder="Alquiler (ARS/mes)">
+            <input class="input" id="f-pretendido" type="number" placeholder="Precio pretendido USD">
+            <input class="input" id="f-recomendado" type="number" placeholder="Precio recomendado USD">
+          </div>
+          <div class="grid-2">
+            <input class="input" id="f-preciomin" type="number" placeholder="Precio mínimo aceptable USD">
+            <input class="input" id="f-comision" placeholder="Comisión pactada (ej: 4% + IVA)">
+          </div>
+          <input class="input" id="f-condfin" placeholder="Condiciones de financiación (si hay)">
+        </div>
+      </details>
       <label style="display:flex;gap:8px;align-items:center;font-size:.8rem;color:var(--muted);cursor:pointer;">
         <input type="checkbox" id="f-cochera"> Cochera
       </label>
@@ -1165,6 +1206,9 @@
     <p class="small muted" style="margin:4px 0 12px;">Todo sigue el mismo camino: extraer → revisar → guardar. Nada entra sin tu ojo.</p>
     <div class="stack">
       <button class="btn btn-gold" onclick="hideModal('modal-import');document.getElementById('ficha-file').click()">📎 Subir ficha PDF (Zonaprop/Tokko)</button>
+      <button class="btn btn-gold" onclick="hideModal('modal-import');document.getElementById('ficha-audio').click()">🎙 Subir audio (te transcribo y cargo la ficha)</button>
+      <input type="file" id="ficha-audio" accept="audio/*,.ogg,.opus,.mp3,.m4a,.wav" style="display:none;" onchange="importarFicha(this)">
+      <div style="font-size:.68rem;color:var(--muted);text-align:center;">Ej: «Oficina en Corrientes 1441, 150 metros, alquiler 1.800 dólares, expensas 280 mil, al frente, orientación norte, 2 baños, apto profesional»</div>
       <div style="font-size:.72rem;color:var(--muted);text-align:center;">— o pegá el texto de la publicación / del lead —</div>
       <textarea class="input" id="imp-texto" placeholder="Pegá acá el texto (Zonaprop → Compartir → Copiar, o el texto del lead de Tokko)…" style="min-height:110px;"></textarea>
       <button class="btn btn-gold" onclick="importarTexto()">⚡ Procesar texto con IA</button>
@@ -1210,6 +1254,22 @@
         <select class="input" id="ce-pufaA"><option value="">Autoridad —</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
       </div>
       <input class="input" id="ce-busca" placeholder="Qué busca (zona, presupuesto, tipología)">
+      <div style="font-size:.7rem;color:var(--muted);letter-spacing:.06em;">ESTADO VIVO del contacto</div>
+      <div class="grid-2">
+        <select class="input" id="ce-estado" aria-label="Estado del contacto">
+          <option value="">Estado —</option><option>Activo</option><option>Seguimiento</option><option>Dormido</option><option>Congelado</option><option>Perdido</option>
+        </select>
+        <select class="input" id="ce-motivo" aria-label="Motivo (si congelado/dormido)">
+          <option value="">Motivo —</option><option>No responde</option><option>Sin presupuesto</option><option>No decide</option><option>Fuera de mercado</option>
+          <option>Huésped AMBBI</option><option>Personal</option><option>Ya resuelto</option><option>Contactar más adelante</option><option>Otro</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <select class="input" id="ce-prioridad" aria-label="Prioridad actual">
+          <option value="">Prioridad —</option><option>Baja</option><option>Media</option><option>Alta</option><option>Crítica</option>
+        </select>
+        <label style="display:flex;gap:8px;align-items:center;font-size:.8rem;color:var(--gold);cursor:pointer;"><input type="checkbox" id="ce-foco"> ⭐ En foco esta semana</label>
+      </div>
       <div class="grid-2">
         <input class="input" id="ce-seguimiento" type="date" aria-label="Próximo seguimiento">
         <label style="display:flex;gap:8px;align-items:center;font-size:.8rem;color:var(--muted);cursor:pointer;"><input type="checkbox" id="ce-250"> En los 250</label>
