@@ -799,7 +799,7 @@
       <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px;">
         <button class="btn btn-ghost btn-sm" onclick="loadCrm()">↻ Actualizar</button>
         <button class="btn btn-gold btn-sm" onclick="showModal('modal-contacto')">+ Contacto / Lead</button>
-        <button class="btn btn-gold btn-sm" onclick="showModal('modal-prop')">+ Propiedad</button>
+        <button class="btn btn-gold btn-sm" onclick="abrirFicha('')">+ Propiedad</button>
         <button class="btn btn-gold btn-sm" onclick="showModal('modal-operacion')">+ Operación</button>
       </div>
 
@@ -1039,25 +1039,62 @@
 
 <!-- Modal nueva propiedad -->
 <div class="modal-overlay hidden" id="modal-prop">
-  <div class="modal">
-    <h3>Nueva Propiedad (→ Notion)</h3>
+  <div class="modal" style="max-width:720px;width:94vw;max-height:88vh;overflow-y:auto;">
+    <h3 id="f-titulo-modal">Ficha de Propiedad</h3>
+    <input type="hidden" id="f-id">
     <div class="stack">
-      <input class="input" id="p-address" placeholder="Dirección / título (ej: Santa Fe 2125 4ºB)">
+      <input class="input" id="f-propiedad" placeholder="Título (ej: Oficina Corrientes 1441 7ºA)">
       <div class="grid-2">
-        <select class="input" id="p-type" aria-label="Tipo de propiedad">
-          <option>Departamento</option><option>Oficina</option><option>Local</option>
+        <input class="input" id="f-direccion" placeholder="Dirección (calle y número)">
+        <input class="input" id="f-piso" placeholder="Piso / Depto (ej: 7º A)">
+      </div>
+      <div class="grid-3">
+        <select class="input" id="f-tipo" aria-label="Tipo de propiedad">
+          <option value="">Tipo —</option><option>Departamento</option><option>Oficina</option><option>Local</option>
           <option>Cochera</option><option>Casa</option><option>Terreno</option>
         </select>
-        <select class="input" id="p-operacion" aria-label="Operación">
-          <option>Venta</option><option>Alquiler</option><option>Venta/Alquiler</option>
+        <select class="input" id="f-operacion" aria-label="Operación">
+          <option value="">Operación —</option><option>Venta</option><option>Alquiler</option><option>Venta/Alquiler</option>
+        </select>
+        <select class="input" id="f-estado" aria-label="Estado">
+          <option value="">Estado —</option><option>Publicada</option><option>Reservada</option><option>Cerrada</option><option>Pausada</option>
         </select>
       </div>
-      <input class="input" id="p-price" placeholder="Valor pedido (ej: USD 120.000)">
-      <input class="input" id="p-zonaprop" placeholder="Link Zonaprop (opcional)">
-      <textarea class="input" id="p-notes" placeholder="Notas…" style="min-height:60px;"></textarea>
+      <div class="grid-3">
+        <input class="input" id="f-valorventa" type="number" placeholder="Valor VENTA (USD)">
+        <input class="input" id="f-valoralquiler" type="number" placeholder="Valor ALQUILER (USD/mes)">
+        <input class="input" id="f-expensas" type="number" placeholder="Expensas (ARS)">
+      </div>
+      <div class="grid-3">
+        <input class="input" id="f-m2tot" type="number" placeholder="M² totales">
+        <input class="input" id="f-m2cub" type="number" placeholder="M² cubiertos">
+        <select class="input" id="f-orientacion" aria-label="Orientación">
+          <option value="">Orientación —</option><option>Frente</option><option>Contrafrente</option><option>Lateral</option>
+          <option>Norte</option><option>Sur</option><option>Este</option><option>Oeste</option>
+          <option>NE</option><option>NO</option><option>SE</option><option>SO</option>
+        </select>
+      </div>
+      <div class="grid-3">
+        <input class="input" id="f-ambientes" type="number" placeholder="Ambientes">
+        <input class="input" id="f-dormitorios" type="number" placeholder="Dormitorios">
+        <input class="input" id="f-banos" type="number" placeholder="Baños">
+      </div>
+      <div class="grid-3">
+        <input class="input" id="f-pisosedificio" type="number" placeholder="Pisos del edificio">
+        <input class="input" id="f-antiguedad" type="number" placeholder="Antigüedad (años)">
+        <select class="input" id="f-financiacion" aria-label="Financiación">
+          <option value="">Financiación —</option><option>Sí</option><option>No</option>
+        </select>
+      </div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:.8rem;color:var(--muted);cursor:pointer;">
+        <input type="checkbox" id="f-cochera"> Cochera
+      </label>
+      <input class="input" id="f-zonaprop" placeholder="Link Zonaprop (también la cargás a mano en Tokko)">
+      <textarea class="input" id="f-descripcion" placeholder="Descripción (la misma que usás en la publicación)…" style="min-height:70px;"></textarea>
+      <textarea class="input" id="f-notas" placeholder="Notas internas…" style="min-height:50px;"></textarea>
       <div style="display:flex;gap:10px;justify-content:flex-end;">
         <button class="btn btn-ghost" onclick="hideModal('modal-prop')">Cancelar</button>
-        <button class="btn btn-gold" onclick="createCrmPropiedad()">Crear en el CRM</button>
+        <button class="btn btn-gold" id="f-guardar" onclick="saveCrmFicha()">Guardar ficha</button>
       </div>
     </div>
   </div>

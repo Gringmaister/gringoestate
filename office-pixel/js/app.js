@@ -1321,12 +1321,17 @@
       var pr = document.getElementById('crm-propiedades');
       if (pr) {
         var items = d.propiedades?.items || [];
+        crmFichaCache = {};
+        items.forEach(function (p) { crmFichaCache[p.id] = p; });
         pr.innerHTML = items.length ? items.map(function (p) {
           var docsCol = p.docsPct >= 100 ? 'var(--ok)' : p.docsPct >= 50 ? 'var(--gold)' : 'var(--warn)';
-          return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);">' +
-            '<span style="flex:1;font-weight:600;font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(p.propiedad) + '</span>' +
+          var valor = p.valorVenta ? ('$' + Number(p.valorVenta).toLocaleString('es-AR')) : p.valorAlquiler ? ('$' + Number(p.valorAlquiler).toLocaleString('es-AR') + '/mes') : (p.valorPedido || '—');
+          var specs = [p.tipoPropiedad, p.m2Totales ? p.m2Totales + 'm²' : null, p.ambientes ? p.ambientes + ' amb' : null].filter(Boolean).join(' · ');
+          return '<div onclick="abrirFicha(\'' + p.id + '\')" style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer;" title="Click para abrir/editar la ficha">' +
+            '<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(p.propiedad) + '</div>' +
+            (specs ? '<div style="font-size:.68rem;color:var(--muted);">' + escHtml(specs) + '</div>' : '') + '</div>' +
             '<span class="badge badge-muted">' + escHtml(p.operacion || '—') + '</span>' +
-            '<span style="color:var(--gold);font-family:var(--mono);font-size:.78rem;">' + escHtml(p.valorPedido || '—') + '</span>' +
+            '<span style="color:var(--gold);font-family:var(--mono);font-size:.78rem;">' + escHtml(String(valor)) + '</span>' +
             '<div style="display:flex;align-items:center;gap:6px;width:130px;">' +
               '<div style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.07);overflow:hidden;"><div style="height:100%;width:' + p.docsPct + '%;background:' + docsCol + ';border-radius:3px;"></div></div>' +
               '<span style="font-size:.7rem;font-family:var(--mono);color:' + docsCol + ';width:54px;">docs ' + p.docsPct + '%</span>' +
@@ -1358,17 +1363,48 @@
   }
   window.loadCrmSeguimientos = loadCrmSeguimientos;
 
-  async function createCrmPropiedad() {
-    var v = function (id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
-    if (!v('p-address')) return toast('La dirección/título es requerida', 'err');
-    var d = await apiFetch('/crm/propiedad', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ propiedad: v('p-address'), tipoPropiedad: v('p-type'), operacion: v('p-operacion'), valorPedido: v('p-price'), linkZonaprop: v('p-zonaprop') || undefined, notas: v('p-notes') })
+  /* ─── FICHA DE PROPIEDAD (create + edit desde la web) ─── */
+  var crmFichaCache = {}; // id → ficha completa (del pipeline)
+  var FICHA_FIELDS = [
+    ['f-propiedad', 'propiedad'], ['f-direccion', 'direccion'], ['f-piso', 'pisoDepto'],
+    ['f-tipo', 'tipoPropiedad'], ['f-operacion', 'operacion'], ['f-estado', 'estado'],
+    ['f-valorventa', 'valorVenta'], ['f-valoralquiler', 'valorAlquiler'], ['f-expensas', 'expensas'],
+    ['f-m2tot', 'm2Totales'], ['f-m2cub', 'm2Cubiertos'], ['f-orientacion', 'orientacion'],
+    ['f-ambientes', 'ambientes'], ['f-dormitorios', 'dormitorios'], ['f-banos', 'banos'],
+    ['f-pisosedificio', 'pisosEdificio'], ['f-antiguedad', 'antiguedad'], ['f-financiacion', 'financiacion'],
+    ['f-zonaprop', 'linkZonaprop'], ['f-descripcion', 'descripcion'], ['f-notas', 'notas']
+  ];
+
+  function abrirFicha(id) {
+    var f = (id && crmFichaCache[id]) || {};
+    var t = document.getElementById('f-titulo-modal');
+    if (t) t.textContent = id ? ('Editar — ' + (f.propiedad || 'ficha')) : 'Nueva Propiedad (ficha completa)';
+    var hid = document.getElementById('f-id'); if (hid) hid.value = id || '';
+    FICHA_FIELDS.forEach(function (m) {
+      var el = document.getElementById(m[0]);
+      if (!el) return;
+      var val = f[m[1]];
+      el.value = (val === null || val === undefined) ? '' : String(val);
     });
-    if (d && d.ok) { hideModal('modal-prop'); toast('Propiedad creada en el CRM (Notion)', 'ok'); loadCrm(); }
+    var co = document.getElementById('f-cochera'); if (co) co.checked = !!f.cochera;
+    showModal('modal-prop');
+  }
+  window.abrirFicha = abrirFicha;
+
+  async function saveCrmFicha() {
+    var v = function (id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
+    if (!v('f-propiedad')) return toast('El título es requerido', 'err');
+    var body = {};
+    FICHA_FIELDS.forEach(function (m) { body[m[1]] = v(m[0]); });
+    var co = document.getElementById('f-cochera'); body.cochera = !!(co && co.checked);
+    var id = v('f-id');
+    var url = id ? '/crm/propiedad/actualizar' : '/crm/propiedad';
+    if (id) body.id = id;
+    var d = await apiFetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (d && d.ok) { hideModal('modal-prop'); toast(id ? 'Ficha actualizada' : 'Propiedad creada en el CRM', 'ok'); loadCrm(); }
     else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
   }
-  window.createCrmPropiedad = createCrmPropiedad;
+  window.saveCrmFicha = saveCrmFicha;
 
   async function createCrmContacto() {
     var v = function (id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
