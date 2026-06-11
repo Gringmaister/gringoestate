@@ -800,6 +800,8 @@
         <button class="btn btn-ghost btn-sm" onclick="loadCrm()">↻ Actualizar</button>
         <button class="btn btn-gold btn-sm" onclick="showModal('modal-contacto')">+ Contacto / Lead</button>
         <button class="btn btn-gold btn-sm" onclick="abrirFicha('')">+ Propiedad</button>
+        <button class="btn btn-gold btn-sm" onclick="document.getElementById('ficha-file').click()">📎 Importar ficha</button>
+        <input type="file" id="ficha-file" accept=".pdf,.txt" style="display:none;" onchange="importarFicha(this)">
         <button class="btn btn-gold btn-sm" onclick="showModal('modal-operacion')">+ Operación</button>
       </div>
 

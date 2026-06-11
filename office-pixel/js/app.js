@@ -1406,6 +1406,36 @@
   }
   window.saveCrmFicha = saveCrmFicha;
 
+  /* ─── IMPORTAR FICHA ZONAPROP (PDF → gpt-5.5 → modal pre-llenado) ─── */
+  async function importarFicha(input) {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    input.value = '';
+    if (file.size > 15 * 1024 * 1024) return toast('Archivo muy grande (máx 15MB)', 'err');
+    toast('Procesando ficha con IA… (~20s)', 'ok');
+    var reader = new FileReader();
+    reader.onload = async function () {
+      var d = await apiFetch('/crm/ficha-import', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: file.name, base64: String(reader.result) })
+      });
+      if (!d || d.__error || !d.ok) return toast('Error: ' + ((d && d.error) || 'no pude procesar la ficha'), 'err');
+      abrirFicha('');
+      var f = d.ficha || {};
+      FICHA_FIELDS.forEach(function (m) {
+        var el = document.getElementById(m[0]);
+        if (!el) return;
+        var val = f[m[1]];
+        if (val !== null && val !== undefined && val !== '') el.value = String(val);
+      });
+      var co = document.getElementById('f-cochera'); if (co) co.checked = !!f.cochera;
+      var t = document.getElementById('f-titulo-modal'); if (t) t.textContent = 'Ficha importada — revisá y guardá';
+      toast('Ficha extraída — revisala antes de guardar', 'ok');
+    };
+    reader.readAsDataURL(file);
+  }
+  window.importarFicha = importarFicha;
+
   async function createCrmContacto() {
     var v = function (id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
     if (!v('c-nombre')) return toast('El nombre es requerido', 'err');
