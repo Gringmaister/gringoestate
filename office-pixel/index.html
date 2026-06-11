@@ -957,6 +957,16 @@
         </div>
         <div id="crm-propiedades"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
       </div>
+      <!-- TASACIONES por comparables -->
+      <div class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.3);" role="region" aria-label="Tasaciones por comparables">
+        <div class="card-head">
+          <div><h2 class="card-title" style="color:var(--gold);">🧮 Tasaciones</h2><div class="card-sub">por comparables de Zonaprop — balcón corrido = cubierto · terraza 30% · cochera ±25k USD</div></div>
+          <button class="btn btn-gold btn-sm" onclick="showModal('modal-tasacion')">+ Tasación</button>
+        </div>
+        <div id="crm-tasaciones"><div class="skeleton skeleton-block" style="height:50px;"></div></div>
+        <div id="crm-tasacion-detalle" style="margin-top:12px;"></div>
+      </div>
+
       <!-- DOCUMENTAL -->
       <div class="card" role="region" aria-label="Módulo documental">
         <div class="card-head">
@@ -1225,6 +1235,32 @@
       <div style="display:flex;gap:10px;justify-content:flex-end;">
         <button class="btn btn-ghost" onclick="hideModal('modal-prop')">Cancelar</button>
         <button class="btn btn-gold" id="f-guardar" onclick="saveCrmFicha()">Guardar ficha</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modal-tasacion">
+  <div class="modal">
+    <h3>🧮 Nueva Tasación</h3>
+    <div class="stack">
+      <input class="input" id="ts-titulo" placeholder="Título (ej: Depto Junín 1500 3ºA — García)">
+      <div class="grid-2">
+        <input class="input" id="ts-direccion" placeholder="Dirección">
+        <input class="input" id="ts-barrio" placeholder="Barrio (clave para comparar)">
+      </div>
+      <div class="grid-2">
+        <select class="input" id="ts-tipo" aria-label="Tipo"><option>Departamento</option><option>Oficina</option><option>Local</option><option>PH</option><option>Casa</option></select>
+        <label style="display:flex;gap:8px;align-items:center;font-size:.8rem;color:var(--muted);cursor:pointer;"><input type="checkbox" id="ts-cochera"> Tiene cochera (+25k al final)</label>
+      </div>
+      <div class="grid-3">
+        <input class="input" id="ts-m2cub" type="number" placeholder="M² cubiertos">
+        <input class="input" id="ts-m2balcon" type="number" placeholder="M² balcón corrido">
+        <input class="input" id="ts-m2terraza" type="number" placeholder="M² terraza (pondera 30%)">
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="hideModal('modal-tasacion')">Cancelar</button>
+        <button class="btn btn-gold" onclick="crearTasacion()">Crear</button>
       </div>
     </div>
   </div>

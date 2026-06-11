@@ -1376,6 +1376,7 @@
       loadCrmHigiene();
       loadPlanSemanal();
       loadCrmMatching();
+      loadTasaciones();
     } catch (e) {}
   }
   window.loadCrm = loadCrm;
@@ -1582,6 +1583,109 @@
     else toast('Error al crear la tarea', 'err');
   }
   window.crearTareaContacto = crearTareaContacto;
+
+  /* ─── T1: Tasaciones por comparables ─── */
+  async function loadTasaciones() {
+    var el = document.getElementById('crm-tasaciones');
+    if (!el) return;
+    var d = await apiFetch('/crm/tasaciones');
+    if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">No pude leer tasaciones.</span>'; return; }
+    el.innerHTML = (d.items || []).length ? d.items.map(function (t) {
+      return '<div onclick="abrirTasacion(\'' + t.id + '\')" style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer;" title="Click para abrir">' +
+        '<span style="flex:1;font-weight:600;font-size:.84rem;">' + escHtml(t.tasacion) + '</span>' +
+        '<span class="badge badge-muted">' + escHtml(t.barrio || '—') + '</span>' +
+        '<span style="font-family:var(--mono);font-size:.74rem;color:var(--muted);">' + (t.m2Pond || '—') + 'm²</span>' +
+        (t.tasacionUsd ? '<span style="font-family:var(--mono);font-size:.8rem;color:var(--gold);">USD ' + Number(t.tasacionUsd).toLocaleString('es-AR') + '</span>' : '') +
+        '<span class="badge ' + (t.estado === 'Lista' ? 'badge-ok' : 'badge-muted') + '">' + escHtml(t.estado || '—') + '</span>' +
+      '</div>';
+    }).join('') : '<span class="small muted">Sin tasaciones — creá la primera y pegale links de Zonaprop de comparables.</span>';
+  }
+  window.loadTasaciones = loadTasaciones;
+
+  async function crearTasacion() {
+    var v = function (id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
+    if (!v('ts-titulo')) return toast('El título es requerido', 'err');
+    var co = document.getElementById('ts-cochera');
+    var d = await apiFetch('/crm/tasacion', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tasacion: v('ts-titulo'), direccion: v('ts-direccion'), barrio: v('ts-barrio'), tipoPropiedad: v('ts-tipo'), m2Cubiertos: Number(v('ts-m2cub')) || 0, m2Balcon: Number(v('ts-m2balcon')) || 0, m2Terraza: Number(v('ts-m2terraza')) || 0, cochera: !!(co && co.checked) })
+    });
+    if (d && d.ok) { hideModal('modal-tasacion'); toast('Tasación creada — ' + d.m2Ponderados + ' m² ponderados. Ahora pegale comparables.', 'ok'); loadTasaciones(); abrirTasacion(d.id); }
+    else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
+  }
+  window.crearTasacion = crearTasacion;
+
+  async function abrirTasacion(id) {
+    var el = document.getElementById('crm-tasacion-detalle');
+    if (!el) return;
+    el.innerHTML = '<div class="skeleton skeleton-block" style="height:80px;"></div>';
+    var d = await apiFetch('/crm/tasacion/' + id);
+    if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">Error al abrir.</span>'; return; }
+    var t = d.tasacion, comps = d.comparables || [];
+    var filas = comps.map(function (c) {
+      return '<tr style="border-top:1px solid rgba(255,255,255,0.06);' + (c.outlier ? 'opacity:.45;' : '') + '">' +
+        '<td style="padding:4px 6px;font-size:.76rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (c.link ? '<a href="' + escHtml(c.link) + '" target="_blank" rel="noopener" style="color:var(--text);">' + escHtml(c.comparable) + ' ↗</a>' : escHtml(c.comparable)) + '</td>' +
+        '<td style="padding:4px 6px;font-family:var(--mono);font-size:.74rem;text-align:right;">' + (c.precio ? c.precio.toLocaleString('es-AR') : '—') + '</td>' +
+        '<td style="padding:4px 6px;font-family:var(--mono);font-size:.74rem;text-align:right;">' + (c.precioAjustado ? c.precioAjustado.toLocaleString('es-AR') : '—') + (c.cochera ? ' 🚗' : '') + '</td>' +
+        '<td style="padding:4px 6px;font-family:var(--mono);font-size:.74rem;text-align:right;">' + (c.m2Pond || '—') + '</td>' +
+        '<td style="padding:4px 6px;font-family:var(--mono);font-size:.78rem;text-align:right;color:var(--gold);">' + (c.usdM2 ? c.usdM2.toLocaleString('es-AR') : '—') + '</td>' +
+        '<td style="padding:4px 6px;font-size:.74rem;text-align:center;">' + (c.outlier ? '⚠ outlier' : c.similar ? '✓' : '✕') + '</td>' +
+        '<td style="padding:4px 6px;font-family:var(--mono);font-size:.7rem;text-align:right;">' + (c.expensas ? (c.expensas / 1000) + 'k' : '—') + '</td>' +
+      '</tr>';
+    }).join('');
+    el.innerHTML =
+      '<div style="border:1px solid var(--border);border-radius:12px;padding:12px;">' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
+          '<strong style="font-size:.9rem;">' + escHtml(t.tasacion) + '</strong>' +
+          '<span class="badge badge-muted">' + escHtml(t.barrio || '') + '</span>' +
+          '<span style="font-family:var(--mono);font-size:.74rem;color:var(--muted);">' + (t.m2Pond || '—') + ' m² pond.' + (t.cochera ? ' + 🚗' : '') + '</span>' +
+          '<span style="margin-left:auto;"></span>' +
+          '<button class="btn btn-gold btn-sm" onclick="calcularTasacion(\'' + t.id + '\')">🧮 Calcular</button>' +
+        '</div>' +
+        (t.tasacionUsd ? '<div style="border:1px solid var(--ok);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.86rem;">💰 <b>TASACIÓN: USD ' + t.tasacionUsd.toLocaleString('es-AR') + '</b> <span style="color:var(--muted);font-size:.76rem;">(USD/m² zona: ' + (t.usdM2Zona || '—') + ' · rango ' + (t.rangoDesde || 0).toLocaleString('es-AR') + '–' + (t.rangoHasta || 0).toLocaleString('es-AR') + ')</span></div>' : '') +
+        '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">' +
+          '<input class="input" id="cmp-link" placeholder="Pegá un LINK de Zonaprop…" style="flex:2;min-width:200px;">' +
+          '<button class="btn btn-gold btn-sm" onclick="agregarComparable(\'' + t.id + '\',\'link\')">+ por link</button>' +
+        '</div>' +
+        '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">' +
+          '<textarea class="input" id="cmp-texto" placeholder="…o pegá el TEXTO del aviso (compartir → copiar)" style="flex:2;min-width:200px;min-height:44px;"></textarea>' +
+          '<button class="btn btn-ghost btn-sm" onclick="agregarComparable(\'' + t.id + '\',\'texto\')">+ por texto</button>' +
+        '</div>' +
+        (comps.length ? '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="font-size:.66rem;color:var(--muted);text-transform:uppercase;"><th style="text-align:left;padding:4px 6px;">Comparable</th><th style="text-align:right;">Precio</th><th style="text-align:right;">Ajustado</th><th style="text-align:right;">m²</th><th style="text-align:right;">USD/m²</th><th>Similar</th><th style="text-align:right;">Exp.</th></tr></thead><tbody>' + filas + '</tbody></table></div>' : '<div class="small muted">Sin comparables todavía — pegá el primero ↑</div>') +
+      '</div>';
+  }
+  window.abrirTasacion = abrirTasacion;
+
+  async function agregarComparable(tasacionId, via) {
+    var body = { tasacionId: tasacionId };
+    if (via === 'link') {
+      var l = (document.getElementById('cmp-link') || {}).value || '';
+      if (!/^https?:\/\//.test(l.trim())) return toast('Pegá un link válido', 'err');
+      body.link = l.trim();
+    } else {
+      var tx = (document.getElementById('cmp-texto') || {}).value || '';
+      if (tx.trim().length < 60) return toast('Pegá el texto completo del aviso', 'err');
+      body.texto = tx.trim();
+    }
+    toast('Analizando comparable con IA… (~20s)', 'ok');
+    var d = await apiFetch('/crm/tasacion/comparable', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (d && d.ok) {
+      var c = d.comparable;
+      toast('✅ ' + c.titulo + ' — USD/m² ' + (c.usdM2 || '?') + (c.esSimilar ? '' : ' (lo marqué NO similar: ' + (c.razon || '') + ')'), 'ok');
+      abrirTasacion(tasacionId);
+    } else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
+  }
+  window.agregarComparable = agregarComparable;
+
+  async function calcularTasacion(id) {
+    toast('Calculando…', 'ok');
+    var d = await apiFetch('/crm/tasacion/calcular', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+    if (d && d.ok) {
+      toast('🧮 TASACIÓN: USD ' + d.tasacionUsd.toLocaleString('es-AR') + ' (' + d.usdM2Zona + ' USD/m² × ' + d.m2Ponderados + 'm²)' + (d.outliers.length ? ' · ' + d.outliers.length + ' outlier(s) excluidos' : ''), 'ok');
+      abrirTasacion(id); loadTasaciones();
+    } else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
+  }
+  window.calcularTasacion = calcularTasacion;
 
   /* ─── C4: Matching demanda↔propiedad ─── */
   async function loadCrmMatching() {
