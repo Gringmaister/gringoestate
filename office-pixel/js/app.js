@@ -166,6 +166,7 @@
       loadGauges(),
       loadDocker(),
       loadBambiOps(),
+      loadBambiInbox(),
       loadOpsTab(),
       loadOpsPipeline(),
       loadIAChart(),
@@ -2912,6 +2913,65 @@
     }, 50);
   }
   window.loadBambiOps = loadBambiOps;
+
+  /* ─── BANDEJA DE HUÉSPEDES (Frente 5) ─────────────────────────────── */
+  function inboxAgo(s) {
+    s = s || 0;
+    if (s < 60) return 'recién';
+    var m = Math.round(s / 60);
+    if (m < 60) return 'hace ' + m + ' min';
+    var h = Math.floor(m / 60), mm = m % 60;
+    if (h < 24) return 'hace ' + h + 'h' + (mm ? ' ' + mm + 'm' : '');
+    return 'hace ' + Math.floor(h / 24) + 'd';
+  }
+  async function loadBambiInbox() {
+    var el = document.getElementById('bambi-inbox-content');
+    if (!el) return;
+    el.innerHTML = '<div class="skeleton skeleton-block" style="height:120px;"></div>';
+    var badge = document.getElementById('bambi-inbox-waiting');
+    var d = await apiFetch('/agents/conversations/bambi?limit=40');
+    if (!d || d.__error || !d.ok) {
+      el.innerHTML = '<span style="color:var(--muted);font-size:.82rem;">Sin datos de la bandeja' + (d && d.__error ? ' (' + d.__error + ')' : '') + '</span>';
+      if (badge) badge.style.display = 'none';
+      return;
+    }
+    var threads = (d.threads || []).slice();
+    threads.sort(function (a, b) {
+      if (!!a.waiting !== !!b.waiting) return a.waiting ? -1 : 1;
+      return (b.waiting_s || 0) - (a.waiting_s || 0);
+    });
+    if (badge) {
+      if (d.waiting > 0) { badge.textContent = d.waiting + ' esperando'; badge.style.display = ''; }
+      else { badge.style.display = 'none'; }
+    }
+    if (!threads.length) {
+      el.innerHTML = '<span style="color:var(--muted);font-size:.82rem;">Sin conversaciones recientes</span>';
+      return;
+    }
+    var head = '<div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;">' +
+      (d.waiting > 0
+        ? '<strong style="color:var(--warn);font-size:.95rem;">' + d.waiting + '</strong> esperando respuesta · ' + threads.length + ' chats'
+        : '<strong style="color:var(--ok);">✓ al día</strong> · ' + threads.length + ' chats') +
+      '</div>';
+    var rows = threads.map(function (t) {
+      var waiting = !!t.waiting;
+      var accent = waiting ? 'var(--warn)' : 'rgba(255,255,255,0.10)';
+      var meta = waiting ? '⏳ ' + inboxAgo(t.waiting_s) : '✓ respondido';
+      var metaCol = waiting ? 'var(--warn)' : 'var(--muted)';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);border-left:3px solid ' + accent + ';padding-left:9px;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:.82rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
+            escHtml(t.name || '—') +
+            (t.tag ? ' <span style="color:var(--muted);font-size:.72rem;font-weight:400;">· ' + escHtml(t.tag) + '</span>' : '') +
+          '</div>' +
+          (t.snippet ? '<div style="font-size:.72rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(t.snippet) + '</div>' : '') +
+        '</div>' +
+        '<span style="color:' + metaCol + ';font-size:.72rem;flex-shrink:0;white-space:nowrap;">' + meta + '</span>' +
+      '</div>';
+    }).join('');
+    el.innerHTML = head + rows;
+  }
+  window.loadBambiInbox = loadBambiInbox;
 
   /* ─── OPERACIONES TAB ────────────────────────────────────────────── */
   async function loadOpsTab() {

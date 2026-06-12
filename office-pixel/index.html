@@ -389,6 +389,18 @@
           Bambi · Operaciones
         </span>
       </div>
+      <!-- BANDEJA DE HUÉSPEDES (Frente 5) — quién espera respuesta -->
+      <div class="card" id="card-bambi-inbox" style="margin-bottom:18px;" role="region" aria-label="Bandeja de huéspedes">
+        <div class="card-head">
+          <h2 class="card-title">Bandeja de huéspedes <span id="bambi-inbox-waiting" class="badge badge-warn" style="display:none;margin-left:6px;"></span></h2>
+          <button class="btn btn-ghost btn-sm" onclick="loadBambiInbox()" aria-label="Actualizar bandeja de huéspedes">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+          </button>
+        </div>
+        <div id="bambi-inbox-content">
+          <div class="skeleton skeleton-block" style="height:120px;"></div>
+        </div>
+      </div>
       <div class="grid-2" style="margin-bottom:18px;" role="region" aria-label="Operaciones y tareas">
         <!-- Bambi 24/7 -->
         <div class="card" id="card-bambi-ops">
