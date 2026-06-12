@@ -1597,8 +1597,9 @@
     window.lgData = d; window.lgId = id;
     var p = d.propiedad, sem = d.semaforoDocumental || {};
     if (t) t.textContent = '📂 ' + p.propiedad;
-    var seccion = function (titulo, contenido) {
-      return '<div style="margin-bottom:13px;"><div style="font-size:.7rem;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);padding-bottom:3px;margin-bottom:6px;">' + titulo + '</div>' + contenido + '</div>';
+    var seccion = function (titulo, contenido, extraHeader) {
+      return '<div style="margin-bottom:18px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px 14px;">' +
+        '<div style="display:flex;align-items:center;gap:8px;font-size:.74rem;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:9px;"><span style="flex:1;">' + titulo + '</span>' + (extraHeader || '') + '</div>' + contenido + '</div>';
     };
     // ═ PRÓXIMA ACCIÓN — enorme, arriba, con botones
     var faltan = (d.checklist || []).filter(function (c) { return c.estado === 'pendiente' || c.estado === 'bloqueante'; }).map(function (c) { return c.tipo; });
@@ -1624,24 +1625,38 @@
         '<span style="font-family:var(--mono);font-size:.74rem;color:var(--muted);">' + (p.m2Totales || '—') + ' m² · ' + (p.ambientes || '—') + ' amb</span>' +
       '</div>' +
       (d.propietario ? '<div style="font-size:.8rem;margin-top:6px;">🏠 <b>' + escHtml(d.propietario.nombre) + '</b>' + (d.propietario.telefono ? ' · <a href="https://wa.me/' + String(d.propietario.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener" style="color:var(--gold);">' + escHtml(d.propietario.telefono) + '</a>' : '') + '</div>' : '<div class="small muted" style="margin-top:6px;">Sin propietario vinculado.</div>'));
-    // checklist por COLORES
+    // checklist por COLORES — S44: grid de tarjetas high-quality + barra de progreso + dropzone
     var colorDe = { recibido: 'var(--ok)', pedido: '#5ec8d8', revisar: 'var(--warn)', bloqueante: 'var(--danger)', no_aplica: '#555', pendiente: '#999' };
-    var lblDe = { recibido: 'recibido', pedido: 'pedido', revisar: 'revisar', bloqueante: 'BLOQUEA', no_aplica: 'no aplica', pendiente: 'pendiente' };
-    var chk = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;"><span class="badge" style="border:1px solid ' + (/legal/.test(sem.nivel) ? 'var(--danger)' : /comercial|operativo/.test(sem.nivel) ? 'var(--warn)' : 'var(--ok)') + ';">' + escHtml(sem.nivel || '—') + '</span>' +
-      '<span style="font-size:.66rem;color:var(--muted);">🟢 recibido · 🔵 pedido · 🟡 revisar · 🔴 bloquea · ⚪ no aplica</span></div>';
+    var lblDe = { recibido: '✓ Recibido', pedido: '📨 Pedido', revisar: '🟡 Revisar', bloqueante: '⛔ BLOQUEA', no_aplica: 'No aplica', pendiente: 'Pendiente' };
+    var nRec = (d.checklist || []).filter(function (c) { return c.estado === 'recibido'; }).length;
+    var nTot = (d.checklist || []).filter(function (c) { return c.estado !== 'no_aplica'; }).length;
+    var pct = nTot ? Math.round(nRec / nTot * 100) : 0;
+    var chk = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">' +
+      '<span class="badge" style="border:1.5px solid ' + (/legal/.test(sem.nivel) ? 'var(--danger)' : /comercial|operativo/.test(sem.nivel) ? 'var(--warn)' : 'var(--ok)') + ';font-size:.72rem;padding:3px 10px;">' + escHtml(sem.nivel || '—') + '</span>' +
+      '<div style="flex:1;min-width:140px;height:7px;border-radius:5px;background:rgba(255,255,255,0.07);overflow:hidden;"><div style="height:100%;width:' + pct + '%;border-radius:5px;background:linear-gradient(90deg,var(--gold),#e8c96a);transition:width .4s;"></div></div>' +
+      '<span style="font-family:var(--mono);font-size:.74rem;color:var(--gold);">' + nRec + '/' + nTot + ' · ' + pct + '%</span></div>';
+    chk += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:7px;">';
     chk += (d.checklist || []).map(function (c) {
-      return '<div style="display:flex;align-items:center;gap:7px;padding:3px 0;border-top:1px solid rgba(255,255,255,0.04);font-size:.78rem;">' +
-        '<i style="width:9px;height:9px;border-radius:50%;background:' + (colorDe[c.estado] || '#999') + ';flex-shrink:0;"></i>' +
-        '<span style="flex:1;' + (c.estado === 'no_aplica' ? 'opacity:.45;text-decoration:line-through;' : '') + '">' + escHtml(c.tipo) + (c.driveLink ? ' <a href="' + escHtml(c.driveLink) + '" target="_blank" rel="noopener" style="color:var(--muted);">↗</a>' : '') + '</span>' +
-        '<span style="font-size:.64rem;color:' + (colorDe[c.estado] || '#999') + ';">' + lblDe[c.estado] + '</span>' +
-        '<span style="display:inline-flex;gap:2px;">' +
-          (c.estado !== 'recibido' ? '<button class="btn btn-ghost btn-sm" style="padding:0 5px;" title="Marcar pedido" onclick="lgDocAccion(\'' + c.tipo + '\',\'pedido\')">📨</button>' : '') +
-          (c.estado !== 'recibido' ? '<button class="btn btn-ghost btn-sm" style="padding:0 5px;" title="Marcar recibido (a mano)" onclick="lgDocAccion(\'' + c.tipo + '\',\'recibido\')">✓</button>' : '') +
-          (c.estado !== 'no_aplica' ? '<button class="btn btn-ghost btn-sm" style="padding:0 5px;" title="No aplica" onclick="lgDocAccion(\'' + c.tipo + '\',\'no_aplica\')">🚫</button>' : '<button class="btn btn-ghost btn-sm" style="padding:0 5px;" title="Restaurar" onclick="lgDocAccion(\'' + c.tipo + '\',\'reset\')">↺</button>') +
-        '</span></div>' +
-        (c.redFlags ? '<div style="font-size:.72rem;color:var(--danger);padding-left:16px;">🚩 ' + escHtml(c.redFlags) + '</div>' : '');
+      var col = colorDe[c.estado] || '#999';
+      return '<div style="border:1px solid rgba(255,255,255,0.07);border-left:3px solid ' + col + ';border-radius:9px;padding:7px 9px;background:rgba(255,255,255,0.015);' + (c.estado === 'no_aplica' ? 'opacity:.4;' : '') + '">' +
+        '<div style="display:flex;align-items:center;gap:6px;">' +
+          '<span style="flex:1;font-size:.79rem;font-weight:600;' + (c.estado === 'no_aplica' ? 'text-decoration:line-through;' : '') + '">' + escHtml(c.tipo) + (c.driveLink ? ' <a href="' + escHtml(c.driveLink) + '" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:none;">↗</a>' : '') + '</span>' +
+          '<span style="font-size:.62rem;color:' + col + ';white-space:nowrap;">' + lblDe[c.estado] + '</span></div>' +
+        '<div style="display:flex;gap:3px;margin-top:5px;">' +
+          (c.estado !== 'recibido' ? '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Marcar pedido" onclick="lgDocAccion(\'' + c.tipo + '\',\'pedido\')">📨 pedir</button>' : '') +
+          (c.estado !== 'recibido' ? '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Marcar recibido (a mano)" onclick="lgDocAccion(\'' + c.tipo + '\',\'recibido\')">✓</button>' : '') +
+          (c.estado !== 'no_aplica' ? '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="No aplica" onclick="lgDocAccion(\'' + c.tipo + '\',\'no_aplica\')">🚫</button>' : '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Restaurar" onclick="lgDocAccion(\'' + c.tipo + '\',\'reset\')">↺</button>') +
+        '</div>' +
+        (c.redFlags ? '<div style="font-size:.68rem;color:var(--danger);margin-top:4px;">🚩 ' + escHtml(c.redFlags) + '</div>' : '') +
+      '</div>';
     }).join('');
-    izq += seccion('📥 Documental — checklist (' + (d.checklist || []).filter(function (c) { return c.estado === 'recibido'; }).length + '/' + (d.checklist || []).filter(function (c) { return c.estado !== 'no_aplica'; }).length + ')', chk);
+    chk += '</div>';
+    // S44: DROPZONE — arrastrá el documento directo al legajo (o click para elegir)
+    chk += '<div id="lg-dropzone" onclick="document.getElementById(\'lg-dropfile\').click()" style="margin-top:10px;border:2px dashed rgba(212,175,55,0.35);border-radius:11px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;font-size:.8rem;color:var(--muted);">' +
+      '📎 <b style="color:var(--text);">Arrastrá acá</b> la escritura, expensas, ABL, plano… <span style="opacity:.7;">(o hacé click)</span> — va al Drive y tilda el checklist solo' +
+      '<input type="file" id="lg-dropfile" style="display:none;" onchange="lgFileElegido(this.files[0])"></div>' +
+      '<div id="lg-droptipo" style="display:none;margin-top:8px;"></div>';
+    izq += seccion('📥 Documental', chk);
     izq += seccion('🧮 Tasaciones (' + (d.tasaciones || []).length + ')',
       (d.tasaciones || []).length ? d.tasaciones.map(function (x) {
         return '<div style="display:flex;gap:8px;align-items:center;padding:3px 0;font-size:.78rem;flex-wrap:wrap;"><span style="flex:1;">' + escHtml(x.tasacion) + '</span><span class="badge badge-muted">' + escHtml(x.estado || '') + '</span>' + (x.precioCierre ? '<span style="font-family:var(--mono);color:var(--gold);">USD ' + Number(x.precioCierre).toLocaleString('es-AR') + '</span>' : '') + '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'modal-legajo\');crmTab(\'propiedades\');abrirTasacion(\'' + x.id + '\')">abrir</button></div>';
@@ -1654,9 +1669,11 @@
       (d.operaciones || []).length ? d.operaciones.map(function (o) {
         return '<div style="display:flex;gap:8px;font-size:.78rem;padding:2px 0;"><span style="flex:1;">' + escHtml(o.operacion) + '</span><span class="badge badge-muted">' + escHtml(o.etapa || '') + '</span></div>';
       }).join('') : '<div class="small muted">Sin operaciones.</div>');
-    // ═ DOCK DE HERMES (derecha)
-    var dock = '<div style="border:1px solid rgba(94,200,216,0.4);border-radius:12px;padding:10px;position:sticky;top:0;">' +
-      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><strong style="color:#5ec8d8;font-size:.85rem;">🪽 HERMES · Asistente del Legajo</strong></div>' +
+    // ═ DOCK DE HERMES (derecha) — S44: avatar real + header high-quality
+    var dock = '<div style="border:1px solid rgba(94,200,216,0.45);border-radius:14px;padding:13px;position:sticky;top:0;background:linear-gradient(180deg,rgba(94,200,216,0.06),rgba(94,200,216,0.01));">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid rgba(94,200,216,0.2);">' +
+        '<img src="/images/hermes-avatar.webp" alt="Hermes" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid rgba(94,200,216,0.6);box-shadow:0 0 12px rgba(94,200,216,0.25);" onerror="this.style.display=\'none\'">' +
+        '<div><strong style="color:#5ec8d8;font-size:.92rem;display:block;letter-spacing:.02em;">HERMES</strong><span style="font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Asistente del Legajo</span></div></div>' +
       '<div style="display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;">' +
         ['resumen|📊 Resumen', 'chat|💬 Chat', 'comentarios|🗒 Notas', 'mensajes|📨 Mensajes'].map(function (x) {
           var pr = x.split('|');
@@ -1674,10 +1691,13 @@
         ((sem.bloqueos || []).length ? '<div style="color:var(--danger);">⛔ <b>Bloquea:</b> ' + sem.bloqueos.map(function (b) { return b.detalle; }).join(' · ') + '</div>' : '') +
         '<div style="margin-top:6px;">▶ <b>' + escHtml(d.proximaAccion || '') + '</b></div>' +
       '</div></div>';
-    // chat
+    // chat — S44: + nota de voz (Whisper) y altura más generosa
     dock += '<div class="lgdock-pane" id="lgdock-chat" style="display:none;">' +
-      '<div id="lg-chat-log" style="max-height:280px;overflow-y:auto;font-size:.76rem;margin-bottom:8px;"><div class="small muted">Preguntale a Hermes sobre ESTA propiedad: "¿qué falta para publicar?" · "¿qué le pido al propietario?" · "¿qué riesgos ves?"</div></div>' +
-      '<div style="display:flex;gap:6px;"><input class="input" id="lg-chat-input" placeholder="Preguntale a Hermes…" style="flex:1;" onkeydown="if(event.key===\'Enter\')lgChatSend()"><button class="btn btn-gold btn-sm" onclick="lgChatSend()">➤</button></div></div>';
+      '<div id="lg-chat-log" style="max-height:380px;overflow-y:auto;font-size:.76rem;margin-bottom:8px;"><div class="small muted">Preguntale a Hermes sobre ESTA propiedad — por texto o con una 🎤 nota de voz: "¿qué falta para publicar?" · "¿qué le pido al propietario?" · "¿qué riesgos ves?"</div></div>' +
+      '<div style="display:flex;gap:6px;align-items:center;">' +
+        '<input class="input" id="lg-chat-input" placeholder="Preguntale a Hermes…" style="flex:1;" onkeydown="if(event.key===\'Enter\')lgChatSend()">' +
+        '<button class="btn btn-ghost btn-sm" id="lg-mic-btn" title="Mantené una conversación por voz: grabás, Whisper transcribe y Hermes responde" onclick="lgAudioToggle()">🎤</button>' +
+        '<button class="btn btn-gold btn-sm" onclick="lgChatSend()">➤</button></div></div>';
     // comentarios
     dock += '<div class="lgdock-pane" id="lgdock-comentarios" style="display:none;">' +
       '<div style="max-height:240px;overflow-y:auto;font-size:.74rem;margin-bottom:8px;">' +
@@ -1695,10 +1715,108 @@
           (m.destinatario ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="https://wa.me/' + String(m.destinatario).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') + '</div></div>';
       }).join('') : '<div class="small muted">Sin mensajes sugeridos.</div>') + '</div>';
     dock += '</div>';
-    if (body) body.innerHTML = accionHtml + '<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;"><div style="flex:1.35;min-width:360px;">' + izq + '</div><div style="flex:1;min-width:290px;">' + dock + '</div></div>';
+    if (body) body.innerHTML = accionHtml + '<div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;"><div style="flex:1.5;min-width:420px;">' + izq + '</div><div style="flex:1;min-width:320px;">' + dock + '</div></div>';
     lgDockTab('resumen');
+    lgDropWire();
   }
   window.abrirLegajo = abrirLegajo;
+
+  /* S44: drag & drop de documentos directo al legajo */
+  function lgDropWire() {
+    var dz = document.getElementById('lg-dropzone');
+    if (!dz) return;
+    ['dragover', 'dragenter'].forEach(function (ev) { dz.addEventListener(ev, function (e) { e.preventDefault(); e.stopPropagation(); dz.style.borderColor = 'var(--gold)'; dz.style.background = 'rgba(212,175,55,0.1)'; }); });
+    ['dragleave', 'drop'].forEach(function (ev) { dz.addEventListener(ev, function (e) { e.preventDefault(); e.stopPropagation(); dz.style.borderColor = 'rgba(212,175,55,0.35)'; dz.style.background = ''; }); });
+    dz.addEventListener('drop', function (e) { var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) lgFileElegido(f); });
+  }
+
+  function lgFileElegido(file) {
+    if (!file) return;
+    if (file.size > 20 * 1024 * 1024) return toast('Máx 20MB', 'err');
+    window.lgPendingFile = file;
+    var tipos = (((window.lgData || {}).checklist) || []).map(function (c) { return c.tipo; });
+    if (!tipos.length) tipos = ['Escritura', 'Expensas', 'ABL', 'Plano'];
+    if (tipos.indexOf('Fotos') < 0) tipos.push('Fotos');
+    tipos.push('Otro');
+    var box = document.getElementById('lg-droptipo');
+    if (!box) return;
+    box.style.display = '';
+    box.innerHTML = '<div style="border:1px solid var(--gold);border-radius:10px;padding:9px 11px;background:rgba(212,175,55,0.05);">' +
+      '<div style="font-size:.76rem;margin-bottom:6px;">📄 <b>' + escHtml(file.name) + '</b> — ¿qué documento es?</div>' +
+      '<div style="display:flex;gap:5px;flex-wrap:wrap;">' +
+      tipos.map(function (t2) { return '<button class="btn btn-ghost btn-sm" onclick="lgUploadDrop(\'' + escHtml(t2).replace(/'/g, '') + '\')">' + escHtml(t2) + '</button>'; }).join('') +
+      '<button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="window.lgPendingFile=null;document.getElementById(\'lg-droptipo\').style.display=\'none\'">✕</button>' +
+      '</div></div>';
+  }
+  window.lgFileElegido = lgFileElegido;
+
+  function lgUploadDrop(tipo) {
+    var file = window.lgPendingFile;
+    if (!file) return;
+    var box = document.getElementById('lg-droptipo');
+    if (box) box.innerHTML = '<div class="small muted" style="padding:8px;">☁️ Subiendo <b>' + escHtml(file.name) + '</b> como ' + escHtml(tipo) + '… (Drive + checklist' + (tipo === 'Escritura' ? ' + análisis automático de titulares/gravámenes' : '') + ')</div>';
+    var reader = new FileReader();
+    reader.onload = async function () {
+      var d = await apiFetch('/crm/propiedad/doc', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: window.lgId, tipoDoc: tipo, filename: file.name, base64: String(reader.result) }) });
+      window.lgPendingFile = null;
+      if (d && d.ok) { toast('☁️ ' + escHtml(tipo) + ' guardado en Drive' + (tipo === 'Escritura' ? ' — analizando escritura…' : ''), 'ok'); abrirLegajo(window.lgId); }
+      else { toast('Error: ' + ((d && d.error) || 'no pude subir'), 'err'); if (box) box.style.display = 'none'; }
+    };
+    reader.readAsDataURL(file);
+  }
+  window.lgUploadDrop = lgUploadDrop;
+
+  /* S44: nota de voz a Hermes (MediaRecorder → Whisper → chat con contexto) */
+  window.lgRec = null;
+  async function lgAudioToggle() {
+    var btn = document.getElementById('lg-mic-btn');
+    if (window.lgRec) { // grabando → frenar y mandar
+      window.lgRec.stop();
+      return;
+    }
+    if (!navigator.mediaDevices || !window.MediaRecorder) return toast('Tu navegador no soporta grabación de audio', 'err');
+    try {
+      var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      var chunks = [];
+      var rec = new MediaRecorder(stream);
+      rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+      rec.onstop = function () {
+        stream.getTracks().forEach(function (t2) { t2.stop(); });
+        window.lgRec = null;
+        if (btn) { btn.textContent = '🎤'; btn.style.background = ''; btn.style.color = ''; }
+        var blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
+        if (blob.size < 1200) return toast('Audio muy corto — probá de nuevo', 'err');
+        var fr = new FileReader();
+        fr.onload = function () { lgChatSendAudio(String(fr.result)); };
+        fr.readAsDataURL(blob);
+      };
+      rec.start();
+      window.lgRec = rec;
+      if (btn) { btn.textContent = '⏹'; btn.style.background = 'var(--danger)'; btn.style.color = '#fff'; }
+      toast('🎤 Grabando… tocá ⏹ para mandar', 'ok');
+    } catch (e) { toast('No pude acceder al micrófono (permiso denegado)', 'err'); }
+  }
+  window.lgAudioToggle = lgAudioToggle;
+
+  async function lgChatSendAudio(b64) {
+    var log = document.getElementById('lg-chat-log');
+    if (log) { log.innerHTML += '<div style="text-align:right;margin:4px 0;"><span id="lg-chat-audiobubble" style="background:rgba(212,166,64,0.15);border-radius:8px;padding:4px 8px;display:inline-block;">🎤 <i>transcribiendo…</i></span></div><div id="lg-chat-wait" class="small muted">Hermes está escuchando…</div>'; log.scrollTop = log.scrollHeight; }
+    var d = await apiFetch('/crm/propiedad/' + window.lgId + '/hermes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ audio: b64, filename: 'nota.webm' }) });
+    var w = document.getElementById('lg-chat-wait'); if (w) w.remove();
+    var bub = document.getElementById('lg-chat-audiobubble');
+    if (bub) { bub.innerHTML = '🎤 ' + escHtml((d && d.transcripcion) || '(no entendí el audio)'); bub.removeAttribute('id'); }
+    lgChatPintarRespuesta(d, log);
+  }
+  window.lgChatSendAudio = lgChatSendAudio;
+
+  function lgChatPintarRespuesta(d, log) {
+    if (!log) log = document.getElementById('lg-chat-log');
+    if (!log) return;
+    log.innerHTML += '<div style="display:flex;gap:6px;align-items:flex-start;margin:5px 0;">' +
+      '<img src="/images/hermes-avatar.webp" alt="" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-top:2px;" onerror="this.outerHTML=\'🪽\'">' +
+      '<span style="background:rgba(94,200,216,0.12);border-radius:8px;padding:5px 9px;display:inline-block;white-space:pre-wrap;">' + escHtml((d && d.respuesta) || (d && d.error) || 'No pude responder.') + '</span></div>';
+    log.scrollTop = log.scrollHeight;
+  }
 
   function lgDockTab(which) {
     document.querySelectorAll('.lgdock-pane').forEach(function (x) { x.style.display = 'none'; });
@@ -1716,7 +1834,7 @@
     if (log) { log.innerHTML += '<div style="text-align:right;margin:4px 0;"><span style="background:rgba(212,166,64,0.15);border-radius:8px;padding:4px 8px;display:inline-block;">' + escHtml(q) + '</span></div><div id="lg-chat-wait" class="small muted">Hermes está pensando…</div>'; log.scrollTop = log.scrollHeight; }
     var d = await apiFetch('/crm/propiedad/' + window.lgId + '/hermes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pregunta: q }) });
     var w = document.getElementById('lg-chat-wait'); if (w) w.remove();
-    if (log) { log.innerHTML += '<div style="margin:4px 0;"><span style="background:rgba(94,200,216,0.12);border-radius:8px;padding:4px 8px;display:inline-block;white-space:pre-wrap;">🪽 ' + escHtml((d && d.respuesta) || 'No pude responder.') + '</span></div>'; log.scrollTop = log.scrollHeight; }
+    lgChatPintarRespuesta(d, log);
   }
   window.lgChatSend = lgChatSend;
 
@@ -2132,6 +2250,7 @@
       window.crmHigFiltro = window.crmHigFiltro || 'todos';
       // P5 consultor (S43): filtros + lote + modo teclado — 371 uno-por-uno era inviable
       var lista = d.sinClasificar.top.filter(function (l) {
+        if (window.crmHigBusca && (l.nombre || '').toLowerCase().indexOf(window.crmHigBusca) < 0) return false;
         if (window.crmHigFiltro === 'telefono') return !!l.telefono;
         if (window.crmHigFiltro === 'activos') return (l.mensajes || 0) >= 20;
         if (window.crmHigFiltro === 'basura') return !l.telefono || /^\d+$/.test((l.nombre || '').trim()) || (l.mensajes || 0) <= 1;
@@ -2145,6 +2264,7 @@
       };
       html += '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">' +
         chip('todos', 'Todos') + chip('activos', '🔥 ≥20 msgs') + chip('telefono', '📞 Con tel.') + chip('basura', '🧹 Probable basura') +
+        '<input class="input" placeholder="🔎 Buscar nombre…" value="' + escHtml(window.crmHigBusca || '') + '" style="width:160px;font-size:.74rem;padding:3px 8px;" oninput="window.crmHigBusca=this.value.toLowerCase();window.crmHigFocus=0;clearTimeout(window.crmHigBuscaT);window.crmHigBuscaT=setTimeout(function(){var v=document.activeElement&&document.activeElement.value;loadCrmHigiene().then(function(){var i=document.querySelector(\'#crm-higiene input.input\');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);}});},350)">' +
         '<button class="btn btn-sm ' + (window.crmHigKb ? 'btn-gold' : 'btn-ghost') + '" style="margin-left:auto;" title="Clasificá con el teclado: ↑↓ moverse · P promover · E equipo · A ambbi · X personal · V proveedor · N no contactar · D descartar · S saltar" onclick="window.crmHigKb=!window.crmHigKb;window.crmHigFocus=0;loadCrmHigiene()">⌨️ Modo rápido</button>' +
       '</div>';
       if (window.crmHigKb) {
@@ -2182,7 +2302,9 @@
       }).join('');
       html += '</div>';
       if (lista.length > window.crmHigieneVisible) {
-        html += '<button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="window.crmHigieneVisible+=20;loadCrmHigiene()">▾ Mostrar 20 más (' + (lista.length - window.crmHigieneVisible) + ' restantes)</button>';
+        html += '<div style="display:flex;gap:6px;margin-top:8px;">' +
+          '<button class="btn btn-ghost btn-sm" onclick="window.crmHigieneVisible+=20;loadCrmHigiene()">▾ Mostrar 20 más (' + (lista.length - window.crmHigieneVisible) + ' restantes)</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="window.crmHigieneVisible=99999;loadCrmHigiene()">⤓ Mostrar TODOS (' + lista.length + ')</button></div>';
       }
     } else html += '<div class="small muted">✅ Todo clasificado.</div>';
     if ((d.duplicados || []).length) {
