@@ -1812,9 +1812,11 @@
   function lgChatPintarRespuesta(d, log) {
     if (!log) log = document.getElementById('lg-chat-log');
     if (!log) return;
+    var txt = (d && d.respuesta) || (d && d.error) ||
+      (d && d.__error ? '⚠ Error técnico (' + d.__error + ') — reintentá; si persiste avisale a Claudio.' : 'No pude responder.');
     log.innerHTML += '<div style="display:flex;gap:6px;align-items:flex-start;margin:5px 0;">' +
       '<img src="/images/hermes-avatar.webp" alt="" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-top:2px;" onerror="this.outerHTML=\'🪽\'">' +
-      '<span style="background:rgba(94,200,216,0.12);border-radius:8px;padding:5px 9px;display:inline-block;white-space:pre-wrap;">' + escHtml((d && d.respuesta) || (d && d.error) || 'No pude responder.') + '</span></div>';
+      '<span style="background:rgba(94,200,216,0.12);border-radius:8px;padding:5px 9px;display:inline-block;white-space:pre-wrap;">' + escHtml(txt) + '</span></div>';
     log.scrollTop = log.scrollHeight;
   }
 
