@@ -1592,77 +1592,163 @@
     showModal('modal-legajo');
     var d = await apiFetch('/crm/propiedad/' + id + '/legajo');
     if (!d || d.__error || !d.ok) { if (body) body.innerHTML = '<span class="small muted">Error al cargar el legajo.</span>'; return; }
+    window.lgData = d; window.lgId = id;
     var p = d.propiedad, sem = d.semaforoDocumental || {};
     if (t) t.textContent = '📂 ' + p.propiedad;
-    var semColor = /legal/.test(sem.nivel) ? 'var(--danger)' : /comercial|operativo/.test(sem.nivel) ? 'var(--warn)' : sem.nivel === 'Completo' ? 'var(--ok)' : 'var(--muted)';
     var seccion = function (titulo, contenido) {
-      return '<div style="margin-bottom:14px;"><div style="font-size:.72rem;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);padding-bottom:3px;margin-bottom:7px;">' + titulo + '</div>' + contenido + '</div>';
+      return '<div style="margin-bottom:13px;"><div style="font-size:.7rem;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);padding-bottom:3px;margin-bottom:6px;">' + titulo + '</div>' + contenido + '</div>';
     };
-    var html = '';
-    // RESUMEN + próxima acción
+    // ═ PRÓXIMA ACCIÓN — enorme, arriba, con botones
+    var faltan = (d.checklist || []).filter(function (c) { return c.estado === 'pendiente' || c.estado === 'bloqueante'; }).map(function (c) { return c.tipo; });
+    var accionHtml = '<div style="border:2px solid var(--gold);border-radius:12px;padding:12px 14px;margin-bottom:14px;">' +
+      '<div style="font-size:.68rem;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;">▶ Próxima acción recomendada</div>' +
+      '<div style="font-size:1rem;font-weight:700;margin:4px 0 2px;">' + escHtml(d.proximaAccion || '—') + '</div>' +
+      (faltan.length ? '<div style="font-size:.76rem;color:var(--muted);margin-bottom:8px;">Faltan: ' + faltan.join(' · ') + '</div>' : '<div style="margin-bottom:8px;"></div>') +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+        ((d.mensajesSugeridos || []).length ? '<button class="btn btn-gold btn-sm" onclick="copiarBorrador(this)" data-msg="' + escHtml(d.mensajesSugeridos[0].texto) + '">📋 Copiar mensaje</button>' : '') +
+        '<button class="btn btn-ghost btn-sm" onclick="lgCrearTarea()">✚ Crear tarea</button>' +
+        (faltan.length ? '<button class="btn btn-ghost btn-sm" onclick="lgMarcarPedidos()" title="Marca como PEDIDOS todos los docs faltantes">📨 Marcar pedidos</button>' : '') +
+        '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'modal-legajo\');abrirDocUpload(\'' + p.id + '\')">📎 Subir doc</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'modal-legajo\');abrirFicha(\'' + p.id + '\')">✏️ Ficha</button>' +
+      '</div></div>';
+    // ═ COLUMNA IZQUIERDA
     var valor = p.valorVenta ? 'USD ' + Number(p.valorVenta).toLocaleString('es-AR') : p.valorAlquiler ? 'USD ' + Number(p.valorAlquiler).toLocaleString('es-AR') + '/mes' : (p.valorPedido || '—');
-    html += seccion('Resumen',
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
+    var izq = seccion('Resumen',
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
         '<span class="badge badge-muted">' + escHtml(p.tipoPropiedad || '—') + '</span>' +
         '<span class="badge badge-muted">' + escHtml(p.operacion || '—') + '</span>' +
         '<span class="badge ' + (p.estado === 'Publicada' ? 'badge-ok' : 'badge-muted') + '">' + escHtml(p.estado || '—') + '</span>' +
         '<span style="font-family:var(--mono);font-size:.82rem;color:var(--gold);">' + valor + '</span>' +
-        '<span style="font-family:var(--mono);font-size:.76rem;color:var(--muted);">' + (p.m2Totales || '—') + ' m² · ' + (p.ambientes || '—') + ' amb</span>' +
-        '<span style="margin-left:auto;"></span>' +
-        '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'modal-legajo\');abrirFicha(\'' + p.id + '\')">✏️ Editar ficha</button>' +
-        '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'modal-legajo\');abrirDocUpload(\'' + p.id + '\')">📎 Subir doc</button>' +
+        '<span style="font-family:var(--mono);font-size:.74rem;color:var(--muted);">' + (p.m2Totales || '—') + ' m² · ' + (p.ambientes || '—') + ' amb</span>' +
       '</div>' +
-      (d.propietario ? '<div style="font-size:.8rem;">🏠 Propietario: <b>' + escHtml(d.propietario.nombre) + '</b>' + (d.propietario.telefono ? ' · <a href="https://wa.me/' + String(d.propietario.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener" style="color:var(--gold);">' + escHtml(d.propietario.telefono) + '</a>' : '') + '</div>' : '<div class="small muted">Sin propietario vinculado — vinculalo desde su contacto.</div>') +
-      '<div style="border:1px solid var(--gold);border-radius:10px;padding:8px 12px;margin-top:8px;font-size:.82rem;">▶ <b>Próxima acción:</b> ' + escHtml(d.proximaAccion || '—') + '</div>'
-    );
-    // DOCUMENTAL con semáforo real
-    var docsHtml = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span class="badge" style="border:1px solid ' + semColor + ';color:' + semColor + ';">' + escHtml(sem.nivel || '—') + '</span><span style="font-size:.74rem;color:var(--muted);">docs ' + (sem.pct || 0) + '%</span></div>';
-    (sem.bloqueos || []).forEach(function (b) { docsHtml += '<div style="font-size:.78rem;color:var(--warn);">⚠ [' + b.nivel + '] ' + escHtml(b.detalle) + '</div>'; });
-    if ((d.documentos || []).length) {
-      docsHtml += (d.documentos || []).map(function (doc) {
-        return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-top:1px solid rgba(255,255,255,0.05);font-size:.78rem;flex-wrap:wrap;">' +
-          '<span class="badge badge-muted">' + escHtml(doc.tipo || '—') + '</span>' +
-          '<span style="flex:1;min-width:120px;">' + (doc.driveLink ? '<a href="' + escHtml(doc.driveLink) + '" target="_blank" rel="noopener" style="color:var(--text);">' + escHtml(doc.documento) + ' ↗</a>' : escHtml(doc.documento)) + '</span>' +
-          '<span style="font-size:.68rem;color:var(--muted);">' + escHtml(doc.fuente || '') + ' · ' + escHtml(doc.estado || '') + '</span>' +
-        '</div>' +
-        (doc.redFlags ? '<div style="font-size:.74rem;color:var(--danger);padding-left:8px;">🚩 ' + escHtml(doc.redFlags) + '</div>' : '') +
-        (doc.datosExtraidos ? '<div style="font-size:.72rem;color:var(--muted);padding-left:8px;">' + escHtml(doc.datosExtraidos.slice(0, 220)) + '</div>' : '');
-      }).join('');
-    } else docsHtml += '<div class="small muted">Sin documentos en el legajo — subí el primero con 📎 (la escritura se analiza sola: titulares, gravámenes, red flags).</div>';
-    html += seccion('📥 Documental (' + (d.documentos || []).length + ')', docsHtml);
-    // TASACIONES
-    html += seccion('🧮 Tasaciones (' + (d.tasaciones || []).length + ')',
+      (d.propietario ? '<div style="font-size:.8rem;margin-top:6px;">🏠 <b>' + escHtml(d.propietario.nombre) + '</b>' + (d.propietario.telefono ? ' · <a href="https://wa.me/' + String(d.propietario.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener" style="color:var(--gold);">' + escHtml(d.propietario.telefono) + '</a>' : '') + '</div>' : '<div class="small muted" style="margin-top:6px;">Sin propietario vinculado.</div>'));
+    // checklist por COLORES
+    var colorDe = { recibido: 'var(--ok)', pedido: '#5ec8d8', revisar: 'var(--warn)', bloqueante: 'var(--danger)', no_aplica: '#555', pendiente: '#999' };
+    var lblDe = { recibido: 'recibido', pedido: 'pedido', revisar: 'revisar', bloqueante: 'BLOQUEA', no_aplica: 'no aplica', pendiente: 'pendiente' };
+    var chk = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;"><span class="badge" style="border:1px solid ' + (/legal/.test(sem.nivel) ? 'var(--danger)' : /comercial|operativo/.test(sem.nivel) ? 'var(--warn)' : 'var(--ok)') + ';">' + escHtml(sem.nivel || '—') + '</span>' +
+      '<span style="font-size:.66rem;color:var(--muted);">🟢 recibido · 🔵 pedido · 🟡 revisar · 🔴 bloquea · ⚪ no aplica</span></div>';
+    chk += (d.checklist || []).map(function (c) {
+      return '<div style="display:flex;align-items:center;gap:7px;padding:3px 0;border-top:1px solid rgba(255,255,255,0.04);font-size:.78rem;">' +
+        '<i style="width:9px;height:9px;border-radius:50%;background:' + (colorDe[c.estado] || '#999') + ';flex-shrink:0;"></i>' +
+        '<span style="flex:1;' + (c.estado === 'no_aplica' ? 'opacity:.45;text-decoration:line-through;' : '') + '">' + escHtml(c.tipo) + (c.driveLink ? ' <a href="' + escHtml(c.driveLink) + '" target="_blank" rel="noopener" style="color:var(--muted);">↗</a>' : '') + '</span>' +
+        '<span style="font-size:.64rem;color:' + (colorDe[c.estado] || '#999') + ';">' + lblDe[c.estado] + '</span>' +
+        '<span style="display:inline-flex;gap:2px;">' +
+          (c.estado !== 'recibido' ? '<button class="btn btn-ghost btn-sm" style="padding:0 5px;" title="Marcar pedido" onclick="lgDocAccion(\'' + c.tipo + '\',\'pedido\')">📨</button>' : '') +
+          (c.estado !== 'recibido' ? '<button class="btn btn-ghost btn-sm" style="padding:0 5px;" title="Marcar recibido (a mano)" onclick="lgDocAccion(\'' + c.tipo + '\',\'recibido\')">✓</button>' : '') +
+          (c.estado !== 'no_aplica' ? '<button class="btn btn-ghost btn-sm" style="padding:0 5px;" title="No aplica" onclick="lgDocAccion(\'' + c.tipo + '\',\'no_aplica\')">🚫</button>' : '<button class="btn btn-ghost btn-sm" style="padding:0 5px;" title="Restaurar" onclick="lgDocAccion(\'' + c.tipo + '\',\'reset\')">↺</button>') +
+        '</span></div>' +
+        (c.redFlags ? '<div style="font-size:.72rem;color:var(--danger);padding-left:16px;">🚩 ' + escHtml(c.redFlags) + '</div>' : '');
+    }).join('');
+    izq += seccion('📥 Documental — checklist (' + (d.checklist || []).filter(function (c) { return c.estado === 'recibido'; }).length + '/' + (d.checklist || []).filter(function (c) { return c.estado !== 'no_aplica'; }).length + ')', chk);
+    izq += seccion('🧮 Tasaciones (' + (d.tasaciones || []).length + ')',
       (d.tasaciones || []).length ? d.tasaciones.map(function (x) {
-        return '<div style="display:flex;gap:8px;align-items:center;padding:4px 0;font-size:.8rem;flex-wrap:wrap;">' +
-          '<span style="flex:1;">' + escHtml(x.tasacion) + '</span><span class="badge badge-muted">' + escHtml(x.estado || '') + '</span>' +
-          (x.precioCierre ? '<span style="font-family:var(--mono);color:var(--gold);">USD ' + Number(x.precioCierre).toLocaleString('es-AR') + '</span>' : '') +
-          (x.semaforo ? '<span style="font-size:.74rem;">' + escHtml(x.semaforo) + '</span>' : '') +
-          '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'modal-legajo\');crmTab(\'propiedades\');abrirTasacion(\'' + x.id + '\')">abrir</button>' +
-        '</div>';
-      }).join('') : '<div class="small muted">Sin tasaciones — creá una desde 🧮 Tasaciones.</div>');
-    // INTERESADOS
-    html += seccion('🛒 Interesados (' + (d.interesados || []).length + ')',
+        return '<div style="display:flex;gap:8px;align-items:center;padding:3px 0;font-size:.78rem;flex-wrap:wrap;"><span style="flex:1;">' + escHtml(x.tasacion) + '</span><span class="badge badge-muted">' + escHtml(x.estado || '') + '</span>' + (x.precioCierre ? '<span style="font-family:var(--mono);color:var(--gold);">USD ' + Number(x.precioCierre).toLocaleString('es-AR') + '</span>' : '') + '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'modal-legajo\');crmTab(\'propiedades\');abrirTasacion(\'' + x.id + '\')">abrir</button></div>';
+      }).join('') : '<div class="small muted">Sin tasaciones.</div>');
+    izq += seccion('🛒 Interesados (' + (d.interesados || []).length + ')',
       (d.interesados || []).length ? d.interesados.map(function (c) {
-        return '<div style="display:flex;gap:8px;align-items:center;padding:3px 0;font-size:.8rem;flex-wrap:wrap;">' +
-          '<span style="flex:1;">' + escHtml(c.nombre) + '</span><span class="badge badge-muted">' + escHtml(c.etapaDemanda || '—') + '</span>' +
-          (c.telefono ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="https://wa.me/' + String(c.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener">💬</a>' : '') +
-          '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'modal-legajo\');abrirContactoEdit(\'' + c.id + '\')">✏️</button>' +
-        '</div>';
-      }).join('') : '<div class="small muted">Sin interesados vinculados todavía.</div>');
-    // OPERACIONES
-    html += seccion('💼 Operaciones (' + (d.operaciones || []).length + ')',
+        return '<div style="display:flex;gap:8px;align-items:center;padding:2px 0;font-size:.78rem;"><span style="flex:1;">' + escHtml(c.nombre) + '</span><span class="badge badge-muted">' + escHtml(c.etapaDemanda || '—') + '</span>' + (c.telefono ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;padding:0 6px;" href="https://wa.me/' + String(c.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener">💬</a>' : '') + '</div>';
+      }).join('') : '<div class="small muted">Sin interesados.</div>');
+    izq += seccion('💼 Operaciones (' + (d.operaciones || []).length + ')',
       (d.operaciones || []).length ? d.operaciones.map(function (o) {
-        return '<div style="display:flex;gap:8px;align-items:center;padding:3px 0;font-size:.8rem;"><span style="flex:1;">' + escHtml(o.operacion) + '</span><span class="badge badge-muted">' + escHtml(o.etapa || '') + '</span>' + (o.montoTotal ? '<span style="font-family:var(--mono);color:var(--gold);">USD ' + Number(o.montoTotal).toLocaleString('es-AR') + '</span>' : '') + '</div>';
-      }).join('') : '<div class="small muted">Sin operaciones — cuando haya oferta/reserva, nace acá.</div>');
-    // HISTORIAL
-    if ((d.historial || []).length) {
-      html += seccion('🕓 Historial', d.historial.map(function (h) {
-        return '<div style="font-size:.72rem;color:var(--muted);padding:2px 0;">' + escHtml((h.ts || '').slice(0, 16).replace('T', ' ')) + ' · <b>' + escHtml(h.accion) + '</b> (' + escHtml(h.fuente || '') + ')' + (h.detalle && h.detalle.tipoDoc ? ' — ' + escHtml(h.detalle.tipoDoc) : '') + '</div>';
-      }).join(''));
-    }
-    if (body) body.innerHTML = html;
+        return '<div style="display:flex;gap:8px;font-size:.78rem;padding:2px 0;"><span style="flex:1;">' + escHtml(o.operacion) + '</span><span class="badge badge-muted">' + escHtml(o.etapa || '') + '</span></div>';
+      }).join('') : '<div class="small muted">Sin operaciones.</div>');
+    // ═ DOCK DE HERMES (derecha)
+    var dock = '<div style="border:1px solid rgba(94,200,216,0.4);border-radius:12px;padding:10px;position:sticky;top:0;">' +
+      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><strong style="color:#5ec8d8;font-size:.85rem;">🪽 HERMES · Asistente del Legajo</strong></div>' +
+      '<div style="display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;">' +
+        ['resumen|📊 Resumen', 'chat|💬 Chat', 'comentarios|🗒 Notas', 'mensajes|📨 Mensajes'].map(function (x) {
+          var pr = x.split('|');
+          return '<button class="btn btn-ghost btn-sm lgdock-tab" data-t="' + pr[0] + '" onclick="lgDockTab(\'' + pr[0] + '\')">' + pr[1] + '</button>';
+        }).join('') + '</div>';
+    // resumen
+    var tiene = (d.checklist || []).filter(function (c) { return c.estado === 'recibido'; }).map(function (c) { return c.tipo; });
+    var pedir = (d.checklist || []).filter(function (c) { return c.estado === 'pendiente' || c.estado === 'bloqueante'; }).map(function (c) { return c.tipo; });
+    var revisar = (d.checklist || []).filter(function (c) { return c.estado === 'revisar'; }).map(function (c) { return c.tipo; });
+    dock += '<div class="lgdock-pane" id="lgdock-resumen">' +
+      '<div style="font-size:.74rem;line-height:1.6;">' +
+        '<div>✅ <b>Tenemos:</b> ' + (tiene.join(', ') || '—') + '</div>' +
+        '<div>📨 <b>Falta pedir:</b> ' + (pedir.join(', ') || '—') + '</div>' +
+        (revisar.length ? '<div>🟡 <b>Falta revisar:</b> ' + revisar.join(', ') + '</div>' : '') +
+        ((sem.bloqueos || []).length ? '<div style="color:var(--danger);">⛔ <b>Bloquea:</b> ' + sem.bloqueos.map(function (b) { return b.detalle; }).join(' · ') + '</div>' : '') +
+        '<div style="margin-top:6px;">▶ <b>' + escHtml(d.proximaAccion || '') + '</b></div>' +
+      '</div></div>';
+    // chat
+    dock += '<div class="lgdock-pane" id="lgdock-chat" style="display:none;">' +
+      '<div id="lg-chat-log" style="max-height:280px;overflow-y:auto;font-size:.76rem;margin-bottom:8px;"><div class="small muted">Preguntale a Hermes sobre ESTA propiedad: "¿qué falta para publicar?" · "¿qué le pido al propietario?" · "¿qué riesgos ves?"</div></div>' +
+      '<div style="display:flex;gap:6px;"><input class="input" id="lg-chat-input" placeholder="Preguntale a Hermes…" style="flex:1;" onkeydown="if(event.key===\'Enter\')lgChatSend()"><button class="btn btn-gold btn-sm" onclick="lgChatSend()">➤</button></div></div>';
+    // comentarios
+    dock += '<div class="lgdock-pane" id="lgdock-comentarios" style="display:none;">' +
+      '<div style="max-height:240px;overflow-y:auto;font-size:.74rem;margin-bottom:8px;">' +
+      ((d.comentarios || []).length ? d.comentarios.map(function (c) { return '<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><b>' + escHtml(c.autor) + '</b> <span style="color:var(--muted);font-size:.66rem;">' + escHtml((c.ts || '').slice(5, 16).replace('T', ' ')) + '</span><br>' + escHtml(c.texto) + '</div>'; }).join('') : '<div class="small muted">Sin notas todavía.</div>') +
+      ((d.historial || []).filter(function (h) { return h.accion !== 'comentario'; }).slice(0, 6).map(function (h) { return '<div style="padding:3px 0;color:var(--muted);font-size:.68rem;">⚙ ' + escHtml((h.ts || '').slice(5, 16).replace('T', ' ')) + ' · ' + escHtml(h.accion) + '</div>'; }).join('')) +
+      '</div>' +
+      '<div style="display:flex;gap:6px;"><input class="input" id="lg-coment-input" placeholder="Nota interna…" style="flex:1;" onkeydown="if(event.key===\'Enter\')lgComentar()"><button class="btn btn-ghost btn-sm" onclick="lgComentar()">＋</button></div></div>';
+    // mensajes
+    dock += '<div class="lgdock-pane" id="lgdock-mensajes" style="display:none;">' +
+      ((d.mensajesSugeridos || []).length ? d.mensajesSugeridos.map(function (m) {
+        return '<div style="border:1px solid var(--border);border-radius:8px;padding:7px 9px;margin-bottom:7px;">' +
+          '<div style="font-size:.74rem;font-weight:700;margin-bottom:3px;">' + escHtml(m.titulo) + '</div>' +
+          '<div style="font-size:.7rem;color:var(--muted);max-height:64px;overflow:hidden;">' + escHtml(m.texto) + '</div>' +
+          '<div style="display:flex;gap:5px;margin-top:5px;"><button class="btn btn-gold btn-sm" onclick="copiarBorrador(this)" data-msg="' + escHtml(m.texto) + '">📋 Copiar</button>' +
+          (m.destinatario ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="https://wa.me/' + String(m.destinatario).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') + '</div></div>';
+      }).join('') : '<div class="small muted">Sin mensajes sugeridos.</div>') + '</div>';
+    dock += '</div>';
+    if (body) body.innerHTML = accionHtml + '<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;"><div style="flex:1.35;min-width:360px;">' + izq + '</div><div style="flex:1;min-width:290px;">' + dock + '</div></div>';
+    lgDockTab('resumen');
   }
   window.abrirLegajo = abrirLegajo;
+
+  function lgDockTab(which) {
+    document.querySelectorAll('.lgdock-pane').forEach(function (x) { x.style.display = 'none'; });
+    var el = document.getElementById('lgdock-' + which); if (el) el.style.display = '';
+    document.querySelectorAll('.lgdock-tab').forEach(function (b) { b.style.borderColor = b.dataset.t === which ? 'var(--gold)' : ''; });
+  }
+  window.lgDockTab = lgDockTab;
+
+  async function lgChatSend() {
+    var inp = document.getElementById('lg-chat-input');
+    var q = inp ? inp.value.trim() : '';
+    if (!q) return;
+    inp.value = '';
+    var log = document.getElementById('lg-chat-log');
+    if (log) { log.innerHTML += '<div style="text-align:right;margin:4px 0;"><span style="background:rgba(212,166,64,0.15);border-radius:8px;padding:4px 8px;display:inline-block;">' + escHtml(q) + '</span></div><div id="lg-chat-wait" class="small muted">Hermes está pensando…</div>'; log.scrollTop = log.scrollHeight; }
+    var d = await apiFetch('/crm/propiedad/' + window.lgId + '/hermes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pregunta: q }) });
+    var w = document.getElementById('lg-chat-wait'); if (w) w.remove();
+    if (log) { log.innerHTML += '<div style="margin:4px 0;"><span style="background:rgba(94,200,216,0.12);border-radius:8px;padding:4px 8px;display:inline-block;white-space:pre-wrap;">🪽 ' + escHtml((d && d.respuesta) || 'No pude responder.') + '</span></div>'; log.scrollTop = log.scrollHeight; }
+  }
+  window.lgChatSend = lgChatSend;
+
+  async function lgComentar() {
+    var inp = document.getElementById('lg-coment-input');
+    var txt = inp ? inp.value.trim() : '';
+    if (!txt) return;
+    var d = await apiFetch('/crm/propiedad/comentario', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: window.lgId, texto: txt }) });
+    if (d && d.ok) { toast('Nota guardada', 'ok'); abrirLegajo(window.lgId); }
+  }
+  window.lgComentar = lgComentar;
+
+  async function lgDocAccion(tipo, estado) {
+    var d = await apiFetch('/crm/propiedad/doc-gestion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: window.lgId, tipoDoc: tipo, estado: estado }) });
+    if (d && d.ok) abrirLegajo(window.lgId);
+  }
+  window.lgDocAccion = lgDocAccion;
+
+  async function lgMarcarPedidos() {
+    var faltan = ((window.lgData || {}).checklist || []).filter(function (c) { return c.estado === 'pendiente' || c.estado === 'bloqueante'; });
+    for (var i = 0; i < faltan.length; i++) {
+      await apiFetch('/crm/propiedad/doc-gestion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: window.lgId, tipoDoc: faltan[i].tipo, estado: 'pedido' }) });
+    }
+    toast('📨 ' + faltan.length + ' documentos marcados como pedidos', 'ok');
+    abrirLegajo(window.lgId);
+  }
+  window.lgMarcarPedidos = lgMarcarPedidos;
+
+  async function lgCrearTarea() {
+    var d = window.lgData || {};
+    var r = await apiFetch('/tasks/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: (d.proximaAccion || 'Seguimiento') + ' — ' + ((d.propiedad || {}).propiedad || ''), notes: 'Desde el Legajo del Gringo CRM' }) });
+    if (r && r.ok) toast('Tarea creada en el Task OS', 'ok'); else toast('Error al crear tarea', 'err');
+  }
+  window.lgCrearTarea = lgCrearTarea;
 
   /* ─── T1: Tasaciones por comparables ─── */
   async function loadTasaciones() {
