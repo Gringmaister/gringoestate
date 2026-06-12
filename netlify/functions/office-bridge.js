@@ -33,6 +33,10 @@ exports.handler = async (event) => {
       if (event.headers[h]) forwardHeaders[h] = event.headers[h];
     }
     if (!forwardHeaders['content-type']) forwardHeaders['content-type'] = 'application/json';
+    // Inyecta server-side el token de las rutas sensibles del bridge (gate S37: /api/files,
+    // /api/agents/tool|chat|reload, etc.) sin exponerlo al cliente. Setear OFFICE_BRIDGE_TOKEN
+    // en las env vars de Netlify = el mismo valor de wispy-stack/.env. (S40 — reconexión del panel)
+    if (process.env.OFFICE_BRIDGE_TOKEN) forwardHeaders['x-office-token'] = process.env.OFFICE_BRIDGE_TOKEN;
 
     const fetchOpts = { method: event.httpMethod || 'GET', headers: forwardHeaders };
     if (!['GET', 'HEAD'].includes(event.httpMethod) && event.body) {
