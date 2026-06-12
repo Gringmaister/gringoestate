@@ -8,8 +8,8 @@
   <meta name="theme-color" content="#070707" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Marcellus&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/pixel.css?v=s47" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css?v=s48" />
 </head>
 <body>
 
@@ -944,7 +944,7 @@
       <!-- LOS 250 + SEGUIMIENTOS -->
       <div class="grid-2" style="margin-bottom:14px;">
         <div class="card" role="region" aria-label="Los 250 contactos trabajables">
-          <div class="card-head"><h2 class="card-title">⭐ Los 250</h2><span class="badge badge-muted" id="crm-250-total">—</span></div>
+          <div class="card-head"><h2 class="card-title">⭐ Los 250</h2><span style="display:inline-flex;gap:6px;align-items:center;"><button class="btn btn-ghost btn-sm" onclick="toggleLos250Lista()" title="Ver el listado completo de contactos del CRM con su etiqueta A/B/C/D">📋 Listado completo</button><span class="badge badge-muted" id="crm-250-total">—</span></span></div>
           <div class="kpi-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));" id="crm-250-grid">
             <div class="kpi" title="Los TOP de la industria: te traen negocio y tratás con ellos"><span>A</span><strong id="crm-250-A" style="color:var(--ok)">—</strong><small>top industria</small></div>
             <div class="kpi" title="Los que estás trabajando y pueden servir"><span>B</span><strong id="crm-250-B" style="color:var(--gold)">—</strong><small>en trabajo</small></div>
@@ -952,6 +952,7 @@
             <div class="kpi" title="Congelados"><span>D</span><strong id="crm-250-D" style="color:var(--muted)">—</strong><small>congelados</small></div>
           </div>
           <div class="small muted" style="margin-top:8px;">Regla Magnin: se labura bien sobre ~250 contactos. Hermes etiqueta y retroalimenta.</div>
+          <div id="crm-250-lista"></div>
         </div>
         <div class="card" role="region" aria-label="Seguimientos pendientes">
           <div class="card-head"><h2 class="card-title">⏰ Seguimientos</h2></div>
@@ -983,13 +984,25 @@
       <!-- DOCUMENTAL -->
       <div class="card" role="region" aria-label="Módulo documental">
         <div class="card-head">
-          <div><h2 class="card-title">📄 Documental</h2><div class="card-sub">modelos, checklists y estado de documentación por propiedad</div></div>
-          <a class="btn btn-ghost btn-sm" href="https://www.notion.so/37b3ca3891cd81cf80b0dac28236aa5d" target="_blank" rel="noopener" style="text-decoration:none;">📚 Modelos & Checklists →</a>
+          <div><h2 class="card-title">📄 Documental</h2><div class="card-sub">checklists internos y estado de documentación por propiedad</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="var x=document.getElementById('doc-checklists');x.style.display=x.style.display==='none'?'':'none'">📚 Checklists ▾</button>
         </div>
         <div class="small muted" style="line-height:1.6;">
           Cada propiedad tiene su <b>legajo</b> (click en la fila): documentos con análisis automático de escritura (titulares, gravámenes, red flags), semáforo documental con bloqueantes, tasaciones, interesados y operaciones.
-          Flujo: <b>pedir → identificar faltantes → procesar (Drive) → contratos Baigún → seguimiento</b> + 4 facilitadores (informes/dominio · fotos+plano · cartel · marketing).
-          Los modelos de reserva/boleto/contrato se cargan en el repositorio interno ↗.
+          Flujo: <b>pedir → identificar faltantes → procesar (Drive) → contratos → seguimiento</b> + 4 facilitadores (informes/dominio · fotos+plano · cartel · marketing).
+        </div>
+        <div id="doc-checklists" style="display:none;margin-top:10px;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;">
+            <div class="kpi" style="text-align:left;display:block;padding:10px 12px;">
+              <div style="font-size:.72rem;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">🏷 Venta (12)</div>
+              <div style="font-size:.74rem;line-height:1.7;color:var(--text);">Escritura · DNI/CUIT · ABL · Expensas · Reglamento · Certif. dominio · Inhibiciones · COTI · Poder · Plano · Fotos · Autorización</div>
+            </div>
+            <div class="kpi" style="text-align:left;display:block;padding:10px 12px;">
+              <div style="font-size:.72rem;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">🔑 Alquiler (8)</div>
+              <div style="font-size:.74rem;line-height:1.7;color:var(--text);">Escritura · DNI/CUIT · Expensas · Reglamento · Autorización · Plano · Fotos · Contrato</div>
+            </div>
+          </div>
+          <div class="small muted" style="margin-top:7px;">El semáforo de cada legajo usa estos checklists según la operación. Los documentos suben al <b>Drive</b> de la propiedad (drag & drop en el legajo o reenviándoselos a Wispy).</div>
         </div>
       </div>
       </div><!-- /ct-propiedades -->
@@ -1264,6 +1277,15 @@
   <div class="modal">
     <h3>🧮 Nueva Tasación</h3>
     <div class="stack">
+      <div style="border:1px dashed rgba(212,175,55,0.4);border-radius:10px;padding:9px 11px;">
+        <div style="font-size:.72rem;color:var(--muted);margin-bottom:6px;">📥 <b style="color:var(--text);">Pre-llenar automático</b> — subí la ficha (PDF), mandá una <b style="color:var(--text);">nota de AUDIO</b> describiendo el depto, o pegá el texto:</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('ts-imp-file').click()">📄 PDF / 🎤 Audio</button>
+          <input type="file" id="ts-imp-file" accept="application/pdf,audio/*,.txt" style="display:none;" onchange="tasacionDesdeArchivo(this.files[0])">
+          <textarea id="ts-imp-texto" placeholder="…o pegá acá el texto de la ficha/descripción" style="flex:1;min-width:170px;min-height:34px;max-height:58px;font-size:.72rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:5px 8px;resize:vertical;"></textarea>
+          <button class="btn btn-gold btn-sm" onclick="tasacionDesdeTexto()">Extraer</button>
+        </div>
+      </div>
       <input class="input" id="ts-titulo" placeholder="Título (ej: Depto Junín 1500 3ºA — García)">
       <div class="grid-2">
         <input class="input" id="ts-direccion" placeholder="Dirección">
@@ -1512,7 +1534,7 @@
 <!-- Scripts -->
 <!-- S45: ?v= cache-buster — subir la versión en cada deploy con cambios de JS/CSS
      (el HTML revalida siempre en Netlify; el query nuevo fuerza al browser a bajar el asset fresco) -->
-<script src="js/api.js?v=s47"></script>
-<script src="js/app.js?v=s47"></script>
+<script src="js/api.js?v=s48"></script>
+<script src="js/app.js?v=s48"></script>
 </body>
 </html>

@@ -1346,7 +1346,24 @@
         var items = d.propiedades?.items || [];
         crmFichaCache = {};
         items.forEach(function (p) { crmFichaCache[p.id] = p; });
-        pr.innerHTML = items.length ? items.map(function (p) {
+        // S48: flujo guiado — el orden del funnel de una propiedad, clickeable (pedido Franco)
+        var paso = function (n, icon, label, accion, tip) {
+          return '<div onclick="' + accion + '" class="kpi" style="cursor:pointer;display:flex;align-items:center;gap:7px;padding:7px 12px;text-align:left;" title="' + escHtml(tip) + '">' +
+            '<span style="font-family:var(--mono);font-size:.66rem;color:var(--gold);border:1px solid rgba(212,166,64,0.5);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">' + n + '</span>' +
+            '<span style="font-size:.74rem;white-space:nowrap;">' + icon + ' ' + label + '</span></div>';
+        };
+        var journey = '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">' +
+          paso(1, '📥', 'Cargar propiedad', 'showModal(\'modal-import\')', 'Importá la ficha: PDF de Zonaprop, texto pegado, audio o carga manual') +
+          '<span style="color:var(--muted);">→</span>' +
+          paso(2, '📎', 'Documentos', 'toast(\'Click en la propiedad → su legajo → arrastrá los docs (la escritura se analiza sola)\',\'ok\')', 'Abrí el legajo de la propiedad y arrastrá escritura/expensas/ABL — semáforo y análisis automáticos') +
+          '<span style="color:var(--muted);">→</span>' +
+          paso(3, '🧮', 'Tasar', 'showModal(\'modal-tasacion\')', 'Creá la tasación (podés pre-llenarla desde un audio o la ficha) y pegale comparables de Zonaprop') +
+          '<span style="color:var(--muted);">→</span>' +
+          paso(4, '🤝', 'Captar', 'toast(\'Con la Carpeta Wow entregada: si el propietario acepta el precio → etapa Captada en el embudo Captación\',\'ok\')', 'PDF Carpeta Wow → negociación → autorización firmada → Captada') +
+          '<span style="color:var(--muted);">→</span>' +
+          paso(5, '📣', 'Publicar y matchear', 'crmTab(\'demanda\')', 'Publicada → entran leads → matching automático con tu demanda → visitas → operación') +
+        '</div>';
+        pr.innerHTML = journey + (items.length ? items.map(function (p) {
           var docsCol = p.docsPct >= 100 ? 'var(--ok)' : p.docsPct >= 50 ? 'var(--gold)' : 'var(--warn)';
           var valor = p.valorVenta ? ('$' + Number(p.valorVenta).toLocaleString('es-AR')) : p.valorAlquiler ? ('$' + Number(p.valorAlquiler).toLocaleString('es-AR') + '/mes') : (p.valorPedido || '—');
           var specs = [p.tipoPropiedad, p.m2Totales ? p.m2Totales + 'm²' : null, p.ambientes ? p.ambientes + ' amb' : null].filter(Boolean).join(' · ');
@@ -1374,7 +1391,7 @@
             '<span class="badge ' + (p.estado === 'Publicada' ? 'badge-ok' : 'badge-muted') + '">' + escHtml(p.estado || '—') + '</span>' +
             '<button class="btn btn-ghost btn-sm" title="Subir documentación (escritura, informes…) — copia SIEMPRE al Drive de gringoestate + tick en el checklist" onclick="event.stopPropagation();abrirDocUpload(\'' + p.id + '\')">📎</button>' +
           '</div>';
-        }).join('') : '<span class="small muted">Sin propiedades todavía — cargá la primera con «+ Propiedad».</span>';
+        }).join('') : '<span class="small muted">Sin propiedades todavía — cargá la primera con «+ Propiedad».</span>');
       }
       window.crmPipelineCache = d;
       renderVista360();
@@ -1524,28 +1541,42 @@
       // conversiones por embudo (solo cuando hay datos)
       var cv = document.getElementById('cm-conversiones');
       if (cv) {
+        // S48: conversiones como mini-cards con barra (pedido Franco "visualmente más atractivo")
         var chips = [];
         ['captacion', 'demanda'].forEach(function (k) {
           var obj = (m.conversiones || {})[k] || {};
           Object.keys(obj).forEach(function (par) {
-            if (obj[par] !== null) chips.push('<span class="badge badge-muted" title="' + escHtml(k) + '">' + escHtml(par) + ': <b style="color:var(--gold);">' + obj[par] + '%</b></span>');
+            if (obj[par] === null) return;
+            var v = obj[par];
+            var c = v >= 50 ? 'var(--ok)' : v >= 25 ? 'var(--gold)' : '#c9803a';
+            chips.push('<div class="kpi" style="min-width:150px;padding:7px 11px;text-align:left;display:block;" title="Embudo ' + escHtml(k) + '">' +
+              '<div style="font-size:.64rem;color:var(--muted);letter-spacing:.04em;">' + escHtml(par.replace('→', ' → ')) + '</div>' +
+              '<div style="font-family:var(--mono);font-size:1.05rem;font-weight:700;color:' + c + ';margin:2px 0;">' + v + '%</div>' +
+              '<div style="height:4px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden;"><i style="display:block;height:100%;width:' + Math.min(100, v) + '%;background:' + c + ';border-radius:3px;"></i></div></div>');
           });
         });
-        cv.innerHTML = chips.length ? '<div style="font-size:.68rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Conversión por etapa</div><div style="display:flex;gap:6px;flex-wrap:wrap;">' + chips.join('') + '</div>' : '';
+        cv.innerHTML = chips.length ? '<div style="font-size:.68rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Conversión por etapa</div><div style="display:flex;gap:8px;flex-wrap:wrap;">' + chips.join('') + '</div>' : '';
       }
       // Benchmarks Magnin + plan semanal 40-5-5-1
       var bm = document.getElementById('cm-benchmarks');
       if (bm && m.benchmarks) {
+        // S48: benchmarks como tarjetas con ícono (pedido Franco)
+        var bench = function (icon, valor, label, tip) {
+          return '<div class="kpi" style="min-width:118px;padding:8px 11px;text-align:center;" title="' + escHtml(tip) + '">' +
+            '<div style="font-size:1.05rem;">' + icon + '</div>' +
+            '<div style="font-family:var(--mono);font-size:.98rem;font-weight:700;color:var(--gold);margin:1px 0;">' + valor + '</div>' +
+            '<div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;line-height:1.3;">' + label + '</div></div>';
+        };
         bm.innerHTML =
           (m.carteraAlerta ? '<div style="font-size:.78rem;color:var(--warn);padding:6px 0;">' + escHtml(m.carteraAlerta) + '</div>' : '') +
-          '<div style="font-size:.68rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Referencias Magnin (benchmarks — para comparar, no automatizan nada)</div>' +
-          '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
-            '<span class="badge badge-muted" title="Captar 1 de cada 3 tasaciones; antes, descartar la mitad de los pedidos que no califican">Tasación→Captada: <b style="color:var(--gold);">33%</b></span>' +
-            '<span class="badge badge-muted" title="2 captaciones en cartera por cada venta">Captación→Venta: <b style="color:var(--gold);">50%</b></span>' +
-            '<span class="badge badge-muted" title="600 clics → 30 consultas → 15 visitas → 1 reserva (reserva→venta 1:1)">15 visitas = <b style="color:var(--gold);">1 reserva</b></span>' +
-            '<span class="badge badge-muted" title="Cartera chica y rotativa, marketing de altísima calidad">Cartera: <b style="color:var(--gold);">máx 5</b></span>' +
-            '<span class="badge badge-muted" title="12 contactos diarios prospectando = 12 ventas/año">12 contactos/día</span>' +
-            '<span class="badge badge-muted" title="Responder en menos de 1 minuto; 2-3hs ya es tarde">Speed-to-lead: <b style="color:var(--gold);">&lt;1 min</b></span>' +
+          '<div style="font-size:.68rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Referencias Magnin (benchmarks — para comparar, no automatizan nada)</div>' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+            bench('📐', '33%', 'Tasación → Captada', 'Captar 1 de cada 3 tasaciones; antes, descartar la mitad de los pedidos que no califican') +
+            bench('🏆', '50%', 'Captación → Venta', '2 captaciones en cartera por cada venta') +
+            bench('👀', '15 : 1', 'Visitas → Reserva', '600 clics → 30 consultas → 15 visitas → 1 reserva (reserva→venta 1:1)') +
+            bench('🗂', 'máx 5', 'Cartera activa', 'Cartera chica y rotativa, marketing de altísima calidad') +
+            bench('📞', '12/día', 'Contactos prospección', '12 contactos diarios prospectando = 12 ventas/año') +
+            bench('⚡', '&lt;1 min', 'Speed-to-lead', 'Responder en menos de 1 minuto; 2-3hs ya es tarde') +
           '</div>';
       }
     }
@@ -1605,7 +1636,7 @@
     var p = d.propiedad, sem = d.semaforoDocumental || {};
     if (t) t.textContent = '📂 ' + p.propiedad;
     var seccion = function (titulo, contenido, extraHeader) {
-      return '<div style="margin-bottom:18px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px 14px;">' +
+      return '<div class="lg-sec" style="margin-bottom:18px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px 14px;">' +
         '<div style="display:flex;align-items:center;gap:8px;font-size:.74rem;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:9px;"><span style="flex:1;">' + titulo + '</span>' + (extraHeader || '') + '</div>' + contenido + '</div>';
     };
     // ═ PRÓXIMA ACCIÓN — enorme, arriba, con botones
@@ -2128,14 +2159,19 @@
     if (!el) return;
     var pipe = window.crmPipelineCache, ops = window.crmOpsCache;
     if (!pipe && !ops) return;
+    // S48: Vista 360 GRÁFICA (pedido Franco "filas y números no se entiende") — barras con color por etapa
     var col = function (titulo, emoji, tab, etapas, total) {
-      return '<div onclick="crmTab(\'' + tab + '\')" style="cursor:pointer;border:1px solid var(--border);border-radius:10px;padding:10px 12px;" title="Ir a ' + titulo + '">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;"><strong style="font-size:.8rem;">' + emoji + ' ' + titulo + '</strong><span class="badge badge-muted">' + total + '</span></div>' +
-        (etapas || []).map(function (e) {
+      var maxC = Math.max.apply(null, (etapas || []).map(function (e) { return e.count; }).concat([1]));
+      return '<div onclick="crmTab(\'' + tab + '\')" class="kpi" style="cursor:pointer;border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:block;text-align:left;" title="Ir a ' + titulo + '">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><strong style="font-size:.8rem;">' + emoji + ' ' + titulo + '</strong><span class="badge badge-muted">' + total + '</span></div>' +
+        (etapas || []).map(function (e, ei) {
           var on = e.count > 0;
-          return '<div style="display:flex;justify-content:space-between;font-size:.72rem;padding:2px 0;color:' + (on ? 'var(--text)' : 'var(--muted)') + ';">' +
-            '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(e.etapa) + '</span>' +
-            '<span style="font-family:var(--mono);color:' + (on ? 'var(--gold)' : 'var(--muted)') + ';">' + e.count + '</span></div>';
+          var c = funnelColor(e.etapa, ei);
+          var w = on ? Math.max(8, Math.round(e.count / maxC * 100)) : 0;
+          return '<div style="position:relative;display:flex;justify-content:space-between;align-items:center;font-size:.72rem;padding:3px 7px;margin:2px 0;border-radius:6px;overflow:hidden;color:' + (on ? 'var(--text)' : 'var(--muted)') + ';">' +
+            '<i style="position:absolute;left:0;top:0;bottom:0;width:' + w + '%;background:linear-gradient(90deg,' + c + '33,' + c + '14);border-left:2px solid ' + (on ? c : 'transparent') + ';border-radius:6px;"></i>' +
+            '<span style="position:relative;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(e.etapa) + '</span>' +
+            '<span style="position:relative;font-family:var(--mono);font-weight:700;color:' + (on ? c : 'var(--muted)') + ';">' + e.count + '</span></div>';
         }).join('') + '</div>';
     };
     var html = '';
@@ -2324,11 +2360,11 @@
           '<span style="display:inline-flex;gap:4px;">' +
             '<button class="btn btn-gold btn-sm" title="Promover al CRM: lo crea como contacto TRABAJABLE en tu base de brokerage" onclick="clasificarLinea(\'' + l.id + '\',\'Promover\')">⭐ Promover</button>' +
             '<button class="btn btn-ghost btn-sm" title="Tu gente: staff, socios, colaboradores" onclick="clasificarLinea(\'' + l.id + '\',\'Equipo\')">👔 Equipo</button>' +
-            '<button class="btn btn-ghost btn-sm" title="Huésped AMBBI (temporario) — no pertenece a este CRM" onclick="clasificarLinea(\'' + l.id + '\',\'AMBBI\')">🏨</button>' +
-            '<button class="btn btn-ghost btn-sm" title="Personal (familia/amigos)" onclick="clasificarLinea(\'' + l.id + '\',\'Personal\')">👤</button>' +
-            '<button class="btn btn-ghost btn-sm" title="Proveedor (negocios/servicios)" onclick="clasificarLinea(\'' + l.id + '\',\'Proveedor\')">🏪</button>' +
-            '<button class="btn btn-ghost btn-sm" title="No contactar nunca (bloqueado)" onclick="clasificarLinea(\'' + l.id + '\',\'No contactar\')">⛔</button>' +
-            '<button class="btn btn-ghost btn-sm" title="Descartar: basura/spam, no sirve" onclick="clasificarLinea(\'' + l.id + '\',\'Descartado\')">🗑</button>' +
+            '<button class="btn btn-ghost btn-sm" title="Huésped AMBBI (temporario) — no pertenece a este CRM" onclick="clasificarLinea(\'' + l.id + '\',\'AMBBI\')">🏨 Huésped</button>' +
+            '<button class="btn btn-ghost btn-sm" title="Personal (familia/amigos)" onclick="clasificarLinea(\'' + l.id + '\',\'Personal\')">👤 Personal</button>' +
+            '<button class="btn btn-ghost btn-sm" title="Proveedor (negocios/servicios)" onclick="clasificarLinea(\'' + l.id + '\',\'Proveedor\')">🏪 Proveedor</button>' +
+            '<button class="btn btn-ghost btn-sm" title="No contactar nunca (bloqueado)" onclick="clasificarLinea(\'' + l.id + '\',\'No contactar\')">⛔ No contactar</button>' +
+            '<button class="btn btn-ghost btn-sm" title="Descartar: basura/spam, no sirve" onclick="clasificarLinea(\'' + l.id + '\',\'Descartado\')">🗑 Descartar</button>' +
           '</span>' +
         '</div>';
       }).join('');
@@ -3556,3 +3592,69 @@ window.waToggle = function () {
   var b = document.getElementById('sys-wa-mode');
   if (b) b.textContent = localStorage.getItem('waMode') === 'web' ? 'WA: Web' : 'WA: App';
 })();
+
+/* ─── S48: Los 250 — listado completo con etiquetas (pedido Franco) ─── */
+window.toggleLos250Lista = async function () {
+  var box = document.getElementById('crm-250-lista');
+  if (!box) return;
+  if (box.innerHTML) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="small muted" style="margin-top:8px;">Cargando…</div>';
+  var d = await apiFetch('/crm/contactos');
+  if (!d || !d.ok) { box.innerHTML = '<div class="small muted">No pude leer contactos.</div>'; return; }
+  var orden = { A: 0, B: 1, C: 2, D: 3 };
+  var list = (d.contactos || []).slice().sort(function (a, b) {
+    var ea = orden[a.etiqueta] != null ? orden[a.etiqueta] : 9;
+    var eb = orden[b.etiqueta] != null ? orden[b.etiqueta] : 9;
+    return ea - eb || (a.nombre || '').localeCompare(b.nombre || '');
+  });
+  var colorE = { A: 'var(--ok)', B: 'var(--gold)', C: 'var(--warn)', D: 'var(--muted)' };
+  var sinEtiqueta = list.filter(function (c) { return !c.etiqueta; }).length;
+  box.innerHTML = '<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px;">' +
+    '<div style="font-size:.68rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Listado completo (' + list.length + ')' + (sinEtiqueta ? ' — ' + sinEtiqueta + ' sin etiqueta A/B/C/D: click y etiquetalos' : '') + '</div>' +
+    '<div style="max-height:340px;overflow-y:auto;">' +
+    list.map(function (c) {
+      return '<div onclick="abrirContactoEdit(\'' + c.id + '\')" style="display:flex;gap:8px;align-items:center;padding:4px 6px;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;font-size:.78rem;" title="Click para editar (etiqueta, etapas, NURC/PUFA)">' +
+        '<strong style="width:18px;text-align:center;color:' + (colorE[c.etiqueta] || 'var(--muted)') + ';font-family:var(--mono);">' + (c.etiqueta || '·') + '</strong>' +
+        '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(c.nombre) + '</span>' +
+        (c.tipo ? '<span class="badge badge-muted">' + escHtml(c.tipo) + '</span>' : '') +
+        (c.en250 ? '<span title="En los 250">⭐</span>' : '') +
+        '<span style="font-family:var(--mono);font-size:.64rem;color:var(--muted);">' + (c.ultimaInteraccion || '') + '</span>' +
+      '</div>';
+    }).join('') + '</div></div>';
+};
+
+/* ─── S48: tasación PRE-LLENADA desde PDF / audio / texto (pedido Franco: no cargar a mano) ─── */
+window.tasacionDesdeArchivo = function (file) {
+  if (!file) return;
+  if (file.size > 20 * 1024 * 1024) return toast('Máx 20MB', 'err');
+  toast('🧠 Extrayendo datos de ' + file.name + '… (~20-40s)', 'ok');
+  var fr = new FileReader();
+  fr.onload = async function () {
+    var d = await apiFetch('/crm/ficha-import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filename: file.name, base64: String(fr.result) }) });
+    tasacionAplicarFicha(d);
+  };
+  fr.readAsDataURL(file);
+};
+window.tasacionDesdeTexto = async function () {
+  var ta = document.getElementById('ts-imp-texto');
+  var texto = ta ? ta.value.trim() : '';
+  if (texto.length < 30) return toast('Pegá la ficha o descripción completa', 'err');
+  toast('🧠 Extrayendo datos… (~20s)', 'ok');
+  var d = await apiFetch('/crm/ficha-import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ texto: texto }) });
+  if (ta) ta.value = '';
+  tasacionAplicarFicha(d);
+};
+window.tasacionAplicarFicha = function (d) {
+  if (!d || !d.ok) return toast('Error: ' + ((d && d.error) || (d && d.__error ? 'técnico ' + d.__error : 'no pude extraer')), 'err');
+  var f = d.ficha || {};
+  var set = function (id, v) { var e = document.getElementById(id); if (e && v != null && v !== '') e.value = String(v); };
+  set('ts-titulo', f.propiedad); set('ts-direccion', f.direccion); set('ts-barrio', f.barrio);
+  set('ts-tipo', f.tipoPropiedad); set('ts-m2cub', f.m2Cubiertos); set('ts-m2semi', f.m2Semicubiertos);
+  set('ts-m2terraza', f.m2Descubiertos); set('ts-antiguedad', f.antiguedad); set('ts-pisosedif', f.pisosEdificio);
+  set('ts-orientacion', f.orientacion); set('ts-disposicion', f.disposicion);
+  var piso = parseInt(String(f.pisoDepto || '').replace(/[^0-9]/g, ''), 10);
+  if (piso) set('ts-piso', piso);
+  var co = document.getElementById('ts-cochera'); if (co) co.checked = !!f.cochera;
+  var dud = f.camposDudosos || [];
+  toast(dud.length ? '✅ Pre-llenada — ⚠ revisá: ' + dud.join(', ') : '✅ Tasación pre-llenada — revisá y creá', 'ok');
+};

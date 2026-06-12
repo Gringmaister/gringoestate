@@ -31,7 +31,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { min-height: 100%; }
 body {
-  font-family: 'Inter', 'Roboto', sans-serif; -webkit-font-smoothing: antialiased;
+  font-family: 'Roboto', 'Inter', sans-serif; -webkit-font-smoothing: antialiased;
   background:
     radial-gradient(circle at top right, rgba(212,166,64,0.13), transparent 26%),
     radial-gradient(circle at bottom left, rgba(212,166,64,0.07), transparent 24%),
@@ -61,11 +61,11 @@ a { color: inherit; text-decoration: none; }
   margin-right: 8px;
 }
 .system-brand strong {
-  font-family: 'Marcellus', 'Bebas Neue', serif;
-  letter-spacing: 0.12em;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.18em;
   font-size: 1.2rem;
   color: var(--gold);
-  text-shadow: 0 0 10px rgba(212,166,64,0.22);
+  text-shadow: 0 0 20px rgba(212,166,64,0.4);
 }
 .system-brand span { color: var(--muted); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; }
 .sys-tiles { display: flex; gap: 20px; flex: 1; }
@@ -149,7 +149,7 @@ a { color: inherit; text-decoration: none; }
   border-bottom: 1px solid var(--border);
 }
 .section-head h1 {
-  font-family: 'Marcellus', 'Bebas Neue', serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 2.2rem;
   letter-spacing: 0.08em;
   color: var(--text);
@@ -193,9 +193,9 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: 14px;
 }
 .card-title {
-  font-family: 'Marcellus', 'Bebas Neue', serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 1.1rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.18em;
   color: var(--gold);
 }
 .card-title-metro { color: var(--metro); }
@@ -274,9 +274,9 @@ a { color: inherit; text-decoration: none; }
   gap: 12px;
 }
 .agent-name {
-  font-family: 'Marcellus', 'Bebas Neue', serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 1.3rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.18em;
 }
 .agent-body { padding: 16px 18px; display: grid; gap: 12px; }
 
@@ -398,7 +398,7 @@ textarea.input { resize: vertical; min-height: 80px; font-family: var(--mono); f
   box-shadow: 0 40px 90px rgba(0,0,0,0.5);
   padding: 28px;
 }
-.modal h3 { font-family: 'Marcellus', 'Bebas Neue', serif; font-size: 1.5rem; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 16px; }
+.modal h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 16px; }
 
 /* ── TOAST ──────────────────────────────────────────────────────── */
 #toast {
@@ -428,7 +428,7 @@ textarea.input { resize: vertical; min-height: 80px; font-family: var(--mono); f
   text-align: center;
 }
 .lock-icon { font-size: 2.8rem; margin-bottom: 12px; }
-.lock-card h2 { font-family: 'Marcellus', 'Bebas Neue', serif; font-size: 1.8rem; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 6px; }
+.lock-card h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 6px; }
 .lock-card p  { color: var(--muted); font-size: 0.84rem; margin-bottom: 20px; }
 .pin-input {
   font-family: var(--mono); font-size: 1.4rem; letter-spacing: 0.4em;
@@ -449,7 +449,7 @@ textarea.input { resize: vertical; min-height: 80px; font-family: var(--mono); f
   text-align: center; color: var(--muted);
 }
 .placeholder-block .ph-icon { font-size: 2.4rem; margin-bottom: 10px; }
-.placeholder-block h3 { font-family: 'Marcellus', 'Bebas Neue', serif; font-size: 1.3rem; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 6px; }
+.placeholder-block h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 6px; }
 
 /* ── DOCKER GRID ────────────────────────────────────────────────── */
 .docker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
@@ -653,7 +653,7 @@ input:focus:not(:focus-visible) { outline: none; }
 }
 .brand-copy { flex: 1; min-width: 0; }
 .brand-copy h1 {
-  font-family: 'Marcellus', 'Bebas Neue', serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 2rem;
   letter-spacing: 0.1em;
   line-height: 0.95;
@@ -670,7 +670,7 @@ input:focus:not(:focus-visible) { outline: none; }
   color: var(--gold);
   font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   font-family: var(--mono);
 }
@@ -775,7 +775,7 @@ input:focus:not(:focus-visible) { outline: none; }
 }
 .pulso-kicker svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .pulso-card h2 {
-  font-family: 'Marcellus', 'Bebas Neue', serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 1.9rem;
   letter-spacing: 0.06em;
   line-height: 0.92;
@@ -801,7 +801,7 @@ input:focus:not(:focus-visible) { outline: none; }
   display: block;
   font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.18em;
   color: var(--gold);
   margin-bottom: 5px;
 }
@@ -836,9 +836,9 @@ input:focus:not(:focus-visible) { outline: none; }
   margin-bottom: 14px;
 }
 .brain-head-title {
-  font-family: 'Marcellus', 'Bebas Neue', serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 1.1rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.18em;
   color: var(--gold);
 }
 .brain-stream {
@@ -891,9 +891,9 @@ input:focus:not(:focus-visible) { outline: none; }
   margin-bottom: 14px;
 }
 .chart-title {
-  font-family: 'Marcellus', 'Bebas Neue', serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 1.05rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.18em;
   color: var(--gold);
 }
 .chart-stage {
@@ -929,7 +929,7 @@ input:focus:not(:focus-visible) { outline: none; }
   background: rgba(255,255,255,0.02);
   padding: 10px 12px;
 }
-.chart-stat span { display: block; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+.chart-stat span { display: block; font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
 .chart-stat strong { display: block; font-size: 1.05rem; color: var(--text); }
 
 /* ── AGENT AVATAR RING ──────────────────────────────────────────── */
@@ -986,7 +986,7 @@ input:focus:not(:focus-visible) { outline: none; }
 }
 .avatar-placeholder svg { width: 48px; height: 48px; }
 .avatar-placeholder .avatar-initial {
-  font-family: 'Marcellus', 'Bebas Neue', serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 2.8rem;
   line-height: 1;
   letter-spacing: 0.05em;
@@ -1016,7 +1016,7 @@ input:focus:not(:focus-visible) { outline: none; }
   padding: 4px 0 10px;
 }
 .agent-meta-name {
-  font-family: 'Marcellus', 'Bebas Neue', serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 1.6rem;
   letter-spacing: 0.1em;
   line-height: 1;
@@ -1150,7 +1150,7 @@ input:focus:not(:focus-visible) { outline: none; }
 }
 .agents-future-title {
   font-size: 0.68rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--muted);
   margin-bottom: 14px;
@@ -1254,7 +1254,7 @@ input:focus:not(:focus-visible) { outline: none; }
 /* ─── INFRA · Mapa del stack (capas + nodos con micro-bars) ─── */
 .stack-layer { margin-bottom: 18px; }
 .stack-layer-label {
-  font-family: 'Marcellus', 'Bebas Neue', serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 1.02rem;
   letter-spacing: .14em;
   color: var(--muted);
@@ -1291,7 +1291,7 @@ input:focus:not(:focus-visible) { outline: none; }
 /* ─── GRINGO CRM · Embudos ─── */
 .crm-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; align-items: end; }
 .crm-col { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.crm-col strong { font-family: 'Marcellus', 'Bebas Neue', serif; font-size: 1.5rem; color: var(--gold); line-height: 1; }
+.crm-col strong { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--gold); line-height: 1; }
 .crm-bar { width: 100%; height: 64px; display: flex; align-items: flex-end; }
 .crm-bar i { display: block; width: 100%; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, rgba(212,166,64,0.85), rgba(212,166,64,0.25)); transition: height .3s; }
 .crm-col span { font-size: .64rem; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; line-height: 1.25; }
@@ -1321,3 +1321,16 @@ input:focus:not(:focus-visible) { outline: none; }
 .tc-ico { font-size: 1rem; flex-shrink: 0; }
 .tc-label { font-size: .73rem; font-weight: 600; line-height: 1.25; flex: 1; }
 .tc-risk { width: 6px; height: 6px; border-radius: 50%; position: absolute; top: 8px; right: 8px; }
+
+
+/* ── S48: interactividad de cajas (hover con vida, identidad Gringo Estate) ── */
+.card, .kpi, .crm-card, .lg-sec {
+  transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease, background .16s ease;
+}
+.card:hover { border-color: rgba(212,166,64,0.45); box-shadow: 0 6px 22px rgba(0,0,0,0.35), 0 0 0 1px rgba(212,166,64,0.12) inset; }
+.kpi:hover { transform: translateY(-2px); border-color: rgba(212,166,64,0.5); }
+.crm-card:hover { transform: translateY(-1px) scale(1.01); box-shadow: 0 4px 14px rgba(0,0,0,0.4); }
+.lg-sec:hover { border-color: rgba(212,166,64,0.35); background: rgba(255,255,255,0.028); }
+.crm-col { transition: transform .16s ease; }
+.crm-col:hover { transform: translateY(-2px); }
+.crm-col:hover .crm-bar i { filter: brightness(1.25); }
