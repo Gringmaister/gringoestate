@@ -1334,3 +1334,6 @@ input:focus:not(:focus-visible) { outline: none; }
 .crm-col { transition: transform .16s ease; }
 .crm-col:hover { transform: translateY(-2px); }
 .crm-col:hover .crm-bar i { filter: brightness(1.25); }
+
+/* S49: acciones del refinamiento compactas (los nombres en botones los hacían anchos) */
+.hig-acciones .btn { font-size: 0.62rem; padding: 1px 7px; }

@@ -1555,7 +1555,9 @@
               '<div style="height:4px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden;"><i style="display:block;height:100%;width:' + Math.min(100, v) + '%;background:' + c + ';border-radius:3px;"></i></div></div>');
           });
         });
-        cv.innerHTML = chips.length ? '<div style="font-size:.68rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Conversión por etapa</div><div style="display:flex;gap:8px;flex-wrap:wrap;">' + chips.join('') + '</div>' : '';
+        cv.innerHTML = chips.length ? '<div style="font-size:.68rem;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;">Conversión por etapa</div>' +
+          '<div style="font-size:.7rem;color:var(--muted);margin-bottom:7px;">De los contactos que llegaron a cada etapa, qué % avanzó a la siguiente — son TUS números reales; compará contra las referencias Magnin de abajo.</div>' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + chips.join('') + '</div>' : '';
       }
       // Benchmarks Magnin + plan semanal 40-5-5-1
       var bm = document.getElementById('cm-benchmarks');
@@ -2203,13 +2205,19 @@
     var box = document.getElementById('cm-plansemanal');
     if (!box || !d || !d.ok) return;
     var t = d.targets, p = d.plan;
+    // S49: tarjetas con barra de progreso (pedido Franco "el +1/− no se ve muy bien")
     var item = function (campo, label, val, target) {
       var ok = val >= target;
-      return '<div style="display:flex;align-items:center;gap:6px;border:1px solid ' + (ok ? 'var(--ok)' : 'var(--border)') + ';border-radius:10px;padding:6px 10px;">' +
-        '<span style="font-size:.74rem;color:var(--muted);">' + label + '</span>' +
-        '<strong style="font-family:var(--mono);font-size:.85rem;color:' + (ok ? 'var(--ok)' : 'var(--text)') + ';">' + val + '/' + target + (ok ? ' ✓' : '') + '</strong>' +
-        '<button class="btn btn-gold btn-sm" style="padding:1px 8px;" title="Sumar 1 (lo hiciste vos)" onclick="sumarPlan(\'' + campo + '\',1)">+1</button>' +
-        '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;" title="Restar 1 (corrección)" onclick="sumarPlan(\'' + campo + '\',-1)">−</button>' +
+      var pct = Math.min(100, Math.round(val / target * 100));
+      var c = ok ? 'var(--ok)' : pct >= 50 ? 'var(--gold)' : '#8a8f98';
+      return '<div class="kpi" style="min-width:160px;padding:8px 11px;text-align:left;display:block;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">' +
+          '<span style="font-size:.7rem;color:var(--muted);">' + label + '</span>' +
+          '<span style="display:inline-flex;gap:3px;flex-shrink:0;">' +
+            '<button class="btn btn-gold btn-sm" style="padding:0 8px;" title="Sumar 1 (lo hiciste vos)" onclick="sumarPlan(\'' + campo + '\',1)">+1</button>' +
+            '<button class="btn btn-ghost btn-sm" style="padding:0 7px;" title="Restar 1 (corrección)" onclick="sumarPlan(\'' + campo + '\',-1)">−</button></span></div>' +
+        '<div style="font-family:var(--mono);font-size:1.05rem;font-weight:700;color:' + c + ';margin:2px 0;">' + val + '<span style="font-size:.7rem;color:var(--muted);"> / ' + target + (ok ? ' ✓' : '') + '</span></div>' +
+        '<div style="height:4px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden;"><i style="display:block;height:100%;width:' + pct + '%;background:' + c + ';border-radius:3px;transition:width .3s;"></i></div>' +
       '</div>';
     };
     box.innerHTML = '<div style="font-size:.68rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Plan semanal 40-5-5-1 (' + d.semana + ') — lo marcás VOS a medida que lo hacés</div>' +
@@ -2307,7 +2315,17 @@
     var el = document.getElementById('crm-higiene');
     if (!el) return;
     var d = await apiFetch('/crm/higiene');
-    if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">No pude leer higiene.</span>'; return; }
+    if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">No pude leer el refinamiento.</span>'; return; }
+    window.crmHigieneData = d;
+    renderHigiene();
+  }
+  window.loadCrmHigiene = loadCrmHigiene;
+
+  // S49: render PURO desde estado local — filtros/teclado/selección/clasificar = instantáneos, cero refetch
+  function renderHigiene() {
+    var el = document.getElementById('crm-higiene');
+    var d = window.crmHigieneData;
+    if (!el || !d) return;
     var cnt = document.getElementById('crm-hig-count');
     if (cnt) cnt.textContent = d.sinClasificar.count + ' sin clasificar';
     var html = '';
@@ -2328,12 +2346,12 @@
       var nSel = Object.keys(window.crmHigSel).length;
       var chip = function (key, label) {
         var on = window.crmHigFiltro === key;
-        return '<button class="btn btn-sm ' + (on ? 'btn-gold' : 'btn-ghost') + '" onclick="window.crmHigFiltro=\'' + key + '\';window.crmHigFocus=0;loadCrmHigiene()">' + label + '</button>';
+        return '<button class="btn btn-sm ' + (on ? 'btn-gold' : 'btn-ghost') + '" onclick="window.crmHigFiltro=\'' + key + '\';window.crmHigFocus=0;renderHigiene()">' + label + '</button>';
       };
       html += '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">' +
         chip('todos', 'Todos') + chip('activos', '🔥 ≥20 msgs') + chip('telefono', '📞 Con tel.') + chip('basura', '🧹 Probable basura') +
-        '<input class="input" placeholder="🔎 Buscar nombre…" value="' + escHtml(window.crmHigBusca || '') + '" style="width:160px;font-size:.74rem;padding:3px 8px;" oninput="window.crmHigBusca=this.value.toLowerCase();window.crmHigFocus=0;clearTimeout(window.crmHigBuscaT);window.crmHigBuscaT=setTimeout(function(){var v=document.activeElement&&document.activeElement.value;loadCrmHigiene().then(function(){var i=document.querySelector(\'#crm-higiene input.input\');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);}});},350)">' +
-        '<button class="btn btn-sm ' + (window.crmHigKb ? 'btn-gold' : 'btn-ghost') + '" style="margin-left:auto;" title="Clasificá con el teclado: ↑↓ moverse · P promover · E equipo · A ambbi · X personal · V proveedor · N no contactar · D descartar · S saltar" onclick="window.crmHigKb=!window.crmHigKb;window.crmHigFocus=0;loadCrmHigiene()">⌨️ Modo rápido</button>' +
+        '<input class="input" placeholder="🔎 Buscar nombre…" value="' + escHtml(window.crmHigBusca || '') + '" style="width:160px;font-size:.74rem;padding:3px 8px;" oninput="window.crmHigBusca=this.value.toLowerCase();window.crmHigFocus=0;clearTimeout(window.crmHigBuscaT);window.crmHigBuscaT=setTimeout(function(){renderHigiene();var i=document.querySelector(\'#crm-higiene input.input\');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);}},220)">' +
+        '<button class="btn btn-sm ' + (window.crmHigKb ? 'btn-gold' : 'btn-ghost') + '" style="margin-left:auto;" title="Clasificá con el teclado: ↑↓ moverse · P promover · E equipo · A ambbi · X personal · V proveedor · N no contactar · D descartar · S saltar" onclick="window.crmHigKb=!window.crmHigKb;window.crmHigFocus=0;renderHigiene()">⌨️ Modo rápido</button>' +
       '</div>';
       if (window.crmHigKb) {
         html += '<div style="font-size:.68rem;color:var(--gold);margin-bottom:6px;font-family:var(--mono);">↑↓ moverse · P promover · E equipo · A ambbi · X personal · V proveedor · N no contactar · D descartar · S saltar</div>';
@@ -2345,21 +2363,22 @@
             var p2 = par.split('|');
             return '<button class="btn btn-ghost btn-sm" onclick="clasificarLote(\'' + p2[0] + '\')">' + p2[1] + ' ' + p2[0] + '</button>';
           }).join('') +
-          '<button class="btn btn-ghost btn-sm" onclick="window.crmHigSel={};loadCrmHigiene()">✕ limpiar</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="window.crmHigSel={};renderHigiene()">✕ limpiar</button>' +
         '</div>';
       }
       html += '<div style="font-size:.72rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Sin clasificar (' + lista.length + (window.crmHigFiltro !== 'todos' ? ' con este filtro' : '') + ') — tildá varios para clasificar en lote</div>';
-      html += '<div style="max-width:820px;">';
+      html += '<div style="max-width:980px;max-height:56vh;overflow-y:auto;border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:0 6px;">';
       html += lista.slice(0, window.crmHigieneVisible).map(function (l, idx) {
         var foco = window.crmHigKb && (window.crmHigFocus || 0) === idx;
         var sel = !!window.crmHigSel[l.id];
-        return '<div data-hig-idx="' + idx + '" style="display:grid;grid-template-columns:24px minmax(140px,1fr) 70px auto;align-items:center;gap:8px;padding:4px 6px;border-bottom:1px solid rgba(255,255,255,0.05);' + (foco ? 'background:rgba(212,175,55,0.12);border-radius:8px;' : '') + '">' +
+        return '<div data-hig-idx="' + idx + '" style="display:grid;grid-template-columns:22px minmax(120px,250px) 52px auto;align-items:center;gap:7px;padding:2px 4px;border-bottom:1px solid rgba(255,255,255,0.05);' + (foco ? 'background:rgba(212,175,55,0.12);border-radius:8px;' : '') + '">' +
           '<input type="checkbox"' + (sel ? ' checked' : '') + ' onchange="toggleHigSel(\'' + l.id + '\',this.checked)" aria-label="Seleccionar">' +
           '<span style="font-size:.82rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(l.nombre) + (l.telefono ? '' : ' <span style="color:var(--muted);font-weight:400;font-size:.66rem;">(sin tel.)</span>') + '</span>' +
           '<span style="font-size:.68rem;color:var(--muted);font-family:var(--mono);text-align:right;">' + (l.mensajes || 0) + ' msgs</span>' +
-          '<span style="display:inline-flex;gap:4px;">' +
+          '<span class="hig-acciones" style="display:inline-flex;gap:3px;">' +
             '<button class="btn btn-gold btn-sm" title="Promover al CRM: lo crea como contacto TRABAJABLE en tu base de brokerage" onclick="clasificarLinea(\'' + l.id + '\',\'Promover\')">⭐ Promover</button>' +
             '<button class="btn btn-ghost btn-sm" title="Tu gente: staff, socios, colaboradores" onclick="clasificarLinea(\'' + l.id + '\',\'Equipo\')">👔 Equipo</button>' +
+            '<button class="btn btn-ghost btn-sm" title="Encargado de edificio — entra al CRM como contacto clave (conocen todo su edificio)" onclick="clasificarLinea(\'' + l.id + '\',\'Promover\',\'Encargado\')">🛎 Encargado</button>' +
             '<button class="btn btn-ghost btn-sm" title="Huésped AMBBI (temporario) — no pertenece a este CRM" onclick="clasificarLinea(\'' + l.id + '\',\'AMBBI\')">🏨 Huésped</button>' +
             '<button class="btn btn-ghost btn-sm" title="Personal (familia/amigos)" onclick="clasificarLinea(\'' + l.id + '\',\'Personal\')">👤 Personal</button>' +
             '<button class="btn btn-ghost btn-sm" title="Proveedor (negocios/servicios)" onclick="clasificarLinea(\'' + l.id + '\',\'Proveedor\')">🏪 Proveedor</button>' +
@@ -2371,8 +2390,8 @@
       html += '</div>';
       if (lista.length > window.crmHigieneVisible) {
         html += '<div style="display:flex;gap:6px;margin-top:8px;">' +
-          '<button class="btn btn-ghost btn-sm" onclick="window.crmHigieneVisible+=20;loadCrmHigiene()">▾ Mostrar 20 más (' + (lista.length - window.crmHigieneVisible) + ' restantes)</button>' +
-          '<button class="btn btn-ghost btn-sm" onclick="window.crmHigieneVisible=99999;loadCrmHigiene()">⤓ Mostrar TODOS (' + lista.length + ')</button></div>';
+          '<button class="btn btn-ghost btn-sm" onclick="window.crmHigieneVisible+=20;renderHigiene()">▾ Mostrar 20 más (' + (lista.length - window.crmHigieneVisible) + ' restantes)</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="window.crmHigieneVisible=99999;renderHigiene()">⤓ Mostrar TODOS (' + lista.length + ')</button></div>';
       }
     } else html += '<div class="small muted">✅ Todo clasificado.</div>';
     if ((d.duplicados || []).length) {
@@ -2389,13 +2408,27 @@
     }
     el.innerHTML = html;
   }
-  window.loadCrmHigiene = loadCrmHigiene;
+  window.renderHigiene = renderHigiene;
 
-  async function clasificarLinea(id, clasificacion) {
+  async function clasificarLinea(id, clasificacion, tipo) {
     delete (window.crmHigSel || {})[id];
-    var d = await apiFetch('/crm/clasificar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, clasificacion: clasificacion }) });
-    if (d && d.ok) { toast(clasificacion === 'Promover' ? '⭐ Promovido al CRM' : 'Clasificado: ' + clasificacion, 'ok'); loadCrmHigiene(); }
-    else toast('Error al clasificar', 'err');
+    // S49: UI OPTIMISTA — la fila desaparece YA (el guardado sigue en background).
+    // Antes: POST a Notion + refetch completo = 2-3s de click muerto.
+    var d0 = window.crmHigieneData, item = null, pos = -1;
+    if (d0 && d0.sinClasificar) {
+      pos = d0.sinClasificar.top.findIndex(function (l) { return l.id === id; });
+      if (pos >= 0) { item = d0.sinClasificar.top.splice(pos, 1)[0]; d0.sinClasificar.count--; }
+      renderHigiene();
+    }
+    toast(clasificacion === 'Promover' ? (tipo === 'Encargado' ? '🛎 Encargado → CRM' : '⭐ Promovido al CRM') : 'Clasificado: ' + clasificacion, 'ok');
+    var body = { id: id, clasificacion: clasificacion };
+    if (tipo) body.tipo = tipo;
+    var d = await apiFetch('/crm/clasificar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (!d || !d.ok) {
+      // rollback: vuelve la fila a su lugar + aviso
+      if (item && d0) { d0.sinClasificar.top.splice(Math.max(0, pos), 0, item); d0.sinClasificar.count++; renderHigiene(); }
+      toast('⚠ No se guardó "' + (item ? item.nombre : id) + '" — reintentá', 'err');
+    }
   }
   window.clasificarLinea = clasificarLinea;
 
@@ -2403,17 +2436,25 @@
   function toggleHigSel(id, on) {
     window.crmHigSel = window.crmHigSel || {};
     if (on) window.crmHigSel[id] = true; else delete window.crmHigSel[id];
-    loadCrmHigiene();
+    renderHigiene();
   }
   window.toggleHigSel = toggleHigSel;
 
   async function clasificarLote(clasificacion) {
     var ids = Object.keys(window.crmHigSel || {});
     if (!ids.length) return;
-    toast('Clasificando ' + ids.length + ' como ' + clasificacion + '…', 'ok');
+    // S49: optimista también en lote — las filas se van YA
+    var d0 = window.crmHigieneData;
+    if (d0 && d0.sinClasificar) {
+      d0.sinClasificar.top = d0.sinClasificar.top.filter(function (l) { return !window.crmHigSel[l.id]; });
+      d0.sinClasificar.count -= ids.length;
+      window.crmHigSel = {};
+      renderHigiene();
+    }
+    toast('✅ ' + ids.length + ' → ' + clasificacion + ' (guardando…)', 'ok');
     var d = await apiFetch('/crm/clasificar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: ids, clasificacion: clasificacion }) });
-    if (d && d.ok) { toast('✅ ' + (d.aplicados || ids.length) + ' clasificados como ' + clasificacion, 'ok'); window.crmHigSel = {}; loadCrmHigiene(); }
-    else toast('Error en el lote: ' + ((d && d.error) || 'sin conexión'), 'err');
+    if (!d || !d.ok) { toast('⚠ El lote no se guardó — recargando lista real', 'err'); loadCrmHigiene(); }
+    else if ((d.aplicados || 0) < ids.length) { toast('⚠ ' + (ids.length - d.aplicados) + ' no se guardaron — recargando', 'err'); loadCrmHigiene(); }
   }
   window.clasificarLote = clasificarLote;
 
@@ -2428,9 +2469,9 @@
     var idx = Math.min(window.crmHigFocus || 0, max);
     var KEYS = { p: 'Promover', e: 'Equipo', a: 'AMBBI', x: 'Personal', v: 'Proveedor', n: 'No contactar', d: 'Descartado' };
     var k = e.key.toLowerCase();
-    if (e.key === 'ArrowDown') { e.preventDefault(); window.crmHigFocus = Math.min(idx + 1, max); loadCrmHigiene(); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); window.crmHigFocus = Math.max(idx - 1, 0); loadCrmHigiene(); }
-    else if (k === 's') { e.preventDefault(); window.crmHigFocus = Math.min(idx + 1, max); loadCrmHigiene(); }
+    if (e.key === 'ArrowDown') { e.preventDefault(); window.crmHigFocus = Math.min(idx + 1, max); renderHigiene(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); window.crmHigFocus = Math.max(idx - 1, 0); renderHigiene(); }
+    else if (k === 's') { e.preventDefault(); window.crmHigFocus = Math.min(idx + 1, max); renderHigiene(); }
     else if (KEYS[k]) { e.preventDefault(); var item = lista[idx]; if (item) { window.crmHigFocus = idx; clasificarLinea(item.id, KEYS[k]); } }
   });
 
