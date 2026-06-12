@@ -1279,13 +1279,20 @@
 
   /* ─── GRINGO CRM (banco Notion) ─────────────────────────────────── */
   var CRM_ETIQ_COLOR = { A: 'var(--ok)', B: 'var(--gold)', C: 'var(--warn)', D: 'var(--muted)' };
+  // S47: embudos con COLOR — progresión frío→oro→verde por avance; descartes en gris (pedido Franco)
+  var FUNNEL_PALETTE = ['#5ec8d8', '#6fa8e8', '#9b8cf0', '#c9a0f0', '#d4af37', '#e8c96a', '#67d98b', '#46b97a', '#3da06a', '#67d98b'];
+  function funnelColor(etapa, i) {
+    if (/descart|perdid|ca[íi]da|rechaz/i.test(etapa || '')) return '#6b7078';
+    return FUNNEL_PALETTE[Math.min(i, FUNNEL_PALETTE.length - 1)];
+  }
   function crmFunnelHtml(etapas) {
     var max = Math.max.apply(null, etapas.map(function (e) { return e.count; }).concat([1]));
-    return '<div class="crm-cols">' + etapas.map(function (e) {
+    return '<div class="crm-cols">' + etapas.map(function (e, fi) {
       var h = Math.max(e.count > 0 ? 14 : 4, Math.round(e.count / max * 64));
+      var col = funnelColor(e.etapa, fi);
       return '<div class="crm-col" title="' + escHtml(e.etapa) + ': ' + e.count + '">' +
-        '<strong>' + e.count + '</strong>' +
-        '<div class="crm-bar"><i style="height:' + h + 'px"></i></div>' +
+        '<strong style="color:' + (e.count > 0 ? col : 'var(--muted)') + ';">' + e.count + '</strong>' +
+        '<div class="crm-bar"><i style="height:' + h + 'px;background:linear-gradient(180deg,' + col + ',' + col + '55);box-shadow:0 0 8px ' + col + '33;"></i></div>' +
         '<span>' + escHtml(e.etapa) + '</span>' +
         (e.cards && e.cards.length ? '<div class="crm-cards">' + e.cards.slice(0, 3).map(function (c) {
           var col = CRM_ETIQ_COLOR[c.etiqueta] || 'var(--muted)';
@@ -1558,7 +1565,7 @@
           '</div>' +
           '<div style="font-size:.76rem;color:var(--muted);margin:4px 0 7px;"><b style="color:var(--text);">Motivo:</b> ' + r.motivos.map(escHtml).join(' · ') + (r.busca ? ' · busca: ' + escHtml(r.busca) : '') + '</div>' +
           '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
-            (r.telefono ? '<a class="btn btn-gold btn-sm" style="text-decoration:none;" href="https://wa.me/' + String(r.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') +
+            (r.telefono ? '<a class="btn btn-gold btn-sm" style="text-decoration:none;" href="' + waHref(r.telefono) + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') +
             '<button class="btn btn-ghost btn-sm" onclick="marcarContactado(\'' + r.id + '\')">✓ Contactado</button>' +
             '<button class="btn btn-ghost btn-sm" onclick="crearTareaContacto(\'' + r.id + '\')">📋 Crear tarea</button>' +
             '<button class="btn btn-ghost btn-sm" onclick="posponerContacto(\'' + r.id + '\')">⏰ Posponer 3d</button>' +
@@ -1616,15 +1623,30 @@
       '</div></div>';
     // ═ COLUMNA IZQUIERDA
     var valor = p.valorVenta ? 'USD ' + Number(p.valorVenta).toLocaleString('es-AR') : p.valorAlquiler ? 'USD ' + Number(p.valorAlquiler).toLocaleString('es-AR') + '/mes' : (p.valorPedido || '—');
+    // S47: hero del resumen — nombre + dirección protagonistas y características en grilla clara
+    var carac = [
+      ['M² totales', p.m2Totales], ['M² cubiertos', p.m2Cubiertos], ['Ambientes', p.ambientes],
+      ['Dormitorios', p.dormitorios], ['Baños', p.banos], ['Piso/Depto', p.pisoDepto],
+      ['Orientación', p.orientacion], ['Disposición', p.disposicion], ['Antigüedad', p.antiguedad ? p.antiguedad + ' años' : null],
+      ['Expensas', p.expensas ? '$ ' + Number(p.expensas).toLocaleString('es-AR') : null],
+      ['Estado', p.estadoConservacion], ['Cochera', p.cochera ? 'Sí' : null]
+    ].filter(function (x) { return x[1] != null && x[1] !== '' && x[1] !== '—'; });
     var izq = seccion('Resumen',
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
+      '<div style="font-size:1.12rem;font-weight:800;letter-spacing:.01em;margin-bottom:2px;">' + escHtml(p.propiedad || '—') + '</div>' +
+      '<div style="font-size:.82rem;color:var(--muted);margin-bottom:9px;">📍 ' + escHtml([p.direccion, p.barrio].filter(Boolean).join(' · ') || 'sin dirección cargada') + '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">' +
         '<span class="badge badge-muted">' + escHtml(p.tipoPropiedad || '—') + '</span>' +
         '<span class="badge badge-muted">' + escHtml(p.operacion || '—') + '</span>' +
         '<span class="badge ' + (p.estado === 'Publicada' ? 'badge-ok' : 'badge-muted') + '">' + escHtml(p.estado || '—') + '</span>' +
-        '<span style="font-family:var(--mono);font-size:.82rem;color:var(--gold);">' + valor + '</span>' +
-        '<span style="font-family:var(--mono);font-size:.74rem;color:var(--muted);">' + (p.m2Totales || '—') + ' m² · ' + (p.ambientes || '—') + ' amb</span>' +
+        '<span style="font-family:var(--mono);font-size:.95rem;font-weight:700;color:var(--gold);margin-left:auto;">' + valor + '</span>' +
       '</div>' +
-      (d.propietario ? '<div style="font-size:.8rem;margin-top:6px;">🏠 <b>' + escHtml(d.propietario.nombre) + '</b>' + (d.propietario.telefono ? ' · <a href="https://wa.me/' + String(d.propietario.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener" style="color:var(--gold);">' + escHtml(d.propietario.telefono) + '</a>' : '') + '</div>' : '<div class="small muted" style="margin-top:6px;">Sin propietario vinculado.</div>'));
+      (carac.length ? '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;">' +
+        carac.map(function (x) {
+          return '<div style="border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:5px 9px;background:rgba(255,255,255,0.012);">' +
+            '<div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;">' + x[0] + '</div>' +
+            '<div style="font-size:.84rem;font-weight:600;">' + escHtml(String(x[1])) + '</div></div>';
+        }).join('') + '</div>' : '') +
+      (d.propietario ? '<div style="font-size:.8rem;margin-top:9px;">🏠 Propietario: <b>' + escHtml(d.propietario.nombre) + '</b>' + (d.propietario.telefono ? ' · <a href="' + waHref(d.propietario.telefono) + '" target="_blank" rel="noopener" style="color:var(--gold);">' + escHtml(d.propietario.telefono) + '</a>' : '') + '</div>' : '<div class="small muted" style="margin-top:9px;">Sin propietario vinculado — vinculalo desde la ficha ✏️.</div>'));
     // checklist por COLORES — S44: grid de tarjetas high-quality + barra de progreso + dropzone
     var colorDe = { recibido: 'var(--ok)', pedido: '#5ec8d8', revisar: 'var(--warn)', bloqueante: 'var(--danger)', no_aplica: '#555', pendiente: '#999' };
     var lblDe = { recibido: '✓ Recibido', pedido: '📨 Pedido', revisar: '🟡 Revisar', bloqueante: '⛔ BLOQUEA', no_aplica: 'No aplica', pendiente: 'Pendiente' };
@@ -1663,7 +1685,7 @@
       }).join('') : '<div class="small muted">Sin tasaciones.</div>');
     izq += seccion('🛒 Interesados (' + (d.interesados || []).length + ')',
       (d.interesados || []).length ? d.interesados.map(function (c) {
-        return '<div style="display:flex;gap:8px;align-items:center;padding:2px 0;font-size:.78rem;"><span style="flex:1;">' + escHtml(c.nombre) + '</span><span class="badge badge-muted">' + escHtml(c.etapaDemanda || '—') + '</span>' + (c.telefono ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;padding:0 6px;" href="https://wa.me/' + String(c.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener">💬</a>' : '') + '</div>';
+        return '<div style="display:flex;gap:8px;align-items:center;padding:2px 0;font-size:.78rem;"><span style="flex:1;">' + escHtml(c.nombre) + '</span><span class="badge badge-muted">' + escHtml(c.etapaDemanda || '—') + '</span>' + (c.telefono ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;padding:0 6px;" href="' + waHref(c.telefono) + '" target="_blank" rel="noopener">💬</a>' : '') + '</div>';
       }).join('') : '<div class="small muted">Sin interesados.</div>');
     izq += seccion('💼 Operaciones (' + (d.operaciones || []).length + ')',
       (d.operaciones || []).length ? d.operaciones.map(function (o) {
@@ -1712,7 +1734,7 @@
           '<div style="font-size:.74rem;font-weight:700;margin-bottom:3px;">' + escHtml(m.titulo) + '</div>' +
           '<div style="font-size:.7rem;color:var(--muted);max-height:64px;overflow:hidden;">' + escHtml(m.texto) + '</div>' +
           '<div style="display:flex;gap:5px;margin-top:5px;"><button class="btn btn-gold btn-sm" onclick="copiarBorrador(this)" data-msg="' + escHtml(m.texto) + '">📋 Copiar</button>' +
-          (m.destinatario ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="https://wa.me/' + String(m.destinatario).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') + '</div></div>';
+          (m.destinatario ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + waHref(m.destinatario) + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') + '</div></div>';
       }).join('') : '<div class="small muted">Sin mensajes sugeridos.</div>') + '</div>';
     dock += '</div>';
     if (body) body.innerHTML = accionHtml + '<div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;"><div style="flex:1.5;min-width:420px;">' + izq + '</div><div style="flex:1;min-width:320px;">' + dock + '</div></div>';
@@ -2068,7 +2090,7 @@
         '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
           '<button class="btn btn-gold btn-sm" onclick="copiarMatchMsg(' + mi + ')">📋 Copiar mensaje</button>' +
           '<button class="btn btn-ghost btn-sm" title="Editar el borrador antes de copiarlo" onclick="var t=document.getElementById(\'match-msg-' + mi + '\');t.style.display=t.style.display===\'none\'?\'\':\'none\';">✏️ Editar</button>' +
-          (m.telefono ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="https://wa.me/' + String(m.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') +
+          (m.telefono ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + waHref(m.telefono) + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') +
           (m.contactoId ? '<button class="btn btn-ghost btn-sm" title="Lo contactaste: actualiza última interacción + nota en el CRM" onclick="marcarMatchContactado(\'' + m.contactoId + '\',\'' + escHtml(m.propiedad).replace(/'/g, '') + '\')">✓ Contactado</button>' : '') +
           '<button class="btn btn-ghost btn-sm" title="No va — ocultar este match" onclick="descartarMatch(\'' + key.replace(/'/g, '') + '\')">🚫</button>' +
         '</div>' +
@@ -2126,6 +2148,14 @@
     if (ops) {
       var activas = (ops.etapas || []).filter(function (e) { return ['Cerrada', 'Caída'].indexOf(e.etapa) < 0; });
       html += col('Operaciones', '💼', 'operaciones', activas, ops.activas || 0);
+      // S47: honorarios SIEMPRE visibles en el resumen (pedido Franco)
+      var hEsp = 0, hCob = 0;
+      (ops.items || []).forEach(function (o) { if (o.etapa !== 'Caída') { hEsp += o.honorariosEsperados || 0; hCob += o.honorariosCobrados || 0; } });
+      html += '<div style="grid-column:1/-1;display:flex;gap:14px;flex-wrap:wrap;border:1px solid rgba(212,175,55,0.35);border-radius:10px;padding:8px 12px;background:rgba(212,175,55,0.04);align-items:center;">' +
+        '<span style="font-size:.72rem;color:var(--gold);text-transform:uppercase;letter-spacing:.07em;font-weight:700;">💰 Honorarios</span>' +
+        '<span style="font-size:.78rem;">Esperados: <b style="font-family:var(--mono);color:var(--gold);">$' + hEsp.toLocaleString('es-AR') + '</b></span>' +
+        '<span style="font-size:.78rem;">Cobrados: <b style="font-family:var(--mono);color:var(--ok);">$' + hCob.toLocaleString('es-AR') + '</b></span>' +
+        '<span style="font-size:.78rem;">Pendientes: <b style="font-family:var(--mono);color:' + ((hEsp - hCob) > 0 ? 'var(--warn)' : 'var(--muted)') + ';">$' + Math.max(0, hEsp - hCob).toLocaleString('es-AR') + '</b></span></div>';
     }
     if (html) el.innerHTML = html;
   }
@@ -3508,4 +3538,21 @@
     setInterval(loadIAChart,   300000);  // IA chart every 5min
   });
 
+})();
+
+/* ─── S47: WhatsApp App ⇄ Web (pedido Franco: poder abrir la línea Business) ─── */
+window.waHref = function (tel) {
+  var n = String(tel || '').replace(/[^0-9]/g, '');
+  return (localStorage.getItem('waMode') === 'web' ? 'https://web.whatsapp.com/send?phone=' : 'https://wa.me/') + n;
+};
+window.waToggle = function () {
+  var nuevo = localStorage.getItem('waMode') === 'web' ? 'app' : 'web';
+  localStorage.setItem('waMode', nuevo);
+  var b = document.getElementById('sys-wa-mode');
+  if (b) b.textContent = nuevo === 'web' ? 'WA: Web' : 'WA: App';
+  if (window.toast) toast(nuevo === 'web' ? 'Los botones 💬 abren WhatsApp WEB (logueá ahí tu línea Business)' : 'Los botones 💬 abren la APP de WhatsApp instalada', 'ok');
+};
+(function () {
+  var b = document.getElementById('sys-wa-mode');
+  if (b) b.textContent = localStorage.getItem('waMode') === 'web' ? 'WA: Web' : 'WA: App';
 })();
