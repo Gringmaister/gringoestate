@@ -1352,7 +1352,7 @@
               var col = [semComercial, semDoc, semMkt, semOp][i];
               return '<i title="' + escHtml(tt) + '" style="width:8px;height:8px;border-radius:50%;background:' + col + ';display:inline-block;"></i>';
             }).join('') + '</span>';
-          return '<div onclick="abrirFicha(\'' + p.id + '\')" style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer;" title="Click para abrir/editar la ficha">' +
+          return '<div onclick="abrirLegajo(\'' + p.id + '\')" style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer;" title="Click para abrir el LEGAJO 360">' +
             semaforos +
             '<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(p.propiedad) + '</div>' +
             (specs ? '<div style="font-size:.68rem;color:var(--muted);">' + escHtml(specs) + '</div>' : '') + '</div>' +
@@ -1583,6 +1583,86 @@
     else toast('Error al crear la tarea', 'err');
   }
   window.crearTareaContacto = crearTareaContacto;
+
+  /* ─── LEGAJO 360 de propiedad (P1 consultor) ─── */
+  async function abrirLegajo(id) {
+    var t = document.getElementById('lg-titulo'); if (t) t.textContent = '📂 Legajo';
+    var body = document.getElementById('lg-body');
+    if (body) body.innerHTML = '<div class="skeleton skeleton-block" style="height:120px;"></div>';
+    showModal('modal-legajo');
+    var d = await apiFetch('/crm/propiedad/' + id + '/legajo');
+    if (!d || d.__error || !d.ok) { if (body) body.innerHTML = '<span class="small muted">Error al cargar el legajo.</span>'; return; }
+    var p = d.propiedad, sem = d.semaforoDocumental || {};
+    if (t) t.textContent = '📂 ' + p.propiedad;
+    var semColor = /legal/.test(sem.nivel) ? 'var(--danger)' : /comercial|operativo/.test(sem.nivel) ? 'var(--warn)' : sem.nivel === 'Completo' ? 'var(--ok)' : 'var(--muted)';
+    var seccion = function (titulo, contenido) {
+      return '<div style="margin-bottom:14px;"><div style="font-size:.72rem;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);padding-bottom:3px;margin-bottom:7px;">' + titulo + '</div>' + contenido + '</div>';
+    };
+    var html = '';
+    // RESUMEN + próxima acción
+    var valor = p.valorVenta ? 'USD ' + Number(p.valorVenta).toLocaleString('es-AR') : p.valorAlquiler ? 'USD ' + Number(p.valorAlquiler).toLocaleString('es-AR') + '/mes' : (p.valorPedido || '—');
+    html += seccion('Resumen',
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
+        '<span class="badge badge-muted">' + escHtml(p.tipoPropiedad || '—') + '</span>' +
+        '<span class="badge badge-muted">' + escHtml(p.operacion || '—') + '</span>' +
+        '<span class="badge ' + (p.estado === 'Publicada' ? 'badge-ok' : 'badge-muted') + '">' + escHtml(p.estado || '—') + '</span>' +
+        '<span style="font-family:var(--mono);font-size:.82rem;color:var(--gold);">' + valor + '</span>' +
+        '<span style="font-family:var(--mono);font-size:.76rem;color:var(--muted);">' + (p.m2Totales || '—') + ' m² · ' + (p.ambientes || '—') + ' amb</span>' +
+        '<span style="margin-left:auto;"></span>' +
+        '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'modal-legajo\');abrirFicha(\'' + p.id + '\')">✏️ Editar ficha</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'modal-legajo\');abrirDocUpload(\'' + p.id + '\')">📎 Subir doc</button>' +
+      '</div>' +
+      (d.propietario ? '<div style="font-size:.8rem;">🏠 Propietario: <b>' + escHtml(d.propietario.nombre) + '</b>' + (d.propietario.telefono ? ' · <a href="https://wa.me/' + String(d.propietario.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener" style="color:var(--gold);">' + escHtml(d.propietario.telefono) + '</a>' : '') + '</div>' : '<div class="small muted">Sin propietario vinculado — vinculalo desde su contacto.</div>') +
+      '<div style="border:1px solid var(--gold);border-radius:10px;padding:8px 12px;margin-top:8px;font-size:.82rem;">▶ <b>Próxima acción:</b> ' + escHtml(d.proximaAccion || '—') + '</div>'
+    );
+    // DOCUMENTAL con semáforo real
+    var docsHtml = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span class="badge" style="border:1px solid ' + semColor + ';color:' + semColor + ';">' + escHtml(sem.nivel || '—') + '</span><span style="font-size:.74rem;color:var(--muted);">docs ' + (sem.pct || 0) + '%</span></div>';
+    (sem.bloqueos || []).forEach(function (b) { docsHtml += '<div style="font-size:.78rem;color:var(--warn);">⚠ [' + b.nivel + '] ' + escHtml(b.detalle) + '</div>'; });
+    if ((d.documentos || []).length) {
+      docsHtml += (d.documentos || []).map(function (doc) {
+        return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-top:1px solid rgba(255,255,255,0.05);font-size:.78rem;flex-wrap:wrap;">' +
+          '<span class="badge badge-muted">' + escHtml(doc.tipo || '—') + '</span>' +
+          '<span style="flex:1;min-width:120px;">' + (doc.driveLink ? '<a href="' + escHtml(doc.driveLink) + '" target="_blank" rel="noopener" style="color:var(--text);">' + escHtml(doc.documento) + ' ↗</a>' : escHtml(doc.documento)) + '</span>' +
+          '<span style="font-size:.68rem;color:var(--muted);">' + escHtml(doc.fuente || '') + ' · ' + escHtml(doc.estado || '') + '</span>' +
+        '</div>' +
+        (doc.redFlags ? '<div style="font-size:.74rem;color:var(--danger);padding-left:8px;">🚩 ' + escHtml(doc.redFlags) + '</div>' : '') +
+        (doc.datosExtraidos ? '<div style="font-size:.72rem;color:var(--muted);padding-left:8px;">' + escHtml(doc.datosExtraidos.slice(0, 220)) + '</div>' : '');
+      }).join('');
+    } else docsHtml += '<div class="small muted">Sin documentos en el legajo — subí el primero con 📎 (la escritura se analiza sola: titulares, gravámenes, red flags).</div>';
+    html += seccion('📥 Documental (' + (d.documentos || []).length + ')', docsHtml);
+    // TASACIONES
+    html += seccion('🧮 Tasaciones (' + (d.tasaciones || []).length + ')',
+      (d.tasaciones || []).length ? d.tasaciones.map(function (x) {
+        return '<div style="display:flex;gap:8px;align-items:center;padding:4px 0;font-size:.8rem;flex-wrap:wrap;">' +
+          '<span style="flex:1;">' + escHtml(x.tasacion) + '</span><span class="badge badge-muted">' + escHtml(x.estado || '') + '</span>' +
+          (x.precioCierre ? '<span style="font-family:var(--mono);color:var(--gold);">USD ' + Number(x.precioCierre).toLocaleString('es-AR') + '</span>' : '') +
+          (x.semaforo ? '<span style="font-size:.74rem;">' + escHtml(x.semaforo) + '</span>' : '') +
+          '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'modal-legajo\');crmTab(\'propiedades\');abrirTasacion(\'' + x.id + '\')">abrir</button>' +
+        '</div>';
+      }).join('') : '<div class="small muted">Sin tasaciones — creá una desde 🧮 Tasaciones.</div>');
+    // INTERESADOS
+    html += seccion('🛒 Interesados (' + (d.interesados || []).length + ')',
+      (d.interesados || []).length ? d.interesados.map(function (c) {
+        return '<div style="display:flex;gap:8px;align-items:center;padding:3px 0;font-size:.8rem;flex-wrap:wrap;">' +
+          '<span style="flex:1;">' + escHtml(c.nombre) + '</span><span class="badge badge-muted">' + escHtml(c.etapaDemanda || '—') + '</span>' +
+          (c.telefono ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="https://wa.me/' + String(c.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener">💬</a>' : '') +
+          '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'modal-legajo\');abrirContactoEdit(\'' + c.id + '\')">✏️</button>' +
+        '</div>';
+      }).join('') : '<div class="small muted">Sin interesados vinculados todavía.</div>');
+    // OPERACIONES
+    html += seccion('💼 Operaciones (' + (d.operaciones || []).length + ')',
+      (d.operaciones || []).length ? d.operaciones.map(function (o) {
+        return '<div style="display:flex;gap:8px;align-items:center;padding:3px 0;font-size:.8rem;"><span style="flex:1;">' + escHtml(o.operacion) + '</span><span class="badge badge-muted">' + escHtml(o.etapa || '') + '</span>' + (o.montoTotal ? '<span style="font-family:var(--mono);color:var(--gold);">USD ' + Number(o.montoTotal).toLocaleString('es-AR') + '</span>' : '') + '</div>';
+      }).join('') : '<div class="small muted">Sin operaciones — cuando haya oferta/reserva, nace acá.</div>');
+    // HISTORIAL
+    if ((d.historial || []).length) {
+      html += seccion('🕓 Historial', d.historial.map(function (h) {
+        return '<div style="font-size:.72rem;color:var(--muted);padding:2px 0;">' + escHtml((h.ts || '').slice(0, 16).replace('T', ' ')) + ' · <b>' + escHtml(h.accion) + '</b> (' + escHtml(h.fuente || '') + ')' + (h.detalle && h.detalle.tipoDoc ? ' — ' + escHtml(h.detalle.tipoDoc) : '') + '</div>';
+      }).join(''));
+    }
+    if (body) body.innerHTML = html;
+  }
+  window.abrirLegajo = abrirLegajo;
 
   /* ─── T1: Tasaciones por comparables ─── */
   async function loadTasaciones() {

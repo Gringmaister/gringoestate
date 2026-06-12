@@ -974,9 +974,9 @@
           <a class="btn btn-ghost btn-sm" href="https://www.notion.so/37b3ca3891cd81cf80b0dac28236aa5d" target="_blank" rel="noopener" style="text-decoration:none;">📚 Modelos & Checklists →</a>
         </div>
         <div class="small muted" style="line-height:1.6;">
-          El <b>% de docs de cada propiedad</b> se ve en su fila de arriba (semáforo 2 + barra) y el detalle en su ficha de Notion.
+          Cada propiedad tiene su <b>legajo</b> (click en la fila): documentos con análisis automático de escritura (titulares, gravámenes, red flags), semáforo documental con bloqueantes, tasaciones, interesados y operaciones.
           Flujo: <b>pedir → identificar faltantes → procesar (Drive) → contratos Baigún → seguimiento</b> + 4 facilitadores (informes/dominio · fotos+plano · cartel · marketing).
-          Los modelos de reserva/boleto/contrato se cargan arrastrando el docx en la página de Notion ↗.
+          Los modelos de reserva/boleto/contrato se cargan en el repositorio interno ↗.
         </div>
       </div>
       </div><!-- /ct-propiedades -->
@@ -1237,6 +1237,13 @@
         <button class="btn btn-gold" id="f-guardar" onclick="saveCrmFicha()">Guardar ficha</button>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modal-legajo">
+  <div class="modal" style="max-width:860px;width:96vw;max-height:90vh;overflow-y:auto;">
+    <h3 id="lg-titulo">Legajo</h3>
+    <div id="lg-body"><div class="skeleton skeleton-block" style="height:120px;"></div></div>
   </div>
 </div>
 
