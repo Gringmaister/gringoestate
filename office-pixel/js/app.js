@@ -2102,9 +2102,11 @@
           '<span style="font-size:.82rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(l.nombre) + '</span>' +
           '<span style="font-size:.68rem;color:var(--muted);font-family:var(--mono);text-align:right;">' + (l.mensajes || 0) + ' msgs</span>' +
           '<span style="display:inline-flex;gap:4px;">' +
-            '<button class="btn btn-gold btn-sm" title="Promover al CRM: lo crea como contacto TRABAJABLE en tu base de brokerage (queda en el embudo y en Los 250 si lo marcás)" onclick="clasificarLinea(\'' + l.id + '\',\'Promover\')">⭐ Promover</button>' +
-            '<button class="btn btn-ghost btn-sm" title="Es huésped de AMBBI (alquiler temporario) — no pertenece a este CRM" onclick="clasificarLinea(\'' + l.id + '\',\'AMBBI\')">🏨 AMBBI</button>' +
-            '<button class="btn btn-ghost btn-sm" title="Contacto personal (familia/amigos) — fuera del CRM comercial" onclick="clasificarLinea(\'' + l.id + '\',\'Personal\')">👤 Personal</button>' +
+            '<button class="btn btn-gold btn-sm" title="Promover al CRM: lo crea como contacto TRABAJABLE en tu base de brokerage" onclick="clasificarLinea(\'' + l.id + '\',\'Promover\')">⭐ Promover</button>' +
+            '<button class="btn btn-ghost btn-sm" title="Tu gente: staff, socios, colaboradores" onclick="clasificarLinea(\'' + l.id + '\',\'Equipo\')">👔 Equipo</button>' +
+            '<button class="btn btn-ghost btn-sm" title="Huésped AMBBI (temporario) — no pertenece a este CRM" onclick="clasificarLinea(\'' + l.id + '\',\'AMBBI\')">🏨</button>' +
+            '<button class="btn btn-ghost btn-sm" title="Personal (familia/amigos)" onclick="clasificarLinea(\'' + l.id + '\',\'Personal\')">👤</button>' +
+            '<button class="btn btn-ghost btn-sm" title="Proveedor (negocios/servicios)" onclick="clasificarLinea(\'' + l.id + '\',\'Proveedor\')">🏪</button>' +
             '<button class="btn btn-ghost btn-sm" title="No contactar nunca (bloqueado)" onclick="clasificarLinea(\'' + l.id + '\',\'No contactar\')">⛔</button>' +
             '<button class="btn btn-ghost btn-sm" title="Descartar: basura/spam, no sirve" onclick="clasificarLinea(\'' + l.id + '\',\'Descartado\')">🗑</button>' +
           '</span>' +
