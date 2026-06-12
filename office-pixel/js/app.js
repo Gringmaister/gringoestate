@@ -1608,7 +1608,7 @@
     var co = document.getElementById('ts-cochera');
     var d = await apiFetch('/crm/tasacion', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tasacion: v('ts-titulo'), direccion: v('ts-direccion'), barrio: v('ts-barrio'), tipoPropiedad: v('ts-tipo'), m2Cubiertos: Number(v('ts-m2cub')) || 0, m2Balcon: Number(v('ts-m2balcon')) || 0, m2Terraza: Number(v('ts-m2terraza')) || 0, cochera: !!(co && co.checked) })
+      body: JSON.stringify({ tasacion: v('ts-titulo'), direccion: v('ts-direccion'), barrio: v('ts-barrio'), tipoPropiedad: v('ts-tipo'), m2Cubiertos: Number(v('ts-m2cub')) || 0, m2Balcon: Number(v('ts-m2balcon')) || 0, m2Terraza: Number(v('ts-m2terraza')) || 0, m2Semicubiertos: Number(v('ts-m2semi')) || 0, m2Patio: Number(v('ts-m2patio')) || 0, precioPretendido: Number(v('ts-pretendido')) || undefined, piso: v('ts-piso') !== '' ? Number(v('ts-piso')) : undefined, pisosEdificio: Number(v('ts-pisosedif')) || undefined, antiguedad: Number(v('ts-antiguedad')) || undefined, orientacion: v('ts-orientacion') || undefined, disposicion: v('ts-disposicion') || undefined, cochera: !!(co && co.checked), operacion: 'Venta', objetivo: 'Captación' })
     });
     if (d && d.ok) { hideModal('modal-tasacion'); toast('Tasación creada — ' + d.m2Ponderados + ' m² ponderados. Ahora pegale comparables.', 'ok'); loadTasaciones(); abrirTasacion(d.id); }
     else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
@@ -1623,27 +1623,63 @@
     if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">Error al abrir.</span>'; return; }
     var t = d.tasacion, comps = d.comparables || [];
     var filas = comps.map(function (c) {
-      return '<tr style="border-top:1px solid rgba(255,255,255,0.06);' + (c.outlier ? 'opacity:.45;' : '') + '">' +
-        '<td style="padding:4px 6px;font-size:.76rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (c.link ? '<a href="' + escHtml(c.link) + '" target="_blank" rel="noopener" style="color:var(--text);">' + escHtml(c.comparable) + ' ↗</a>' : escHtml(c.comparable)) + '</td>' +
+      var excl = c.estadoAviso === 'Excluido' || c.outlier;
+      var est = c.estadoAviso === 'Excluido' ? '🚫' : c.outlier ? '⚠ outlier' : c.similar ? '✓' : '✕';
+      return '<tr style="border-top:1px solid rgba(255,255,255,0.06);' + (excl ? 'opacity:.45;' : '') + '">' +
+        '<td style="padding:4px 6px;font-size:.76rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + escHtml(c.motivoExclusion || c.notas || '') + '">' + (c.link ? '<a href="' + escHtml(c.link) + '" target="_blank" rel="noopener" style="color:var(--text);">' + escHtml(c.comparable) + ' ↗</a>' : escHtml(c.comparable)) + '</td>' +
         '<td style="padding:4px 6px;font-family:var(--mono);font-size:.74rem;text-align:right;">' + (c.precio ? c.precio.toLocaleString('es-AR') : '—') + '</td>' +
         '<td style="padding:4px 6px;font-family:var(--mono);font-size:.74rem;text-align:right;">' + (c.precioAjustado ? c.precioAjustado.toLocaleString('es-AR') : '—') + (c.cochera ? ' 🚗' : '') + '</td>' +
         '<td style="padding:4px 6px;font-family:var(--mono);font-size:.74rem;text-align:right;">' + (c.m2Pond || '—') + '</td>' +
         '<td style="padding:4px 6px;font-family:var(--mono);font-size:.78rem;text-align:right;color:var(--gold);">' + (c.usdM2 ? c.usdM2.toLocaleString('es-AR') : '—') + '</td>' +
-        '<td style="padding:4px 6px;font-size:.74rem;text-align:center;">' + (c.outlier ? '⚠ outlier' : c.similar ? '✓' : '✕') + '</td>' +
-        '<td style="padding:4px 6px;font-family:var(--mono);font-size:.7rem;text-align:right;">' + (c.expensas ? (c.expensas / 1000) + 'k' : '—') + '</td>' +
+        '<td style="padding:4px 6px;font-family:var(--mono);font-size:.7rem;text-align:right;">' + (c.diasPublicado != null ? c.diasPublicado + 'd' : '—') + '</td>' +
+        '<td style="padding:4px 6px;font-size:.74rem;text-align:center;">' + est + '</td>' +
+        '<td style="padding:4px 6px;text-align:center;"><button class="btn btn-ghost btn-sm" style="padding:0 6px;" title="' + (excl ? 'Re-incluir en el cálculo' : 'Excluir del cálculo') + '" onclick="toggleComparable(\'' + c.id + '\',\'' + (excl ? 'Incluido' : 'Excluido') + '\',\'' + t.id + '\')">' + (excl ? '↩' : '🚫') + '</button></td>' +
       '</tr>';
     }).join('');
+    var preciosHtml = '';
+    if (t.precioCierre) {
+      var px = function (lbl, val, hl) { return '<div style="border:1px solid ' + (hl ? 'var(--gold)' : 'var(--border)') + ';border-radius:10px;padding:7px 10px;min-width:130px;flex:1;"><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;">' + lbl + '</div><div style="font-family:var(--mono);font-size:.95rem;color:' + (hl ? 'var(--gold)' : 'var(--text)') + ';font-weight:700;">USD ' + Number(val).toLocaleString('es-AR') + '</div></div>'; };
+      preciosHtml = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
+        px('Cierre probable', t.precioCierre, true) + px('Publicación (+' + (t.margenPublicacion || 6) + '%)', t.precioPublicacion) +
+        px('Venta rápida', t.precioRapida) + px('Neto bolsillo', t.netoBolsillo) + '</div>' +
+        '<div style="font-size:.74rem;color:var(--muted);margin-bottom:10px;">' +
+          'Rango: ' + Number(t.rangoDesde || 0).toLocaleString('es-AR') + '–' + Number(t.rangoHasta || 0).toLocaleString('es-AR') +
+          ' · USD/m² ajustado: ' + (t.usdM2Zona || '—') + ' · Ajuste Magnin: ' + ((t.ajTotal > 0 ? '+' : '') + (t.ajTotal || 0)) + '%' +
+          ' · Confianza: <b>' + (t.confianza || '—') + '</b>' +
+          (t.semaforo ? ' · Captación: <b>' + escHtml(t.semaforo) + '</b>' : '') +
+          (t.priceGap != null ? ' · Price Gap: <b style="color:' + (t.priceGap > 15 ? 'var(--danger)' : t.priceGap > 5 ? 'var(--warn)' : 'var(--ok)') + ';">' + (t.priceGap > 0 ? '+' : '') + t.priceGap + '%</b>' : '') +
+        '</div>' +
+        (t.estrategia ? '<div style="font-size:.76rem;border-left:2px solid var(--gold);padding:4px 10px;margin-bottom:10px;color:var(--muted);">' + escHtml(t.estrategia) + '</div>' : '');
+    }
+    var diagHtml = '<details style="border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:10px;"' + (t.precioCierre ? '' : ' open') + '>' +
+      '<summary style="font-size:.78rem;color:var(--gold);cursor:pointer;">📋 Diagnóstico Magnin (scores 1-10 + ajustes) — completalo antes de calcular</summary>' +
+      '<div class="grid-2" style="margin-top:10px;">' +
+        '<input class="input" id="dg-ubicacion" type="number" min="1" max="10" placeholder="Score Ubicación 1-10" value="' + (t.scoreUbicacion || '') + '">' +
+        '<input class="input" id="dg-edificio" type="number" min="1" max="10" placeholder="Score Edificio 1-10" value="' + (t.scoreEdificio || '') + '">' +
+      '</div>' +
+      '<div class="grid-2" style="margin-top:6px;">' +
+        '<input class="input" id="dg-unidad" type="number" min="1" max="10" placeholder="Score Unidad 1-10" value="' + (t.scoreUnidad || '') + '">' +
+        '<input class="input" id="dg-estado" type="number" min="1" max="10" placeholder="Score Estado/mantenim. 1-10" value="' + (t.scoreEstado || '') + '">' +
+      '</div>' +
+      '<div class="grid-2" style="margin-top:6px;">' +
+        '<input class="input" id="dg-pretendido" type="number" placeholder="Precio pretendido USD" value="' + (t.precioPretendido || '') + '">' +
+        '<input class="input" id="dg-ajmanual" type="number" step="0.5" placeholder="Ajuste manual % (override, opcional)" value="' + (t.ajManual || '') + '">' +
+      '</div>' +
+      '<label style="display:flex;gap:8px;align-items:center;font-size:.76rem;color:var(--muted);margin-top:6px;cursor:pointer;"><input type="checkbox" id="dg-marca"' + (t.edificioMarca ? ' checked' : '') + '> ★ Edificio de marca (+hasta 30%)</label>' +
+      '<button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="guardarDiagnostico(\'' + t.id + '\')">💾 Guardar diagnóstico</button>' +
+    '</details>';
     el.innerHTML =
       '<div style="border:1px solid var(--border);border-radius:12px;padding:12px;">' +
         '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
           '<strong style="font-size:.9rem;">' + escHtml(t.tasacion) + '</strong>' +
           '<span class="badge badge-muted">' + escHtml(t.barrio || '') + '</span>' +
+          '<span class="badge badge-muted">' + escHtml(t.estado || '') + '</span>' +
           '<span style="font-family:var(--mono);font-size:.74rem;color:var(--muted);">' + (t.m2Pond || '—') + ' m² pond.' + (t.cochera ? ' + 🚗' : '') + '</span>' +
           '<span style="margin-left:auto;"></span>' +
           '<button class="btn btn-gold btn-sm" onclick="calcularTasacion(\'' + t.id + '\')">🧮 Calcular</button>' +
-          (t.tasacionUsd ? '<button class="btn btn-gold btn-sm" onclick="pdfTasacion(\'' + t.id + '\')">📄 PDF Baigún</button>' : '') +
+          (t.precioCierre ? '<button class="btn btn-gold btn-sm" onclick="pdfTasacion(\'' + t.id + '\')">📄 Carpeta Wow</button>' : '') +
         '</div>' +
-        (t.tasacionUsd ? '<div style="border:1px solid var(--ok);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.86rem;">💰 <b>TASACIÓN: USD ' + t.tasacionUsd.toLocaleString('es-AR') + '</b> <span style="color:var(--muted);font-size:.76rem;">(USD/m² zona: ' + (t.usdM2Zona || '—') + ' · rango ' + (t.rangoDesde || 0).toLocaleString('es-AR') + '–' + (t.rangoHasta || 0).toLocaleString('es-AR') + ')</span></div>' : '') +
+        preciosHtml + diagHtml +
         '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">' +
           '<input class="input" id="cmp-link" placeholder="Pegá un LINK de Zonaprop…" style="flex:2;min-width:200px;">' +
           '<button class="btn btn-gold btn-sm" onclick="agregarComparable(\'' + t.id + '\',\'link\')">+ por link</button>' +
@@ -1652,7 +1688,7 @@
           '<textarea class="input" id="cmp-texto" placeholder="…o pegá el TEXTO del aviso (compartir → copiar)" style="flex:2;min-width:200px;min-height:44px;"></textarea>' +
           '<button class="btn btn-ghost btn-sm" onclick="agregarComparable(\'' + t.id + '\',\'texto\')">+ por texto</button>' +
         '</div>' +
-        (comps.length ? '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="font-size:.66rem;color:var(--muted);text-transform:uppercase;"><th style="text-align:left;padding:4px 6px;">Comparable</th><th style="text-align:right;">Precio</th><th style="text-align:right;">Ajustado</th><th style="text-align:right;">m²</th><th style="text-align:right;">USD/m²</th><th>Similar</th><th style="text-align:right;">Exp.</th></tr></thead><tbody>' + filas + '</tbody></table></div>' : '<div class="small muted">Sin comparables todavía — pegá el primero ↑</div>') +
+        (comps.length ? '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="font-size:.66rem;color:var(--muted);text-transform:uppercase;"><th style="text-align:left;padding:4px 6px;">Comparable</th><th style="text-align:right;">Precio</th><th style="text-align:right;">Ajustado</th><th style="text-align:right;">m²</th><th style="text-align:right;">USD/m²</th><th style="text-align:right;">Días</th><th>Estado</th><th></th></tr></thead><tbody>' + filas + '</tbody></table></div>' : '<div class="small muted">Sin comparables todavía — pegá el primero ↑</div>') +
       '</div>';
   }
   window.abrirTasacion = abrirTasacion;
@@ -1687,6 +1723,25 @@
     } else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
   }
   window.calcularTasacion = calcularTasacion;
+
+  async function guardarDiagnostico(id) {
+    var v = function (eid) { var e = document.getElementById(eid); return e ? e.value.trim() : ''; };
+    var marca = document.getElementById('dg-marca');
+    var d = await apiFetch('/crm/tasacion/actualizar', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: id, scoreUbicacion: Number(v('dg-ubicacion')) || undefined, scoreEdificio: Number(v('dg-edificio')) || undefined, scoreUnidad: Number(v('dg-unidad')) || undefined, scoreEstado: Number(v('dg-estado')) || undefined, precioPretendido: Number(v('dg-pretendido')) || undefined, ajManual: v('dg-ajmanual') !== '' ? Number(v('dg-ajmanual')) : undefined, edificioMarca: !!(marca && marca.checked) })
+    });
+    if (d && d.ok) { toast('Diagnóstico guardado — recalculá para aplicar', 'ok'); }
+    else toast('Error: ' + ((d && d.error) || ''), 'err');
+  }
+  window.guardarDiagnostico = guardarDiagnostico;
+
+  async function toggleComparable(cid, estado, tasacionId) {
+    var d = await apiFetch('/crm/comparable/estado', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: cid, estado: estado, motivo: estado === 'Excluido' ? 'Excluido manualmente por el bróker' : '' }) });
+    if (d && d.ok) { toast(estado === 'Excluido' ? '🚫 Excluido del cálculo' : '↩ Re-incluido', 'ok'); abrirTasacion(tasacionId); }
+    else toast('Error', 'err');
+  }
+  window.toggleComparable = toggleComparable;
 
   async function pdfTasacion(id) {
     toast('Generando PDF brandeado… (~15s)', 'ok');

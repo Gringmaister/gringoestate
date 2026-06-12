@@ -1256,7 +1256,21 @@
       <div class="grid-3">
         <input class="input" id="ts-m2cub" type="number" placeholder="M² cubiertos">
         <input class="input" id="ts-m2balcon" type="number" placeholder="M² balcón corrido">
-        <input class="input" id="ts-m2terraza" type="number" placeholder="M² terraza (pondera 30%)">
+        <input class="input" id="ts-m2terraza" type="number" placeholder="M² terraza (30%)">
+      </div>
+      <div class="grid-3">
+        <input class="input" id="ts-m2semi" type="number" placeholder="M² semicubiertos (50%)">
+        <input class="input" id="ts-m2patio" type="number" placeholder="M² patio (30%)">
+        <input class="input" id="ts-pretendido" type="number" placeholder="Precio pretendido propietario USD">
+      </div>
+      <div class="grid-3">
+        <input class="input" id="ts-piso" type="number" placeholder="Piso">
+        <input class="input" id="ts-pisosedif" type="number" placeholder="Pisos del edificio">
+        <input class="input" id="ts-antiguedad" type="number" placeholder="Antigüedad (años)">
+      </div>
+      <div class="grid-2">
+        <select class="input" id="ts-orientacion"><option value="">Orientación —</option><option>Norte</option><option>Noreste</option><option>Este</option><option>Sudeste</option><option>Sur</option><option>Sudoeste</option><option>Oeste</option><option>Noroeste</option></select>
+        <select class="input" id="ts-disposicion"><option value="">Disposición —</option><option>Frente</option><option>Contrafrente</option><option>Lateral</option><option>Interno</option><option>Pulmón</option></select>
       </div>
       <div style="display:flex;gap:10px;justify-content:flex-end;">
         <button class="btn btn-ghost" onclick="hideModal('modal-tasacion')">Cancelar</button>
