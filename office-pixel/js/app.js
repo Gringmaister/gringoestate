@@ -1288,8 +1288,9 @@
         '<span>' + escHtml(e.etapa) + '</span>' +
         (e.cards && e.cards.length ? '<div class="crm-cards">' + e.cards.slice(0, 3).map(function (c) {
           var col = CRM_ETIQ_COLOR[c.etiqueta] || 'var(--muted)';
-          var click = c.id ? ' onclick="abrirContactoEdit(\'' + c.id + '\')" style="cursor:pointer;border-left-color:' + col + '"' : ' style="border-left-color:' + col + '"';
-          return '<div class="crm-card"' + click + ' title="Click para editar (etapas, NURC/PUFA)">' + escHtml(c.nombre) + '</div>';
+          var handler = c.onclick || (c.id ? 'abrirContactoEdit(\'' + c.id + '\')' : '');
+          var click = handler ? ' onclick="' + handler + '" style="cursor:pointer;border-left-color:' + col + '"' : ' style="border-left-color:' + col + '"';
+          return '<div class="crm-card"' + click + ' title="' + escHtml(c.title || 'Click para editar (etapas, NURC/PUFA)') + '">' + escHtml(c.nombre) + '</div>';
         }).join('') + (e.cards.length > 3 ? '<div class="small muted">+' + (e.cards.length - 3) + '</div>' : '') + '</div>' : '') +
       '</div>';
     }).join('') + '</div>';
@@ -1928,7 +1929,12 @@
     if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">No pude calcular matches.</span>'; return; }
     var cnt = document.getElementById('crm-match-count');
     if (cnt) cnt.textContent = d.count + ' matches';
-    el.innerHTML = (d.matches || []).length ? d.matches.slice(0, 10).map(function (m) {
+    // S43 (consultor #14): matches accionables — descartar persiste, contactado escribe al CRM
+    var desc = {}; try { desc = JSON.parse(localStorage.getItem('crmMatchDescartados') || '{}'); } catch (e2) {}
+    var matches = (d.matches || []).filter(function (m) { return !desc[(m.contactoId || m.contacto) + '|' + m.propiedad]; });
+    var nDesc = (d.matches || []).length - matches.length;
+    el.innerHTML = (matches.length ? matches.slice(0, 10).map(function (m, mi) {
+      var key = (m.contactoId || m.contacto) + '|' + m.propiedad;
       return '<div style="border:1px solid var(--border);border-radius:10px;padding:9px 12px;margin-bottom:7px;">' +
         '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
           '<strong style="font-size:.84rem;">' + escHtml(m.contacto) + '</strong>' +
@@ -1937,15 +1943,41 @@
           '<span style="margin-left:auto;font-family:var(--mono);font-size:.7rem;color:var(--gold);">' + m.score + '%</span>' +
         '</div>' +
         '<div style="font-size:.74rem;color:var(--muted);margin:3px 0 7px;">' + m.razones.map(escHtml).join(' · ') + ' · etapa: ' + escHtml(m.etapa || '—') + '</div>' +
+        '<textarea id="match-msg-' + mi + '" style="display:none;width:100%;min-height:64px;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;margin-bottom:6px;">' + escHtml(m.borrador) + '</textarea>' +
         '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
-          '<button class="btn btn-gold btn-sm" onclick="copiarBorrador(this)" data-msg="' + escHtml(m.borrador) + '">📋 Copiar mensaje</button>' +
+          '<button class="btn btn-gold btn-sm" onclick="copiarMatchMsg(' + mi + ')">📋 Copiar mensaje</button>' +
+          '<button class="btn btn-ghost btn-sm" title="Editar el borrador antes de copiarlo" onclick="var t=document.getElementById(\'match-msg-' + mi + '\');t.style.display=t.style.display===\'none\'?\'\':\'none\';">✏️ Editar</button>' +
           (m.telefono ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="https://wa.me/' + String(m.telefono).replace(/[^0-9]/g, '') + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') +
-          (m.contactoId ? '<button class="btn btn-ghost btn-sm" onclick="abrirContactoEdit(\'' + m.contactoId + '\')">✏️</button>' : '') +
+          (m.contactoId ? '<button class="btn btn-ghost btn-sm" title="Lo contactaste: actualiza última interacción + nota en el CRM" onclick="marcarMatchContactado(\'' + m.contactoId + '\',\'' + escHtml(m.propiedad).replace(/'/g, '') + '\')">✓ Contactado</button>' : '') +
+          '<button class="btn btn-ghost btn-sm" title="No va — ocultar este match" onclick="descartarMatch(\'' + key.replace(/'/g, '') + '\')">🚫</button>' +
         '</div>' +
       '</div>';
-    }).join('') : '<span class="small muted">Sin matches todavía — aparecen cuando una propiedad activa encaja con lo que busca un lead (operación + zona + presupuesto).</span>';
+    }).join('') : '<span class="small muted">Sin matches todavía — aparecen cuando una propiedad activa encaja con lo que busca un lead (operación + zona + presupuesto).</span>') +
+    (nDesc ? '<button class="btn btn-ghost btn-sm" style="margin-top:4px;" onclick="localStorage.removeItem(\'crmMatchDescartados\');loadCrmMatching()">↩ Mostrar ' + nDesc + ' descartado(s)</button>' : '');
   }
   window.loadCrmMatching = loadCrmMatching;
+
+  function copiarMatchMsg(mi) {
+    var t = document.getElementById('match-msg-' + mi);
+    if (!t) return;
+    navigator.clipboard.writeText(t.value).then(function () { toast('📋 Mensaje copiado — pegalo en WhatsApp', 'ok'); });
+  }
+  window.copiarMatchMsg = copiarMatchMsg;
+
+  function descartarMatch(key) {
+    var desc = {}; try { desc = JSON.parse(localStorage.getItem('crmMatchDescartados') || '{}'); } catch (e2) {}
+    desc[key] = true;
+    localStorage.setItem('crmMatchDescartados', JSON.stringify(desc));
+    loadCrmMatching();
+  }
+  window.descartarMatch = descartarMatch;
+
+  async function marcarMatchContactado(contactoId, propiedad) {
+    var d = await apiFetch('/crm/contacto/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: contactoId, tocado: true, nota: 'Contactado por match con ' + propiedad }) });
+    if (d && d.ok) toast('✓ Registrado en el CRM (última interacción + nota)', 'ok');
+    else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
+  }
+  window.marcarMatchContactado = marcarMatchContactado;
 
   /* ─── C3.2: Vista 360 — los 3 procesos en un pantallazo ─── */
   function renderVista360() {
@@ -2095,11 +2127,46 @@
     if (d.sinClasificar.top.length) {
       window.crmHigieneLista = d.sinClasificar.top;
       window.crmHigieneVisible = window.crmHigieneVisible || 20;
-      html += '<div style="font-size:.72rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Sin clasificar (top por mensajes) — ¿qué es cada uno?</div>';
-      html += '<div style="max-width:760px;">';
-      html += d.sinClasificar.top.slice(0, window.crmHigieneVisible).map(function (l) {
-        return '<div style="display:grid;grid-template-columns:minmax(150px,1fr) 70px auto;align-items:center;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);">' +
-          '<span style="font-size:.82rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(l.nombre) + '</span>' +
+      window.crmHigSel = window.crmHigSel || {};
+      window.crmHigFiltro = window.crmHigFiltro || 'todos';
+      // P5 consultor (S43): filtros + lote + modo teclado — 371 uno-por-uno era inviable
+      var lista = d.sinClasificar.top.filter(function (l) {
+        if (window.crmHigFiltro === 'telefono') return !!l.telefono;
+        if (window.crmHigFiltro === 'activos') return (l.mensajes || 0) >= 20;
+        if (window.crmHigFiltro === 'basura') return !l.telefono || /^\d+$/.test((l.nombre || '').trim()) || (l.mensajes || 0) <= 1;
+        return true;
+      });
+      window.crmHigListaFiltrada = lista;
+      var nSel = Object.keys(window.crmHigSel).length;
+      var chip = function (key, label) {
+        var on = window.crmHigFiltro === key;
+        return '<button class="btn btn-sm ' + (on ? 'btn-gold' : 'btn-ghost') + '" onclick="window.crmHigFiltro=\'' + key + '\';window.crmHigFocus=0;loadCrmHigiene()">' + label + '</button>';
+      };
+      html += '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">' +
+        chip('todos', 'Todos') + chip('activos', '🔥 ≥20 msgs') + chip('telefono', '📞 Con tel.') + chip('basura', '🧹 Probable basura') +
+        '<button class="btn btn-sm ' + (window.crmHigKb ? 'btn-gold' : 'btn-ghost') + '" style="margin-left:auto;" title="Clasificá con el teclado: ↑↓ moverse · P promover · E equipo · A ambbi · X personal · V proveedor · N no contactar · D descartar · S saltar" onclick="window.crmHigKb=!window.crmHigKb;window.crmHigFocus=0;loadCrmHigiene()">⌨️ Modo rápido</button>' +
+      '</div>';
+      if (window.crmHigKb) {
+        html += '<div style="font-size:.68rem;color:var(--gold);margin-bottom:6px;font-family:var(--mono);">↑↓ moverse · P promover · E equipo · A ambbi · X personal · V proveedor · N no contactar · D descartar · S saltar</div>';
+      }
+      if (nSel) {
+        html += '<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;border:1px solid var(--gold);border-radius:10px;padding:6px 10px;margin-bottom:8px;background:rgba(212,175,55,0.06);">' +
+          '<strong style="font-size:.76rem;">' + nSel + ' seleccionados →</strong>' +
+          ['Equipo|👔', 'AMBBI|🏨', 'Personal|👤', 'Proveedor|🏪', 'No contactar|⛔', 'Descartado|🗑'].map(function (par) {
+            var p2 = par.split('|');
+            return '<button class="btn btn-ghost btn-sm" onclick="clasificarLote(\'' + p2[0] + '\')">' + p2[1] + ' ' + p2[0] + '</button>';
+          }).join('') +
+          '<button class="btn btn-ghost btn-sm" onclick="window.crmHigSel={};loadCrmHigiene()">✕ limpiar</button>' +
+        '</div>';
+      }
+      html += '<div style="font-size:.72rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Sin clasificar (' + lista.length + (window.crmHigFiltro !== 'todos' ? ' con este filtro' : '') + ') — tildá varios para clasificar en lote</div>';
+      html += '<div style="max-width:820px;">';
+      html += lista.slice(0, window.crmHigieneVisible).map(function (l, idx) {
+        var foco = window.crmHigKb && (window.crmHigFocus || 0) === idx;
+        var sel = !!window.crmHigSel[l.id];
+        return '<div data-hig-idx="' + idx + '" style="display:grid;grid-template-columns:24px minmax(140px,1fr) 70px auto;align-items:center;gap:8px;padding:4px 6px;border-bottom:1px solid rgba(255,255,255,0.05);' + (foco ? 'background:rgba(212,175,55,0.12);border-radius:8px;' : '') + '">' +
+          '<input type="checkbox"' + (sel ? ' checked' : '') + ' onchange="toggleHigSel(\'' + l.id + '\',this.checked)" aria-label="Seleccionar">' +
+          '<span style="font-size:.82rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(l.nombre) + (l.telefono ? '' : ' <span style="color:var(--muted);font-weight:400;font-size:.66rem;">(sin tel.)</span>') + '</span>' +
           '<span style="font-size:.68rem;color:var(--muted);font-family:var(--mono);text-align:right;">' + (l.mensajes || 0) + ' msgs</span>' +
           '<span style="display:inline-flex;gap:4px;">' +
             '<button class="btn btn-gold btn-sm" title="Promover al CRM: lo crea como contacto TRABAJABLE en tu base de brokerage" onclick="clasificarLinea(\'' + l.id + '\',\'Promover\')">⭐ Promover</button>' +
@@ -2113,8 +2180,8 @@
         '</div>';
       }).join('');
       html += '</div>';
-      if (d.sinClasificar.top.length > window.crmHigieneVisible) {
-        html += '<button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="window.crmHigieneVisible+=20;loadCrmHigiene()">▾ Mostrar 20 más (' + (d.sinClasificar.count - window.crmHigieneVisible) + ' restantes)</button>';
+      if (lista.length > window.crmHigieneVisible) {
+        html += '<button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="window.crmHigieneVisible+=20;loadCrmHigiene()">▾ Mostrar 20 más (' + (lista.length - window.crmHigieneVisible) + ' restantes)</button>';
       }
     } else html += '<div class="small muted">✅ Todo clasificado.</div>';
     if ((d.duplicados || []).length) {
@@ -2134,11 +2201,47 @@
   window.loadCrmHigiene = loadCrmHigiene;
 
   async function clasificarLinea(id, clasificacion) {
+    delete (window.crmHigSel || {})[id];
     var d = await apiFetch('/crm/clasificar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, clasificacion: clasificacion }) });
     if (d && d.ok) { toast(clasificacion === 'Promover' ? '⭐ Promovido al CRM' : 'Clasificado: ' + clasificacion, 'ok'); loadCrmHigiene(); }
     else toast('Error al clasificar', 'err');
   }
   window.clasificarLinea = clasificarLinea;
+
+  /* P5 consultor (S43): selección + lote + teclado */
+  function toggleHigSel(id, on) {
+    window.crmHigSel = window.crmHigSel || {};
+    if (on) window.crmHigSel[id] = true; else delete window.crmHigSel[id];
+    loadCrmHigiene();
+  }
+  window.toggleHigSel = toggleHigSel;
+
+  async function clasificarLote(clasificacion) {
+    var ids = Object.keys(window.crmHigSel || {});
+    if (!ids.length) return;
+    toast('Clasificando ' + ids.length + ' como ' + clasificacion + '…', 'ok');
+    var d = await apiFetch('/crm/clasificar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: ids, clasificacion: clasificacion }) });
+    if (d && d.ok) { toast('✅ ' + (d.aplicados || ids.length) + ' clasificados como ' + clasificacion, 'ok'); window.crmHigSel = {}; loadCrmHigiene(); }
+    else toast('Error en el lote: ' + ((d && d.error) || 'sin conexión'), 'err');
+  }
+  window.clasificarLote = clasificarLote;
+
+  // Modo teclado: actúa sobre la fila resaltada cuando ⌨️ está activo (y no estás tipeando)
+  document.addEventListener('keydown', function (e) {
+    if (!window.crmHigKb) return;
+    var tag = (e.target && e.target.tagName || '').toLowerCase();
+    if (['input', 'textarea', 'select'].indexOf(tag) >= 0) return;
+    var lista = window.crmHigListaFiltrada || [];
+    if (!lista.length) return;
+    var max = Math.min(lista.length, window.crmHigieneVisible || 20) - 1;
+    var idx = Math.min(window.crmHigFocus || 0, max);
+    var KEYS = { p: 'Promover', e: 'Equipo', a: 'AMBBI', x: 'Personal', v: 'Proveedor', n: 'No contactar', d: 'Descartado' };
+    var k = e.key.toLowerCase();
+    if (e.key === 'ArrowDown') { e.preventDefault(); window.crmHigFocus = Math.min(idx + 1, max); loadCrmHigiene(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); window.crmHigFocus = Math.max(idx - 1, 0); loadCrmHigiene(); }
+    else if (k === 's') { e.preventDefault(); window.crmHigFocus = Math.min(idx + 1, max); loadCrmHigiene(); }
+    else if (KEYS[k]) { e.preventDefault(); var item = lista[idx]; if (item) { window.crmHigFocus = idx; clasificarLinea(item.id, KEYS[k]); } }
+  });
 
   /* Editor de contacto (NURC/PUFA/etapas) */
   var crmContactosCache = null;
@@ -2300,7 +2403,7 @@
     el.innerHTML = (opsEmpty
       ? '<div style="border:1px dashed var(--border);border-radius:12px;padding:18px;text-align:center;margin-bottom:12px;"><div style="font-size:.82rem;color:var(--muted);margin-bottom:10px;">Sin operaciones activas. Cuando haya una oferta o reserva en la mesa, cargala acá (o aprobá la sugerencia de Hermes desde el Inbox).</div><button class="btn btn-gold btn-sm" onclick="showModal(\'modal-operacion\')">+ Primera operación</button></div>'
       : '') + crmFunnelHtml((d.etapas || []).map(function (e) {
-      return { etapa: e.etapa, count: e.count, cards: (e.items || []).map(function (i) { return { nombre: i.operacion + (i.montoTotal ? ' · $' + Number(i.montoTotal).toLocaleString('es-AR') : '') }; }) };
+      return { etapa: e.etapa, count: e.count, cards: (e.items || []).map(function (i) { return { nombre: i.operacion + (i.montoTotal ? ' · $' + Number(i.montoTotal).toLocaleString('es-AR') : ''), onclick: 'abrirOperacion(\'' + i.id + '\')', title: 'Abrir flujo guiado de la operación' }; }) };
     }));
     var al = document.getElementById('crm-ops-alertas');
     if (al) {
@@ -2333,6 +2436,120 @@
     else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
   }
   window.createCrmOperacion = createCrmOperacion;
+
+  /* ─── P4 consultor (S43): OPERACIÓN GUIADA — checklist por tipo, no formulario genérico ─── */
+  function ensureOpModal() {
+    if (document.getElementById('modal-op-detalle')) return;
+    var div = document.createElement('div');
+    div.innerHTML = '<div class="modal-overlay hidden" id="modal-op-detalle"><div class="modal" style="max-width:560px;">' +
+      '<h3 id="opd-titulo" style="margin:0 18px 0 0;font-size:.95rem;">Operación</h3>' +
+      '<div id="opd-body" style="margin-top:10px;max-height:70vh;overflow-y:auto;"></div>' +
+      '</div></div>';
+    document.body.appendChild(div.firstChild);
+    initModalUX(); // suma la ✕ + click-afuera + Esc (mismo wiring que los demás modales)
+  }
+
+  window.crmOpDetalle = null; // operación abierta + estado de checklist en edición
+
+  async function abrirOperacion(id) {
+    if (!window.crmOpsCache) { var d0 = await apiFetch('/crm/operaciones'); if (d0 && d0.ok) window.crmOpsCache = d0; }
+    var d = window.crmOpsCache || {};
+    var op = ((d.items) || []).filter(function (o) { return o.id === id; })[0];
+    if (!op) return toast('No encontré la operación', 'err');
+    ensureOpModal();
+    window.crmOpDetalle = { op: op, checklist: Object.assign({}, op.checklist || {}) };
+    renderOpDetalle();
+    showModal('modal-op-detalle');
+  }
+  window.abrirOperacion = abrirOperacion;
+
+  function renderOpDetalle() {
+    var st = window.crmOpDetalle; if (!st) return;
+    var op = st.op;
+    var d = window.crmOpsCache || {};
+    var t = document.getElementById('opd-titulo');
+    if (t) t.textContent = '💼 ' + op.operacion;
+    var tipo = op.tipo === 'Venta' || op.tipo === 'Alquiler' ? op.tipo : null;
+    var tpl = tipo ? ((d.checklists || {})[tipo] || []) : [];
+    var hechos = tpl.filter(function (i) { return st.checklist[i.k]; }).length;
+    var proximo = tpl.filter(function (i) { return !st.checklist[i.k]; })[0];
+    var html = '';
+    // tipo (si falta, elegirlo activa la guía)
+    html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">' +
+      '<span style="font-size:.72rem;color:var(--muted);">Tipo:</span>' +
+      ['Venta', 'Alquiler'].map(function (tp) {
+        var on = op.tipo === tp;
+        return '<button class="btn btn-sm ' + (on ? 'btn-gold' : 'btn-ghost') + '" onclick="setOpTipo(\'' + tp + '\')">' + tp + '</button>';
+      }).join('') +
+      '<span style="margin-left:auto;font-size:.72rem;color:var(--muted);">Etapa:</span>' +
+      '<select id="opd-etapa" style="font-size:.74rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:3px 6px;">' +
+      ((d.etapas || []).map(function (e) { return e.etapa; })).map(function (e) { return '<option' + (op.etapa === e ? ' selected' : '') + '>' + e + '</option>'; }).join('') +
+      '</select></div>';
+    if (!tipo) {
+      html += '<div style="border:1px dashed var(--border);border-radius:10px;padding:12px;font-size:.78rem;color:var(--muted);">Elegí <b>Venta</b> o <b>Alquiler</b> y aparece el flujo guiado con su checklist (informes, escribanía, garantías…).</div>';
+    } else {
+      // próxima acción ENORME (mismo patrón que el legajo)
+      if (proximo) {
+        html += '<div style="border:1px solid var(--gold);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:rgba(212,175,55,0.06);">' +
+          '<div style="font-size:.66rem;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">▶ Próximo paso (' + hechos + '/' + tpl.length + ')</div>' +
+          '<div style="font-size:.86rem;font-weight:700;">' + escHtml(proximo.label) + '</div></div>';
+      } else if (tpl.length) {
+        html += '<div style="border:1px solid var(--ok);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:.82rem;">✅ Checklist completo — si cobraste, pasala a <b>Cerrada</b> (y cargá el cierre como comparable 💎)</div>';
+      }
+      html += '<div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Checklist ' + tipo + '</div>';
+      html += tpl.map(function (i) {
+        var on = !!st.checklist[i.k];
+        return '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;font-size:.8rem;' + (on ? 'color:var(--muted);' : '') + '">' +
+          '<input type="checkbox"' + (on ? ' checked' : '') + ' onchange="toggleOpItem(\'' + i.k + '\',this.checked)">' +
+          '<span style="' + (on ? 'text-decoration:line-through;' : '') + '">' + escHtml(i.label) + '</span></label>';
+      }).join('');
+    }
+    // montos + bloqueo
+    var num = function (id2, ph, val) { return '<input id="' + id2 + '" type="number" placeholder="' + ph + '" value="' + (val == null ? '' : val) + '" style="width:110px;font-size:.74rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px 6px;">'; };
+    html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">' +
+      num('opd-monto', 'Monto USD', op.montoTotal) + num('opd-reserva', 'Reserva', op.reserva) + num('opd-refuerzo', 'Refuerzo', op.refuerzo) +
+      num('opd-honesp', 'Honor. esp.', op.honorariosEsperados) + num('opd-honcob', 'Honor. cobrados', op.honorariosCobrados) +
+      '<input id="opd-firma" type="date" value="' + (op.fechaFirma || '') + '" style="font-size:.74rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px 6px;">' +
+      '</div>' +
+      '<input id="opd-bloqueo" placeholder="🔴 ¿Trabada? Escribí el bloqueo (queda en alertas)" value="' + escHtml(op.bloqueo || '') + '" style="width:100%;margin-top:8px;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' +
+      '<div style="display:flex;gap:8px;margin-top:12px;">' +
+        '<button class="btn btn-gold btn-sm" onclick="saveOpDetalle()">💾 Guardar</button>' +
+        '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + (op.url || '#') + '" target="_blank" rel="noopener">↗ Abrir ficha</a>' +
+      '</div>';
+    var body = document.getElementById('opd-body');
+    if (body) body.innerHTML = html;
+  }
+
+  function setOpTipo(tp) { if (window.crmOpDetalle) { window.crmOpDetalle.op.tipo = tp; renderOpDetalle(); } }
+  window.setOpTipo = setOpTipo;
+  function toggleOpItem(k, on) {
+    var st = window.crmOpDetalle; if (!st) return;
+    if (on) st.checklist[k] = true; else delete st.checklist[k];
+    renderOpDetalle();
+  }
+  window.toggleOpItem = toggleOpItem;
+
+  async function saveOpDetalle() {
+    var st = window.crmOpDetalle; if (!st) return;
+    var v = function (id2) { var e = document.getElementById(id2); return e ? e.value.trim() : ''; };
+    var d = window.crmOpsCache || {};
+    var tipo = st.op.tipo;
+    var tpl = ((d.checklists || {})[tipo] || []);
+    var proximo = tpl.filter(function (i) { return !st.checklist[i.k]; })[0];
+    var body = {
+      id: st.op.id, etapa: v('opd-etapa') || undefined, tipo: tipo || undefined,
+      checklist: st.checklist,
+      bloqueo: v('opd-bloqueo'),
+      proximoPaso: proximo ? proximo.label : (tpl.length ? 'Checklist completo — cerrar' : ''),
+      montoTotal: v('opd-monto') || undefined, reserva: v('opd-reserva') || undefined, refuerzo: v('opd-refuerzo') || undefined,
+      honorariosEsperados: v('opd-honesp') || undefined, honorariosCobrados: v('opd-honcob') || undefined,
+      fechaFirma: v('opd-firma') || undefined
+    };
+    var r = await apiFetch('/crm/operacion/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (r && r.ok) { hideModal('modal-op-detalle'); toast('Operación actualizada — próximo paso: ' + (body.proximoPaso || '—'), 'ok'); window.crmOpsCache = null; loadCrmOperaciones(); }
+    else toast('Error: ' + ((r && r.error) || 'sin conexión'), 'err');
+  }
+  window.saveOpDetalle = saveOpDetalle;
 
   /* ─── HUE ────────────────────────────────────────────────────────── */
   async function loadHue() {
