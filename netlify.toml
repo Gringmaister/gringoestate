@@ -60,3 +60,16 @@
   for = "/office-pixel/css/*"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+
+# S52.2 — CAUSA RAÍZ del "no carga la versión nueva": el HTML mismo se cacheaba y seguía
+# apuntando al ?v= viejo, así que el browser nunca veía el JS nuevo aunque revalidara js/*.
+# Con no-cache en el HTML, el index SIEMPRE se revalida → el ?v= nuevo llega sin hard-refresh.
+[[headers]]
+  for = "/office-pixel/"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/office-pixel/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"

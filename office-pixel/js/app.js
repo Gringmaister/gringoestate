@@ -1444,6 +1444,8 @@
       loadCrmMatching();
       loadTasaciones();
       loadDocInbox();
+      // S52.2: precargar el badge de Auditoría de cargas (que el contador se vea sin abrir la solapa)
+      apiFetch('/crm/docs-auditoria').then(function (a) { var e = document.getElementById('crm-audit-count'); if (e && a && a.ok) e.textContent = a.count || 0; }).catch(function () {});
     } catch (e) {}
   }
   window.loadCrm = loadCrm;
