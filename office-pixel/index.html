@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/pixel.css?v=s51" />
+  <link rel="stylesheet" href="css/pixel.css?v=s52" />
 </head>
 <body>
 
@@ -992,6 +992,15 @@
         <div id="crm-tasacion-detalle" style="margin-top:12px;"></div>
       </div>
 
+      <!-- S52: DOC INBOX — documentos capturados de WhatsApp (cuarentena) -->
+      <div class="card" style="margin-bottom:14px;border-color:rgba(126,200,227,0.3);" role="region" aria-label="Doc Inbox">
+        <div class="card-head">
+          <div><h2 class="card-title" style="color:var(--metro);">📥 Doc Inbox</h2><div class="card-sub">documentos que llegan por WhatsApp · Hermes captura y organiza, vos validás</div></div>
+          <span style="display:inline-flex;gap:6px;align-items:center;"><button class="btn btn-ghost btn-sm" onclick="loadDocInbox()" title="Refrescar">↻</button><span class="badge badge-muted" id="doc-inbox-count">—</span></span>
+        </div>
+        <div id="doc-inbox"><div class="skeleton skeleton-block" style="height:60px;"></div></div>
+      </div>
+
       <!-- DOCUMENTAL -->
       <div class="card" role="region" aria-label="Módulo documental">
         <div class="card-head">
@@ -1580,7 +1589,7 @@
 <!-- Scripts -->
 <!-- S45: ?v= cache-buster — subir la versión en cada deploy con cambios de JS/CSS
      (el HTML revalida siempre en Netlify; el query nuevo fuerza al browser a bajar el asset fresco) -->
-<script src="js/api.js?v=s51"></script>
-<script src="js/app.js?v=s51"></script>
+<script src="js/api.js?v=s52"></script>
+<script src="js/app.js?v=s52"></script>
 </body>
 </html>

@@ -1443,6 +1443,7 @@
       loadPlanSemanal();
       loadCrmMatching();
       loadTasaciones();
+      loadDocInbox();
     } catch (e) {}
   }
   window.loadCrm = loadCrm;
@@ -4009,3 +4010,71 @@ window.tasacionAplicarFicha = function (d) {
   // restaurar estado del dock al cargar
   try { if (localStorage.getItem('hermesDockState') === 'open') { setTimeout(function () { if (inCrm()) hermesDockOpen(); }, 1200); } } catch (e) {}
 })();
+
+/* ════════════ S52: DOC INBOX — bandeja de documentos capturados de WhatsApp ════════════ */
+window.loadDocInbox = async function () {
+  var el = document.getElementById('doc-inbox');
+  if (!el) return;
+  var d = await apiFetch('/crm/doc-inbox');
+  if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">No pude leer el Doc Inbox.</span>'; return; }
+  var cnt = document.getElementById('doc-inbox-count');
+  if (cnt) cnt.textContent = (d.count || 0) + ' en bandeja';
+  // cache de propiedades para los dropdowns de asignación
+  window.docInboxProps = ((window.crmPipelineCache || {}).propiedades || {}).items || [];
+  var html = '';
+  var pend = d.pendientesRevision || [], sin = d.sinClasificar || [];
+  if (pend.length) {
+    html += '<div style="font-size:.7rem;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Pendientes de revisión (' + pend.length + ') — Hermes ya los asoció, validá vos</div>';
+    html += pend.map(function (x) {
+      return '<div style="border:1px solid ' + (x.redFlags ? 'var(--danger)' : 'rgba(255,255,255,0.08)') + ';border-radius:10px;padding:8px 11px;margin-bottom:7px;background:rgba(255,255,255,0.015);">' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+          '<strong style="font-size:.82rem;">' + escHtml(x.filename) + '</strong>' +
+          (x.tipo ? '<span class="badge badge-muted">' + escHtml(x.tipo) + '</span>' : '') +
+          '<span class="badge badge-metro">→ ' + escHtml(x.propiedad || '—') + '</span>' +
+          (x.confianza ? '<span style="font-size:.66rem;color:var(--muted);">conf. ' + escHtml(x.confianza) + '</span>' : '') +
+          (x.driveLink ? '<a href="' + escHtml(x.driveLink) + '" target="_blank" rel="noopener" style="color:var(--muted);font-size:.72rem;">↗ Drive</a>' : '') +
+        '</div>' +
+        (x.redFlags ? '<div style="font-size:.7rem;color:var(--danger);margin-top:4px;">⚠️ ' + escHtml(x.redFlags) + '</div>' : '') +
+        '<div class="btn-row" style="margin-top:6px;">' +
+          '<button class="btn btn-gold btn-sm" onclick="docInboxValidar(\'' + x.id + '\')" title="Confirmá que el documento está OK (lo tilda en verde en el legajo)">✓ Validar</button>' +
+          (x.propiedadId ? '<button class="btn btn-ghost btn-sm" onclick="abrirLegajo(\'' + x.propiedadId + '\')">📂 Legajo</button>' : '') +
+          '<button class="btn btn-ghost btn-sm" onclick="docInboxDescartar(\'' + x.id + '\')">🗑 Descartar</button>' +
+        '</div></div>';
+    }).join('');
+  }
+  if (sin.length) {
+    html += '<div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:10px 0 6px;">Sin clasificar (' + sin.length + ') — asignalos a una propiedad</div>';
+    html += sin.map(function (x) {
+      var opts = '<option value="">— elegir propiedad —</option>' + (window.docInboxProps || []).map(function (p) { return '<option value="' + p.id + '">' + escHtml(p.propiedad) + '</option>'; }).join('');
+      return '<div style="border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:8px 11px;margin-bottom:7px;">' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+          '<strong style="font-size:.82rem;">' + escHtml(x.filename) + '</strong>' +
+          (x.tipo ? '<span class="badge badge-muted">' + escHtml(x.tipo) + '</span>' : '') +
+          (x.remitente ? '<span style="font-size:.68rem;color:var(--muted);">de ' + escHtml(x.remitente) + '</span>' : '') +
+          (x.driveLink ? '<a href="' + escHtml(x.driveLink) + '" target="_blank" rel="noopener" style="color:var(--muted);font-size:.72rem;">↗ Drive</a>' : '') +
+        '</div>' +
+        '<div class="btn-row" style="margin-top:6px;">' +
+          '<select class="input" id="di-prop-' + x.id + '" style="width:auto;font-size:.74rem;padding:3px 8px;">' + opts + '</select>' +
+          '<button class="btn btn-gold btn-sm" onclick="docInboxAsignar(\'' + x.id + '\')">Asignar</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="docInboxDescartar(\'' + x.id + '\')">🗑</button>' +
+        '</div></div>';
+    }).join('');
+  }
+  el.innerHTML = html || '<div class="small muted">Bandeja vacía. Los documentos que te lleguen por WhatsApp aparecen acá automáticamente.</div>';
+};
+
+window.docInboxValidar = async function (id) {
+  var d = await apiFetch('/crm/doc-inbox/validar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+  if (d && d.ok) { toast('✓ Validado — tildado en el legajo', 'ok'); loadDocInbox(); } else toast('Error al validar', 'err');
+};
+window.docInboxAsignar = async function (id) {
+  var sel = document.getElementById('di-prop-' + id);
+  var propiedadId = sel ? sel.value : '';
+  if (!propiedadId) return toast('Elegí una propiedad', 'err');
+  var d = await apiFetch('/crm/doc-inbox/asignar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, propiedadId: propiedadId }) });
+  if (d && d.ok) { toast('Asignado — pendiente de revisión', 'ok'); loadDocInbox(); } else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
+};
+window.docInboxDescartar = async function (id) {
+  var d = await apiFetch('/crm/doc-inbox/descartar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+  if (d && d.ok) { toast('Descartado', 'ok'); loadDocInbox(); } else toast('Error al descartar', 'err');
+};
