@@ -1463,6 +1463,18 @@
   }
   window.loadCrmSeguimientos = loadCrmSeguimientos;
 
+  // S51 F2: sub-modos de Contactos — relacional (Los 250 + Seguimientos) vs refinamiento WhatsApp
+  window.contactosModo = function (modo) {
+    var rel = document.getElementById('cblock-relacional'), ref = document.getElementById('cblock-refinar');
+    var bRel = document.getElementById('cmode-relacional'), bRef = document.getElementById('cmode-refinar');
+    var esRef = modo === 'refinar';
+    if (rel) rel.style.display = esRef ? 'none' : '';
+    if (ref) ref.style.display = esRef ? '' : 'none';
+    if (bRel) { bRel.classList.toggle('btn-gold', !esRef); bRel.classList.toggle('btn-ghost', esRef); }
+    if (bRef) { bRef.classList.toggle('btn-gold', esRef); bRef.classList.toggle('btn-ghost', !esRef); }
+    if (esRef && window.loadCrmHigiene) loadCrmHigiene();
+  };
+
   /* ─── FICHA DE PROPIEDAD (create + edit desde la web) ─── */
   var crmFichaCache = {}; // id → ficha completa (del pipeline)
   var FICHA_FIELDS = [
@@ -1623,32 +1635,37 @@
       }
     }
     var hh = await apiFetch('/crm/hablar-hoy');
-    var el = document.getElementById('crm-hablar-hoy');
-    if (el) {
-      var recs = (hh && hh.ok && hh.recomendados) || [];
-      window.crmRecsCache = {};
-      recs.forEach(function (r) { window.crmRecsCache[r.id] = r; });
-      el.innerHTML = recs.length ? recs.map(function (r) {
-        return '<div style="border:1px solid var(--border);border-radius:10px;padding:9px 12px;margin-bottom:7px;background:rgba(255,255,255,0.02);">' +
-          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
-            '<strong style="font-size:.86rem;">' + escHtml(r.nombre) + '</strong>' +
-            (r.etiqueta ? '<span class="badge badge-gold">' + r.etiqueta + '</span>' : '') +
-            '<span class="badge badge-muted">' + escHtml(r.tipo || '—') + '</span>' +
-            '<span style="margin-left:auto;font-family:var(--mono);font-size:.7rem;color:var(--gold);">score ' + r.score + '</span>' +
-          '</div>' +
-          '<div style="font-size:.76rem;color:var(--muted);margin:4px 0 7px;"><b style="color:var(--text);">Motivo:</b> ' + r.motivos.map(escHtml).join(' · ') + (r.busca ? ' · busca: ' + escHtml(r.busca) : '') + '</div>' +
-          '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
-            (r.telefono ? '<a class="btn btn-gold btn-sm" style="text-decoration:none;" href="' + waHref(r.telefono) + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') +
-            '<button class="btn btn-ghost btn-sm" onclick="marcarContactado(\'' + r.id + '\')">✓ Contactado</button>' +
-            '<button class="btn btn-ghost btn-sm" onclick="crearTareaContacto(\'' + r.id + '\')">📋 Crear tarea</button>' +
-            '<button class="btn btn-ghost btn-sm" onclick="posponerContacto(\'' + r.id + '\')">⏰ Posponer 3d</button>' +
-            '<button class="btn btn-ghost btn-sm" onclick="abrirContactoEdit(\'' + r.id + '\')">✏️ Editar</button>' +
-          '</div>' +
-        '</div>';
-      }).join('') : '<span class="small muted">Sin recomendaciones todavía — el recomendador cobra vida cuando tus contactos tienen etiqueta, etapa o seguimiento. Cargá los primeros desde 🧹 Higiene o el Import Center.</span>';
-    }
+    var recs = (hh && hh.ok && hh.recomendados) || [];
+    window.crmRecsCache = {};
+    recs.forEach(function (r) { window.crmRecsCache[r.id] = r; });
+    pintarRecomendados(document.getElementById('crm-hablar-hoy'), recs);
+    pintarRecomendados(document.getElementById('crm-hablar-contactos'), recs); // S51: franja en Contactos
   }
   window.loadCrmResumen = loadCrmResumen;
+
+  // S51: render reutilizable de "a quién hablarle hoy" (Resumen + franja superior de Contactos)
+  function pintarRecomendados(el, recs) {
+    if (!el) return;
+    el.innerHTML = recs.length ? recs.map(function (r) {
+      return '<div style="border:1px solid var(--border);border-radius:10px;padding:9px 12px;margin-bottom:7px;background:rgba(255,255,255,0.02);">' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+          '<strong style="font-size:.86rem;">' + escHtml(r.nombre) + '</strong>' +
+          (r.etiqueta ? '<span class="badge badge-gold">' + r.etiqueta + '</span>' : '') +
+          '<span class="badge badge-muted">' + escHtml(r.tipo || '—') + '</span>' +
+          '<span style="margin-left:auto;font-family:var(--mono);font-size:.7rem;color:var(--gold);">score ' + r.score + '</span>' +
+        '</div>' +
+        '<div style="font-size:.76rem;color:var(--muted);margin:4px 0 7px;"><b style="color:var(--text);">Motivo:</b> ' + r.motivos.map(escHtml).join(' · ') + (r.busca ? ' · busca: ' + escHtml(r.busca) : '') + '</div>' +
+        '<div class="btn-row">' +
+          (r.telefono ? '<a class="btn btn-gold btn-sm" style="text-decoration:none;" href="' + waHref(r.telefono) + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') +
+          '<button class="btn btn-ghost btn-sm" onclick="marcarContactado(\'' + r.id + '\')">✓ Contactado</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="crearTareaContacto(\'' + r.id + '\')">📋 Crear tarea</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="posponerContacto(\'' + r.id + '\')">⏰ Posponer 3d</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="abrirContactoEdit(\'' + r.id + '\')">✏️ Editar</button>' +
+        '</div>' +
+      '</div>';
+    }).join('') : '<span class="small muted">Sin recomendaciones todavía — el recomendador cobra vida cuando tus contactos tienen etiqueta, etapa o seguimiento. Cargá los primeros desde 🧹 Refinamiento o el Import Center.</span>';
+  }
+  window.pintarRecomendados = pintarRecomendados;
 
   async function posponerContacto(id) {
     var f = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
@@ -1681,6 +1698,41 @@
       return '<div class="lg-sec" style="margin-bottom:18px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px 14px;">' +
         '<div style="display:flex;align-items:center;gap:8px;font-size:.74rem;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:9px;"><span style="flex:1;">' + titulo + '</span>' + (extraHeader || '') + '</div>' + contenido + '</div>';
     };
+    // ═ S51: CABECERA PREMIUM — título + specs + 4 semáforos grandes + barra de avance comercial
+    var valorHdr = p.valorVenta ? 'USD ' + Number(p.valorVenta).toLocaleString('es-AR') : p.valorAlquiler ? 'USD ' + Number(p.valorAlquiler).toLocaleString('es-AR') + '/mes' : (p.valorPedido || '');
+    var specs = [p.operacion, valorHdr, (p.m2Totales ? p.m2Totales + ' m²' : ''), (p.ambientes ? p.ambientes + ' amb' : ''), p.estado, ((d.interesados || []).length ? (d.interesados.length + ' interesados') : '')].filter(Boolean).join(' · ');
+    var sf = d.semaforos || {};
+    var SF_ICON = { verde: '🟢', amarillo: '🟡', rojo: '🔴', gris: '⚪' };
+    var SF_COL = { verde: 'var(--ok)', amarillo: 'var(--warn)', rojo: 'var(--danger)', gris: 'var(--muted)' };
+    var semChip = function (lbl, s) {
+      s = s || { estado: 'gris', detalle: '—' };
+      return '<div style="flex:1;min-width:150px;border:1px solid ' + SF_COL[s.estado] + '55;border-left:4px solid ' + SF_COL[s.estado] + ';border-radius:10px;padding:8px 11px;background:rgba(255,255,255,0.015);">' +
+        '<div style="font-size:.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;">' + lbl + '</div>' +
+        '<div style="font-size:.86rem;font-weight:700;">' + SF_ICON[s.estado] + ' <span style="color:' + SF_COL[s.estado] + ';">' + escHtml((s.detalle || '').split(' · ')[0] || s.estado) + '</span></div></div>';
+    };
+    // barra de avance comercial (stepper)
+    var tieneTas = (d.tasaciones || []).some(function (x) { return x.precioCierre; });
+    var opsActivas = (d.operaciones || []).some(function (o) { return ['Cerrada', 'Caída'].indexOf(o.etapa) < 0; });
+    var cerrada = (d.operaciones || []).some(function (o) { return o.etapa === 'Cerrada'; });
+    var docPct = sem.pct || 0;
+    var pasos = [
+      { l: 'Cargada', ok: 'verde' },
+      { l: 'Docs', ok: docPct >= 100 ? 'verde' : docPct > 0 ? 'amarillo' : 'rojo', extra: docPct + '%' },
+      { l: 'Tasación', ok: tieneTas ? 'verde' : 'gris' },
+      { l: 'Publicada', ok: p.estado === 'Publicada' ? 'verde' : 'gris' },
+      { l: 'Leads', ok: (d.interesados || []).length ? 'verde' : 'gris', extra: (d.interesados || []).length || '' },
+      { l: 'Operación', ok: opsActivas ? 'verde' : 'gris' },
+      { l: 'Cerrada', ok: cerrada ? 'verde' : 'gris' }
+    ];
+    var stepper = '<div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:10px;">' + pasos.map(function (s, i) {
+      return (i ? '<span style="color:var(--muted);font-size:.7rem;">›</span>' : '') +
+        '<span style="font-size:.66rem;padding:3px 8px;border-radius:7px;border:1px solid ' + SF_COL[s.ok] + '44;color:' + SF_COL[s.ok] + ';white-space:nowrap;">' + SF_ICON[s.ok] + ' ' + s.l + (s.extra ? ' ' + s.extra : '') + '</span>';
+    }).join('') + '</div>';
+    var cabeceraHtml = '<div style="border:1px solid rgba(212,166,64,0.25);border-radius:14px;padding:14px 16px;margin-bottom:14px;background:linear-gradient(160deg,rgba(212,166,64,0.06),rgba(255,255,255,0.01));">' +
+      '<div style="font-size:1.3rem;font-weight:800;letter-spacing:.01em;line-height:1.15;">' + escHtml(p.propiedad || '—') + '</div>' +
+      '<div style="font-size:.86rem;color:var(--muted);margin:3px 0 12px;">' + escHtml(specs) + (p.direccion ? ' · 📍 ' + escHtml(p.direccion) : '') + '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + semChip('Comercial', sf.comercial) + semChip('Documental', sf.documental) + semChip('Marketing', sf.marketing) + semChip('Demanda', sf.demanda) + '</div>' +
+      stepper + '</div>';
     // ═ PRÓXIMA ACCIÓN — enorme, arriba, con botones
     var faltan = (d.checklist || []).filter(function (c) { return c.estado === 'pendiente' || c.estado === 'bloqueante'; }).map(function (c) { return c.tipo; });
     var accionHtml = '<div style="border:2px solid var(--gold);border-radius:12px;padding:12px 14px;margin-bottom:14px;">' +
@@ -1778,14 +1830,29 @@
     var tiene = (d.checklist || []).filter(function (c) { return c.estado === 'recibido'; }).map(function (c) { return c.tipo; });
     var pedir = (d.checklist || []).filter(function (c) { return c.estado === 'pendiente' || c.estado === 'bloqueante'; }).map(function (c) { return c.tipo; });
     var revisar = (d.checklist || []).filter(function (c) { return c.estado === 'revisar'; }).map(function (c) { return c.tipo; });
+    // S51 F6: resumen ACTIVO en lenguaje natural (derivado de semáforos — instantáneo, sin LLM)
+    var resumenActivo = (function () {
+      var partes = [];
+      partes.push('La propiedad está ' + (p.estado === 'Publicada' ? '**publicada**' : '**' + (p.estado || 'en preparación').toLowerCase() + '**'));
+      if ((d.interesados || []).length) partes.push('con ' + d.interesados.length + ' interesado(s)');
+      var frase = partes.join(' ');
+      if (pedir.length) frase += ', pero documentalmente incompleta. Bloquea/falta: ' + pedir.slice(0, 5).join(', ') + '.';
+      else frase += '. Documentación al día.';
+      if (!tiene.length && !pedir.length) frase = 'Recién cargada. Arrancá pidiendo la documentación inicial.';
+      return frase;
+    })();
+    var primerMsg = (d.mensajesSugeridos || [])[0];
     dock += '<div class="lgdock-pane" id="lgdock-resumen">' +
+      '<div style="background:rgba(94,200,216,0.08);border-left:3px solid #5ec8d8;border-radius:8px;padding:9px 11px;font-size:.8rem;line-height:1.5;margin-bottom:10px;">' + escHtml(resumenActivo) + '</div>' +
       '<div style="font-size:.74rem;line-height:1.6;">' +
         '<div>✅ <b>Tenemos:</b> ' + (tiene.join(', ') || '—') + '</div>' +
         '<div>📨 <b>Falta pedir:</b> ' + (pedir.join(', ') || '—') + '</div>' +
         (revisar.length ? '<div>🟡 <b>Falta revisar:</b> ' + revisar.join(', ') + '</div>' : '') +
         ((sem.bloqueos || []).length ? '<div style="color:var(--danger);">⛔ <b>Bloquea:</b> ' + sem.bloqueos.map(function (b) { return b.detalle; }).join(' · ') + '</div>' : '') +
         '<div style="margin-top:6px;">▶ <b>' + escHtml(d.proximaAccion || '') + '</b></div>' +
-      '</div></div>';
+      '</div>' +
+      (primerMsg ? '<button class="btn btn-gold btn-sm" style="margin-top:10px;width:100%;" onclick="copiarBorrador(this)" data-msg="' + escHtml(primerMsg.texto) + '">📋 Copiar mensaje al propietario</button>' : '') +
+      '</div>';
     // chat — S44: + nota de voz (Whisper) y altura más generosa
     dock += '<div class="lgdock-pane" id="lgdock-chat" style="display:none;">' +
       '<div id="lg-chat-log" style="max-height:380px;overflow-y:auto;font-size:.76rem;margin-bottom:8px;"><div class="small muted">Preguntale a Hermes sobre ESTA propiedad — por texto o con una 🎤 nota de voz: "¿qué falta para publicar?" · "¿qué le pido al propietario?" · "¿qué riesgos ves?"</div></div>' +
@@ -1810,7 +1877,7 @@
           (m.destinatario ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + waHref(m.destinatario) + '" target="_blank" rel="noopener">💬 Abrir chat</a>' : '') + '</div></div>';
       }).join('') : '<div class="small muted">Sin mensajes sugeridos.</div>') + '</div>';
     dock += '</div>';
-    if (body) body.innerHTML = accionHtml + '<div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;"><div style="flex:1.5;min-width:420px;">' + izq + '</div><div style="flex:1;min-width:320px;">' + dock + '</div></div>';
+    if (body) body.innerHTML = cabeceraHtml + accionHtml + '<div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;"><div style="flex:1.5;min-width:420px;">' + izq + '</div><div style="flex:1;min-width:320px;">' + dock + '</div></div>';
     lgDockTab('resumen');
     lgDropWire();
   }
@@ -1863,33 +1930,37 @@
 
   /* S44: nota de voz a Hermes (MediaRecorder → Whisper → chat con contexto) */
   window.lgRec = null;
-  async function lgAudioToggle() {
-    var btn = document.getElementById('lg-mic-btn');
-    if (window.lgRec) { // grabando → frenar y mandar
-      window.lgRec.stop();
-      return;
-    }
+  // S51 F7: helper GENÉRICO de grabación directa — toggle (1er click graba, 2º envía).
+  // Reutilizable por Legajo, Hermes Console, Tasación e Import. El audio NUNCA se sube como
+  // archivo (pedido Franco): siempre se graba y se procesa. btnEl muestra el estado ⏹.
+  function grabarAudioYProcesar(btnEl, onBase64) {
+    if (window.audioRec) { try { window.audioRec.stop(); } catch (e) {} return; } // ya grabando → frenar+enviar
     if (!navigator.mediaDevices || !window.MediaRecorder) return toast('Tu navegador no soporta grabación de audio', 'err');
-    try {
-      var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
       var chunks = [];
       var rec = new MediaRecorder(stream);
+      var prev = btnEl ? btnEl.innerHTML : '';
       rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
       rec.onstop = function () {
         stream.getTracks().forEach(function (t2) { t2.stop(); });
-        window.lgRec = null;
-        if (btn) { btn.textContent = '🎤'; btn.style.background = ''; btn.style.color = ''; }
+        window.audioRec = null;
+        if (btnEl) { btnEl.innerHTML = prev; btnEl.classList.remove('btn-danger'); }
         var blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
         if (blob.size < 1200) return toast('Audio muy corto — probá de nuevo', 'err');
         var fr = new FileReader();
-        fr.onload = function () { lgChatSendAudio(String(fr.result)); };
+        fr.onload = function () { onBase64(String(fr.result)); };
         fr.readAsDataURL(blob);
       };
       rec.start();
-      window.lgRec = rec;
-      if (btn) { btn.textContent = '⏹'; btn.style.background = 'var(--danger)'; btn.style.color = '#fff'; }
-      toast('🎤 Grabando… tocá ⏹ para mandar', 'ok');
-    } catch (e) { toast('No pude acceder al micrófono (permiso denegado)', 'err'); }
+      window.audioRec = rec;
+      if (btnEl) { btnEl.innerHTML = '⏹ Grabando… (tocá para enviar)'; btnEl.classList.add('btn-danger'); }
+      toast('🎤 Grabando… tocá de nuevo para enviar', 'ok');
+    }).catch(function () { toast('No pude acceder al micrófono (permiso denegado)', 'err'); });
+  }
+  window.grabarAudioYProcesar = grabarAudioYProcesar;
+
+  function lgAudioToggle() {
+    grabarAudioYProcesar(document.getElementById('lg-mic-btn'), function (b64) { lgChatSendAudio(b64); });
   }
   window.lgAudioToggle = lgAudioToggle;
 
@@ -2219,9 +2290,21 @@
     if (!el) return;
     var pipe = window.crmPipelineCache, ops = window.crmOpsCache;
     if (!pipe && !ops) return;
-    // S48: Vista 360 GRÁFICA (pedido Franco "filas y números no se entiende") — barras con color por etapa
-    var col = function (titulo, emoji, tab, etapas, total) {
+    // S48/S51: Vista 360 de MANDO — barras con color + cuello de botella + acción crítica por embudo
+    var col = function (titulo, emoji, tab, etapas, total, accionesMapa) {
       var maxC = Math.max.apply(null, (etapas || []).map(function (e) { return e.count; }).concat([1]));
+      // cuello de botella: etapa activa NO terminal con más acumulación
+      var TERM = /descart|perdid|ca[íi]da|rechaz|cerrad|publicada/i;
+      var cuello = (etapas || []).filter(function (e) { return e.count > 0 && !TERM.test(e.etapa); }).sort(function (a, b) { return b.count - a.count; })[0];
+      var footer = '';
+      if (cuello) {
+        var accion = (accionesMapa && accionesMapa[cuello.etapa]) || 'mover al siguiente paso';
+        footer = '<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.07);padding-top:7px;font-size:.7rem;">' +
+          '<div style="color:var(--warn);">🔧 Cuello: <b>' + cuello.count + ' en ' + escHtml(cuello.etapa) + '</b></div>' +
+          '<div style="color:var(--muted);margin-top:2px;">▶ ' + escHtml(accion) + '</div></div>';
+      } else if (total === 0) {
+        footer = '<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.07);padding-top:7px;font-size:.7rem;color:var(--muted);">Vacío — cargá el primero acá.</div>';
+      }
       return '<div onclick="crmTab(\'' + tab + '\')" class="kpi" style="cursor:pointer;border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:block;text-align:left;" title="Ir a ' + titulo + '">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><strong style="font-size:.8rem;">' + emoji + ' ' + titulo + '</strong><span class="badge badge-muted">' + total + '</span></div>' +
         (etapas || []).map(function (e, ei) {
@@ -2232,18 +2315,18 @@
             '<i style="position:absolute;left:0;top:0;bottom:0;width:' + w + '%;background:linear-gradient(90deg,' + c + '33,' + c + '14);border-left:2px solid ' + (on ? c : 'transparent') + ';border-radius:6px;"></i>' +
             '<span style="position:relative;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(e.etapa) + '</span>' +
             '<span style="position:relative;font-family:var(--mono);font-weight:700;color:' + (on ? c : 'var(--muted)') + ';">' + e.count + '</span></div>';
-        }).join('') + '</div>';
+        }).join('') + footer + '</div>';
     };
     var html = '';
     if (pipe) {
       var capT = (pipe.captacion || []).reduce(function (s, e) { return s + e.count; }, 0);
       var demT = (pipe.demanda || []).reduce(function (s, e) { return s + e.count; }, 0);
-      html += col('Captación', '🏠', 'captacion', pipe.captacion, capT);
-      html += col('Demanda', '🛒', 'demanda', pipe.demanda, demT);
+      html += col('Captación', '🏠', 'captacion', pipe.captacion, capT, ACCIONES_CAP);
+      html += col('Demanda', '🛒', 'demanda', pipe.demanda, demT, ACCIONES_DEM);
     }
     if (ops) {
       var activas = (ops.etapas || []).filter(function (e) { return ['Cerrada', 'Caída'].indexOf(e.etapa) < 0; });
-      html += col('Operaciones', '💼', 'operaciones', activas, ops.activas || 0);
+      html += col('Operaciones', '💼', 'operaciones', activas, ops.activas || 0, null);
       // S47: honorarios SIEMPRE visibles en el resumen (pedido Franco)
       var hEsp = 0, hCob = 0;
       (ops.items || []).forEach(function (o) { if (o.etapa !== 'Caída') { hEsp += o.honorariosEsperados || 0; hCob += o.honorariosCobrados || 0; } });
@@ -2580,6 +2663,16 @@
     procesarImportRespuesta(d);
   }
   window.importarTexto = importarTexto;
+
+  // S51 F7: grabar audio directo en el Import Center (sin subir archivo)
+  window.importarGrabarAudio = function (btn) {
+    grabarAudioYProcesar(btn, async function (b64) {
+      toast('🧠 Transcribiendo y armando la ficha… (~20-40s)', 'ok');
+      var d = await apiFetch('/crm/ficha-import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filename: 'nota.webm', base64: b64 }) });
+      hideModal('modal-import');
+      procesarImportRespuesta(d);
+    });
+  };
 
   function procesarImportRespuesta(d) {
     if (!d || d.__error || !d.ok) return toast('Error: ' + ((d && d.error) || 'no pude procesar'), 'err');
@@ -3749,6 +3842,14 @@ window.tasacionDesdeTexto = async function () {
   if (ta) ta.value = '';
   tasacionAplicarFicha(d);
 };
+// S51 F7: grabar audio directo para pre-llenar la tasación (sin subir archivo)
+window.tasacionGrabarAudio = function (btn) {
+  grabarAudioYProcesar(btn, async function (b64) {
+    toast('🧠 Transcribiendo y extrayendo datos… (~20-40s)', 'ok');
+    var d = await apiFetch('/crm/ficha-import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filename: 'nota.webm', base64: b64 }) });
+    tasacionAplicarFicha(d);
+  });
+};
 window.tasacionAplicarFicha = function (d) {
   if (!d || !d.ok) return toast('Error: ' + ((d && d.error) || (d && d.__error ? 'técnico ' + d.__error : 'no pude extraer')), 'err');
   var f = d.ficha || {};
@@ -3763,3 +3864,148 @@ window.tasacionAplicarFicha = function (d) {
   var dud = f.camposDudosos || [];
   toast(dud.length ? '✅ Pre-llenada — ⚠ revisá: ' + dud.join(', ') : '✅ Tasación pre-llenada — revisá y creá', 'ok');
 };
+
+/* ════════════ S51 F1: HERMES DOCK FLOTANTE GLOBAL ════════════ */
+(function () {
+  var CTX_LABEL = {
+    resumen: 'Prioridades del día', captacion: 'Propietarios a mover', demanda: 'Leads a escribir',
+    operaciones: 'Operaciones y cierres', propiedades: 'Qué falta por propiedad', contactos: 'Clasificá y seguí'
+  };
+  var CONSOLE_CHIPS = ['¿Qué tengo que hacer hoy?', '¿Qué propiedades están trabadas?', '¿Qué contactos debería promover?', 'Mostrame riesgos documentales', '¿Dónde está la plata en juego?'];
+
+  function activeCrmTab() {
+    var el = document.querySelector('.crm-tab.active');
+    return el ? el.id.replace('ct-', '') : 'resumen';
+  }
+  function inCrm() {
+    var v = document.getElementById('view-gebroker');
+    return v && v.classList.contains('active');
+  }
+
+  // Polling liviano: muestra/oculta el dock según sección + re-renderiza el panel al cambiar de sub-tab.
+  // Desacoplado de nav()/crmTab() para no tocar esas funciones (menor riesgo).
+  var lastTab = null, lastInCrm = null;
+  function tick() {
+    var dock = document.getElementById('hermes-dock');
+    if (!dock) return;
+    var here = inCrm();
+    if (here !== lastInCrm) {
+      dock.style.display = here ? '' : 'none';
+      lastInCrm = here;
+      if (here) loadHermesPulse();
+    }
+    if (here) {
+      var t = activeCrmTab();
+      if (t !== lastTab) {
+        lastTab = t;
+        var ctx = document.getElementById('hermes-panel-ctx');
+        if (ctx) ctx.textContent = CTX_LABEL[t] || 'Copiloto';
+        if (document.getElementById('hermes-panel').style.display !== 'none') renderHermesPanel();
+      }
+    }
+  }
+  setInterval(tick, 1000);
+
+  window.hermesPulse = null;
+  async function loadHermesPulse() {
+    var d = await apiFetch('/crm/pulse');
+    if (!d || !d.ok) return;
+    window.hermesPulse = d;
+    var txt = document.getElementById('hermes-mini-txt');
+    if (txt) txt.innerHTML = 'Hermes · <b style="color:var(--gold)">' + d.recomendaciones + '</b> rec · <b style="color:var(--danger)">' + d.bloqueos + '</b> bloq · <b style="color:var(--warn)">' + d.urgentes + '</b> urg';
+    if (document.getElementById('hermes-panel').style.display !== 'none') renderHermesPanel();
+  }
+  window.loadHermesPulse = loadHermesPulse;
+
+  function dockState(s) { try { localStorage.setItem('hermesDockState', s); } catch (e) {} }
+  window.hermesDockOpen = function () {
+    document.getElementById('hermes-mini').style.display = 'none';
+    document.getElementById('hermes-panel').style.display = '';
+    dockState('open');
+    if (!window.hermesPulse) loadHermesPulse(); else renderHermesPanel();
+  };
+  window.hermesDockCollapse = function () {
+    document.getElementById('hermes-panel').style.display = 'none';
+    document.getElementById('hermes-mini').style.display = '';
+    dockState('mini');
+  };
+
+  function itemRow(icon, nombre, motivo, accion) {
+    return '<div class="hermes-item"><span>' + icon + '</span><span style="flex:1;"><b>' + escHtml(nombre) + '</b>' + (motivo ? '<br><span style="color:var(--muted);font-size:.7rem;">' + escHtml(motivo) + '</span>' : '') + '</span>' + (accion || '') + '</div>';
+  }
+  function renderHermesPanel() {
+    var body = document.getElementById('hermes-panel-body');
+    var p = window.hermesPulse;
+    if (!body) return;
+    if (!p) { body.innerHTML = '<div class="skeleton skeleton-block" style="height:90px;"></div>'; return; }
+    var tab = activeCrmTab();
+    var det = p.detalle || {};
+    var html = '<div class="hermes-pulse-row">' +
+      '<div class="pulse-kpi"><strong style="color:var(--gold)">' + p.recomendaciones + '</strong><small>rec</small></div>' +
+      '<div class="pulse-kpi"><strong style="color:var(--danger)">' + p.bloqueos + '</strong><small>bloq</small></div>' +
+      '<div class="pulse-kpi"><strong style="color:var(--warn)">' + p.urgentes + '</strong><small>urg</small></div></div>';
+    var items = '';
+    if (tab === 'operaciones') {
+      (det.bloqueosLista || []).filter(function (b) { return b.tipo === 'operacion'; }).forEach(function (b) { items += itemRow('🔴', b.nombre, 'Trabada: ' + (b.motivo || ''), ''); });
+      if ((det.honorariosPipeline || 0) > 0) items += itemRow('💰', 'Honorarios en pipeline', 'USD ' + Number(det.honorariosPipeline).toLocaleString('es-AR'), '');
+    } else if (tab === 'propiedades') {
+      (det.bloqueosLista || []).filter(function (b) { return b.tipo === 'propiedad'; }).forEach(function (b) { items += itemRow('🏢', b.nombre, b.motivo, b.id ? '<button class="btn btn-xs btn-ghost" onclick="abrirLegajo(\'' + b.id + '\')">abrir</button>' : ''); });
+    } else if (tab === 'contactos') {
+      items += itemRow('🧹', (det.sinClasificar || 0) + ' sin clasificar', 'Refiná la base cruda de WhatsApp', '');
+      (det.recomendados || []).slice(0, 4).forEach(function (r) { items += itemRow('⭐', r.nombre, r.motivo, r.telefono ? '<a class="btn btn-xs btn-ghost" href="' + waHref(r.telefono) + '" target="_blank" rel="noopener">💬</a>' : ''); });
+    } else {
+      // resumen / captacion / demanda → recomendados del día
+      (det.recomendados || []).forEach(function (r) { items += itemRow('⭐', r.nombre, r.motivo, r.telefono ? '<a class="btn btn-xs btn-ghost" href="' + waHref(r.telefono) + '" target="_blank" rel="noopener">💬</a>' : ''); });
+      (det.urgentesLista || []).slice(0, 3).forEach(function (u) { items += itemRow(u.tipo === 'firma' ? '✍️' : u.tipo === 'reporte' ? '📊' : '⏰', u.nombre, u.tipo + (u.cuando ? ' · ' + u.cuando : ''), ''); });
+    }
+    body.innerHTML = html + (items || '<div class="small muted" style="padding:6px 0;">Todo al día acá. ✅</div>');
+  }
+  window.renderHermesPanel = renderHermesPanel;
+
+  /* ── Hermes Console (chat global) ── */
+  window.hermesConsoleOpen = function () {
+    showModal('hermes-console');
+    var chips = document.getElementById('hermes-console-chips');
+    if (chips && !chips.dataset.ready) {
+      chips.innerHTML = CONSOLE_CHIPS.map(function (c) { return '<span class="hermes-chip" onclick="hermesConsoleAsk(\'' + c.replace(/'/g, "\\'") + '\')">' + escHtml(c) + '</span>'; }).join('');
+      chips.dataset.ready = '1';
+    }
+    var log = document.getElementById('hermes-console-log');
+    if (log && !log.innerHTML) log.innerHTML = '<div class="small muted">Preguntale a Hermes sobre TODO tu brokerage — por texto o 🎤 voz. Tocá una sugerencia o escribí.</div>';
+  };
+  window.hermesConsoleAsk = function (q) {
+    document.getElementById('hermes-console-input').value = q;
+    hermesConsoleSend();
+  };
+  function consolePintarUsuario(txt) {
+    var log = document.getElementById('hermes-console-log');
+    if (log) { log.innerHTML += '<div style="text-align:right;margin:5px 0;"><span style="background:rgba(212,166,64,0.15);border-radius:8px;padding:5px 9px;display:inline-block;">' + escHtml(txt) + '</span></div><div id="hc-wait" class="small muted">Hermes está pensando…</div>'; log.scrollTop = log.scrollHeight; }
+  }
+  function consolePintarRespuesta(d) {
+    var log = document.getElementById('hermes-console-log');
+    var w = document.getElementById('hc-wait'); if (w) w.remove();
+    var txt = (d && d.respuesta) || (d && d.error) || (d && d.__error ? '⚠ Error técnico (' + d.__error + ')' : 'No pude responder.');
+    if (log) { log.innerHTML += '<div style="display:flex;gap:7px;align-items:flex-start;margin:5px 0;"><img src="/images/hermes-avatar.webp" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-top:2px;" onerror="this.outerHTML=\'🪽\'"><span style="background:rgba(94,200,216,0.12);border-radius:8px;padding:6px 10px;display:inline-block;white-space:pre-wrap;">' + escHtml(txt) + '</span></div>'; log.scrollTop = log.scrollHeight; }
+  }
+  window.hermesConsoleSend = async function () {
+    var inp = document.getElementById('hermes-console-input');
+    var q = inp ? inp.value.trim() : '';
+    if (!q) return;
+    inp.value = '';
+    consolePintarUsuario(q);
+    var d = await apiFetch('/crm/hermes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pregunta: q }) });
+    consolePintarRespuesta(d);
+  };
+  window.hermesConsoleAudio = function (btn) {
+    grabarAudioYProcesar(btn, async function (b64) {
+      var log = document.getElementById('hermes-console-log');
+      if (log) { log.innerHTML += '<div style="text-align:right;margin:5px 0;"><span id="hc-audiobub" style="background:rgba(212,166,64,0.15);border-radius:8px;padding:5px 9px;display:inline-block;">🎤 <i>transcribiendo…</i></span></div><div id="hc-wait" class="small muted">Hermes está escuchando…</div>'; log.scrollTop = log.scrollHeight; }
+      var d = await apiFetch('/crm/hermes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ audio: b64, filename: 'nota.webm' }) });
+      var bub = document.getElementById('hc-audiobub'); if (bub) { bub.innerHTML = '🎤 ' + escHtml((d && d.transcripcion) || '(no entendí)'); bub.removeAttribute('id'); }
+      consolePintarRespuesta(d);
+    });
+  };
+
+  // restaurar estado del dock al cargar
+  try { if (localStorage.getItem('hermesDockState') === 'open') { setTimeout(function () { if (inCrm()) hermesDockOpen(); }, 1200); } } catch (e) {}
+})();

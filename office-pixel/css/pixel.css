@@ -322,7 +322,20 @@ a { color: inherit; text-decoration: none; }
 .btn-ghost  { background: rgba(212,166,64,0.08); color: var(--text); border: 1px solid rgba(212,166,64,0.18); }
 .btn-ghost:hover { background: rgba(212,166,64,0.14); transform: translateY(-1px); }
 .btn-danger { background: rgba(255,123,123,0.12); color: var(--danger); border: 1px solid rgba(255,123,123,0.2); }
+.btn-danger:hover { background: rgba(255,123,123,0.2); transform: translateY(-1px); }
 .btn-sm     { padding: 6px 10px; font-size: 0.74rem; border-radius: 9px; }
+/* S51: jerarquía + estados consistentes (sin desaturar la identidad Gringo Estate) */
+.btn:active { transform: translateY(0) scale(0.98); }
+.btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-xs     { padding: 3px 8px; font-size: 0.68rem; border-radius: 8px; gap: 4px; }
+/* botón ícono-only (acciones secundarias compactas en filas densas) */
+.btn-icon   { padding: 5px 8px; font-size: 0.8rem; border-radius: 9px; }
+/* acción principal de un bloque: un toque más de presencia, una sola por grupo */
+.btn-primary-lg { padding: 11px 20px; font-size: 0.9rem; border-radius: 13px; }
+/* grupo de botones: la acción principal manda, las secundarias acompañan */
+.btn-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.btn-row .btn-ghost { font-weight: 600; }
 
 /* ── INPUTS ─────────────────────────────────────────────────────── */
 .input {
@@ -1337,3 +1350,35 @@ input:focus:not(:focus-visible) { outline: none; }
 
 /* S49: acciones del refinamiento compactas (los nombres en botones los hacían anchos) */
 .hig-acciones .btn { font-size: 0.62rem; padding: 1px 7px; }
+
+/* ════════ S51: HERMES DOCK FLOTANTE GLOBAL ════════ */
+#hermes-dock { position: fixed; right: 20px; bottom: 20px; z-index: 45; }
+#hermes-mini {
+  display: inline-flex; align-items: center; gap: 9px;
+  background: linear-gradient(160deg, rgba(94,200,216,0.16), rgba(20,20,20,0.96));
+  border: 1px solid rgba(94,200,216,0.5); border-radius: 30px;
+  padding: 8px 16px 8px 9px; cursor: pointer; color: var(--text);
+  box-shadow: 0 8px 26px rgba(0,0,0,0.45), 0 0 18px rgba(94,200,216,0.18);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+#hermes-mini:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.5), 0 0 24px rgba(94,200,216,0.3); }
+#hermes-mini img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(94,200,216,0.6); }
+#hermes-mini-txt { font-size: .78rem; font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
+#hermes-panel {
+  width: min(370px, calc(100vw - 40px)); max-height: 78vh; overflow-y: auto;
+  background: linear-gradient(180deg, rgba(94,200,216,0.06), rgba(16,16,16,0.99));
+  border: 1px solid rgba(94,200,216,0.45); border-radius: 16px; padding: 14px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+}
+#hermes-panel .hp-head { display: flex; align-items: center; gap: 9px; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid rgba(94,200,216,0.22); }
+#hermes-panel .hp-head img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(94,200,216,0.55); }
+#hermes-panel .hp-head strong { color: #5ec8d8; font-size: .9rem; display: block; letter-spacing: .02em; }
+#hermes-panel .hp-head span { font-size: .64rem; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; }
+#hermes-panel .hp-head > div { flex: 1; }
+.hermes-pulse-row { display: flex; gap: 6px; margin-bottom: 10px; }
+.hermes-pulse-row .pulse-kpi { flex: 1; text-align: center; border: 1px solid var(--border); border-radius: 10px; padding: 7px 4px; }
+.hermes-pulse-row .pulse-kpi strong { display: block; font-family: var(--mono); font-size: 1.1rem; font-weight: 700; }
+.hermes-pulse-row .pulse-kpi small { font-size: .58rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.hermes-item { font-size: .76rem; padding: 5px 0; border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 7px; align-items: flex-start; }
+.hermes-chip { background: rgba(94,200,216,0.1); border: 1px solid rgba(94,200,216,0.3); color: #aee4ee; border-radius: 14px; padding: 4px 11px; font-size: .72rem; cursor: pointer; transition: background .15s; }
+.hermes-chip:hover { background: rgba(94,200,216,0.2); }

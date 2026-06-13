@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/pixel.css?v=s50" />
+  <link rel="stylesheet" href="css/pixel.css?v=s51" />
 </head>
 <body>
 
@@ -932,17 +932,20 @@
       </div><!-- /ct-operaciones -->
 
       <div class="crm-tab" id="ct-contactos">
-      <!-- REFINAMIENTO DE CONTACTOS WHATSAPP (ex Higiene semanal, S49) -->
-      <div class="card" style="margin-bottom:14px;border-color:rgba(126,200,227,0.3);" role="region" aria-label="Refinamiento de contactos WhatsApp">
-        <div class="card-head">
-          <div><h2 class="card-title" style="color:var(--metro);">🧹 Refinamiento de contactos WhatsApp</h2><div class="card-sub">depuración de la base cruda de la línea laboral — el CRM limpio vale más que el CRM lleno</div></div>
-          <span class="badge badge-muted" id="crm-hig-count">—</span>
-        </div>
-        <div id="crm-higiene"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
+      <!-- S51: A QUIÉN HABLARLE HOY (franja superior — el motor relacional manda) -->
+      <div class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.3);" role="region" aria-label="A quién hablarle hoy">
+        <div class="card-head"><div><h2 class="card-title">🎯 A quién hablarle hoy</h2><div class="card-sub">Hermes ordena tu cartera por prioridad — score, motivo y acción</div></div></div>
+        <div id="crm-hablar-contactos"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
       </div>
 
-      <!-- LOS 250 + SEGUIMIENTOS -->
-      <div class="grid-2" style="margin-bottom:14px;">
+      <!-- S51: sub-modos del bloque relacional -->
+      <div class="btn-row" style="margin-bottom:12px;">
+        <button class="btn btn-gold btn-sm" id="cmode-relacional" onclick="contactosModo('relacional')">⭐ Los 250 + Seguimientos</button>
+        <button class="btn btn-ghost btn-sm" id="cmode-refinar" onclick="contactosModo('refinar')">🧹 Refinamiento WhatsApp <span class="badge badge-muted" id="crm-hig-count">—</span></button>
+      </div>
+
+      <!-- LOS 250 + SEGUIMIENTOS (pantalla partida, protagonistas) -->
+      <div id="cblock-relacional" class="grid-2" style="margin-bottom:14px;">
         <div class="card" role="region" aria-label="Los 250 contactos trabajables">
           <div class="card-head"><h2 class="card-title">⭐ Los 250</h2><span style="display:inline-flex;gap:6px;align-items:center;"><button class="btn btn-ghost btn-sm" onclick="toggleLos250Lista()" title="Ver el listado completo de contactos del CRM con su etiqueta A/B/C/D">📋 Listado completo</button><span class="badge badge-muted" id="crm-250-total">—</span></span></div>
           <div class="kpi-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));" id="crm-250-grid">
@@ -958,6 +961,14 @@
           <div class="card-head"><h2 class="card-title">⏰ Seguimientos</h2></div>
           <div id="crm-seguimientos"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
         </div>
+      </div>
+
+      <!-- REFINAMIENTO DE CONTACTOS WHATSAPP (ex Higiene, S49) — sub-modo colapsable (S51) -->
+      <div id="cblock-refinar" class="card" style="margin-bottom:14px;border-color:rgba(126,200,227,0.3);display:none;" role="region" aria-label="Refinamiento de contactos WhatsApp">
+        <div class="card-head">
+          <div><h2 class="card-title" style="color:var(--metro);">🧹 Refinamiento de contactos WhatsApp</h2><div class="card-sub">depuración de la base cruda de la línea laboral — el CRM limpio vale más que el CRM lleno</div></div>
+        </div>
+        <div id="crm-higiene"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
       </div>
 
       </div><!-- /ct-contactos -->
@@ -1126,6 +1137,43 @@
   </main>
 </div>
 
+<!-- ════════ HERMES DOCK FLOTANTE GLOBAL (S51) — solo visible en Gringo CRM ════════ -->
+<div id="hermes-dock" style="display:none;">
+  <!-- Estado 1: mini-dock -->
+  <button id="hermes-mini" onclick="hermesDockOpen()" title="Abrir a Hermes — tu copiloto del brokerage">
+    <img src="/images/hermes-avatar.webp" alt="Hermes" onerror="this.style.display='none'">
+    <span id="hermes-mini-txt">Hermes</span>
+  </button>
+  <!-- Estado 2: panel lateral contextual -->
+  <div id="hermes-panel" style="display:none;">
+    <div class="hp-head">
+      <img src="/images/hermes-avatar.webp" alt="" onerror="this.style.display='none'">
+      <div><strong>HERMES</strong><span id="hermes-panel-ctx">Copiloto</span></div>
+      <button class="btn btn-icon btn-ghost" onclick="hermesConsoleOpen()" title="Abrir consola completa">⛶</button>
+      <button class="btn btn-icon btn-ghost" onclick="hermesDockCollapse()" title="Minimizar">—</button>
+    </div>
+    <div id="hermes-panel-body"><div class="skeleton skeleton-block" style="height:90px;"></div></div>
+    <button class="btn btn-gold" style="width:100%;margin-top:8px;" onclick="hermesConsoleOpen()">💬 Preguntale lo que sea</button>
+  </div>
+</div>
+<!-- Estado 3: consola overlay -->
+<div class="modal-overlay hidden" id="hermes-console">
+  <div class="modal" style="max-width:min(94vw,820px);width:94vw;max-height:90vh;display:flex;flex-direction:column;padding:20px 22px;">
+    <div style="display:flex;align-items:center;gap:11px;padding-bottom:11px;border-bottom:1px solid rgba(94,200,216,0.25);margin-bottom:10px;">
+      <img src="/images/hermes-avatar.webp" alt="Hermes" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid rgba(94,200,216,0.6);box-shadow:0 0 14px rgba(94,200,216,0.3);" onerror="this.style.display='none'">
+      <div style="flex:1;"><strong style="color:#5ec8d8;font-size:1.05rem;letter-spacing:.02em;">HERMES CONSOLE</strong><div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Copiloto de todo el brokerage · nunca envía, solo recomienda</div></div>
+      <button class="btn btn-icon btn-ghost" onclick="hideModal('hermes-console')">✕</button>
+    </div>
+    <div id="hermes-console-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"></div>
+    <div id="hermes-console-log" style="flex:1;overflow-y:auto;min-height:240px;max-height:54vh;font-size:.84rem;margin-bottom:10px;"></div>
+    <div class="btn-row" style="flex-wrap:nowrap;">
+      <input class="input" id="hermes-console-input" placeholder="Preguntale a Hermes sobre todo el CRM…" style="flex:1;" onkeydown="if(event.key==='Enter')hermesConsoleSend()">
+      <button class="btn btn-ghost btn-icon" id="hermes-console-mic" onclick="hermesConsoleAudio(this)" title="Grabar nota de voz">🎤</button>
+      <button class="btn btn-gold" onclick="hermesConsoleSend()">➤</button>
+    </div>
+  </div>
+</div>
+
 <!-- ════════ MODALES ════════════════════════════════════════════════ -->
 
 <!-- Modal nueva tarea -->
@@ -1278,8 +1326,9 @@
       <div style="border:1px dashed rgba(212,175,55,0.4);border-radius:10px;padding:9px 11px;">
         <div style="font-size:.72rem;color:var(--muted);margin-bottom:6px;">📥 <b style="color:var(--text);">Pre-llenar automático</b> — subí la ficha (PDF), mandá una <b style="color:var(--text);">nota de AUDIO</b> describiendo el depto, o pegá el texto:</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('ts-imp-file').click()">📄 PDF / 🎤 Audio</button>
-          <input type="file" id="ts-imp-file" accept="application/pdf,audio/*,.txt" style="display:none;" onchange="tasacionDesdeArchivo(this.files[0])">
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('ts-imp-file').click()">📄 Subir PDF</button>
+          <input type="file" id="ts-imp-file" accept="application/pdf,.txt" style="display:none;" onchange="tasacionDesdeArchivo(this.files[0])">
+          <button class="btn btn-ghost btn-sm" id="ts-mic-btn" onclick="tasacionGrabarAudio(this)" title="Grabá describiendo el depto (barrio, m², ambientes, piso, estado…) y te pre-lleno la tasación">🎤 Grabar audio</button>
           <textarea id="ts-imp-texto" placeholder="…o pegá acá el texto de la ficha/descripción" style="flex:1;min-width:170px;min-height:34px;max-height:58px;font-size:.72rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:5px 8px;resize:vertical;"></textarea>
           <button class="btn btn-gold btn-sm" onclick="tasacionDesdeTexto()">Extraer</button>
         </div>
@@ -1346,8 +1395,7 @@
     <p class="small muted" style="margin:4px 0 12px;">Todo sigue el mismo camino: extraer → revisar → guardar. Nada entra sin tu ojo.</p>
     <div class="stack">
       <button class="btn btn-gold" onclick="hideModal('modal-import');document.getElementById('ficha-file').click()">📎 Subir ficha PDF (Zonaprop/Tokko)</button>
-      <button class="btn btn-gold" onclick="hideModal('modal-import');document.getElementById('ficha-audio').click()">🎙 Subir audio (te transcribo y cargo la ficha)</button>
-      <input type="file" id="ficha-audio" accept="audio/*,.ogg,.opus,.mp3,.m4a,.wav" style="display:none;" onchange="importarFicha(this)">
+      <button class="btn btn-gold" id="imp-mic-btn" onclick="importarGrabarAudio(this)" title="Grabá describiendo la propiedad o el lead y te armo la ficha">🎤 Grabar audio (te transcribo y cargo la ficha)</button>
       <div style="font-size:.68rem;color:var(--muted);text-align:center;">Ej: «Oficina en Corrientes 1441, 150 metros, alquiler 1.800 dólares, expensas 280 mil, al frente, orientación norte, 2 baños, apto profesional»</div>
       <div style="font-size:.72rem;color:var(--muted);text-align:center;">— o pegá el texto de la publicación / del lead —</div>
       <textarea class="input" id="imp-texto" placeholder="Pegá acá el texto (Zonaprop → Compartir → Copiar, o el texto del lead de Tokko)…" style="min-height:110px;"></textarea>
@@ -1532,7 +1580,7 @@
 <!-- Scripts -->
 <!-- S45: ?v= cache-buster — subir la versión en cada deploy con cambios de JS/CSS
      (el HTML revalida siempre en Netlify; el query nuevo fuerza al browser a bajar el asset fresco) -->
-<script src="js/api.js?v=s50"></script>
-<script src="js/app.js?v=s50"></script>
+<script src="js/api.js?v=s51"></script>
+<script src="js/app.js?v=s51"></script>
 </body>
 </html>
