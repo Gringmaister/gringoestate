@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/pixel.css?v=s52" />
+  <link rel="stylesheet" href="css/pixel.css?v=s53" />
 </head>
 <body>
 
@@ -938,10 +938,21 @@
         <div id="crm-hablar-contactos"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
       </div>
 
-      <!-- S51: sub-modos del bloque relacional -->
+      <!-- S51/S52.1: sub-modos del depurador -->
       <div class="btn-row" style="margin-bottom:12px;">
         <button class="btn btn-gold btn-sm" id="cmode-relacional" onclick="contactosModo('relacional')">⭐ Los 250 + Seguimientos</button>
         <button class="btn btn-ghost btn-sm" id="cmode-refinar" onclick="contactosModo('refinar')">🧹 Refinamiento WhatsApp <span class="badge badge-muted" id="crm-hig-count">—</span></button>
+        <button class="btn btn-ghost btn-sm" id="cmode-auditoria" onclick="contactosModo('auditoria')">🗂 Auditoría de cargas <span class="badge badge-muted" id="crm-audit-count">—</span></button>
+      </div>
+
+      <!-- S52.1: AUDITORÍA DE CARGAS (depurador documental — historial completo + confirmar) -->
+      <div id="cblock-auditoria" class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.3);display:none;" role="region" aria-label="Auditoría de cargas de archivos">
+        <div class="card-head">
+          <div><h2 class="card-title">🗂 Auditoría de cargas</h2><div class="card-sub">todo lo que entró por WhatsApp/panel · ver, confirmar, reasignar o descartar · Hermes captura, vos validás</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="loadDocAuditoria()" title="Refrescar">↻</button>
+        </div>
+        <div id="doc-audit-filtros" class="btn-row" style="margin-bottom:10px;"></div>
+        <div id="doc-auditoria"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
       </div>
 
       <!-- LOS 250 + SEGUIMIENTOS (pantalla partida, protagonistas) -->
@@ -1589,7 +1600,7 @@
 <!-- Scripts -->
 <!-- S45: ?v= cache-buster — subir la versión en cada deploy con cambios de JS/CSS
      (el HTML revalida siempre en Netlify; el query nuevo fuerza al browser a bajar el asset fresco) -->
-<script src="js/api.js?v=s52"></script>
-<script src="js/app.js?v=s52"></script>
+<script src="js/api.js?v=s53"></script>
+<script src="js/app.js?v=s53"></script>
 </body>
 </html>

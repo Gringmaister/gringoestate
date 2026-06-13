@@ -1464,16 +1464,16 @@
   }
   window.loadCrmSeguimientos = loadCrmSeguimientos;
 
-  // S51 F2: sub-modos de Contactos — relacional (Los 250 + Seguimientos) vs refinamiento WhatsApp
+  // S51/S52.1: sub-modos del depurador — relacional · refinamiento WhatsApp · auditoría de cargas
   window.contactosModo = function (modo) {
-    var rel = document.getElementById('cblock-relacional'), ref = document.getElementById('cblock-refinar');
-    var bRel = document.getElementById('cmode-relacional'), bRef = document.getElementById('cmode-refinar');
-    var esRef = modo === 'refinar';
-    if (rel) rel.style.display = esRef ? 'none' : '';
-    if (ref) ref.style.display = esRef ? '' : 'none';
-    if (bRel) { bRel.classList.toggle('btn-gold', !esRef); bRel.classList.toggle('btn-ghost', esRef); }
-    if (bRef) { bRef.classList.toggle('btn-gold', esRef); bRef.classList.toggle('btn-ghost', !esRef); }
-    if (esRef && window.loadCrmHigiene) loadCrmHigiene();
+    var bloques = { relacional: 'cblock-relacional', refinar: 'cblock-refinar', auditoria: 'cblock-auditoria' };
+    var botones = { relacional: 'cmode-relacional', refinar: 'cmode-refinar', auditoria: 'cmode-auditoria' };
+    Object.keys(bloques).forEach(function (k) {
+      var bl = document.getElementById(bloques[k]); if (bl) bl.style.display = (k === modo ? '' : 'none');
+      var bt = document.getElementById(botones[k]); if (bt) { bt.classList.toggle('btn-gold', k === modo); bt.classList.toggle('btn-ghost', k !== modo); }
+    });
+    if (modo === 'refinar' && window.loadCrmHigiene) loadCrmHigiene();
+    if (modo === 'auditoria' && window.loadDocAuditoria) loadDocAuditoria();
   };
 
   /* ─── FICHA DE PROPIEDAD (create + edit desde la web) ─── */
@@ -4077,4 +4077,73 @@ window.docInboxAsignar = async function (id) {
 window.docInboxDescartar = async function (id) {
   var d = await apiFetch('/crm/doc-inbox/descartar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
   if (d && d.ok) { toast('Descartado', 'ok'); loadDocInbox(); } else toast('Error al descartar', 'err');
+};
+
+/* ════════════ S52.1: AUDITORÍA DE CARGAS (depurador documental) ════════════ */
+var DOC_ESTADO_COLOR = {
+  'Validado': 'var(--ok)', 'Asociado · pendiente de revisión': 'var(--gold)', 'Bloqueante detectado': 'var(--danger)',
+  'Sin clasificar': 'var(--muted)', 'Posible duplicado': '#a78bfa', 'Descartado': '#6b7078',
+  'Recibido': 'var(--metro)', 'Extraído': 'var(--metro)', 'Analizado IA': 'var(--metro)', 'Requiere revisión': 'var(--warn)', 'Capturado': 'var(--metro)'
+};
+window.docAuditFiltro = window.docAuditFiltro || 'Todos';
+window.loadDocAuditoria = async function () {
+  var el = document.getElementById('doc-auditoria');
+  if (!el) return;
+  var d = await apiFetch('/crm/docs-auditoria');
+  if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">No pude leer la auditoría.</span>'; return; }
+  window.docAuditData = d;
+  var cnt = document.getElementById('crm-audit-count'); if (cnt) cnt.textContent = (d.count || 0);
+  window.docAuditProps = d.propiedades || [];
+  // filtros por estado (chips)
+  var fbox = document.getElementById('doc-audit-filtros');
+  if (fbox) {
+    var estados = ['Todos'].concat(Object.keys(d.porEstado || {}));
+    fbox.innerHTML = estados.map(function (e) {
+      var n = e === 'Todos' ? d.count : d.porEstado[e];
+      var on = window.docAuditFiltro === e;
+      return '<button class="btn btn-sm ' + (on ? 'btn-gold' : 'btn-ghost') + '" onclick="window.docAuditFiltro=\'' + e.replace(/'/g, '') + '\';renderDocAuditoria()">' + escHtml(e) + ' <b>' + n + '</b></button>';
+    }).join('');
+  }
+  renderDocAuditoria();
+};
+window.renderDocAuditoria = function () {
+  var el = document.getElementById('doc-auditoria'); var d = window.docAuditData;
+  if (!el || !d) return;
+  var items = (d.items || []).filter(function (x) { return window.docAuditFiltro === 'Todos' || x.estado === window.docAuditFiltro; });
+  if (!items.length) { el.innerHTML = '<div class="small muted">Sin cargas' + (window.docAuditFiltro !== 'Todos' ? ' en estado "' + escHtml(window.docAuditFiltro) + '"' : ' todavía. Lo que entre por WhatsApp aparece acá.') + '</div>'; return; }
+  el.innerHTML = '<div style="max-height:60vh;overflow-y:auto;">' + items.map(function (x) {
+    var col = DOC_ESTADO_COLOR[x.estado] || 'var(--muted)';
+    var opts = '<option value="">— reasignar a… —</option>' + (window.docAuditProps || []).map(function (p) { return '<option value="' + p.id + '"' + (p.id === x.propiedadId ? ' selected' : '') + '>' + escHtml(p.nombre) + '</option>'; }).join('');
+    var fecha = (x.creada || '').slice(0, 16).replace('T', ' ');
+    return '<div style="border:1px solid rgba(255,255,255,0.07);border-left:3px solid ' + col + ';border-radius:9px;padding:8px 11px;margin-bottom:7px;background:rgba(255,255,255,0.012);">' +
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+        '<strong style="font-size:.82rem;">' + escHtml(x.filename) + '</strong>' +
+        '<span class="badge" style="border:1px solid ' + col + '66;color:' + col + ';">' + escHtml(x.estado) + '</span>' +
+        (x.tipo ? '<span class="badge badge-muted">' + escHtml(x.tipo) + '</span>' : '') +
+        (x.propiedad ? '<span class="badge badge-metro">→ ' + escHtml(x.propiedad) + '</span>' : '') +
+        (x.confianza ? '<span style="font-size:.64rem;color:var(--muted);">conf. ' + escHtml(x.confianza) + '</span>' : '') +
+        '<span style="margin-left:auto;font-size:.64rem;color:var(--muted);font-family:var(--mono);">' + escHtml(x.fuente || '') + ' · ' + fecha + (x.remitente ? ' · ' + escHtml(x.remitente) : '') + '</span>' +
+      '</div>' +
+      (x.redFlags ? '<div style="font-size:.7rem;color:var(--danger);margin-top:4px;">⚠️ ' + escHtml(x.redFlags) + '</div>' : '') +
+      '<div class="btn-row" style="margin-top:6px;">' +
+        (x.estado !== 'Validado' && x.propiedadId ? '<button class="btn btn-gold btn-sm" onclick="docInboxValidar(\'' + x.id + '\');setTimeout(loadDocAuditoria,600)">✓ Validar</button>' : '') +
+        '<select class="input" id="da-prop-' + x.id + '" style="width:auto;font-size:.72rem;padding:2px 7px;">' + opts + '</select>' +
+        '<button class="btn btn-ghost btn-sm" onclick="docAuditReasignar(\'' + x.id + '\')">Reasignar</button>' +
+        (x.propiedadId ? '<button class="btn btn-ghost btn-sm" onclick="docAuditDesasociar(\'' + x.id + '\')" title="Sacar la asociación (vuelve a Sin clasificar)">⊘ Desasociar</button>' : '') +
+        (x.driveLink ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + escHtml(x.driveLink) + '" target="_blank" rel="noopener">↗ Drive</a>' : '') +
+        (x.propiedadId ? '<button class="btn btn-ghost btn-sm" onclick="abrirLegajo(\'' + x.propiedadId + '\')">📂 Legajo</button>' : '') +
+        (x.estado !== 'Descartado' ? '<button class="btn btn-ghost btn-sm" onclick="docInboxDescartar(\'' + x.id + '\');setTimeout(loadDocAuditoria,600)">🗑</button>' : '') +
+      '</div></div>';
+  }).join('') + '</div>';
+};
+window.docAuditReasignar = async function (id) {
+  var sel = document.getElementById('da-prop-' + id);
+  var propiedadId = sel ? sel.value : '';
+  if (!propiedadId) return toast('Elegí la propiedad correcta', 'err');
+  var d = await apiFetch('/crm/doc-inbox/asignar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, propiedadId: propiedadId }) });
+  if (d && d.ok) { toast('Reasignado — pendiente de revisión', 'ok'); loadDocAuditoria(); } else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
+};
+window.docAuditDesasociar = async function (id) {
+  var d = await apiFetch('/crm/doc-inbox/desasociar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+  if (d && d.ok) { toast('Desasociado → Sin clasificar', 'ok'); loadDocAuditoria(); } else toast('Error al desasociar', 'err');
 };
