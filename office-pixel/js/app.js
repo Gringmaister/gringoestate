@@ -1279,6 +1279,16 @@
 
   /* ─── GRINGO CRM (banco Notion) ─────────────────────────────────── */
   var CRM_ETIQ_COLOR = { A: 'var(--ok)', B: 'var(--gold)', C: 'var(--warn)', D: 'var(--muted)' };
+  // S50 (consultor): mini-acciones CONCRETAS debajo de cada embudo — no solo etapas decorativas
+  var ACCIONES_CAP = { 'Lead propietario': 'contactarlo y calificar (NURC)', 'Contactado': 'completar NURC + agendar tasación', 'Tasación': 'cargar comparables + generar Carpeta Wow', 'Autorización': 'mandar autorización + Compromiso de Calidad', 'Captada': 'documentación + fotos/plano → publicar' };
+  var ACCIONES_DEM = { 'Consulta': 'calificar (PUFA) y responder en <1 min', 'Calificado': 'proponer visita con 2 horarios', 'Visita coordinada': 'confirmar el día antes + preparar la unidad', 'Oferta/Reserva': 'crear la operación 💼 y pedir refuerzo' };
+  function accionesEmbudo(etapas, mapa) {
+    var lineas = (etapas || []).filter(function (e) { return e.count > 0 && mapa[e.etapa]; }).map(function (e) {
+      return '<div style="font-size:.74rem;padding:2px 0;color:var(--muted);">▶ <b style="color:var(--text);">' + e.count + ' en ' + escHtml(e.etapa) + '</b> → ' + mapa[e.etapa] + '</div>';
+    });
+    return lineas.length ? '<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.06);padding-top:6px;">' + lineas.join('') + '</div>' : '';
+  }
+
   // S47: embudos con COLOR — progresión frío→oro→verde por avance; descartes en gris (pedido Franco)
   var FUNNEL_PALETTE = ['#5ec8d8', '#6fa8e8', '#9b8cf0', '#c9a0f0', '#d4af37', '#e8c96a', '#67d98b', '#46b97a', '#3da06a', '#67d98b'];
   function funnelColor(etapa, i) {
@@ -1323,7 +1333,7 @@
         'Todavía no hay propietarios en el embudo. Cargá un lead, promové desde tus contactos o importá una ficha.',
         '<button class="btn btn-gold btn-sm" onclick="showModal(\'modal-contacto\')">+ Lead propietario</button>' +
         '<button class="btn btn-ghost btn-sm" onclick="crmTab(\'contactos\')">⭐ Promover desde contactos</button>' +
-        '<button class="btn btn-ghost btn-sm" onclick="showModal(\'modal-import\')">📥 Importar</button>') : '') + crmFunnelHtml(d.captacion || []);
+        '<button class="btn btn-ghost btn-sm" onclick="showModal(\'modal-import\')">📥 Importar</button>') : '') + crmFunnelHtml(d.captacion || []) + accionesEmbudo(d.captacion, ACCIONES_CAP);
       var el = document.getElementById('crm-cap-total'); if (el) el.textContent = capTotal + ' propietarios';
       var dem = document.getElementById('crm-demanda');
       var demTotal = (d.demanda || []).reduce(function (s, e) { return s + e.count; }, 0);
@@ -1331,7 +1341,7 @@
         'Todavía no hay compradores/inquilinos. Cargá una consulta, mandale el screenshot del lead a Wispy o promové desde contactos.',
         '<button class="btn btn-gold btn-sm" onclick="showModal(\'modal-contacto\')">+ Lead demanda</button>' +
         '<button class="btn btn-ghost btn-sm" onclick="crmTab(\'contactos\')">⭐ Promover desde contactos</button>' +
-        '<button class="btn btn-ghost btn-sm" onclick="showModal(\'modal-import\')">📥 Importar</button>') : '') + crmFunnelHtml(d.demanda || []);
+        '<button class="btn btn-ghost btn-sm" onclick="showModal(\'modal-import\')">📥 Importar</button>') : '') + crmFunnelHtml(d.demanda || []) + accionesEmbudo(d.demanda, ACCIONES_DEM);
       el = document.getElementById('crm-dem-total'); if (el) el.textContent = demTotal + ' leads';
       // Los 250
       el = document.getElementById('crm-250-total'); if (el) el.textContent = (d.los250?.total || 0) + ' / 250';
@@ -1392,6 +1402,36 @@
             '<button class="btn btn-ghost btn-sm" title="Subir documentación (escritura, informes…) — copia SIEMPRE al Drive de gringoestate + tick en el checklist" onclick="event.stopPropagation();abrirDocUpload(\'' + p.id + '\')">📎</button>' +
           '</div>';
         }).join('') : '<span class="small muted">Sin propiedades todavía — cargá la primera con «+ Propiedad».</span>');
+        // S50 (consultor): card Documental OPERATIVA — checklist vivo por propiedad, no párrafo
+        var docEl = document.getElementById('crm-doc-operativo');
+        if (docEl) {
+          var DOC_CHECK = { 'Venta': ['Escritura', 'DNI/CUIT', 'ABL', 'Expensas', 'Reglamento', 'Certif. dominio', 'Inhibiciones', 'COTI', 'Poder', 'Plano', 'Fotos', 'Autorización'], 'Alquiler': ['Escritura', 'DNI/CUIT', 'Expensas', 'Reglamento', 'Autorización', 'Plano', 'Fotos', 'Contrato'] };
+          var DOC_CRIT = { 'Escritura': 1, 'Plano': 1, 'Fotos': 1, 'Autorización': 1 };
+          docEl.innerHTML = items.length ? items.map(function (p) {
+            var lista = DOC_CHECK[p.operacion] || DOC_CHECK['Alquiler'];
+            var g = p.docsGestion || {};
+            var rec = function (tp) { return (p.docs || []).indexOf(tp) >= 0 || g[tp] === 'recibido'; };
+            var chips = lista.map(function (tipo) {
+              var st = rec(tipo) ? 'recibido' : (g[tipo] || 'pendiente');
+              var col = st === 'recibido' ? 'var(--ok)' : st === 'pedido' ? '#5ec8d8' : st === 'revisar' ? 'var(--warn)' : st === 'no_aplica' ? '#555' : (DOC_CRIT[tipo] && p.estado === 'Publicada' ? 'var(--danger)' : '#999');
+              var icon = st === 'recibido' ? '✓' : st === 'pedido' ? '📨' : st === 'no_aplica' ? '—' : '○';
+              return '<span title="' + tipo + ': ' + st + '" style="display:inline-flex;align-items:center;gap:4px;border:1px solid ' + col + '55;border-left:3px solid ' + col + ';border-radius:7px;padding:2px 8px;font-size:.7rem;' + (st === 'no_aplica' ? 'opacity:.4;' : '') + '">' + icon + ' ' + tipo + '</span>';
+            }).join(' ');
+            var nAplica = lista.filter(function (tp) { return g[tp] !== 'no_aplica'; }).length;
+            var nRec = lista.filter(rec).length;
+            return '<div style="border:1px solid var(--border);border-radius:10px;padding:9px 12px;margin-bottom:8px;">' +
+              '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px;">' +
+                '<strong style="font-size:.82rem;">' + escHtml(p.propiedad) + '</strong>' +
+                '<span class="badge badge-muted">' + escHtml(p.operacion || '') + '</span>' +
+                '<span style="font-family:var(--mono);font-size:.72rem;color:' + (nRec >= nAplica ? 'var(--ok)' : 'var(--gold)') + ';">' + nRec + '/' + nAplica + '</span>' +
+                '<span style="margin-left:auto;display:inline-flex;gap:5px;">' +
+                  '<button class="btn btn-gold btn-sm" onclick="abrirLegajo(\'' + p.id + '\')">📂 Legajo</button>' +
+                  '<button class="btn btn-ghost btn-sm" onclick="abrirDocUpload(\'' + p.id + '\')">📎 Subir</button>' +
+                '</span></div>' +
+              '<div style="display:flex;gap:5px;flex-wrap:wrap;">' + chips + '</div>' +
+            '</div>';
+          }).join('') : '<div class="small muted">Sin propiedades — el documental arranca cuando cargues la primera.</div>';
+        }
       }
       window.crmPipelineCache = d;
       renderVista360();
@@ -1964,6 +2004,16 @@
     el.innerHTML = '<div class="skeleton skeleton-block" style="height:80px;"></div>';
     var d = await apiFetch('/crm/tasacion/' + id);
     if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">Error al abrir.</span>'; return; }
+    window.tsDetalle = d;
+    // S50 (consultor): vista EJECUTIVA por default cuando ya hay resultado; técnica si falta calcular
+    window.tsVista = d.tasacion && d.tasacion.precioCierre ? (window.tsVista || 'ejecutiva') : 'tecnica';
+    renderTasacionDetalle();
+  }
+  // S50: render separado — el toggle ejecutiva/técnica no refetchea
+  function renderTasacionDetalle() {
+    var el = document.getElementById('crm-tasacion-detalle');
+    var d = window.tsDetalle;
+    if (!el || !d) return;
     var t = d.tasacion, comps = d.comparables || [];
     var filas = comps.map(function (c) {
       var excl = c.estadoAviso === 'Excluido' || c.outlier;
@@ -2011,6 +2061,21 @@
       '<label style="display:flex;gap:8px;align-items:center;font-size:.76rem;color:var(--muted);margin-top:6px;cursor:pointer;"><input type="checkbox" id="dg-marca"' + (t.edificioMarca ? ' checked' : '') + '> ★ Edificio de marca (+hasta 30%)</label>' +
       '<button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="guardarDiagnostico(\'' + t.id + '\')">💾 Guardar diagnóstico</button>' +
     '</details>';
+    var ejecutiva = window.tsVista === 'ejecutiva';
+    // S50 (consultor): vista EJECUTIVA = lo mostrable (4 precios + semáforo + estrategia) ·
+    // vista TÉCNICA = el laboratorio (diagnóstico, comparables, ajustes)
+    var tecnicaHtml = diagHtml +
+      '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">' +
+        '<input class="input" id="cmp-link" placeholder="Pegá un LINK de Zonaprop…" style="flex:2;min-width:200px;">' +
+        '<button class="btn btn-gold btn-sm" onclick="agregarComparable(\'' + t.id + '\',\'link\')">+ por link</button>' +
+      '</div>' +
+      '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">' +
+        '<textarea class="input" id="cmp-texto" placeholder="…o pegá el TEXTO del aviso (compartir → copiar)" style="flex:2;min-width:200px;min-height:44px;"></textarea>' +
+        '<button class="btn btn-ghost btn-sm" onclick="agregarComparable(\'' + t.id + '\',\'texto\')">+ por texto</button>' +
+      '</div>' +
+      (comps.length ? '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="font-size:.66rem;color:var(--muted);text-transform:uppercase;"><th style="text-align:left;padding:4px 6px;">Comparable</th><th style="text-align:right;">Precio</th><th style="text-align:right;">Ajustado</th><th style="text-align:right;">m²</th><th style="text-align:right;">USD/m²</th><th style="text-align:right;">Días</th><th>Estado</th><th></th></tr></thead><tbody>' + filas + '</tbody></table></div>' : '<div class="small muted">Sin comparables todavía — pegá el primero ↑</div>');
+    var nIncl = comps.filter(function (c) { return !(c.estadoAviso === 'Excluido' || c.outlier); }).length;
+    var ejecutivaHtml = '<div class="small muted" style="margin-bottom:4px;">' + nIncl + ' comparables en el cálculo (' + (comps.length - nIncl) + ' excluidos) · diagnóstico y ajustes en la 🔬 vista técnica</div>';
     el.innerHTML =
       '<div style="border:1px solid var(--border);border-radius:12px;padding:12px;">' +
         '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
@@ -2019,22 +2084,15 @@
           '<span class="badge badge-muted">' + escHtml(t.estado || '') + '</span>' +
           '<span style="font-family:var(--mono);font-size:.74rem;color:var(--muted);">' + (t.m2Pond || '—') + ' m² pond.' + (t.cochera ? ' + 🚗' : '') + '</span>' +
           '<span style="margin-left:auto;"></span>' +
-          '<button class="btn btn-gold btn-sm" onclick="calcularTasacion(\'' + t.id + '\')">🧮 Calcular</button>' +
+          (t.precioCierre ? '<button class="btn btn-ghost btn-sm" onclick="window.tsVista=\'' + (ejecutiva ? 'tecnica' : 'ejecutiva') + '\';renderTasacionDetalle()">' + (ejecutiva ? '🔬 Vista técnica' : '👔 Vista ejecutiva') + '</button>' : '') +
+          (ejecutiva ? '' : '<button class="btn btn-gold btn-sm" onclick="calcularTasacion(\'' + t.id + '\')">🧮 Calcular</button>') +
           (t.precioCierre ? '<button class="btn btn-gold btn-sm" onclick="pdfTasacion(\'' + t.id + '\')">📄 Carpeta Wow</button>' : '') +
         '</div>' +
-        preciosHtml + diagHtml +
-        '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">' +
-          '<input class="input" id="cmp-link" placeholder="Pegá un LINK de Zonaprop…" style="flex:2;min-width:200px;">' +
-          '<button class="btn btn-gold btn-sm" onclick="agregarComparable(\'' + t.id + '\',\'link\')">+ por link</button>' +
-        '</div>' +
-        '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">' +
-          '<textarea class="input" id="cmp-texto" placeholder="…o pegá el TEXTO del aviso (compartir → copiar)" style="flex:2;min-width:200px;min-height:44px;"></textarea>' +
-          '<button class="btn btn-ghost btn-sm" onclick="agregarComparable(\'' + t.id + '\',\'texto\')">+ por texto</button>' +
-        '</div>' +
-        (comps.length ? '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="font-size:.66rem;color:var(--muted);text-transform:uppercase;"><th style="text-align:left;padding:4px 6px;">Comparable</th><th style="text-align:right;">Precio</th><th style="text-align:right;">Ajustado</th><th style="text-align:right;">m²</th><th style="text-align:right;">USD/m²</th><th style="text-align:right;">Días</th><th>Estado</th><th></th></tr></thead><tbody>' + filas + '</tbody></table></div>' : '<div class="small muted">Sin comparables todavía — pegá el primero ↑</div>') +
+        preciosHtml + (ejecutiva ? ejecutivaHtml : tecnicaHtml) +
       '</div>';
   }
   window.abrirTasacion = abrirTasacion;
+  window.renderTasacionDetalle = renderTasacionDetalle;
 
   async function agregarComparable(tasacionId, via) {
     var body = { tasacionId: tasacionId };
@@ -2636,7 +2694,13 @@
       ? '<div style="border:1px dashed var(--border);border-radius:12px;padding:18px;text-align:center;margin-bottom:12px;"><div style="font-size:.82rem;color:var(--muted);margin-bottom:10px;">Sin operaciones activas. Cuando haya una oferta o reserva en la mesa, cargala acá (o aprobá la sugerencia de Hermes desde el Inbox).</div><button class="btn btn-gold btn-sm" onclick="showModal(\'modal-operacion\')">+ Primera operación</button></div>'
       : '') + crmFunnelHtml((d.etapas || []).map(function (e) {
       return { etapa: e.etapa, count: e.count, cards: (e.items || []).map(function (i) { return { nombre: i.operacion + (i.montoTotal ? ' · $' + Number(i.montoTotal).toLocaleString('es-AR') : ''), onclick: 'abrirOperacion(\'' + i.id + '\')', title: 'Abrir flujo guiado de la operación' }; }) };
-    }));
+    })) + (function () {
+      // S50 (consultor): próximo paso de cada operación viva, debajo del embudo
+      var lineas = (d.items || []).filter(function (o) { return ['Cerrada', 'Caída'].indexOf(o.etapa) < 0 && o.proximoPaso; }).slice(0, 5).map(function (o) {
+        return '<div style="font-size:.74rem;padding:2px 0;color:var(--muted);cursor:pointer;" onclick="abrirOperacion(\'' + o.id + '\')" title="Abrir la operación">▶ <b style="color:var(--text);">' + escHtml(o.operacion) + '</b> → ' + escHtml(o.proximoPaso) + '</div>';
+      });
+      return lineas.length ? '<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.06);padding-top:6px;">' + lineas.join('') + '</div>' : '';
+    })();
     var al = document.getElementById('crm-ops-alertas');
     if (al) {
       var items = [];

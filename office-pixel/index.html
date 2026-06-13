@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/pixel.css?v=s49" />
+  <link rel="stylesheet" href="css/pixel.css?v=s50" />
 </head>
 <body>
 
@@ -987,10 +987,8 @@
           <div><h2 class="card-title">📄 Documental</h2><div class="card-sub">checklists internos y estado de documentación por propiedad</div></div>
           <button class="btn btn-ghost btn-sm" onclick="var x=document.getElementById('doc-checklists');x.style.display=x.style.display==='none'?'':'none'">📚 Checklists ▾</button>
         </div>
-        <div class="small muted" style="line-height:1.6;">
-          Cada propiedad tiene su <b>legajo</b> (click en la fila): documentos con análisis automático de escritura (titulares, gravámenes, red flags), semáforo documental con bloqueantes, tasaciones, interesados y operaciones.
-          Flujo: <b>pedir → identificar faltantes → procesar (Drive) → contratos → seguimiento</b> + 4 facilitadores (informes/dominio · fotos+plano · cartel · marketing).
-        </div>
+        <div id="crm-doc-operativo"><div class="skeleton skeleton-block" style="height:60px;"></div></div>
+        <div class="small muted" style="margin-top:6px;">Las acciones finas (pedir por ítem, marcar recibido, red flags de escritura) viven en el 📂 legajo de cada propiedad.</div>
         <div id="doc-checklists" style="display:none;margin-top:10px;">
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;">
             <div class="kpi" style="text-align:left;display:block;padding:10px 12px;">
@@ -1534,7 +1532,7 @@
 <!-- Scripts -->
 <!-- S45: ?v= cache-buster — subir la versión en cada deploy con cambios de JS/CSS
      (el HTML revalida siempre en Netlify; el query nuevo fuerza al browser a bajar el asset fresco) -->
-<script src="js/api.js?v=s49"></script>
-<script src="js/app.js?v=s49"></script>
+<script src="js/api.js?v=s50"></script>
+<script src="js/app.js?v=s50"></script>
 </body>
 </html>
