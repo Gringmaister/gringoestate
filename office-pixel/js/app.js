@@ -4064,7 +4064,7 @@ window.loadDocInbox = async function () {
         '<div class="btn-row" style="margin-top:6px;">' +
           '<select class="input" id="di-prop-' + x.id + '" style="width:auto;font-size:.74rem;padding:3px 8px;">' + opts + '</select>' +
           '<button class="btn btn-gold btn-sm" onclick="docInboxAsignar(\'' + x.id + '\')">Asignar</button>' +
-          '<button class="btn btn-ghost btn-sm" onclick="docInboxDescartar(\'' + x.id + '\')">🗑</button>' +
+          '<button class="btn btn-ghost btn-sm" title="Descartar (no se borra, queda en el historial)" onclick="docInboxDescartar(\'' + x.id + '\')">🗑 Descartar</button>' +
         '</div></div>';
     }).join('');
   }
@@ -4094,35 +4094,56 @@ var DOC_ESTADO_COLOR = {
   'Recibido': 'var(--metro)', 'Extraído': 'var(--metro)', 'Analizado IA': 'var(--metro)', 'Requiere revisión': 'var(--warn)', 'Capturado': 'var(--metro)'
 };
 window.docAuditFiltro = window.docAuditFiltro || 'Todos';
+// S58: conteos locales (recalculables sin refetch, para el descarte optimista)
+window.docAuditRecount = function () {
+  var d = window.docAuditData; if (!d) return;
+  var pe = {}; (d.items || []).forEach(function (x) { var e = x.estado || '?'; pe[e] = (pe[e] || 0) + 1; });
+  d.porEstado = pe; d.count = (d.items || []).length;
+};
+window.docAuditActivos = function () {
+  var d = window.docAuditData; if (!d) return 0;
+  return (d.count || 0) - ((d.porEstado && d.porEstado['Descartado']) || 0);
+};
+// S58: cabecera (contador + chips de filtro + buscador) — separada para refrescar sin refetch
+window.renderDocAuditHead = function () {
+  var d = window.docAuditData; if (!d) return;
+  var nActivos = docAuditActivos();
+  var cnt = document.getElementById('crm-audit-count'); if (cnt) cnt.textContent = nActivos;
+  var fbox = document.getElementById('doc-audit-filtros');
+  if (!fbox) return;
+  var estados = ['Todos'].concat(Object.keys(d.porEstado || {}));
+  fbox.innerHTML = estados.map(function (e) {
+    var n = e === 'Todos' ? nActivos : d.porEstado[e];
+    var on = window.docAuditFiltro === e;
+    var lbl = e === 'Descartado' ? '🗑 Descartados' : escHtml(e);
+    return '<button class="btn btn-sm ' + (on ? 'btn-gold' : 'btn-ghost') + '" onclick="window.docAuditFiltro=\'' + e.replace(/'/g, '') + '\';renderDocAuditHead();renderDocAuditoria()">' + lbl + ' <b>' + n + '</b></button>';
+  }).join('') +
+  '<span style="margin-left:auto;display:inline-flex;gap:6px;align-items:center;">' +
+    '<input class="input" id="da-prop-buscar" placeholder="🔎 filtrar propiedades del selector…" value="' + escHtml(window.docAuditPropFiltro || '') + '" style="width:200px;font-size:.74rem;padding:3px 8px;" oninput="window.docAuditPropFiltro=this.value;renderDocAuditoria()">' +
+    '<button class="btn btn-ghost btn-sm" onclick="loadDocAuditoria()" title="Releer las propiedades del CRM (después de crear una)">↻ Actualizar propiedades</button>' +
+  '</span>';
+};
 window.loadDocAuditoria = async function () {
   var el = document.getElementById('doc-auditoria');
   if (!el) return;
   var d = await apiFetch('/crm/docs-auditoria');
   if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">No pude leer la auditoría.</span>'; return; }
   window.docAuditData = d;
-  var cnt = document.getElementById('crm-audit-count'); if (cnt) cnt.textContent = (d.count || 0);
   window.docAuditProps = d.propiedades || [];
-  // filtros por estado (chips) + S55: buscador de propiedades para el selector + refresh
-  var fbox = document.getElementById('doc-audit-filtros');
-  if (fbox) {
-    var estados = ['Todos'].concat(Object.keys(d.porEstado || {}));
-    fbox.innerHTML = estados.map(function (e) {
-      var n = e === 'Todos' ? d.count : d.porEstado[e];
-      var on = window.docAuditFiltro === e;
-      return '<button class="btn btn-sm ' + (on ? 'btn-gold' : 'btn-ghost') + '" onclick="window.docAuditFiltro=\'' + e.replace(/'/g, '') + '\';renderDocAuditoria()">' + escHtml(e) + ' <b>' + n + '</b></button>';
-    }).join('') +
-    '<span style="margin-left:auto;display:inline-flex;gap:6px;align-items:center;">' +
-      '<input class="input" id="da-prop-buscar" placeholder="🔎 filtrar propiedades del selector…" value="' + escHtml(window.docAuditPropFiltro || '') + '" style="width:200px;font-size:.74rem;padding:3px 8px;" oninput="window.docAuditPropFiltro=this.value;renderDocAuditoria()">' +
-      '<button class="btn btn-ghost btn-sm" onclick="loadDocAuditoria()" title="Releer las propiedades del CRM (después de crear una)">↻ Actualizar propiedades</button>' +
-    '</span>';
-  }
+  renderDocAuditHead();
   renderDocAuditoria();
 };
 window.renderDocAuditoria = function () {
   var el = document.getElementById('doc-auditoria'); var d = window.docAuditData;
   if (!el || !d) return;
-  var items = (d.items || []).filter(function (x) { return window.docAuditFiltro === 'Todos' || x.estado === window.docAuditFiltro; });
-  if (!items.length) { el.innerHTML = '<div class="small muted">Sin cargas' + (window.docAuditFiltro !== 'Todos' ? ' en estado "' + escHtml(window.docAuditFiltro) + '"' : ' todavía. Lo que entre por WhatsApp aparece acá.') + '</div>'; return; }
+  // S58: "Todos" = activos (oculta Descartados); el chip "🗑 Descartados" los muestra
+  var items = (d.items || []).filter(function (x) { return window.docAuditFiltro === 'Todos' ? x.estado !== 'Descartado' : x.estado === window.docAuditFiltro; });
+  if (!items.length) {
+    var hayDesc = (d.porEstado && d.porEstado['Descartado']) || 0;
+    var msg = window.docAuditFiltro !== 'Todos' ? 'Sin cargas en estado "' + escHtml(window.docAuditFiltro) + '"'
+      : (hayDesc ? 'No hay cargas activas. Hay ' + hayDesc + ' descartada(s) — tocá «🗑 Descartados» para verlas.' : 'Sin cargas todavía. Lo que entre por WhatsApp aparece acá.');
+    el.innerHTML = '<div class="small muted">' + msg + '</div>'; return;
+  }
   var pf = (window.docAuditPropFiltro || '').toLowerCase();
   var propsFiltradas = (window.docAuditProps || []).filter(function (p) { return !pf || (p.nombre || '').toLowerCase().indexOf(pf) >= 0; });
   el.innerHTML = '<div style="max-height:60vh;overflow-y:auto;">' + items.map(function (x) {
@@ -4153,9 +4174,22 @@ window.renderDocAuditoria = function () {
         (x.propiedadId ? '<button class="btn btn-ghost btn-sm" onclick="docAuditDesasociar(\'' + x.id + '\')" title="Sacar la asociación (vuelve a Sin clasificar)">⊘ Desasociar</button>' : '') +
         (x.driveLink ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + escHtml(x.driveLink) + '" target="_blank" rel="noopener">↗ Drive</a>' : '') +
         (x.propiedadId ? '<button class="btn btn-ghost btn-sm" onclick="abrirLegajo(\'' + x.propiedadId + '\')">📂 Legajo</button>' : '') +
-        (x.estado !== 'Descartado' ? '<button class="btn btn-ghost btn-sm" onclick="docInboxDescartar(\'' + x.id + '\');setTimeout(loadDocAuditoria,600)">🗑</button>' : '') +
+        (x.estado !== 'Descartado' ? '<button class="btn btn-ghost btn-sm" title="Descartar: lo saca de la bandeja activa (no se borra, queda en el historial y permite reenviarlo)" onclick="docAuditDescartar(\'' + x.id + '\')">🗑 Descartar</button>' : '') +
       '</div></div>';
   }).join('') + '</div>';
+};
+// S58: descartar desde la Auditoría — OPTIMISTA (la fila desaparece al instante de la bandeja
+// activa, guarda en background, rollback si falla). No depende del refetch ni del caché de 45s.
+window.docAuditDescartar = async function (id) {
+  var d = window.docAuditData; if (!d) return;
+  var it = (d.items || []).find(function (x) { return x.id === id; });
+  if (!it) return;
+  var prev = it.estado;
+  it.estado = 'Descartado';
+  docAuditRecount(); renderDocAuditHead(); renderDocAuditoria();
+  var r = await apiFetch('/crm/doc-inbox/descartar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+  if (r && r.ok) { toast('🗑 Descartado — ya podés reenviarlo', 'ok'); }
+  else { it.estado = prev; docAuditRecount(); renderDocAuditHead(); renderDocAuditoria(); toast('No se pudo descartar — lo dejé como estaba', 'err'); }
 };
 // S57 (opción B): re-analizar pegando el texto del PDF (emergencia, sin Drive/runtime/token)
 window.docAuditReanalizar = async function (id) {
