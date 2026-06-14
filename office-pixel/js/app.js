@@ -4148,12 +4148,24 @@ window.renderDocAuditoria = function () {
         (x.puedeCrearPropiedad ? '<button class="btn btn-gold btn-sm" onclick="docAuditCrearPropiedad(\'' + x.id + '\')" title="Crea una propiedad borrador con los datos del documento y la asocia">＋ Crear propiedad desde documento</button>' : '') +
         '<select class="input" id="da-prop-' + x.id + '" style="width:auto;font-size:.72rem;padding:2px 7px;">' + opts + '</select>' +
         '<button class="btn btn-ghost btn-sm" onclick="docAuditReasignar(\'' + x.id + '\')">Reasignar</button>' +
+        // S57: re-analizar pegando texto (emergencia para docs pre-S56, sin Drive/runtime)
+        (!x.textoSugerencia ? '<button class="btn btn-ghost btn-sm" onclick="docAuditReanalizar(\'' + x.id + '\')" title="Pegá el texto del PDF para extraer dirección/partida/período (sin reenviar el archivo)">🔁 Re-analizar (texto)</button>' : '') +
         (x.propiedadId ? '<button class="btn btn-ghost btn-sm" onclick="docAuditDesasociar(\'' + x.id + '\')" title="Sacar la asociación (vuelve a Sin clasificar)">⊘ Desasociar</button>' : '') +
         (x.driveLink ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + escHtml(x.driveLink) + '" target="_blank" rel="noopener">↗ Drive</a>' : '') +
         (x.propiedadId ? '<button class="btn btn-ghost btn-sm" onclick="abrirLegajo(\'' + x.propiedadId + '\')">📂 Legajo</button>' : '') +
         (x.estado !== 'Descartado' ? '<button class="btn btn-ghost btn-sm" onclick="docInboxDescartar(\'' + x.id + '\');setTimeout(loadDocAuditoria,600)">🗑</button>' : '') +
       '</div></div>';
   }).join('') + '</div>';
+};
+// S57 (opción B): re-analizar pegando el texto del PDF (emergencia, sin Drive/runtime/token)
+window.docAuditReanalizar = async function (id) {
+  var texto = prompt('Pegá el TEXTO del documento (ABL/expensas/etc.) para extraer dirección, partida y período. NO reenvía el archivo — es una herramienta manual:');
+  if (texto === null) return;
+  if (texto.trim().length < 40) return toast('Texto muy corto (mínimo 40 caracteres)', 'err');
+  toast('Extrayendo del texto pegado… (~15s)', 'ok');
+  var d = await apiFetch('/crm/doc-inbox/re-analizar-texto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, texto: texto }) });
+  if (d && d.ok) { toast('✅ Re-analizado' + (d.tipo ? ' como ' + d.tipo : '') + (d.sugerencia ? ' — sugerencia lista' : ''), 'ok'); loadDocAuditoria(); }
+  else toast('Error: ' + ((d && d.error) || 'no pude extraer'), 'err');
 };
 // S55: crear propiedad borrador desde el documento (un click) + asociar + refrescar selector
 window.docAuditCrearPropiedad = async function (id) {
