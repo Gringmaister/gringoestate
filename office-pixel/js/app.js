@@ -4102,7 +4102,7 @@ window.loadDocAuditoria = async function () {
   window.docAuditData = d;
   var cnt = document.getElementById('crm-audit-count'); if (cnt) cnt.textContent = (d.count || 0);
   window.docAuditProps = d.propiedades || [];
-  // filtros por estado (chips)
+  // filtros por estado (chips) + S55: buscador de propiedades para el selector + refresh
   var fbox = document.getElementById('doc-audit-filtros');
   if (fbox) {
     var estados = ['Todos'].concat(Object.keys(d.porEstado || {}));
@@ -4110,7 +4110,11 @@ window.loadDocAuditoria = async function () {
       var n = e === 'Todos' ? d.count : d.porEstado[e];
       var on = window.docAuditFiltro === e;
       return '<button class="btn btn-sm ' + (on ? 'btn-gold' : 'btn-ghost') + '" onclick="window.docAuditFiltro=\'' + e.replace(/'/g, '') + '\';renderDocAuditoria()">' + escHtml(e) + ' <b>' + n + '</b></button>';
-    }).join('');
+    }).join('') +
+    '<span style="margin-left:auto;display:inline-flex;gap:6px;align-items:center;">' +
+      '<input class="input" id="da-prop-buscar" placeholder="🔎 filtrar propiedades del selector…" value="' + escHtml(window.docAuditPropFiltro || '') + '" style="width:200px;font-size:.74rem;padding:3px 8px;" oninput="window.docAuditPropFiltro=this.value;renderDocAuditoria()">' +
+      '<button class="btn btn-ghost btn-sm" onclick="loadDocAuditoria()" title="Releer las propiedades del CRM (después de crear una)">↻ Actualizar propiedades</button>' +
+    '</span>';
   }
   renderDocAuditoria();
 };
@@ -4119,9 +4123,11 @@ window.renderDocAuditoria = function () {
   if (!el || !d) return;
   var items = (d.items || []).filter(function (x) { return window.docAuditFiltro === 'Todos' || x.estado === window.docAuditFiltro; });
   if (!items.length) { el.innerHTML = '<div class="small muted">Sin cargas' + (window.docAuditFiltro !== 'Todos' ? ' en estado "' + escHtml(window.docAuditFiltro) + '"' : ' todavía. Lo que entre por WhatsApp aparece acá.') + '</div>'; return; }
+  var pf = (window.docAuditPropFiltro || '').toLowerCase();
+  var propsFiltradas = (window.docAuditProps || []).filter(function (p) { return !pf || (p.nombre || '').toLowerCase().indexOf(pf) >= 0; });
   el.innerHTML = '<div style="max-height:60vh;overflow-y:auto;">' + items.map(function (x) {
     var col = DOC_ESTADO_COLOR[x.estado] || 'var(--muted)';
-    var opts = '<option value="">— reasignar a… —</option>' + (window.docAuditProps || []).map(function (p) { return '<option value="' + p.id + '"' + (p.id === x.propiedadId ? ' selected' : '') + '>' + escHtml(p.nombre) + '</option>'; }).join('');
+    var opts = '<option value="">— reasignar a… —</option>' + propsFiltradas.map(function (p) { return '<option value="' + p.id + '"' + (p.id === x.propiedadId ? ' selected' : '') + '>' + escHtml(p.nombre) + '</option>'; }).join('');
     var fecha = (x.creada || '').slice(0, 16).replace('T', ' ');
     return '<div style="border:1px solid rgba(255,255,255,0.07);border-left:3px solid ' + col + ';border-radius:9px;padding:8px 11px;margin-bottom:7px;background:rgba(255,255,255,0.012);">' +
       '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
@@ -4132,9 +4138,14 @@ window.renderDocAuditoria = function () {
         (x.confianza ? '<span style="font-size:.64rem;color:var(--muted);">conf. ' + escHtml(x.confianza) + '</span>' : '') +
         '<span style="margin-left:auto;font-size:.64rem;color:var(--muted);font-family:var(--mono);">' + escHtml(x.fuente || '') + ' · ' + fecha + (x.remitente ? ' · ' + escHtml(x.remitente) : '') + '</span>' +
       '</div>' +
+      // S55: sugerencia editorial de Hermes (dirección detectada del inmueble)
+      (x.textoSugerencia ? '<div style="font-size:.74rem;color:#aee4ee;margin-top:5px;">🪽 ' + escHtml(x.textoSugerencia) + '</div>' : '') +
+      (x.nombreSugerido && x.nombreSugerido !== x.filename ? '<div style="font-size:.66rem;color:var(--muted);margin-top:2px;">Nombre sugerido: <span style="font-family:var(--mono);">' + escHtml(x.nombreSugerido) + '</span></div>' : '') +
       (x.redFlags ? '<div style="font-size:.7rem;color:var(--danger);margin-top:4px;">⚠️ ' + escHtml(x.redFlags) + '</div>' : '') +
       '<div class="btn-row" style="margin-top:6px;">' +
         (x.estado !== 'Validado' && x.propiedadId ? '<button class="btn btn-gold btn-sm" onclick="docInboxValidar(\'' + x.id + '\');setTimeout(loadDocAuditoria,600)">✓ Validar</button>' : '') +
+        // S55: crear propiedad desde el documento (cuando hay dirección detectada y no hay match)
+        (x.puedeCrearPropiedad ? '<button class="btn btn-gold btn-sm" onclick="docAuditCrearPropiedad(\'' + x.id + '\')" title="Crea una propiedad borrador con los datos del documento y la asocia">＋ Crear propiedad desde documento</button>' : '') +
         '<select class="input" id="da-prop-' + x.id + '" style="width:auto;font-size:.72rem;padding:2px 7px;">' + opts + '</select>' +
         '<button class="btn btn-ghost btn-sm" onclick="docAuditReasignar(\'' + x.id + '\')">Reasignar</button>' +
         (x.propiedadId ? '<button class="btn btn-ghost btn-sm" onclick="docAuditDesasociar(\'' + x.id + '\')" title="Sacar la asociación (vuelve a Sin clasificar)">⊘ Desasociar</button>' : '') +
@@ -4143,6 +4154,13 @@ window.renderDocAuditoria = function () {
         (x.estado !== 'Descartado' ? '<button class="btn btn-ghost btn-sm" onclick="docInboxDescartar(\'' + x.id + '\');setTimeout(loadDocAuditoria,600)">🗑</button>' : '') +
       '</div></div>';
   }).join('') + '</div>';
+};
+// S55: crear propiedad borrador desde el documento (un click) + asociar + refrescar selector
+window.docAuditCrearPropiedad = async function (id) {
+  toast('Creando propiedad borrador desde el documento…', 'ok');
+  var d = await apiFetch('/crm/doc-inbox/crear-propiedad', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+  if (d && d.ok) { toast('🏠 Propiedad creada: ' + (d.nombre || '') + ' (borrador, pendiente de revisión)', 'ok'); loadDocAuditoria(); }
+  else toast('Error: ' + ((d && d.error) || 'no pude crear'), 'err');
 };
 window.docAuditReasignar = async function (id) {
   var sel = document.getElementById('da-prop-' + id);
