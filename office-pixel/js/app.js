@@ -8,6 +8,12 @@
   'use strict';
 
   const { apiFetch, prom, promAll } = window.GO;
+  // S54.1 FIX: estos helpers viven dentro de este IIFE, pero los bloques agregados FUERA del IIFE
+  // (Hermes Dock, Doc Inbox, Auditoría de cargas) los llaman por nombre → sin esto daban
+  // ReferenceError al renderizar y la lista quedaba en skeleton ("badge carga, lista no").
+  // escHtml es function declaration (hoisted), así que ya existe al asignarla acá.
+  window.apiFetch = apiFetch;
+  window.escHtml = escHtml;
 
   /* ─── STATE ────────────────────────────────────────────────────── */
   let canarianPin = null;
