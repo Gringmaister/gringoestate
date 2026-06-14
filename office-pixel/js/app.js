@@ -4133,6 +4133,41 @@ window.loadDocAuditoria = async function () {
   renderDocAuditHead();
   renderDocAuditoria();
 };
+// S59: nombre corto del inmueble sugerido/asociado de un doc (para la relación por tanda)
+window.docAuditInmueble = function (x) {
+  if (x.propiedad) return x.propiedad;
+  var s = x.sugerencia;
+  if (s && s.direccionInmueble) return s.direccionInmueble + (s.unidad ? ' ' + s.unidad : '');
+  return null;
+};
+// S59: naturaleza HONESTA del doc no clasificado (sin OCR) — del bridge (nota) o derivada del filename
+window.docAuditNaturaleza = function (x) {
+  if (x.tipo || x.textoSugerencia || x.propiedadId) return null; // ya tiene señal, no hace falta
+  if (x.nota) return x.nota;
+  var fn = (x.filename || '').toLowerCase();
+  if (/\.(jpe?g|png|webp|gif|heic)$/.test(fn) || fn.indexOf('foto') === 0) return '🖼 Imagen — posible foto/plano (revisar)';
+  if (/\.pdf$/.test(fn)) return '📄 PDF (posible escaneado sin texto) — revisar';
+  return null;
+};
+// S59: agrupar por tanda (mismo remitente + ventana ≤5min). Mapa docId → grupo {docs, inmueble, hora, hermanosSinProp}
+window.docAuditCalcTandas = function (items) {
+  var byId = {};
+  var sorted = items.slice().sort(function (a, b) { return (a.remitente || '').localeCompare(b.remitente || '') || (a.creada || '').localeCompare(b.creada || ''); });
+  var grupos = [], cur = null;
+  sorted.forEach(function (x) {
+    var t = Date.parse(x.creada || '') || 0;
+    if (cur && cur.rem === (x.remitente || '') && Math.abs(t - cur.lastT) <= 5 * 60 * 1000) { cur.docs.push(x); cur.lastT = t; }
+    else { cur = { rem: x.remitente || '', lastT: t, docs: [x] }; grupos.push(cur); }
+  });
+  grupos.forEach(function (g) {
+    var conInm = g.docs.find(function (dd) { return docAuditInmueble(dd); });
+    g.inmueble = conInm ? docAuditInmueble(conInm) : null;
+    g.hora = (g.docs[0].creada || '').slice(11, 16);
+    g.hermanosSinProp = g.docs.filter(function (dd) { return !dd.propiedadId && !dd.puedeCrearPropiedad; }).map(function (dd) { return dd.id; });
+    g.docs.forEach(function (dd) { byId[dd.id] = g; });
+  });
+  return byId;
+};
 window.renderDocAuditoria = function () {
   var el = document.getElementById('doc-auditoria'); var d = window.docAuditData;
   if (!el || !d) return;
@@ -4146,27 +4181,41 @@ window.renderDocAuditoria = function () {
   }
   var pf = (window.docAuditPropFiltro || '').toLowerCase();
   var propsFiltradas = (window.docAuditProps || []).filter(function (p) { return !pf || (p.nombre || '').toLowerCase().indexOf(pf) >= 0; });
+  var tandas = docAuditCalcTandas(items); // S59
+  var TIPOS_MARCAR = ['Escritura', 'Plano', 'ABL', 'Expensas', 'DNI/CUIT', 'Reglamento', 'Certif. dominio', 'Poder', 'Fotos', 'Contrato', 'Otro'];
   el.innerHTML = '<div style="max-height:60vh;overflow-y:auto;">' + items.map(function (x) {
     var col = DOC_ESTADO_COLOR[x.estado] || 'var(--muted)';
     var opts = '<option value="">— reasignar a… —</option>' + propsFiltradas.map(function (p) { return '<option value="' + p.id + '"' + (p.id === x.propiedadId ? ' selected' : '') + '>' + escHtml(p.nombre) + '</option>'; }).join('');
     var fecha = (x.creada || '').slice(0, 16).replace('T', ' ');
+    var g = tandas[x.id] || {}; var enTanda = (g.docs || []).length > 1; // S59
+    var nat = docAuditNaturaleza(x);
+    var hermanos = (g.hermanosSinProp || []).filter(function (hid) { return hid !== x.id; });
+    var tipoSel = '<select class="input" title="Marcar el tipo a mano (para escaneados/imágenes que no se pudieron leer)" style="width:auto;font-size:.72rem;padding:2px 7px;" onchange="if(this.value)docAuditMarcarTipo(\'' + x.id + '\',this.value)"><option value="">🏷 Marcar tipo…</option>' + TIPOS_MARCAR.map(function (t) { return '<option>' + t + '</option>'; }).join('') + '</select>';
     return '<div style="border:1px solid rgba(255,255,255,0.07);border-left:3px solid ' + col + ';border-radius:9px;padding:8px 11px;margin-bottom:7px;background:rgba(255,255,255,0.012);">' +
       '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
         '<strong style="font-size:.82rem;">' + escHtml(x.filename) + '</strong>' +
         '<span class="badge" style="border:1px solid ' + col + '66;color:' + col + ';">' + escHtml(x.estado) + '</span>' +
         (x.tipo ? '<span class="badge badge-muted">' + escHtml(x.tipo) + '</span>' : '') +
         (x.propiedad ? '<span class="badge badge-metro">→ ' + escHtml(x.propiedad) + '</span>' : '') +
+        (enTanda ? '<span class="badge" style="border:1px solid #c9a86144;color:#c9a861;" title="Llegaron juntos: mismo remitente y horario (revisar como paquete)">🧩 Tanda de ' + g.docs.length + (g.hora ? ' · ' + g.hora : '') + '</span>' : '') +
         (x.confianza ? '<span style="font-size:.64rem;color:var(--muted);">conf. ' + escHtml(x.confianza) + '</span>' : '') +
         '<span style="margin-left:auto;font-size:.64rem;color:var(--muted);font-family:var(--mono);">' + escHtml(x.fuente || '') + ' · ' + fecha + (x.remitente ? ' · ' + escHtml(x.remitente) : '') + '</span>' +
       '</div>' +
       // S55: sugerencia editorial de Hermes (dirección detectada del inmueble)
       (x.textoSugerencia ? '<div style="font-size:.74rem;color:#aee4ee;margin-top:5px;">🪽 ' + escHtml(x.textoSugerencia) + '</div>' : '') +
+      // S59: naturaleza honesta del doc no clasificado (sin OCR)
+      (nat ? '<div style="font-size:.72rem;color:#d9b38c;margin-top:5px;">' + escHtml(nat) + '</div>' : '') +
+      // S59: relación por tanda (solo sugiere, no asocia)
+      (enTanda && g.inmueble && !docAuditInmueble(x) ? '<div style="font-size:.72rem;color:#9fd6a0;margin-top:4px;">🔗 Llegó junto con <b>' + escHtml(g.inmueble) + '</b> — revisar antes de asociar</div>' : '') +
       (x.nombreSugerido && x.nombreSugerido !== x.filename ? '<div style="font-size:.66rem;color:var(--muted);margin-top:2px;">Nombre sugerido: <span style="font-family:var(--mono);">' + escHtml(x.nombreSugerido) + '</span></div>' : '') +
       (x.redFlags ? '<div style="font-size:.7rem;color:var(--danger);margin-top:4px;">⚠️ ' + escHtml(x.redFlags) + '</div>' : '') +
       '<div class="btn-row" style="margin-top:6px;">' +
         (x.estado !== 'Validado' && x.propiedadId ? '<button class="btn btn-gold btn-sm" onclick="docInboxValidar(\'' + x.id + '\');setTimeout(loadDocAuditoria,600)">✓ Validar</button>' : '') +
-        // S55: crear propiedad desde el documento (cuando hay dirección detectada y no hay match)
-        (x.puedeCrearPropiedad ? '<button class="btn btn-gold btn-sm" onclick="docAuditCrearPropiedad(\'' + x.id + '\')" title="Crea una propiedad borrador con los datos del documento y la asocia">＋ Crear propiedad desde documento</button>' : '') +
+        // S55/S59: crear propiedad desde el doc; si hay hermanos de tanda, los asocia como pendientes
+        (x.puedeCrearPropiedad ? (hermanos.length
+          ? '<button class="btn btn-gold btn-sm" onclick="docAuditCrearConTanda(\'' + x.id + '\',\'' + hermanos.join(',') + '\')" title="Crea la propiedad borrador desde este documento y asocia los ' + hermanos.length + ' de la misma tanda como pendientes de revisión">＋ Crear propiedad + asociar tanda (' + hermanos.length + ')</button>'
+          : '<button class="btn btn-gold btn-sm" onclick="docAuditCrearPropiedad(\'' + x.id + '\')" title="Crea una propiedad borrador con los datos del documento y la asocia">＋ Crear propiedad desde documento</button>') : '') +
+        tipoSel +
         '<select class="input" id="da-prop-' + x.id + '" style="width:auto;font-size:.72rem;padding:2px 7px;">' + opts + '</select>' +
         '<button class="btn btn-ghost btn-sm" onclick="docAuditReasignar(\'' + x.id + '\')">Reasignar</button>' +
         // S57: re-analizar pegando texto (emergencia para docs pre-S56, sin Drive/runtime)
@@ -4177,6 +4226,23 @@ window.renderDocAuditoria = function () {
         (x.estado !== 'Descartado' ? '<button class="btn btn-ghost btn-sm" title="Descartar: lo saca de la bandeja activa (no se borra, queda en el historial y permite reenviarlo)" onclick="docAuditDescartar(\'' + x.id + '\')">🗑 Descartar</button>' : '') +
       '</div></div>';
   }).join('') + '</div>';
+};
+// S59: marcar tipo a mano (escaneados/imágenes que no se pudieron clasificar). Optimista.
+window.docAuditMarcarTipo = async function (id, tipo) {
+  if (!tipo) return;
+  var d = window.docAuditData; var it = d && (d.items || []).find(function (x) { return x.id === id; });
+  if (it) { it.tipo = tipo; renderDocAuditoria(); }
+  var r = await apiFetch('/crm/doc-inbox/marcar-tipo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, tipo: tipo }) });
+  if (r && r.ok) { toast('🏷 Marcado como ' + tipo, 'ok'); }
+  else { toast('No se pudo marcar el tipo', 'err'); loadDocAuditoria(); }
+};
+// S59: crear propiedad desde el ABL + asociar los hermanos de la tanda (escritura/plano) como pendientes
+window.docAuditCrearConTanda = async function (id, hermanosCsv) {
+  var hermanos = (hermanosCsv || '').split(',').filter(Boolean);
+  toast('Creando propiedad borrador y asociando la tanda…', 'ok');
+  var r = await apiFetch('/crm/doc-inbox/crear-propiedad', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, asociar: hermanos }) });
+  if (r && r.ok) { toast('🏠 ' + (r.nombre || 'Propiedad') + ' creada (borrador) + ' + (r.asociados || 0) + ' documento(s) asociado(s) pendientes', 'ok'); loadDocAuditoria(); }
+  else { toast('Error: ' + ((r && r.error) || 'no se pudo crear'), 'err'); }
 };
 // S58: descartar desde la Auditoría — OPTIMISTA (la fila desaparece al instante de la bandeja
 // activa, guarda en background, rollback si falla). No depende del refetch ni del caché de 45s.
