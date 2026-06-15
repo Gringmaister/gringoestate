@@ -4142,11 +4142,20 @@ window.docAuditInmueble = function (x) {
 };
 // S59: naturaleza HONESTA del doc no clasificado (sin OCR) — del bridge (nota) o derivada del filename
 window.docAuditNaturaleza = function (x) {
-  if (x.tipo || x.textoSugerencia || x.propiedadId) return null; // ya tiene señal, no hace falta
-  if (x.nota) return x.nota;
+  if (x.tipo || x.textoSugerencia) return null; // ya marcado o con datos → no hace falta
+  // en asociados la "nota" del bridge puede ser análisis legal → derivar por filename (seguro)
+  if (!x.propiedadId && x.nota) return x.nota;
   var fn = (x.filename || '').toLowerCase();
-  if (/\.(jpe?g|png|webp|gif|heic)$/.test(fn) || fn.indexOf('foto') === 0) return '🖼 Imagen — posible foto/plano (revisar)';
-  if (/\.pdf$/.test(fn)) return '📄 PDF (posible escaneado sin texto) — revisar';
+  if (/\.(jpe?g|png|webp|gif|heic)$/.test(fn) || fn.indexOf('foto') === 0) return '🖼 Imagen — posible plano (revisar)';
+  if (/\.pdf$/.test(fn)) return '📄 PDF escaneado — posible escritura (revisar)';
+  return null;
+};
+// S60: clase del doc no clasificado → acción principal "Marcar como Plano/Escritura" (si aún no tiene tipo)
+window.docAuditClase = function (x) {
+  if (x.tipo || x.textoSugerencia) return null;
+  var fn = (x.filename || '').toLowerCase();
+  if (/\.(jpe?g|png|webp|gif|heic)$/.test(fn) || fn.indexOf('foto') === 0) return 'imagen';
+  if (/\.pdf$/.test(fn)) return 'pdf';
   return null;
 };
 // S59: agrupar por tanda (mismo remitente + ventana ≤5min). Mapa docId → grupo {docs, inmueble, hora, hermanosSinProp}
@@ -4189,6 +4198,7 @@ window.renderDocAuditoria = function () {
     var fecha = (x.creada || '').slice(0, 16).replace('T', ' ');
     var g = tandas[x.id] || {}; var enTanda = (g.docs || []).length > 1; // S59
     var nat = docAuditNaturaleza(x);
+    var clase = docAuditClase(x); // S60: imagen → Marcar como Plano · pdf → Marcar como Escritura
     var hermanos = (g.hermanosSinProp || []).filter(function (hid) { return hid !== x.id; });
     var tipoSel = '<select class="input" title="Marcar el tipo a mano (para escaneados/imágenes que no se pudieron leer)" style="width:auto;font-size:.72rem;padding:2px 7px;" onchange="if(this.value)docAuditMarcarTipo(\'' + x.id + '\',this.value)"><option value="">🏷 Marcar tipo…</option>' + TIPOS_MARCAR.map(function (t) { return '<option>' + t + '</option>'; }).join('') + '</select>';
     return '<div style="border:1px solid rgba(255,255,255,0.07);border-left:3px solid ' + col + ';border-radius:9px;padding:8px 11px;margin-bottom:7px;background:rgba(255,255,255,0.012);">' +
@@ -4203,8 +4213,9 @@ window.renderDocAuditoria = function () {
       '</div>' +
       // S55: sugerencia editorial de Hermes (dirección detectada del inmueble)
       (x.textoSugerencia ? '<div style="font-size:.74rem;color:#aee4ee;margin-top:5px;">🪽 ' + escHtml(x.textoSugerencia) + '</div>' : '') +
-      // S59: naturaleza honesta del doc no clasificado (sin OCR)
-      (nat ? '<div style="font-size:.72rem;color:#d9b38c;margin-top:5px;">' + escHtml(nat) + '</div>' : '') +
+      // S59/S60: naturaleza honesta + aviso de OCR pausado (la UI no promete lectura automática)
+      (nat ? '<div style="font-size:.72rem;color:#d9b38c;margin-top:5px;">' + escHtml(nat) +
+        '<div style="font-size:.64rem;color:var(--muted);margin-top:1px;">🔒 OCR/visión pausado — no se puede leer automáticamente todavía. Marcá el tipo o asociá a mano.</div></div>' : '') +
       // S59: relación por tanda (solo sugiere, no asocia)
       (enTanda && g.inmueble && !docAuditInmueble(x) ? '<div style="font-size:.72rem;color:#9fd6a0;margin-top:4px;">🔗 Llegó junto con <b>' + escHtml(g.inmueble) + '</b> — revisar antes de asociar</div>' : '') +
       (x.nombreSugerido && x.nombreSugerido !== x.filename ? '<div style="font-size:.66rem;color:var(--muted);margin-top:2px;">Nombre sugerido: <span style="font-family:var(--mono);">' + escHtml(x.nombreSugerido) + '</span></div>' : '') +
@@ -4215,11 +4226,14 @@ window.renderDocAuditoria = function () {
         (x.puedeCrearPropiedad ? (hermanos.length
           ? '<button class="btn btn-gold btn-sm" onclick="docAuditCrearConTanda(\'' + x.id + '\',\'' + hermanos.join(',') + '\')" title="Crea la propiedad borrador desde este documento y asocia los ' + hermanos.length + ' de la misma tanda como pendientes de revisión">＋ Crear propiedad + asociar tanda (' + hermanos.length + ')</button>'
           : '<button class="btn btn-gold btn-sm" onclick="docAuditCrearPropiedad(\'' + x.id + '\')" title="Crea una propiedad borrador con los datos del documento y la asocia">＋ Crear propiedad desde documento</button>') : '') +
+        // S60: acción principal según naturaleza cuando no se pudo leer y no tiene tipo aún
+        (clase === 'imagen' ? '<button class="btn btn-gold btn-sm" onclick="docAuditMarcarTipo(\'' + x.id + '\',\'Plano\')" title="Marcarlo como Plano (no se pudo leer automáticamente)">📐 Marcar como Plano</button>' :
+         clase === 'pdf' ? '<button class="btn btn-gold btn-sm" onclick="docAuditMarcarTipo(\'' + x.id + '\',\'Escritura\')" title="Marcarlo como Escritura (escaneado, no se pudo leer automáticamente)">📜 Marcar como Escritura</button>' : '') +
         tipoSel +
         '<select class="input" id="da-prop-' + x.id + '" style="width:auto;font-size:.72rem;padding:2px 7px;">' + opts + '</select>' +
         '<button class="btn btn-ghost btn-sm" onclick="docAuditReasignar(\'' + x.id + '\')">Reasignar</button>' +
-        // S57: re-analizar pegando texto (emergencia para docs pre-S56, sin Drive/runtime)
-        (!x.textoSugerencia ? '<button class="btn btn-ghost btn-sm" onclick="docAuditReanalizar(\'' + x.id + '\')" title="Pegá el texto del PDF para extraer dirección/partida/período (sin reenviar el archivo)">🔁 Re-analizar (texto)</button>' : '') +
+        // S57/S60: PEGAR texto manual (no reanaliza el archivo ni hace OCR) — solo si NO está asociado (no es acción principal)
+        (!x.propiedadId && !x.textoSugerencia ? '<button class="btn btn-ghost btn-sm" onclick="docAuditReanalizar(\'' + x.id + '\')" title="Abre un campo para PEGAR a mano el texto del documento. No lee el archivo, no hace OCR.">📋 Pegar texto manual</button>' : '') +
         (x.propiedadId ? '<button class="btn btn-ghost btn-sm" onclick="docAuditDesasociar(\'' + x.id + '\')" title="Sacar la asociación (vuelve a Sin clasificar)">⊘ Desasociar</button>' : '') +
         (x.driveLink ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + escHtml(x.driveLink) + '" target="_blank" rel="noopener">↗ Drive</a>' : '') +
         (x.propiedadId ? '<button class="btn btn-ghost btn-sm" onclick="abrirLegajo(\'' + x.propiedadId + '\')">📂 Legajo</button>' : '') +
