@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/pixel.css?v=s68" />
+  <link rel="stylesheet" href="css/pixel.css?v=s69" />
 </head>
 <body>
 
@@ -71,6 +71,24 @@
             <svg viewBox="0 0 24 24"><path d="M2 20h20M4 20V10l8-7 8 7v10"/><path d="M8 20v-6h3v6M13 20v-6h3v6"/></svg>
           </span>
           <span>GRINGO CRM <small class="nav-sub">Brokerage · Pipeline</small></span>
+        </button>
+        <button class="nav-btn" onclick="nav('documentos')" id="nav-documentos" aria-label="DOCUMENTOS — Auditoría de cargas, Doc Inbox">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>
+          </span>
+          <span>DOCUMENTOS <small class="nav-sub">Auditoría · Doc Inbox</small></span>
+        </button>
+        <button class="nav-btn" onclick="nav('tasaciones')" id="nav-tasaciones" aria-label="TASACIONES — Comparables, Magnin">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/></svg>
+          </span>
+          <span>TASACIONES <small class="nav-sub">Comparables · Magnin</small></span>
+        </button>
+        <button class="nav-btn" onclick="nav('operaciones')" id="nav-operaciones" aria-label="OPERACIONES — Cierre, Firmas, Honorarios">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          </span>
+          <span>OPERACIONES <small class="nav-sub">Cierre · Firmas · Honorarios</small></span>
         </button>
       </div>
     </div>
@@ -856,7 +874,6 @@
         <button class="sub-tab active" onclick="crmTab('resumen')">📊 Resumen</button>
         <button class="sub-tab" onclick="crmTab('captacion')">🏠 Captación</button>
         <button class="sub-tab" onclick="crmTab('demanda')">🛒 Demanda</button>
-        <button class="sub-tab" onclick="crmTab('operaciones')">💼 Operaciones</button>
         <button class="sub-tab" onclick="crmTab('propiedades')">🏢 Propiedades</button>
         <button class="sub-tab" onclick="crmTab('contactos')">⭐ Contactos</button>
       </div>
@@ -948,45 +965,18 @@
       </div>
       </div><!-- /ct-demanda -->
 
-      <div class="crm-tab" id="ct-operaciones">
-      <!-- OPERACIONES (funnel cierre) -->
-      <div class="card" style="margin-bottom:14px;" role="region" aria-label="Operaciones — funnel de cierre">
-        <div class="card-head">
-          <div>
-            <h2 class="card-title">💼 Operaciones</h2>
-            <div class="card-sub">de la oferta al cierre — reservas, firmas y honorarios</div>
-          </div>
-          <span class="badge badge-gold" id="crm-ops-total">—</span>
-        </div>
-        <div class="crm-funnel" id="crm-operaciones"><div class="skeleton skeleton-block" style="height:90px;"></div></div>
-        <div id="crm-ops-alertas" style="margin-top:10px;"></div>
-      </div>
-
-      </div><!-- /ct-operaciones -->
-
       <div class="crm-tab" id="ct-contactos">
       <!-- S62A.1: bandeja OPERATIVA primero (procesar/auditar/clasificar) · "A quién hablarle hoy" pasa a solapa -->
       <div class="btn-row" style="margin-bottom:12px;">
-        <button class="btn btn-gold btn-sm" id="cmode-auditoria" onclick="contactosModo('auditoria')">🗂 Auditoría / Cargas <span class="badge badge-muted" id="crm-audit-count">—</span></button>
-        <button class="btn btn-ghost btn-sm" id="cmode-refinar" onclick="contactosModo('refinar')">🧹 Refinamiento WhatsApp <span class="badge badge-muted" id="crm-hig-count">—</span></button>
-        <button class="btn btn-ghost btn-sm" id="cmode-relacional" onclick="contactosModo('relacional')">⭐ Los 250 + Seguimientos</button>
+        <button class="btn btn-gold btn-sm" id="cmode-relacional" onclick="contactosModo('relacional')">⭐ Los 250 + Seguimientos</button>
         <button class="btn btn-ghost btn-sm" id="cmode-hablar" onclick="contactosModo('hablar')">🎯 A quién hablarle hoy</button>
+        <button class="btn btn-ghost btn-sm" id="cmode-refinar" onclick="contactosModo('refinar')">🧹 Refinamiento WhatsApp <span class="badge badge-muted" id="crm-hig-count">—</span></button>
       </div>
 
       <!-- S62A.1: "A quién hablarle hoy" como solapa secundaria (ya no bloque fijo arriba) -->
       <div id="cblock-hablar" class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.3);display:none;" role="region" aria-label="A quién hablarle hoy">
         <div class="card-head"><div><h2 class="card-title">🎯 A quién hablarle hoy</h2><div class="card-sub">Hermes ordena tu cartera por prioridad — score, motivo y acción</div></div></div>
         <div id="crm-hablar-contactos"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
-      </div>
-
-      <!-- S52.1: AUDITORÍA DE CARGAS (depurador documental — historial completo + confirmar) -->
-      <div id="cblock-auditoria" class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.3);" role="region" aria-label="Auditoría de cargas de archivos">
-        <div class="card-head">
-          <div><h2 class="card-title">🗂 Auditoría de cargas</h2><div class="card-sub">todo lo que entró por WhatsApp/panel · ver, confirmar, reasignar o descartar · Hermes captura, vos validás</div></div>
-          <button class="btn btn-ghost btn-sm" onclick="loadDocAuditoria()" title="Refrescar">↻</button>
-        </div>
-        <div id="doc-audit-filtros" class="btn-row" style="margin-bottom:10px;"></div>
-        <div id="doc-auditoria"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
       </div>
 
       <!-- LOS 250 + SEGUIMIENTOS (pantalla partida, protagonistas) -->
@@ -1027,25 +1017,6 @@
         </div>
         <div id="crm-propiedades"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
       </div>
-      <!-- TASACIONES por comparables -->
-      <div class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.3);" role="region" aria-label="Tasaciones por comparables">
-        <div class="card-head">
-          <div><h2 class="card-title" style="color:var(--gold);">🧮 Tasaciones</h2><div class="card-sub">por comparables de Zonaprop — balcón corrido = cubierto · terraza 30% · cochera ±25k USD</div></div>
-          <button class="btn btn-gold btn-sm" onclick="showModal('modal-tasacion')">+ Tasación</button>
-        </div>
-        <div id="crm-tasaciones"><div class="skeleton skeleton-block" style="height:50px;"></div></div>
-        <div id="crm-tasacion-detalle" style="margin-top:12px;"></div>
-      </div>
-
-      <!-- S52: DOC INBOX — documentos capturados de WhatsApp (cuarentena) -->
-      <div class="card" style="margin-bottom:14px;border-color:rgba(126,200,227,0.3);" role="region" aria-label="Doc Inbox">
-        <div class="card-head">
-          <div><h2 class="card-title" style="color:var(--metro);">📥 Doc Inbox</h2><div class="card-sub">documentos que llegan por WhatsApp · Hermes captura y organiza, vos validás</div></div>
-          <span style="display:inline-flex;gap:6px;align-items:center;"><button class="btn btn-ghost btn-sm" onclick="loadDocInbox()" title="Refrescar">↻</button><span class="badge badge-muted" id="doc-inbox-count">—</span></span>
-        </div>
-        <div id="doc-inbox"><div class="skeleton skeleton-block" style="height:60px;"></div></div>
-      </div>
-
       <!-- DOCUMENTAL -->
       <div class="card" role="region" aria-label="Módulo documental">
         <div class="card-head">
@@ -1069,6 +1040,67 @@
         </div>
       </div>
       </div><!-- /ct-propiedades -->
+    </div>
+
+    <!-- ════════════════ DOCUMENTOS (Brokerage · S80B2A: movido de Contactos+Propiedades) ════════════════ -->
+    <div class="view" id="view-documentos">
+      <div class="section-head">
+        <h1>DOCUMENTOS</h1>
+        <span class="badge badge-muted" id="crm-audit-count">—</span>
+      </div>
+      <!-- AUDITORÍA DE CARGAS (movida de Contactos en S80B2A) -->
+      <div id="cblock-auditoria" class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.3);" role="region" aria-label="Auditoría de cargas de archivos">
+        <div class="card-head">
+          <div><h2 class="card-title">🗂 Auditoría de cargas</h2><div class="card-sub">todo lo que entró por WhatsApp/panel · ver, confirmar, reasignar o descartar · Hermes captura, vos validás</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="loadDocAuditoria()" title="Refrescar">↻</button>
+        </div>
+        <div id="doc-audit-filtros" class="btn-row" style="margin-bottom:10px;"></div>
+        <div id="doc-auditoria"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
+      </div>
+      <!-- DOC INBOX (movida de Propiedades en S80B2A) -->
+      <div class="card" style="margin-bottom:14px;border-color:rgba(126,200,227,0.3);" role="region" aria-label="Doc Inbox">
+        <div class="card-head">
+          <div><h2 class="card-title" style="color:var(--metro);">📥 Doc Inbox</h2><div class="card-sub">documentos que llegan por WhatsApp · Hermes captura y organiza, vos validás</div></div>
+          <span style="display:inline-flex;gap:6px;align-items:center;"><button class="btn btn-ghost btn-sm" onclick="loadDocInbox()" title="Refrescar">↻</button><span class="badge badge-muted" id="doc-inbox-count">—</span></span>
+        </div>
+        <div id="doc-inbox"><div class="skeleton skeleton-block" style="height:60px;"></div></div>
+      </div>
+    </div>
+
+    <!-- ════════════════ TASACIONES (Brokerage · S80B2A: movido de Propiedades) ════════════════ -->
+    <div class="view" id="view-tasaciones">
+      <div class="section-head">
+        <h1>TASACIONES</h1>
+        <span class="badge badge-gold">Comparables · Magnin</span>
+      </div>
+      <!-- TASACIONES por comparables (movida de Propiedades en S80B2A) -->
+      <div class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.3);" role="region" aria-label="Tasaciones por comparables">
+        <div class="card-head">
+          <div><h2 class="card-title" style="color:var(--gold);">🧮 Tasaciones</h2><div class="card-sub">por comparables de Zonaprop — balcón corrido = cubierto · terraza 30% · cochera ±25k USD</div></div>
+          <button class="btn btn-gold btn-sm" onclick="showModal('modal-tasacion')">+ Tasación</button>
+        </div>
+        <div id="crm-tasaciones"><div class="skeleton skeleton-block" style="height:50px;"></div></div>
+        <div id="crm-tasacion-detalle" style="margin-top:12px;"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════ OPERACIONES (Brokerage · S80B2A: movido del tab interno del CRM) ════════════════ -->
+    <div class="view" id="view-operaciones">
+      <div class="section-head">
+        <h1>OPERACIONES</h1>
+        <span class="badge badge-gold" id="crm-ops-total">—</span>
+      </div>
+      <!-- OPERACIONES funnel cierre (movida del tab interno del CRM en S80B2A) -->
+      <div class="card" style="margin-bottom:14px;" role="region" aria-label="Operaciones — funnel de cierre">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">💼 Operaciones</h2>
+            <div class="card-sub">de la oferta al cierre — reservas, firmas y honorarios</div>
+          </div>
+        </div>
+        <div class="crm-funnel" id="crm-operaciones"><div class="skeleton skeleton-block" style="height:90px;"></div></div>
+        <div id="crm-ops-alertas" style="margin-top:10px;"></div>
+      </div>
     </div>
 
     <!-- ════════════════ SMART HOME ════════════════ -->
@@ -1634,7 +1666,7 @@
 <!-- Scripts -->
 <!-- S45: ?v= cache-buster — subir la versión en cada deploy con cambios de JS/CSS
      (el HTML revalida siempre en Netlify; el query nuevo fuerza al browser a bajar el asset fresco) -->
-<script src="js/api.js?v=s68"></script>
-<script src="js/app.js?v=s68"></script>
+<script src="js/api.js?v=s69"></script>
+<script src="js/app.js?v=s69"></script>
 </body>
 </html>

@@ -85,6 +85,9 @@
     if (section === 'agentes')   { loadWispy(); loadBambiAgent(); loadAgentActivity('wispy'); }
     if (section === 'ambbi')     { loadAmbbiResumen(); renderPortfolio(); loadTasks(); }
     if (section === 'gebroker')  { loadCrm(); }
+    if (section === 'documentos'){ if (window.loadDocAuditoria) window.loadDocAuditoria(); if (window.loadDocInbox) window.loadDocInbox(); }
+    if (section === 'tasaciones'){ loadTasaciones(); }
+    if (section === 'operaciones'){ loadCrmOperaciones(); }
     if (section === 'smarthome') { loadHue(); }
     if (section === 'infra')     { loadDocker(); }
     if (section === 'canarian')  { checkCanaSession(); }
@@ -1502,15 +1505,14 @@
 
   // S51/S52.1: sub-modos del depurador — relacional · refinamiento WhatsApp · auditoría de cargas
   window.contactosModo = function (modo) {
-    window._contactosModo = modo; // S62A.1: recordar el modo activo (default Auditoría al entrar)
-    var bloques = { auditoria: 'cblock-auditoria', refinar: 'cblock-refinar', relacional: 'cblock-relacional', hablar: 'cblock-hablar' };
-    var botones = { auditoria: 'cmode-auditoria', refinar: 'cmode-refinar', relacional: 'cmode-relacional', hablar: 'cmode-hablar' };
+    window._contactosModo = modo; // S80B2A: Auditoría se mudó a Documentos (top-level); modos = relacional/hablar/refinar
+    var bloques = { refinar: 'cblock-refinar', relacional: 'cblock-relacional', hablar: 'cblock-hablar' };
+    var botones = { refinar: 'cmode-refinar', relacional: 'cmode-relacional', hablar: 'cmode-hablar' };
     Object.keys(bloques).forEach(function (k) {
       var bl = document.getElementById(bloques[k]); if (bl) bl.style.display = (k === modo ? '' : 'none');
       var bt = document.getElementById(botones[k]); if (bt) { bt.classList.toggle('btn-gold', k === modo); bt.classList.toggle('btn-ghost', k !== modo); }
     });
     if (modo === 'refinar' && window.loadCrmHigiene) loadCrmHigiene();
-    if (modo === 'auditoria' && window.loadDocAuditoria) loadDocAuditoria();
   };
 
   /* ─── FICHA DE PROPIEDAD (create + edit desde la web) ─── */
@@ -1601,10 +1603,10 @@
     var tab = document.getElementById('ct-' + which);
     if (tab) tab.classList.add('active');
     document.querySelectorAll('#crm-tabs .sub-tab').forEach(function (b) { b.classList.remove('active'); });
-    var idx = ['resumen', 'captacion', 'demanda', 'operaciones', 'propiedades', 'contactos'].indexOf(which);
+    var idx = ['resumen', 'captacion', 'demanda', 'propiedades', 'contactos'].indexOf(which);
     var btns = document.querySelectorAll('#crm-tabs .sub-tab');
     if (btns[idx]) btns[idx].classList.add('active');
-    if (which === 'contactos' && window.contactosModo) contactosModo(window._contactosModo || 'auditoria'); // S62A.1: default Auditoría
+    if (which === 'contactos' && window.contactosModo) { var _cm = window._contactosModo; if (!_cm || _cm === 'auditoria') _cm = 'relacional'; contactosModo(_cm); } // S80B2A: Auditoría se mudó a Documentos
   }
   window.crmTab = crmTab;
 
@@ -2002,7 +2004,7 @@
     set('ts-m2cub', p.m2Cubiertos || p.m2Totales || '');
     var tt = document.getElementById('ts-tipo');
     if (tt && p.tipoPropiedad) { for (var i = 0; i < tt.options.length; i++) { if (tt.options[i].value === p.tipoPropiedad || tt.options[i].text === p.tipoPropiedad) { tt.selectedIndex = i; break; } } }
-    hideModal('modal-legajo'); crmTab('propiedades'); showModal('modal-tasacion');
+    hideModal('modal-legajo'); nav('tasaciones'); showModal('modal-tasacion');
     toast('Pre-llenado desde ' + (p.propiedad || 'la propiedad') + ' — completá m²/piso y creá', 'ok');
   };
 
@@ -4055,8 +4057,9 @@ window.tasacionAplicarFicha = function (d) {
     return el ? el.id.replace('ct-', '') : 'resumen';
   }
   function inCrm() {
-    var v = document.getElementById('view-gebroker');
-    return v && v.classList.contains('active');
+    return ['view-gebroker', 'view-documentos', 'view-tasaciones', 'view-operaciones'].some(function (id) {
+      var v = document.getElementById(id); return v && v.classList.contains('active');
+    });
   }
 
   // Polling liviano: muestra/oculta el dock según sección + re-renderiza el panel al cambiar de sub-tab.
