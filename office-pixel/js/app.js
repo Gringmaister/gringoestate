@@ -1857,6 +1857,26 @@
       chk = datosCapHtml + chk;
     }
     izq += seccion('📥 Documental', chk);
+    // S64.1: bloque Sucesión / Tracto abreviado (cuando hay Testimonio/Declaratoria) — ítems manuales de revisión
+    if (d.esSucesion && (d.sucesion || []).length) {
+      var SUC_COL = { recibido: 'var(--ok)', pedido: '#5ec8d8', pendiente: 'var(--warn)', no_aplica: '#555' };
+      var SUC_LBL = { recibido: '🟢 Verificado', pedido: '📨 Pedido / gestión', pendiente: '🟡 Pendiente escribanía', no_aplica: '⚪ No aplica' };
+      var sucHtml = '<div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;">Una declaratoria/partición <b style="color:var(--text);">no limpia el riesgo sola</b> — revisá con escribanía: ¿se escritura por tracto abreviado?, ¿firman todos los herederos o uno solo?, ¿asentimiento conyugal?, ¿la UF/matrícula es la unidad exacta?, ¿dominio/inhibiciones/deudas?</div>';
+      sucHtml += (d.sucesion || []).map(function (s) {
+        var col = SUC_COL[s.estado] || 'var(--warn)';
+        var it = (s.item || '').replace(/'/g, '');
+        return '<div style="border:1px solid rgba(255,255,255,0.07);border-left:3px solid ' + col + ';border-radius:9px;padding:6px 9px;margin-bottom:5px;">' +
+          '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">' +
+            '<span style="flex:1;font-size:.77rem;font-weight:600;' + (s.estado === 'no_aplica' ? 'text-decoration:line-through;opacity:.6;' : '') + '">' + escHtml(s.item) + '</span>' +
+            '<span style="font-size:.62rem;color:' + col + ';white-space:nowrap;">' + (SUC_LBL[s.estado] || s.estado) + '</span></div>' +
+          '<div style="display:flex;gap:3px;margin-top:4px;flex-wrap:wrap;">' +
+            (s.estado !== 'recibido' ? '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Marcar verificado (revisado y OK con escribanía)" onclick="lgDocAccion(\'' + it + '\',\'recibido\')">✓ verificado</button>' : '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Volver a pendiente" onclick="lgDocAccion(\'' + it + '\',\'reset\')">↩ pendiente</button>') +
+            (s.estado !== 'pedido' && s.estado !== 'recibido' ? '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="En gestión / pedido a escribanía" onclick="lgDocAccion(\'' + it + '\',\'pedido\')">📨 en gestión</button>' : '') +
+            (s.estado !== 'no_aplica' ? '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="No aplica" onclick="lgDocAccion(\'' + it + '\',\'no_aplica\')">🚫</button>' : '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Restaurar" onclick="lgDocAccion(\'' + it + '\',\'reset\')">↺</button>') +
+          '</div></div>';
+      }).join('');
+      izq += seccion('🏛 Sucesión / Tracto abreviado', sucHtml);
+    }
     izq += seccion('🧮 Tasaciones (' + (d.tasaciones || []).length + ')',
       (d.tasaciones || []).length ? d.tasaciones.map(function (x) {
         return '<div style="display:flex;gap:8px;align-items:center;padding:3px 0;font-size:.78rem;flex-wrap:wrap;"><span style="flex:1;">' + escHtml(x.tasacion) + '</span><span class="badge badge-muted">' + escHtml(x.estado || '') + '</span>' + (x.precioCierre ? '<span style="font-family:var(--mono);color:var(--gold);">USD ' + Number(x.precioCierre).toLocaleString('es-AR') + '</span>' : '') + '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'modal-legajo\');crmTab(\'propiedades\');abrirTasacion(\'' + x.id + '\')">abrir</button></div>';
