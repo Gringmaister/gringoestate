@@ -1789,13 +1789,13 @@
         }).join('') + '</div>' : '') +
       (d.propietario ? '<div style="font-size:.8rem;margin-top:9px;">🏠 Propietario: <b>' + escHtml(d.propietario.nombre) + '</b>' + (d.propietario.telefono ? ' · <a href="' + waHref(d.propietario.telefono) + '" target="_blank" rel="noopener" style="color:var(--gold);">' + escHtml(d.propietario.telefono) + '</a>' : '') + '</div>' : '<div class="small muted" style="margin-top:9px;">Sin propietario vinculado — vinculalo desde la ficha ✏️.</div>'));
     // checklist por COLORES — S44: grid de tarjetas high-quality + barra de progreso + dropzone
-    var colorDe = { recibido: 'var(--ok)', pedido: '#5ec8d8', revisar: 'var(--warn)', bloqueante: 'var(--danger)', no_aplica: '#555', pendiente: '#999' };
-    var lblDe = { recibido: '✓ Recibido', pedido: '📨 Pedido', revisar: '🟡 Revisar', bloqueante: '⛔ BLOQUEA', no_aplica: 'No aplica', pendiente: 'Pendiente' };
+    var colorDe = { recibido: 'var(--ok)', pedido: '#5ec8d8', revisar: 'var(--warn)', recomendado: 'var(--warn)', bloqueante: 'var(--danger)', no_aplica: '#555', pendiente: '#999' };
+    var lblDe = { recibido: '🟢 Validado', pedido: '📨 Pedido', revisar: '🟡 Recibido — revisar', recomendado: '🟡 Recomendado — falta', bloqueante: '🔴 OBLIGATORIO — falta', no_aplica: '⚪ No aplica', pendiente: '⚪ Opcional' };
     var nRec = (d.checklist || []).filter(function (c) { return c.estado === 'recibido'; }).length;
     var nTot = (d.checklist || []).filter(function (c) { return c.estado !== 'no_aplica'; }).length;
     var pct = nTot ? Math.round(nRec / nTot * 100) : 0;
     var chk = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">' +
-      '<span class="badge" style="border:1.5px solid ' + (/legal/.test(sem.nivel) ? 'var(--danger)' : /comercial|operativo/.test(sem.nivel) ? 'var(--warn)' : 'var(--ok)') + ';font-size:.72rem;padding:3px 10px;">' + escHtml(sem.nivel || '—') + '</span>' +
+      '<span class="badge" style="border:1.5px solid ' + (/legal|obligatorios/.test(sem.nivel) ? 'var(--danger)' : /comercial|operativo|proceso|pendiente|recibida/.test(sem.nivel) ? 'var(--warn)' : /Completo/.test(sem.nivel) ? 'var(--ok)' : 'var(--muted)') + ';font-size:.72rem;padding:3px 10px;">' + escHtml(sem.nivel || '—') + (sem.fase ? ' · ' + ({ captacion: 'captación', publicacion: 'publicación', operacion: 'operación' }[sem.fase] || sem.fase) : '') + '</span>' +
       '<div style="flex:1;min-width:140px;height:7px;border-radius:5px;background:rgba(255,255,255,0.07);overflow:hidden;"><div style="height:100%;width:' + pct + '%;border-radius:5px;background:linear-gradient(90deg,var(--gold),#e8c96a);transition:width .4s;"></div></div>' +
       '<span style="font-family:var(--mono);font-size:.74rem;color:var(--gold);">' + nRec + '/' + nTot + ' · ' + pct + '%</span></div>';
     chk += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:7px;">';
@@ -1807,7 +1807,7 @@
           '<span style="font-size:.62rem;color:' + col + ';white-space:nowrap;">' + lblDe[c.estado] + '</span></div>' +
         '<div style="display:flex;gap:3px;margin-top:5px;">' +
           (c.estado !== 'recibido' ? '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Marcar pedido" onclick="lgDocAccion(\'' + c.tipo + '\',\'pedido\')">📨 pedir</button>' : '') +
-          (c.estado !== 'recibido' ? '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Marcar recibido (a mano)" onclick="lgDocAccion(\'' + c.tipo + '\',\'recibido\')">✓</button>' : '') +
+          (c.estado !== 'recibido' ? '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Validar: lo tengo y está OK (verde = validado, no solo recibido)" onclick="lgValidarDoc(\'' + c.tipo + '\')">✓ validar</button>' : '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Volver a pendiente de revisión (desvalidar)" onclick="lgDesvalidarTipo(\'' + c.tipo + '\')">↩ desvalidar</button>') +
           (c.estado !== 'no_aplica' ? '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="No aplica" onclick="lgDocAccion(\'' + c.tipo + '\',\'no_aplica\')">🚫</button>' : '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Restaurar" onclick="lgDocAccion(\'' + c.tipo + '\',\'reset\')">↺</button>') +
         '</div>' +
         (c.redFlags ? '<div style="font-size:.68rem;color:var(--danger);margin-top:4px;">🚩 ' + escHtml(c.redFlags) + '</div>' : '') +
@@ -1837,6 +1837,12 @@
           '</span></div>';
       }).join('');
       chk = docsAsoc + '<div style="height:9px;border-top:1px solid rgba(255,255,255,0.06);margin:4px 0 9px;"></div>' + chk;
+    }
+    // S62A.2: datos mínimos de captación (🔴 si faltan, aunque sea Borrador) — solo en fase captación
+    if (d.fase === 'captacion' && (d.datosCaptacion || []).length) {
+      var datosCapHtml = '<div style="margin-bottom:9px;font-size:.74rem;border:1px solid rgba(255,255,255,0.06);border-radius:9px;padding:7px 10px;background:rgba(255,255,255,0.012);"><b style="color:var(--text);">📋 Datos mínimos de captación</b> ' +
+        (d.datosCaptacion || []).map(function (x) { return '<span class="badge" style="border:1px solid ' + (x.ok ? 'var(--ok)' : 'var(--danger)') + '66;color:' + (x.ok ? 'var(--ok)' : 'var(--danger)') + ';margin-left:5px;">' + (x.ok ? '🟢' : '🔴') + ' ' + escHtml(x.item) + '</span>'; }).join('') + '</div>';
+      chk = datosCapHtml + chk;
     }
     izq += seccion('📥 Documental', chk);
     izq += seccion('🧮 Tasaciones (' + (d.tasaciones || []).length + ')',
@@ -2077,6 +2083,22 @@
     if (d && d.ok) abrirLegajo(window.lgId);
   }
   window.lgDocAccion = lgDocAccion;
+  // S62A.2: validar un ítem del checklist — CONFIRMA para legales (Escritura/Dominio/Inhibiciones/Poder)
+  var DOC_LEGALES_FRONT = ['Escritura', 'Certif. dominio', 'Inhibiciones', 'Poder'];
+  window.lgValidarDoc = function (tipo) {
+    if (DOC_LEGALES_FRONT.indexOf(tipo) >= 0 && !confirm('⚠️ ' + tipo + ' es un documento LEGAL.\n\n¿Confirmás que lo revisaste y está OK para marcarlo VALIDADO?\n(🟢 verde = validado legalmente, no solo recibido.)')) return;
+    lgDocAccion(tipo, 'recibido');
+  };
+  // S62A.2: desvalidar — vuelve el ítem a pendiente; si hay un DOC validado de ese tipo, lo revierte también
+  window.lgDesvalidarTipo = async function (tipo) {
+    var vals = ((window.lgData || {}).documentos || []).filter(function (x) { return x.tipo === tipo && x.estado === 'Validado'; });
+    for (var i = 0; i < vals.length; i++) {
+      await apiFetch('/crm/doc-inbox/desvalidar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: vals[i].id }) });
+    }
+    await apiFetch('/crm/propiedad/doc-gestion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: window.lgId, tipoDoc: tipo, estado: vals.length ? 'revisar' : 'reset' }) });
+    toast('↩ ' + tipo + ' vuelto a pendiente de revisión', 'ok');
+    abrirLegajo(window.lgId);
+  };
 
   async function lgMarcarPedidos() {
     var faltan = ((window.lgData || {}).checklist || []).filter(function (c) { return c.estado === 'pendiente' || c.estado === 'bloqueante'; });
@@ -4093,7 +4115,7 @@ window.loadDocInbox = async function () {
         '</div>' +
         (x.redFlags ? '<div style="font-size:.7rem;color:var(--danger);margin-top:4px;">⚠️ ' + escHtml(x.redFlags) + '</div>' : '') +
         '<div class="btn-row" style="margin-top:6px;">' +
-          '<button class="btn btn-gold btn-sm" onclick="docInboxValidar(\'' + x.id + '\')" title="Confirmá que el documento está OK (lo tilda en verde en el legajo)">✓ Validar</button>' +
+          '<button class="btn btn-gold btn-sm" onclick="docInboxValidar(\'' + x.id + '\',\'' + (x.tipo || '') + '\')" title="Validar: confirmá que el documento está OK (verde = validado)">✓ Validar</button>' +
           (x.propiedadId ? '<button class="btn btn-ghost btn-sm" onclick="abrirLegajo(\'' + x.propiedadId + '\')">📂 Legajo</button>' : '') +
           '<button class="btn btn-ghost btn-sm" onclick="docInboxDescartar(\'' + x.id + '\')">🗑 Descartar</button>' +
         '</div></div>';
@@ -4120,9 +4142,21 @@ window.loadDocInbox = async function () {
   el.innerHTML = html || '<div class="small muted">Bandeja vacía. Los documentos que te lleguen por WhatsApp aparecen acá automáticamente.</div>';
 };
 
-window.docInboxValidar = async function (id) {
+var DOC_LEGALES_AUD = ['Escritura', 'Certif. dominio', 'Inhibiciones', 'Poder']; // S62A.2: confirmar al validar legales
+window.docInboxValidar = async function (id, tipo) {
+  if (DOC_LEGALES_AUD.indexOf(tipo) >= 0 && !confirm('⚠️ ' + tipo + ' es LEGAL. ¿Confirmás que lo revisaste y está OK para marcarlo VALIDADO?')) return;
   var d = await apiFetch('/crm/doc-inbox/validar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
-  if (d && d.ok) { toast('✓ Validado — tildado en el legajo', 'ok'); loadDocInbox(); } else toast('Error al validar', 'err');
+  if (d && d.ok) { toast('🟢 Validado', 'ok'); loadDocInbox(); } else toast('Error al validar', 'err');
+};
+// S62A.2: validar/desvalidar desde la Auditoría (confirma legales · distingue recibido/validado)
+window.docAuditValidar = async function (id, tipo) {
+  if (DOC_LEGALES_AUD.indexOf(tipo) >= 0 && !confirm('⚠️ ' + tipo + ' es un documento LEGAL.\n\n¿Confirmás que lo revisaste y está OK para marcarlo VALIDADO? (🟢 verde = validado legalmente.)')) return;
+  var d = await apiFetch('/crm/doc-inbox/validar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+  if (d && d.ok) { toast('🟢 Validado', 'ok'); loadDocAuditoria(); } else toast('Error al validar', 'err');
+};
+window.docAuditDesvalidar = async function (id) {
+  var d = await apiFetch('/crm/doc-inbox/desvalidar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+  if (d && d.ok) { toast('↩ Vuelto a pendiente de revisión', 'ok'); loadDocAuditoria(); } else toast('Error al desvalidar', 'err');
 };
 window.docInboxAsignar = async function (id) {
   var sel = document.getElementById('di-prop-' + id);
@@ -4270,7 +4304,8 @@ window.renderDocAuditoria = function () {
       (x.nombreSugerido && x.nombreSugerido !== x.filename ? '<div style="font-size:.66rem;color:var(--muted);margin-top:2px;">Nombre sugerido: <span style="font-family:var(--mono);">' + escHtml(x.nombreSugerido) + '</span></div>' : '') +
       (x.redFlags ? '<div style="font-size:.7rem;color:var(--danger);margin-top:4px;">⚠️ ' + escHtml(x.redFlags) + '</div>' : '') +
       '<div class="btn-row" style="margin-top:6px;">' +
-        (x.estado !== 'Validado' && x.propiedadId ? '<button class="btn btn-gold btn-sm" onclick="docInboxValidar(\'' + x.id + '\');setTimeout(loadDocAuditoria,600)">✓ Validar</button>' : '') +
+        (x.estado !== 'Validado' && x.propiedadId ? '<button class="btn btn-gold btn-sm" onclick="docAuditValidar(\'' + x.id + '\',\'' + (x.tipo || '') + '\')">✓ Validar</button>' : '') +
+        (x.estado === 'Validado' ? '<button class="btn btn-ghost btn-sm" onclick="docAuditDesvalidar(\'' + x.id + '\')" title="Volver a pendiente de revisión (desvalidar)">↩ Desvalidar</button>' : '') +
         // S55/S59: crear propiedad desde el doc; si hay hermanos de tanda, los asocia como pendientes
         (x.puedeCrearPropiedad ? (hermanos.length
           ? '<button class="btn btn-gold btn-sm" onclick="docAuditCrearConTanda(\'' + x.id + '\',\'' + hermanos.join(',') + '\')" title="Crea la propiedad borrador desde este documento y asocia los ' + hermanos.length + ' de la misma tanda como pendientes de revisión">＋ Crear propiedad + asociar tanda (' + hermanos.length + ')</button>'
