@@ -1812,6 +1812,25 @@
       '📎 <b style="color:var(--text);">Arrastrá acá</b> la escritura, expensas, ABL, plano… <span style="opacity:.7;">(o hacé click)</span> — va al Drive y tilda el checklist solo' +
       '<input type="file" id="lg-dropfile" style="display:none;" onchange="lgFileElegido(this.files[0])"></div>' +
       '<div id="lg-droptipo" style="display:none;margin-top:8px;"></div>';
+    // S61: lista de DOCUMENTOS ASOCIADOS (recibidos, pendientes de revisión) — arriba del checklist
+    if ((d.documentos || []).length) {
+      var docsAsoc = '<div style="font-size:.73rem;margin-bottom:7px;"><b style="color:var(--text);">📎 Documentos asociados (' + d.documentos.length + ')</b> <span style="color:var(--muted);">— recibidos por Hermes, pendientes de revisión</span></div>';
+      docsAsoc += (d.documentos || []).map(function (x) {
+        var ec = (typeof DOC_ESTADO_COLOR !== 'undefined' && DOC_ESTADO_COLOR[x.estado]) || 'var(--muted)';
+        var fch = (x.creada || '').slice(0, 10);
+        var orig = x.fuente === 'WhatsApp' ? '📱 WhatsApp' : '🖥 ' + (x.fuente || 'Panel');
+        return '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;border:1px solid rgba(255,255,255,0.06);border-left:3px solid ' + ec + ';border-radius:8px;padding:5px 9px;margin-bottom:5px;font-size:.76rem;">' +
+          '<span style="font-weight:600;">' + escHtml(x.documento || 'documento') + '</span>' +
+          (x.tipo ? '<span class="badge badge-muted">' + escHtml(x.tipo) + '</span>' : '<span class="badge" style="border:1px solid var(--muted);color:var(--muted);">sin tipo</span>') +
+          '<span class="badge" style="border:1px solid ' + ec + '66;color:' + ec + ';">' + escHtml(x.estado || '') + '</span>' +
+          '<span style="font-size:.64rem;color:var(--muted);font-family:var(--mono);">' + escHtml(orig) + ' · ' + fch + '</span>' +
+          '<span style="margin-left:auto;display:inline-flex;gap:4px;">' +
+            (x.driveLink ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;padding:1px 7px;font-size:.66rem;" href="' + escHtml(x.driveLink) + '" target="_blank" rel="noopener">↗ Drive</a>' : '') +
+            '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Verlo en la Auditoría de cargas (marcar tipo / reasignar)" onclick="hideModal(\'modal-legajo\');crmTab(\'contactos\');contactosModo(\'auditoria\')">🗂 Auditoría</button>' +
+          '</span></div>';
+      }).join('');
+      chk = docsAsoc + '<div style="height:9px;border-top:1px solid rgba(255,255,255,0.06);margin:4px 0 9px;"></div>' + chk;
+    }
     izq += seccion('📥 Documental', chk);
     izq += seccion('🧮 Tasaciones (' + (d.tasaciones || []).length + ')',
       (d.tasaciones || []).length ? d.tasaciones.map(function (x) {
