@@ -122,6 +122,65 @@
     } catch (e) { /* localStorage no disponible */ }
   }
 
+  /* ─── S80B2B: stubs / launchers (placeholders sin backend ni datos) ── */
+  var STUBS = {
+    petit:        { emoji: '🏗', title: 'AMBBI Petit', estado: 'En preparación', tipo: 'operativo',
+      desc: 'Edificio AMBBI en formato petit — alquiler temporal. En etapa de incorporación.',
+      pasos: ['Relevar unidades y superficies', 'Alta en CONFIG (Sistema Financiero)', 'iCal + tarifas por unidad', 'Fotos y fichas', 'Alta en RoboHost (cotizador)'],
+      checklist: ['Unidades relevadas', 'Cargadas en CONFIG', 'iCal conectado', 'Tarifas base/finde', 'Fotos', 'RoboHost'] },
+    italiano:     { emoji: '🏥', title: 'AMBBI Italiano', estado: 'En preparación', tipo: 'operativo',
+      desc: 'Edificio en el polo Hospital Italiano — pipeline de apertura.',
+      pasos: ['Cerrar acuerdo del edificio', 'Relevar unidades', 'Alta en CONFIG', 'iCal + tarifas', 'Fotos y publicación'],
+      checklist: ['Acuerdo', 'Unidades relevadas', 'CONFIG', 'iCal', 'Tarifas', 'Publicación'] },
+    nuevos:       { emoji: '🆕', title: 'Nuevos edificios AMBBI', estado: 'Pipeline', tipo: 'operativo',
+      desc: 'Oportunidades de edificios en evaluación para incorporar al modelo AMBBI.',
+      pasos: ['Relevar oportunidades', 'Due diligence comercial', 'Propuesta al propietario/desarrollador', 'Decisión'],
+      checklist: ['Oportunidad detectada', 'Números', 'Propuesta enviada', 'Cerrado'] },
+    miami:        { emoji: '🌴', title: 'Gringo Miami', estado: 'En desarrollo', tipo: 'venture',
+      desc: 'Web de lujo para The Crosby (Miami). Reservas vía Airbnb (ReservationKey = fase 2).',
+      pasos: ['Cerrar contenido y fotos', 'iCal de las unidades', 'Definir flujo de reservas', 'Dominio'], link: null },
+    deco:         { emoji: '🕯', title: 'GringoDeco', estado: 'Pre-lanzamiento · landing LIVE', tipo: 'venture',
+      desc: 'Marca propia de decoración — velas aromáticas/decorativas + aromatizantes.',
+      pasos: ['Catálogo y fotos reales', 'Definir e-commerce', 'Cablear captura de leads', 'Dominio propio'], link: 'https://nueva-web-ambbi.vercel.app/deco' },
+    pms:          { emoji: '⚙️', title: 'GringoPMS', estado: 'En desarrollo', tipo: 'venture',
+      desc: 'Software propio de Property Management (Airbnb API + motor de reservas).',
+      pasos: ['Definir alcance MVP', 'Integración Airbnb', 'Motor de reservas', 'Conectar con la operación AMBBI'], link: null },
+    metropolitan: { emoji: '🏛', title: 'Metropolitan', estado: 'En preparación', tipo: 'hospitality',
+      desc: 'Cartera propia (alquiler / sub-alquiler largos). Panel privado — sin datos cargados todavía.',
+      pasos: ['Definir qué se gestiona acá', 'Cargar unidades (privado)', 'Vista de ocupación / cobros'],
+      checklist: ['Unidades', 'Ocupación', 'Cobros'] },
+    ambbiclean:   { emoji: '🧹', title: 'AMBBI Clean', estado: 'En preparación', tipo: 'hospitality',
+      desc: 'Limpieza de unidades propias, oficinas y particulares — horas, clientes y cobranza.',
+      pasos: ['Definir clientes y tarifas', 'Registro de horas', 'Cobranza mensual'],
+      checklist: ['Clientes', 'Tarifas', 'Horas', 'Cobranza'] }
+  };
+  function renderStub(key) {
+    var s = STUBS[key], v = document.getElementById('view-stub');
+    if (!v || !s) return;
+    var pasos = (s.pasos || []).map(function (p) { return '<li>' + escHtml(p) + '</li>'; }).join('');
+    var checks = (s.checklist || []).map(function (c) { return '<div class="small" style="padding:3px 0;color:var(--muted);">☐ ' + escHtml(c) + '</div>'; }).join('');
+    var link = s.link ? '<a class="btn btn-gold btn-sm" href="' + s.link + '" target="_blank" rel="noopener">Ver landing ↗</a>' : '';
+    var resp = (s.tipo === 'operativo' || s.tipo === 'hospitality')
+      ? '<div class="grid-2" style="margin-top:10px;"><div class="kpi" style="text-align:left;display:block;"><span>Responsable</span><strong>—</strong></div><div class="kpi" style="text-align:left;display:block;"><span>Fecha objetivo</span><strong>—</strong></div></div>' : '';
+    v.innerHTML =
+      '<div class="section-head"><h1>' + escHtml(s.title.toUpperCase()) + '</h1><span class="badge badge-muted">🚧 ' + escHtml(s.estado) + '</span></div>' +
+      '<div class="card">' +
+        '<div class="card-head"><div><h2 class="card-title">' + s.emoji + ' ' + escHtml(s.title) + '</h2><div class="card-sub">' + escHtml(s.desc) + '</div></div>' + link + '</div>' +
+        (pasos ? '<div style="margin-top:10px;"><div class="small" style="color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Próximos pasos</div><ul style="margin:0 0 0 18px;font-size:.84rem;line-height:1.8;">' + pasos + '</ul></div>' : '') +
+        (checks ? '<div style="margin-top:12px;"><div class="small" style="color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Checklist (placeholder)</div>' + checks + '</div>' : '') +
+        resp +
+        '<div class="small muted" style="margin-top:12px;">Módulo en preparación — sin conectar a backend. Se cableará cuando el proyecto avance.</div>' +
+      '</div>';
+  }
+  function stub(key) {
+    document.querySelectorAll('.view').forEach(function (v) { v.classList.remove('active'); });
+    document.querySelectorAll('.nav-btn').forEach(function (b) { b.classList.remove('active'); });
+    var view = document.getElementById('view-stub'); if (view) view.classList.add('active');
+    var btn = document.getElementById('nav-stub-' + key); if (btn) btn.classList.add('active');
+    renderStub(key);
+  }
+  window.stub = stub;
+
   /* ─── GAUGE (native Canvas 2D) ──────────────────────────────────
    * Draws a semi-circle arc gauge (left to right, bottom pivot).
    * pct: 0–100, color: stroke color string.

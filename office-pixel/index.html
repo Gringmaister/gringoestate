@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/pixel.css?v=s69" />
+  <link rel="stylesheet" href="css/pixel.css?v=s70" />
 </head>
 <body>
 
@@ -103,6 +103,12 @@
           </span>
           <span>AMBBI <small class="nav-sub">Tareas · Huéspedes · Ocupación</small></span>
         </button>
+        <button class="nav-btn nav-btn-soon" onclick="stub('metropolitan')" id="nav-stub-metropolitan" aria-label="Metropolitan — en preparación">
+          <span class="nav-icon" aria-hidden="true">🏛</span><span>Metropolitan <small class="nav-sub">En preparación</small></span>
+        </button>
+        <button class="nav-btn nav-btn-soon" onclick="stub('ambbiclean')" id="nav-stub-ambbiclean" aria-label="AMBBI Clean — en preparación">
+          <span class="nav-icon" aria-hidden="true">🧹</span><span>AMBBI Clean <small class="nav-sub">Limpieza</small></span>
+        </button>
       </div>
     </div>
 
@@ -110,7 +116,24 @@
     <div class="nav-group" data-group="proyectos">
       <button class="nav-group-header" onclick="toggleNavGroup('proyectos')" aria-expanded="true"><span class="nav-group-emoji" aria-hidden="true">🚧</span><span class="nav-group-name">Proyectos / Expansión</span><span class="nav-group-chevron" aria-hidden="true">▾</span></button>
       <div class="nav-group-items">
-        <div class="nav-soon" aria-label="Próximamente: AMBBI Petit, AMBBI Italiano, Gringo Miami, GringoDeco, GringoPMS">🚧 Próximamente</div>
+        <button class="nav-btn nav-btn-soon" onclick="stub('petit')" id="nav-stub-petit" aria-label="AMBBI Petit — en preparación">
+          <span class="nav-icon" aria-hidden="true">🏗</span><span>AMBBI Petit <small class="nav-sub">En preparación</small></span>
+        </button>
+        <button class="nav-btn nav-btn-soon" onclick="stub('italiano')" id="nav-stub-italiano" aria-label="AMBBI Italiano — en preparación">
+          <span class="nav-icon" aria-hidden="true">🏥</span><span>AMBBI Italiano <small class="nav-sub">Hospital Italiano</small></span>
+        </button>
+        <button class="nav-btn nav-btn-soon" onclick="stub('nuevos')" id="nav-stub-nuevos" aria-label="Nuevos edificios AMBBI — pipeline">
+          <span class="nav-icon" aria-hidden="true">🆕</span><span>Nuevos edificios <small class="nav-sub">Pipeline</small></span>
+        </button>
+        <button class="nav-btn nav-btn-soon" onclick="stub('miami')" id="nav-stub-miami" aria-label="Gringo Miami — en desarrollo">
+          <span class="nav-icon" aria-hidden="true">🌴</span><span>Gringo Miami <small class="nav-sub">En desarrollo</small></span>
+        </button>
+        <button class="nav-btn nav-btn-soon" onclick="stub('deco')" id="nav-stub-deco" aria-label="GringoDeco — pre-lanzamiento">
+          <span class="nav-icon" aria-hidden="true">🕯</span><span>GringoDeco <small class="nav-sub">Pre-lanzamiento</small></span>
+        </button>
+        <button class="nav-btn nav-btn-soon" onclick="stub('pms')" id="nav-stub-pms" aria-label="GringoPMS — en desarrollo">
+          <span class="nav-icon" aria-hidden="true">⚙️</span><span>GringoPMS <small class="nav-sub">En desarrollo</small></span>
+        </button>
       </div>
     </div>
 
@@ -1103,6 +1126,9 @@
       </div>
     </div>
 
+    <!-- ════════════════ STUB compartido (Proyectos/Expansión + Hospitality nuevos · S80B2B) ════════════════ -->
+    <div class="view" id="view-stub"></div>
+
     <!-- ════════════════ SMART HOME ════════════════ -->
     <div class="view" id="view-smarthome">
       <div class="section-head">
@@ -1666,7 +1692,7 @@
 <!-- Scripts -->
 <!-- S45: ?v= cache-buster — subir la versión en cada deploy con cambios de JS/CSS
      (el HTML revalida siempre en Netlify; el query nuevo fuerza al browser a bajar el asset fresco) -->
-<script src="js/api.js?v=s69"></script>
-<script src="js/app.js?v=s69"></script>
+<script src="js/api.js?v=s70"></script>
+<script src="js/app.js?v=s70"></script>
 </body>
 </html>

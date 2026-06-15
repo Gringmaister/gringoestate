@@ -149,6 +149,8 @@ a { color: inherit; text-decoration: none; }
 .nav-group-items { overflow: hidden; max-height: 600px; opacity: 1; transition-property: max-height, opacity; transition-duration: 220ms; transition-timing-function: ease-out; }
 .nav-group.collapsed .nav-group-items { max-height: 0; opacity: 0; pointer-events: none; }
 .nav-soon { padding: 8px 12px; color: var(--muted); opacity: 0.55; font-size: 0.72rem; font-style: italic; }
+.nav-btn-soon { opacity: 0.8; }
+.nav-btn-soon.active, .nav-btn-soon:hover { opacity: 1; }
 .system-brand .ge-brand-g { color: var(--text); }
 .system-brand .ge-brand-o { color: var(--gold); }
 @media (prefers-reduced-motion: reduce) { .nav-group-items, .nav-group-chevron { transition: none; } }
