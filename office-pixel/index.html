@@ -932,21 +932,22 @@
       </div><!-- /ct-operaciones -->
 
       <div class="crm-tab" id="ct-contactos">
-      <!-- S51: A QUIÉN HABLARLE HOY (franja superior — el motor relacional manda) -->
-      <div class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.3);" role="region" aria-label="A quién hablarle hoy">
+      <!-- S62A.1: bandeja OPERATIVA primero (procesar/auditar/clasificar) · "A quién hablarle hoy" pasa a solapa -->
+      <div class="btn-row" style="margin-bottom:12px;">
+        <button class="btn btn-gold btn-sm" id="cmode-auditoria" onclick="contactosModo('auditoria')">🗂 Auditoría / Cargas <span class="badge badge-muted" id="crm-audit-count">—</span></button>
+        <button class="btn btn-ghost btn-sm" id="cmode-refinar" onclick="contactosModo('refinar')">🧹 Refinamiento WhatsApp <span class="badge badge-muted" id="crm-hig-count">—</span></button>
+        <button class="btn btn-ghost btn-sm" id="cmode-relacional" onclick="contactosModo('relacional')">⭐ Los 250 + Seguimientos</button>
+        <button class="btn btn-ghost btn-sm" id="cmode-hablar" onclick="contactosModo('hablar')">🎯 A quién hablarle hoy</button>
+      </div>
+
+      <!-- S62A.1: "A quién hablarle hoy" como solapa secundaria (ya no bloque fijo arriba) -->
+      <div id="cblock-hablar" class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.3);display:none;" role="region" aria-label="A quién hablarle hoy">
         <div class="card-head"><div><h2 class="card-title">🎯 A quién hablarle hoy</h2><div class="card-sub">Hermes ordena tu cartera por prioridad — score, motivo y acción</div></div></div>
         <div id="crm-hablar-contactos"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
       </div>
 
-      <!-- S51/S52.1: sub-modos del depurador -->
-      <div class="btn-row" style="margin-bottom:12px;">
-        <button class="btn btn-gold btn-sm" id="cmode-relacional" onclick="contactosModo('relacional')">⭐ Los 250 + Seguimientos</button>
-        <button class="btn btn-ghost btn-sm" id="cmode-refinar" onclick="contactosModo('refinar')">🧹 Refinamiento WhatsApp <span class="badge badge-muted" id="crm-hig-count">—</span></button>
-        <button class="btn btn-ghost btn-sm" id="cmode-auditoria" onclick="contactosModo('auditoria')">🗂 Auditoría de cargas <span class="badge badge-muted" id="crm-audit-count">—</span></button>
-      </div>
-
       <!-- S52.1: AUDITORÍA DE CARGAS (depurador documental — historial completo + confirmar) -->
-      <div id="cblock-auditoria" class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.3);display:none;" role="region" aria-label="Auditoría de cargas de archivos">
+      <div id="cblock-auditoria" class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.3);" role="region" aria-label="Auditoría de cargas de archivos">
         <div class="card-head">
           <div><h2 class="card-title">🗂 Auditoría de cargas</h2><div class="card-sub">todo lo que entró por WhatsApp/panel · ver, confirmar, reasignar o descartar · Hermes captura, vos validás</div></div>
           <button class="btn btn-ghost btn-sm" onclick="loadDocAuditoria()" title="Refrescar">↻</button>
@@ -956,7 +957,7 @@
       </div>
 
       <!-- LOS 250 + SEGUIMIENTOS (pantalla partida, protagonistas) -->
-      <div id="cblock-relacional" class="grid-2" style="margin-bottom:14px;">
+      <div id="cblock-relacional" class="grid-2" style="margin-bottom:14px;display:none;">
         <div class="card" role="region" aria-label="Los 250 contactos trabajables">
           <div class="card-head"><h2 class="card-title">⭐ Los 250</h2><span style="display:inline-flex;gap:6px;align-items:center;"><button class="btn btn-ghost btn-sm" onclick="toggleLos250Lista()" title="Ver el listado completo de contactos del CRM con su etiqueta A/B/C/D">📋 Listado completo</button><span class="badge badge-muted" id="crm-250-total">—</span></span></div>
           <div class="kpi-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));" id="crm-250-grid">
@@ -1600,7 +1601,7 @@
 <!-- Scripts -->
 <!-- S45: ?v= cache-buster — subir la versión en cada deploy con cambios de JS/CSS
      (el HTML revalida siempre en Netlify; el query nuevo fuerza al browser a bajar el asset fresco) -->
-<script src="js/api.js?v=s61"></script>
-<script src="js/app.js?v=s61"></script>
+<script src="js/api.js?v=s62"></script>
+<script src="js/app.js?v=s62"></script>
 </body>
 </html>

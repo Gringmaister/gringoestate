@@ -1474,8 +1474,9 @@
 
   // S51/S52.1: sub-modos del depurador — relacional · refinamiento WhatsApp · auditoría de cargas
   window.contactosModo = function (modo) {
-    var bloques = { relacional: 'cblock-relacional', refinar: 'cblock-refinar', auditoria: 'cblock-auditoria' };
-    var botones = { relacional: 'cmode-relacional', refinar: 'cmode-refinar', auditoria: 'cmode-auditoria' };
+    window._contactosModo = modo; // S62A.1: recordar el modo activo (default Auditoría al entrar)
+    var bloques = { auditoria: 'cblock-auditoria', refinar: 'cblock-refinar', relacional: 'cblock-relacional', hablar: 'cblock-hablar' };
+    var botones = { auditoria: 'cmode-auditoria', refinar: 'cmode-refinar', relacional: 'cmode-relacional', hablar: 'cmode-hablar' };
     Object.keys(bloques).forEach(function (k) {
       var bl = document.getElementById(bloques[k]); if (bl) bl.style.display = (k === modo ? '' : 'none');
       var bt = document.getElementById(botones[k]); if (bt) { bt.classList.toggle('btn-gold', k === modo); bt.classList.toggle('btn-ghost', k !== modo); }
@@ -1575,6 +1576,7 @@
     var idx = ['resumen', 'captacion', 'demanda', 'operaciones', 'propiedades', 'contactos'].indexOf(which);
     var btns = document.querySelectorAll('#crm-tabs .sub-tab');
     if (btns[idx]) btns[idx].classList.add('active');
+    if (which === 'contactos' && window.contactosModo) contactosModo(window._contactosModo || 'auditoria'); // S62A.1: default Auditoría
   }
   window.crmTab = crmTab;
 
@@ -1737,9 +1739,14 @@
       return (i ? '<span style="color:var(--muted);font-size:.7rem;">›</span>' : '') +
         '<span style="font-size:.66rem;padding:3px 8px;border-radius:7px;border:1px solid ' + SF_COL[s.ok] + '44;color:' + SF_COL[s.ok] + ';white-space:nowrap;">' + SF_ICON[s.ok] + ' ' + s.l + (s.extra ? ' ' + s.extra : '') + '</span>';
     }).join('') + '</div>';
+    // S62A.3: tipo de unidad visible + editable (alimenta el checklist contextual, la tasación y la ficha)
+    var TIPO_UNIDAD_OPTS = ['Departamento', 'Casa', 'Oficina', 'Local', 'Cochera', 'Terreno', 'PH', 'Otro'];
+    var tipoUnidadHtml = '<select class="input" id="lg-tipo-unidad" style="width:auto;font-size:.74rem;padding:2px 8px;" onchange="lgSetTipoUnidad(this.value)" title="Tipo de unidad — alimenta el checklist documental, la tasación y la ficha comercial">' +
+      '<option value="">🏷 Tipo de unidad…</option>' + TIPO_UNIDAD_OPTS.map(function (tu) { return '<option' + (p.tipoPropiedad === tu ? ' selected' : '') + '>' + tu + '</option>'; }).join('') + '</select>';
     var cabeceraHtml = '<div style="border:1px solid rgba(212,166,64,0.25);border-radius:14px;padding:14px 16px;margin-bottom:14px;background:linear-gradient(160deg,rgba(212,166,64,0.06),rgba(255,255,255,0.01));">' +
       '<div style="font-size:1.3rem;font-weight:800;letter-spacing:.01em;line-height:1.15;">' + escHtml(p.propiedad || '—') + '</div>' +
-      '<div style="font-size:.86rem;color:var(--muted);margin:3px 0 12px;">' + escHtml(specs) + (p.direccion ? ' · 📍 ' + escHtml(p.direccion) : '') + '</div>' +
+      '<div style="font-size:.86rem;color:var(--muted);margin:3px 0 9px;">' + escHtml(specs) + (p.direccion ? ' · 📍 ' + escHtml(p.direccion) : '') + '</div>' +
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><span style="font-size:.7rem;color:var(--muted);">Tipo de unidad:</span>' + tipoUnidadHtml + (p.tipoPropiedad ? '' : '<span style="font-size:.66rem;color:var(--warn);">⚠️ sin definir — impacta checklist y tasación</span>') + '</div>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + semChip('Comercial', sf.comercial) + semChip('Documental', sf.documental) + semChip('Marketing', sf.marketing) + semChip('Demanda', sf.demanda) + '</div>' +
       stepper + '</div>';
     // ═ PRÓXIMA ACCIÓN — enorme, arriba, con botones
@@ -1835,7 +1842,8 @@
     izq += seccion('🧮 Tasaciones (' + (d.tasaciones || []).length + ')',
       (d.tasaciones || []).length ? d.tasaciones.map(function (x) {
         return '<div style="display:flex;gap:8px;align-items:center;padding:3px 0;font-size:.78rem;flex-wrap:wrap;"><span style="flex:1;">' + escHtml(x.tasacion) + '</span><span class="badge badge-muted">' + escHtml(x.estado || '') + '</span>' + (x.precioCierre ? '<span style="font-family:var(--mono);color:var(--gold);">USD ' + Number(x.precioCierre).toLocaleString('es-AR') + '</span>' : '') + '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'modal-legajo\');crmTab(\'propiedades\');abrirTasacion(\'' + x.id + '\')">abrir</button></div>';
-      }).join('') : '<div class="small muted">Sin tasaciones.</div>');
+      }).join('') : '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);">Todavía no hay tasación para esta propiedad.<button class="btn btn-gold btn-sm" onclick="tasarDesdeLegajo()">+ Tasar esta propiedad</button></div>',
+      '<button class="btn btn-gold btn-sm" style="padding:2px 9px;font-size:.7rem;" onclick="tasarDesdeLegajo()" title="Crea una tasación pre-llenada y VINCULADA a esta propiedad">+ Tasar esta propiedad</button>');
     izq += seccion('🛒 Interesados (' + (d.interesados || []).length + ')',
       (d.interesados || []).length ? d.interesados.map(function (c) {
         return '<div style="display:flex;gap:8px;align-items:center;padding:2px 0;font-size:.78rem;"><span style="flex:1;">' + escHtml(c.nombre) + '</span><span class="badge badge-muted">' + escHtml(c.etapaDemanda || '—') + '</span>' + (c.telefono ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;padding:0 6px;" href="' + waHref(c.telefono) + '" target="_blank" rel="noopener">💬</a>' : '') + '</div>';
@@ -1910,6 +1918,27 @@
     lgDropWire();
   }
   window.abrirLegajo = abrirLegajo;
+  // S62A.3: guardar el tipo de unidad desde el Legajo (editable). Reusa /crm/propiedad/actualizar.
+  window.lgSetTipoUnidad = async function (tipo) {
+    if (!tipo || !window.lgId) return;
+    var r = await apiFetch('/crm/propiedad/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: window.lgId, tipoPropiedad: tipo }) });
+    if (r && r.ok) { toast('🏷 Tipo de unidad: ' + tipo, 'ok'); if (window.lgData && window.lgData.propiedad) window.lgData.propiedad.tipoPropiedad = tipo; }
+    else toast('No se pudo guardar el tipo de unidad', 'err');
+  };
+  // S62A.4: tasar desde el Legajo — pre-llena el modal y vincula la tasación a la propiedad
+  window.tasarDesdeLegajo = function () {
+    var p = (window.lgData || {}).propiedad; if (!p) return;
+    window.tasarDesdePropId = window.lgId;
+    var set = function (id, val) { var e = document.getElementById(id); if (e) e.value = (val != null ? val : ''); };
+    set('ts-titulo', p.propiedad || '');
+    set('ts-direccion', p.direccion || '');
+    set('ts-barrio', p.barrio || '');
+    set('ts-m2cub', p.m2Cubiertos || p.m2Totales || '');
+    var tt = document.getElementById('ts-tipo');
+    if (tt && p.tipoPropiedad) { for (var i = 0; i < tt.options.length; i++) { if (tt.options[i].value === p.tipoPropiedad || tt.options[i].text === p.tipoPropiedad) { tt.selectedIndex = i; break; } } }
+    hideModal('modal-legajo'); crmTab('propiedades'); showModal('modal-tasacion');
+    toast('Pre-llenado desde ' + (p.propiedad || 'la propiedad') + ' — completá m²/piso y creá', 'ok');
+  };
 
   /* S44: drag & drop de documentos directo al legajo */
   function lgDropWire() {
@@ -2088,9 +2117,10 @@
     var v = function (id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
     if (!v('ts-titulo')) return toast('El título es requerido', 'err');
     var co = document.getElementById('ts-cochera');
+    var propId = window.tasarDesdePropId; window.tasarDesdePropId = null; // S62A.4: vincular a la propiedad y consumir una sola vez
     var d = await apiFetch('/crm/tasacion', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tasacion: v('ts-titulo'), direccion: v('ts-direccion'), barrio: v('ts-barrio'), tipoPropiedad: v('ts-tipo'), m2Cubiertos: Number(v('ts-m2cub')) || 0, m2Balcon: Number(v('ts-m2balcon')) || 0, m2Terraza: Number(v('ts-m2terraza')) || 0, m2Semicubiertos: Number(v('ts-m2semi')) || 0, m2Patio: Number(v('ts-m2patio')) || 0, precioPretendido: Number(v('ts-pretendido')) || undefined, piso: v('ts-piso') !== '' ? Number(v('ts-piso')) : undefined, pisosEdificio: Number(v('ts-pisosedif')) || undefined, antiguedad: Number(v('ts-antiguedad')) || undefined, orientacion: v('ts-orientacion') || undefined, disposicion: v('ts-disposicion') || undefined, cochera: !!(co && co.checked), operacion: 'Venta', objetivo: 'Captación' })
+      body: JSON.stringify({ tasacion: v('ts-titulo'), direccion: v('ts-direccion'), barrio: v('ts-barrio'), tipoPropiedad: v('ts-tipo'), m2Cubiertos: Number(v('ts-m2cub')) || 0, m2Balcon: Number(v('ts-m2balcon')) || 0, m2Terraza: Number(v('ts-m2terraza')) || 0, m2Semicubiertos: Number(v('ts-m2semi')) || 0, m2Patio: Number(v('ts-m2patio')) || 0, precioPretendido: Number(v('ts-pretendido')) || undefined, piso: v('ts-piso') !== '' ? Number(v('ts-piso')) : undefined, pisosEdificio: Number(v('ts-pisosedif')) || undefined, antiguedad: Number(v('ts-antiguedad')) || undefined, orientacion: v('ts-orientacion') || undefined, disposicion: v('ts-disposicion') || undefined, cochera: !!(co && co.checked), operacion: 'Venta', objetivo: 'Captación', propiedadId: propId || undefined })
     });
     if (d && d.ok) { hideModal('modal-tasacion'); toast('Tasación creada — ' + d.m2Ponderados + ' m² ponderados. Ahora pegale comparables.', 'ok'); loadTasaciones(); abrirTasacion(d.id); }
     else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
