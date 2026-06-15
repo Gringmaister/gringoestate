@@ -151,6 +151,11 @@ a { color: inherit; text-decoration: none; }
 .nav-soon { padding: 8px 12px; color: var(--muted); opacity: 0.55; font-size: 0.72rem; font-style: italic; }
 .nav-btn-soon { opacity: 0.8; }
 .nav-btn-soon.active, .nav-btn-soon:hover { opacity: 1; }
+/* S80B3A: stubs en preparación — presentación (scoped a #view-stub) */
+#view-stub .card { border: 1px dashed rgba(212,166,64,0.3); background: rgba(212,166,64,0.02); }
+#view-stub .card ul { margin: 6px 0 0 16px; padding: 0; }
+#view-stub .card ul li { padding: 3px 0; font-size: 0.84rem; }
+#view-stub .grid-2 { gap: 10px; margin-top: 12px; }
 .system-brand .ge-brand-g { color: var(--text); }
 .system-brand .ge-brand-o { color: var(--gold); }
 @media (prefers-reduced-motion: reduce) { .nav-group-items, .nav-group-chevron { transition: none; } }
@@ -613,8 +618,8 @@ input:focus:not(:focus-visible) { outline: none; }
 }
 @media (max-width: 900px) {
   .workspace { grid-template-columns: 1fr; }
-  .sidebar   { position: static; height: auto; display: flex; flex-wrap: wrap; gap: 4px; padding: 10px 8px; overflow: visible; }
-  .sidebar .sidebar-section { margin-top: 0; }
+  .sidebar   { position: static; height: auto; width: 100%; display: block; padding: 10px 10px; overflow: visible; border-right: none; border-bottom: 1px solid var(--border); }
+  .sidebar .nav-group { margin-top: 8px; }
   .kpi-grid  { grid-template-columns: repeat(2, 1fr); }
   .gauge-grid{ grid-template-columns: repeat(3, 1fr); }
   .agent-grid{ grid-template-columns: 1fr; }

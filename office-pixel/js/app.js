@@ -4107,13 +4107,20 @@ window.tasacionAplicarFicha = function (d) {
 (function () {
   var CTX_LABEL = {
     resumen: 'Prioridades del día', captacion: 'Propietarios a mover', demanda: 'Leads a escribir',
-    operaciones: 'Operaciones y cierres', propiedades: 'Qué falta por propiedad', contactos: 'Clasificá y seguí'
+    operaciones: 'Operaciones y cierres', propiedades: 'Qué falta por propiedad', contactos: 'Clasificá y seguí',
+    documentos: 'Documentos y cargas', tasaciones: 'Tasaciones y captación'
   };
   var CONSOLE_CHIPS = ['¿Qué tengo que hacer hoy?', '¿Qué propiedades están trabadas?', '¿Qué contactos debería promover?', 'Mostrame riesgos documentales', '¿Dónde está la plata en juego?'];
 
   function activeCrmTab() {
     var el = document.querySelector('.crm-tab.active');
     return el ? el.id.replace('ct-', '') : 'resumen';
+  }
+  // S80B3A: contexto del Hermes Dock por VISTA (los módulos promovidos en B2A no son crm-tabs)
+  function crmCtxKey() {
+    var map = { 'view-documentos': 'documentos', 'view-tasaciones': 'tasaciones', 'view-operaciones': 'operaciones' };
+    for (var id in map) { var v = document.getElementById(id); if (v && v.classList.contains('active')) return map[id]; }
+    return activeCrmTab();
   }
   function inCrm() {
     return ['view-gebroker', 'view-documentos', 'view-tasaciones', 'view-operaciones'].some(function (id) {
@@ -4134,7 +4141,7 @@ window.tasacionAplicarFicha = function (d) {
       if (here) loadHermesPulse();
     }
     if (here) {
-      var t = activeCrmTab();
+      var t = crmCtxKey();
       if (t !== lastTab) {
         lastTab = t;
         var ctx = document.getElementById('hermes-panel-ctx');
@@ -4177,7 +4184,7 @@ window.tasacionAplicarFicha = function (d) {
     var p = window.hermesPulse;
     if (!body) return;
     if (!p) { body.innerHTML = '<div class="skeleton skeleton-block" style="height:90px;"></div>'; return; }
-    var tab = activeCrmTab();
+    var tab = crmCtxKey();
     var det = p.detalle || {};
     var html = '<div class="hermes-pulse-row">' +
       '<div class="pulse-kpi"><strong style="color:var(--gold)">' + p.recomendaciones + '</strong><small>rec</small></div>' +
@@ -4192,6 +4199,10 @@ window.tasacionAplicarFicha = function (d) {
     } else if (tab === 'contactos') {
       items += itemRow('🧹', (det.sinClasificar || 0) + ' sin clasificar', 'Refiná la base cruda de WhatsApp', '');
       (det.recomendados || []).slice(0, 4).forEach(function (r) { items += itemRow('⭐', r.nombre, r.motivo, r.telefono ? '<a class="btn btn-xs btn-ghost" href="' + waHref(r.telefono) + '" target="_blank" rel="noopener">💬</a>' : ''); });
+    } else if (tab === 'documentos') {
+      items += itemRow('🗂', (det.sinClasificar || 0) + ' sin clasificar', 'Cargas pendientes de validar en Doc Inbox', '');
+    } else if (tab === 'tasaciones') {
+      items += itemRow('🧮', 'Tasaciones', 'Comparables y captación — abrí una tasación para el detalle', '');
     } else {
       // resumen / captacion / demanda → recomendados del día
       (det.recomendados || []).forEach(function (r) { items += itemRow('⭐', r.nombre, r.motivo, r.telefono ? '<a class="btn btn-xs btn-ghost" href="' + waHref(r.telefono) + '" target="_blank" rel="noopener">💬</a>' : ''); });
