@@ -21,6 +21,7 @@ mkdir -p "$DEST"
 # La DB de WhatsApp (evolution_postgres) se agrega vía pg_dump más abajo (S36, 2026-06-10).
 CANDIDATES=(
   agents-runtime/agents-history.db
+  agents-runtime/burn-audit.jsonl agents-runtime/burn-audit.jsonl.1
   bambi/bambi_history.db
   n8n/database.sqlite n8n/database.sqlite-wal n8n/database.sqlite-shm
   wacli/wacli.db wacli/wacli.db-wal wacli/wacli.db-shm wacli/session.db
@@ -57,6 +58,8 @@ CRM_FILES=()
 for f in "$CRM_SRC"/crm-*.json "$CRM_SRC"/crm-*.jsonl "$CRM_SRC"/crm-*.jsonl.1; do
   [ -f "$f" ] && CRM_FILES+=("$(basename "$f")")
 done
+# S70C: evidencia de comparables (snapshots fechados) — es la base propia, debe respaldarse (dir → tar recursa)
+[ -d "$CRM_SRC/crm-comparable-snapshots" ] && CRM_FILES+=("crm-comparable-snapshots")
 [ ${#CRM_FILES[@]} -gt 0 ] && TAR_ARGS+=( -C "$CRM_SRC" "${CRM_FILES[@]}" )
 
 tar -czf "$ARCHIVE" "${TAR_ARGS[@]}" 2>>"$LOG"

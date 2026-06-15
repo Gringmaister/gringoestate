@@ -2198,18 +2198,30 @@
     var d = window.tsDetalle;
     if (!el || !d) return;
     var t = d.tasacion, comps = d.comparables || [];
+    var EA_COL = { Aceptado: 'var(--ok)', Descartado: 'var(--danger)', Revisado: '#5ec8d8', Importado: 'var(--warn)', Borrador: 'var(--muted)' };
     var filas = comps.map(function (c) {
-      var excl = c.estadoAviso === 'Excluido' || c.outlier;
+      var excl = c.estadoAviso === 'Excluido' || c.outlier || c.estadoAnalisis === 'Descartado';
       var est = c.estadoAviso === 'Excluido' ? '🚫' : c.outlier ? '⚠ outlier' : c.similar ? '✓' : '✕';
+      var eaCol = EA_COL[c.estadoAnalisis] || 'var(--muted)';
+      var subline = (c.portal ? '<span style="opacity:.8;">' + escHtml(c.portal) + '</span>' : '') +
+        (c.estadoAnalisis ? ' · <span style="color:' + eaCol + ';">' + escHtml(c.estadoAnalisis) + '</span>' : '') +
+        (c.score != null ? ' · score ' + c.score : '') +
+        (c.fechaCaptura ? ' · ' + escHtml(String(c.fechaCaptura).slice(0, 10)) : '');
       return '<tr style="border-top:1px solid rgba(255,255,255,0.06);' + (excl ? 'opacity:.45;' : '') + '">' +
-        '<td style="padding:4px 6px;font-size:.76rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + escHtml(c.motivoExclusion || c.notas || '') + '">' + (c.link ? '<a href="' + escHtml(c.link) + '" target="_blank" rel="noopener" style="color:var(--text);">' + escHtml(c.comparable) + ' ↗</a>' : escHtml(c.comparable)) + '</td>' +
+        '<td style="padding:4px 6px;font-size:.76rem;max-width:210px;" title="' + escHtml(c.motivoExclusion || c.notas || '') + '">' +
+          '<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (c.link ? '<a href="' + escHtml(c.link) + '" target="_blank" rel="noopener" style="color:var(--text);">' + escHtml(c.comparable) + ' ↗</a>' : escHtml(c.comparable)) + '</div>' +
+          (subline ? '<div style="font-size:.6rem;color:var(--muted);margin-top:1px;">' + subline + '</div>' : '') + '</td>' +
         '<td style="padding:4px 6px;font-family:var(--mono);font-size:.74rem;text-align:right;">' + (c.precio ? c.precio.toLocaleString('es-AR') : '—') + '</td>' +
         '<td style="padding:4px 6px;font-family:var(--mono);font-size:.74rem;text-align:right;">' + (c.precioAjustado ? c.precioAjustado.toLocaleString('es-AR') : '—') + (c.cochera ? ' 🚗' : '') + '</td>' +
         '<td style="padding:4px 6px;font-family:var(--mono);font-size:.74rem;text-align:right;">' + (c.m2Pond || '—') + '</td>' +
         '<td style="padding:4px 6px;font-family:var(--mono);font-size:.78rem;text-align:right;color:var(--gold);">' + (c.usdM2 ? c.usdM2.toLocaleString('es-AR') : '—') + '</td>' +
         '<td style="padding:4px 6px;font-family:var(--mono);font-size:.7rem;text-align:right;">' + (c.diasPublicado != null ? c.diasPublicado + 'd' : '—') + '</td>' +
         '<td style="padding:4px 6px;font-size:.74rem;text-align:center;">' + est + '</td>' +
-        '<td style="padding:4px 6px;text-align:center;"><button class="btn btn-ghost btn-sm" style="padding:0 6px;" title="' + (excl ? 'Re-incluir en el cálculo' : 'Excluir del cálculo') + '" onclick="toggleComparable(\'' + c.id + '\',\'' + (excl ? 'Incluido' : 'Excluido') + '\',\'' + t.id + '\')">' + (excl ? '↩' : '🚫') + '</button></td>' +
+        '<td style="padding:4px 6px;text-align:center;white-space:nowrap;">' +
+          (c.estadoAnalisis !== 'Aceptado' ? '<button class="btn btn-ghost btn-sm" style="padding:0 5px;" title="Aceptar (revisado y OK para la base/cálculo)" onclick="comparableAnalisis(\'' + c.id + '\',\'Aceptado\',\'' + t.id + '\')">✓</button>' : '') +
+          (c.estadoAnalisis !== 'Descartado' ? '<button class="btn btn-ghost btn-sm" style="padding:0 5px;" title="Descartar (sale del cálculo, con motivo)" onclick="comparableAnalisis(\'' + c.id + '\',\'Descartado\',\'' + t.id + '\')">🗑</button>' : '<button class="btn btn-ghost btn-sm" style="padding:0 5px;" title="Re-incluir (Importado)" onclick="comparableAnalisis(\'' + c.id + '\',\'Importado\',\'' + t.id + '\')">↺</button>') +
+          (c.comparableKey ? '<button class="btn btn-ghost btn-sm" style="padding:0 5px;" title="Ver qué decía el aviso al momento de tasar (snapshots)" onclick="verSnapshotComparable(\'' + c.comparableKey + '\')">📄</button>' : '') +
+          '<button class="btn btn-ghost btn-sm" style="padding:0 5px;" title="' + (c.estadoAviso === 'Excluido' ? 'Re-incluir en el cálculo' : 'Excluir del cálculo (técnico)') + '" onclick="toggleComparable(\'' + c.id + '\',\'' + (c.estadoAviso === 'Excluido' ? 'Incluido' : 'Excluido') + '\',\'' + t.id + '\')">' + (c.estadoAviso === 'Excluido' ? '↩' : '🚫') + '</button></td>' +
       '</tr>';
     }).join('');
     var preciosHtml = '';
@@ -2291,12 +2303,36 @@
     toast('Analizando comparable con IA… (~20s)', 'ok');
     var d = await apiFetch('/crm/tasacion/comparable', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (d && d.ok) {
+      if (d.deduped) { toast('♻️ ' + (d.mensaje || 'Ya estaba cargado en esta tasación — no se duplicó'), 'ok'); abrirTasacion(tasacionId); return; }
       var c = d.comparable;
-      toast('✅ ' + c.titulo + ' — USD/m² ' + (c.usdM2 || '?') + (c.esSimilar ? '' : ' (lo marqué NO similar: ' + (c.razon || '') + ')'), 'ok');
+      toast('✅ ' + c.titulo + ' — USD/m² ' + (c.usdM2 || '?') + (d.reusado ? ' (reusé datos de la biblioteca, sin re-leer)' : '') + (c.esSimilar ? '' : ' (lo marqué NO similar: ' + (c.razon || '') + ')'), 'ok');
       abrirTasacion(tasacionId);
     } else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
   }
   window.agregarComparable = agregarComparable;
+  // S70B: workflow humano del comparable (Aceptado/Descartado/Importado) — separado del Estado aviso técnico
+  async function comparableAnalisis(cid, estado, tasId) {
+    var motivo = '';
+    if (estado === 'Descartado') { motivo = prompt('Motivo del descarte (queda registrado):', 'No comparable / fuera de zona'); if (motivo === null) return; }
+    var d = await apiFetch('/crm/comparable/estado', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: cid, estadoAnalisis: estado, motivo: motivo }) });
+    if (d && d.ok) { toast(estado === 'Aceptado' ? '✓ Aceptado para la base' : estado === 'Descartado' ? '🗑 Descartado (fuera del cálculo)' : '↺ ' + estado, 'ok'); abrirTasacion(tasId); }
+    else toast('Error: ' + ((d && d.error) || ''), 'err');
+  }
+  window.comparableAnalisis = comparableAnalisis;
+  // S70C: ver qué decía el aviso al momento de tasar (snapshots fechados)
+  async function verSnapshotComparable(key) {
+    var d = await apiFetch('/crm/comparable/snapshots?key=' + encodeURIComponent(key));
+    if (!d || !d.ok) return toast('No pude leer snapshots', 'err');
+    if (!d.count) return toast('Sin snapshots para este comparable todavía', 'err');
+    var txt = d.snapshots.map(function (s) {
+      return '📅 ' + String(s.fechaCaptura || '').slice(0, 16).replace('T', ' ') + ' · ' + (s.portal || '?') + ' · ' + (s.metodo || '') +
+        (s.titulo ? '\nTítulo: ' + s.titulo : '') +
+        (s.precioUsd != null ? '\nPrecio: USD ' + Number(s.precioUsd).toLocaleString('es-AR') + (s.m2 ? ' · ' + s.m2 + ' m²' : '') + (s.diasPublicado != null ? ' · ' + s.diasPublicado + 'd' : '') : '') +
+        (s.textoExtraido ? '\n\n' + s.textoExtraido.slice(0, 700) : '');
+    }).join('\n\n──────────\n\n');
+    alert('🗂 Qué decía el aviso (snapshots fechados — ' + d.count + ')\n\n' + txt);
+  }
+  window.verSnapshotComparable = verSnapshotComparable;
 
   async function calcularTasacion(id) {
     toast('Calculando…', 'ok');
