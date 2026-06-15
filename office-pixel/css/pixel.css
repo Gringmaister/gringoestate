@@ -135,6 +135,23 @@ a { color: inherit; text-decoration: none; }
 .nav-btn:hover { border-color: rgba(212,166,64,0.2); background: rgba(212,166,64,0.06); color: var(--text); transform: translateX(2px); }
 .nav-btn.active { border-color: rgba(212,166,64,0.28); background: rgba(212,166,64,0.1); color: var(--gold); }
 .nav-btn.active .nav-sub { color: rgba(212,166,64,0.7); }
+/* ── S80B1: sidebar agrupado colapsable + skip-link + logo lockup ── */
+.skip-link { position: absolute; left: -9999px; top: 0; z-index: 60; background: var(--gold); color: #101010; padding: 8px 14px; border-radius: 0 0 8px 0; font-weight: 700; font-size: .8rem; }
+.skip-link:focus { left: 0; }
+.nav-group { margin-top: 14px; }
+.nav-group-header { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 38px; padding: 6px 10px; background: none; border: none; cursor: pointer; text-align: left; color: var(--muted); font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.14em; font-size: 0.82rem; text-transform: uppercase; transition: color 150ms ease-out; }
+.nav-group-header:hover { color: var(--gold); }
+.nav-group-header:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
+.nav-group-emoji { font-size: 0.95rem; line-height: 1; }
+.nav-group-name { flex: 1; }
+.nav-group-chevron { font-size: 0.7rem; color: rgba(212,166,64,0.6); transition: transform 200ms ease-out; }
+.nav-group.collapsed .nav-group-chevron { transform: rotate(-90deg); }
+.nav-group-items { overflow: hidden; max-height: 600px; opacity: 1; transition-property: max-height, opacity; transition-duration: 220ms; transition-timing-function: ease-out; }
+.nav-group.collapsed .nav-group-items { max-height: 0; opacity: 0; pointer-events: none; }
+.nav-soon { padding: 8px 12px; color: var(--muted); opacity: 0.55; font-size: 0.72rem; font-style: italic; }
+.system-brand .ge-brand-g { color: var(--text); }
+.system-brand .ge-brand-o { color: var(--gold); }
+@media (prefers-reduced-motion: reduce) { .nav-group-items, .nav-group-chevron { transition: none; } }
 
 /* ── MAIN CONTENT ───────────────────────────────────────────────── */
 .main-content { padding: 20px 22px; min-width: 0; }

@@ -91,6 +91,34 @@
   }
   window.nav = nav;
 
+  /* ─── S80B1: grupos colapsables del sidebar (estado en localStorage) ── */
+  function toggleNavGroup(key) {
+    var g = document.querySelector('.nav-group[data-group="' + key + '"]');
+    if (!g) return;
+    var collapsed = g.classList.toggle('collapsed');
+    var hdr = g.querySelector('.nav-group-header');
+    if (hdr) hdr.setAttribute('aria-expanded', String(!collapsed));
+    try {
+      var st = JSON.parse(localStorage.getItem('navGroups') || '{}');
+      st[key] = collapsed ? 'c' : 'o';
+      localStorage.setItem('navGroups', JSON.stringify(st));
+    } catch (e) { /* localStorage no disponible */ }
+  }
+  window.toggleNavGroup = toggleNavGroup;
+  function initNavGroups() {
+    try {
+      var st = JSON.parse(localStorage.getItem('navGroups') || '{}');
+      Object.keys(st).forEach(function (key) {
+        if (st[key] !== 'c') return;
+        var g = document.querySelector('.nav-group[data-group="' + key + '"]');
+        if (!g) return;
+        g.classList.add('collapsed');
+        var hdr = g.querySelector('.nav-group-header');
+        if (hdr) hdr.setAttribute('aria-expanded', 'false');
+      });
+    } catch (e) { /* localStorage no disponible */ }
+  }
+
   /* ─── GAUGE (native Canvas 2D) ──────────────────────────────────
    * Draws a semi-circle arc gauge (left to right, bottom pivot).
    * pct: 0–100, color: stroke color string.
@@ -3896,6 +3924,7 @@
   /* ─── INIT ───────────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
     // Initial load: home view is active by default
+    initNavGroups(); // S80B1: aplica estado colapsado guardado del sidebar
     loadHome();
 
     // Update home-date badge with current date

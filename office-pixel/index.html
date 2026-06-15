@@ -6,17 +6,19 @@
   <title>Gringo Office</title>
   <meta name="robots" content="noindex, nofollow" />
   <meta name="theme-color" content="#070707" />
+  <link rel="icon" type="image/webp" href="images/isologo.webp" />
+  <link rel="apple-touch-icon" href="images/isologo.webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/pixel.css?v=s57" />
+  <link rel="stylesheet" href="css/pixel.css?v=s68" />
 </head>
 <body>
 
 <!-- ── SYSTEM BAR ──────────────────────────────────────────────────── -->
 <div class="system-bar">
   <div class="system-brand">
-    <strong>GRINGO OFFICE</strong>
+    <strong><span class="ge-brand-g">GRINGO</span> <span class="ge-brand-o">OFFICE</span></strong>
     <span>centro de mando</span>
   </div>
   <div class="sys-tiles">
@@ -50,67 +52,98 @@
 
   <!-- SIDEBAR -->
   <nav class="sidebar" role="navigation" aria-label="Navegación principal">
-    <div class="sidebar-section">
-      <div class="sidebar-label">Principal</div>
-      <button class="nav-btn active" onclick="nav('home')" id="nav-home" aria-label="HOME — Command overview">
-        <span class="nav-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5Z"/><path d="M9 21V12h6v9"/></svg>
-        </span>
-        <span>HOME <small class="nav-sub">Command / Overview</small></span>
-      </button>
+    <a href="#main-content" class="skip-link">Saltar al contenido</a>
+
+    <!-- HOME (standalone, siempre arriba) -->
+    <button class="nav-btn active" onclick="nav('home')" id="nav-home" aria-label="HOME — Command overview">
+      <span class="nav-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5Z"/><path d="M9 21V12h6v9"/></svg>
+      </span>
+      <span>HOME <small class="nav-sub">Command / Overview</small></span>
+    </button>
+
+    <!-- BROKERAGE (S80B1: en B2 suma Contactos/Propiedades/Documentos/Tasaciones/Operaciones) -->
+    <div class="nav-group" data-group="brokerage">
+      <button class="nav-group-header" onclick="toggleNavGroup('brokerage')" aria-expanded="true"><span class="nav-group-emoji" aria-hidden="true">🤝</span><span class="nav-group-name">Brokerage</span><span class="nav-group-chevron" aria-hidden="true">▾</span></button>
+      <div class="nav-group-items">
+        <button class="nav-btn" onclick="nav('gebroker')" id="nav-gebroker" aria-label="GRINGO CRM — Brokerage, Pipeline">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M2 20h20M4 20V10l8-7 8 7v10"/><path d="M8 20v-6h3v6M13 20v-6h3v6"/></svg>
+          </span>
+          <span>GRINGO CRM <small class="nav-sub">Brokerage · Pipeline</small></span>
+        </button>
+      </div>
     </div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">Stack IA</div>
-      <button class="nav-btn" onclick="nav('agentes')" id="nav-agentes" aria-label="AGENTES — Wispy, Bambi, Leonardo, Hermes">
-        <span class="nav-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 3v4M8 11V8a4 4 0 0 1 8 0v3"/><circle cx="9" cy="16" r="1.5" fill="currentColor" stroke="none"/><circle cx="15" cy="16" r="1.5" fill="currentColor" stroke="none"/></svg>
-        </span>
-        <span>AGENTES <small class="nav-sub">Wispy · Bambi · Leonardo · Hermes</small></span>
-      </button>
+
+    <!-- HOSPITALITY / TEMPORARIOS -->
+    <div class="nav-group" data-group="hospitality">
+      <button class="nav-group-header" onclick="toggleNavGroup('hospitality')" aria-expanded="true"><span class="nav-group-emoji" aria-hidden="true">🏨</span><span class="nav-group-name">Hospitality / Temporarios</span><span class="nav-group-chevron" aria-hidden="true">▾</span></button>
+      <div class="nav-group-items">
+        <button class="nav-btn" onclick="nav('ambbi')" id="nav-ambbi" aria-label="AMBBI — Tareas, Huéspedes, Ocupación">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21V13h6v8"/><rect x="9" y="9" width="2" height="2"/><rect x="13" y="9" width="2" height="2"/></svg>
+          </span>
+          <span>AMBBI <small class="nav-sub">Tareas · Huéspedes · Ocupación</small></span>
+        </button>
+      </div>
     </div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">Operaciones</div>
-      <button class="nav-btn" onclick="nav('ambbi')" id="nav-ambbi" aria-label="AMBBI — Tareas, Huéspedes, Ocupación">
-        <span class="nav-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21V13h6v8"/><rect x="9" y="9" width="2" height="2"/><rect x="13" y="9" width="2" height="2"/></svg>
-        </span>
-        <span>AMBBI <small class="nav-sub">Tareas · Huéspedes · Ocupación</small></span>
-      </button>
-      <button class="nav-btn" onclick="nav('gebroker')" id="nav-gebroker" aria-label="GRINGO CRM — Brokerage, Pipeline">
-        <span class="nav-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M2 20h20M4 20V10l8-7 8 7v10"/><path d="M8 20v-6h3v6M13 20v-6h3v6"/></svg>
-        </span>
-        <span>GRINGO CRM <small class="nav-sub">Brokerage · Pipeline</small></span>
-      </button>
+
+    <!-- PROYECTOS / EXPANSIÓN (S80B1: shell, sin stubs pesados todavía) -->
+    <div class="nav-group" data-group="proyectos">
+      <button class="nav-group-header" onclick="toggleNavGroup('proyectos')" aria-expanded="true"><span class="nav-group-emoji" aria-hidden="true">🚧</span><span class="nav-group-name">Proyectos / Expansión</span><span class="nav-group-chevron" aria-hidden="true">▾</span></button>
+      <div class="nav-group-items">
+        <div class="nav-soon" aria-label="Próximamente: AMBBI Petit, AMBBI Italiano, Gringo Miami, GringoDeco, GringoPMS">🚧 Próximamente</div>
+      </div>
     </div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">Infraestructura</div>
-      <button class="nav-btn" onclick="nav('infra')" id="nav-infra" aria-label="INFRA — Stack, Containers, Servidor">
-        <span class="nav-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
-        </span>
-        <span>INFRA <small class="nav-sub">Stack · Containers · Servidor</small></span>
-      </button>
-      <button class="nav-btn" onclick="nav('smarthome')" id="nav-smarthome" aria-label="SMART HOME — Hue, Google, Xiaomi">
-        <span class="nav-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M15 14a5 5 0 0 0-6 0"/><path d="M17.66 11a8 8 0 0 0-11.32 0"/><path d="M6.34 8.34a12 12 0 0 1 11.32 0"/><line x1="12" y1="20" x2="12.01" y2="20" stroke-width="3" stroke-linecap="round"/></svg>
-        </span>
-        <span>SMART HOME <small class="nav-sub">Hue · Google · Xiaomi</small></span>
-      </button>
+
+    <!-- BACKOFFICE / FINANCE -->
+    <div class="nav-group" data-group="backoffice">
+      <button class="nav-group-header" onclick="toggleNavGroup('backoffice')" aria-expanded="true"><span class="nav-group-emoji" aria-hidden="true">💰</span><span class="nav-group-name">Backoffice / Finance</span><span class="nav-group-chevron" aria-hidden="true">▾</span></button>
+      <div class="nav-group-items">
+        <button class="nav-btn" onclick="nav('canarian')" id="nav-canarian" aria-label="CANARIAN — Ledger, LLC, Ops">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none"/></svg>
+          </span>
+          <span>CANARIAN <small class="nav-sub">Ledger · LLC · Ops</small></span>
+        </button>
+      </div>
     </div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">Confidencial</div>
-      <button class="nav-btn" onclick="nav('canarian')" id="nav-canarian" aria-label="CANARIAN — Ledger, LLC, Ops">
-        <span class="nav-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none"/></svg>
-        </span>
-        <span>CANARIAN <small class="nav-sub">Ledger · LLC · Ops</small></span>
-      </button>
+
+    <!-- IA / AGENTES -->
+    <div class="nav-group" data-group="ia">
+      <button class="nav-group-header" onclick="toggleNavGroup('ia')" aria-expanded="true"><span class="nav-group-emoji" aria-hidden="true">🪽</span><span class="nav-group-name">IA / Agentes</span><span class="nav-group-chevron" aria-hidden="true">▾</span></button>
+      <div class="nav-group-items">
+        <button class="nav-btn" onclick="nav('agentes')" id="nav-agentes" aria-label="AGENTES — Wispy, Bambi, Leonardo, Hermes">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 3v4M8 11V8a4 4 0 0 1 8 0v3"/><circle cx="9" cy="16" r="1.5" fill="currentColor" stroke="none"/><circle cx="15" cy="16" r="1.5" fill="currentColor" stroke="none"/></svg>
+          </span>
+          <span>AGENTES <small class="nav-sub">Wispy · Bambi · Leonardo · Hermes</small></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- INFRA / TECH -->
+    <div class="nav-group" data-group="infra">
+      <button class="nav-group-header" onclick="toggleNavGroup('infra')" aria-expanded="true"><span class="nav-group-emoji" aria-hidden="true">🖥</span><span class="nav-group-name">Infra / Tech</span><span class="nav-group-chevron" aria-hidden="true">▾</span></button>
+      <div class="nav-group-items">
+        <button class="nav-btn" onclick="nav('infra')" id="nav-infra" aria-label="INFRA — Stack, Containers, Servidor">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          </span>
+          <span>INFRA <small class="nav-sub">Stack · Containers · Servidor</small></span>
+        </button>
+        <button class="nav-btn" onclick="nav('smarthome')" id="nav-smarthome" aria-label="SMART HOME — Hue, Google, Xiaomi">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M15 14a5 5 0 0 0-6 0"/><path d="M17.66 11a8 8 0 0 0-11.32 0"/><path d="M6.34 8.34a12 12 0 0 1 11.32 0"/><line x1="12" y1="20" x2="12.01" y2="20" stroke-width="3" stroke-linecap="round"/></svg>
+          </span>
+          <span>SMART HOME <small class="nav-sub">Hue · Google · Xiaomi</small></span>
+        </button>
+      </div>
     </div>
   </nav>
 
   <!-- MAIN -->
-  <main class="main-content">
+  <main class="main-content" id="main-content">
 
     <!-- ════════════════ HOME ════════════════ -->
     <div class="view active" id="view-home">
@@ -1601,7 +1634,7 @@
 <!-- Scripts -->
 <!-- S45: ?v= cache-buster — subir la versión en cada deploy con cambios de JS/CSS
      (el HTML revalida siempre en Netlify; el query nuevo fuerza al browser a bajar el asset fresco) -->
-<script src="js/api.js?v=s67"></script>
-<script src="js/app.js?v=s67"></script>
+<script src="js/api.js?v=s68"></script>
+<script src="js/app.js?v=s68"></script>
 </body>
 </html>
