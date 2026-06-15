@@ -4273,6 +4273,23 @@ window.docAuditClase = function (x) {
   if (/\.pdf$/.test(fn)) return 'pdf';
   return null;
 };
+// S62B: ¿se puede leer este doc con OCR de Google Drive? (en Drive y aún sin texto extraído:
+// legal sin datos, o escaneado/imagen sin clasificar). El Testimonio ya tiene tipo pero no datos → entra.
+window.docPuedeOcr = function (x) {
+  if (!x.driveLink) return false;                                        // tiene que estar en Drive
+  if (x.estado === 'Extraído por OCR · pendiente de revisión') return false; // ya leído por OCR
+  if (x.textoSugerencia) return false;                                   // ya tiene datos del inmueble
+  var legal = ['Escritura', 'Testimonio / Declaratoria / Partición', 'Certif. dominio', 'Inhibiciones'].indexOf(x.tipo) >= 0;
+  return legal || !!docAuditClase(x);
+};
+// S62B: leer un escaneado/imagen con el OCR de Google Drive (manual). NO valida nada → pendiente de revisión.
+window.docAuditOcrDrive = async function (id) {
+  if (!confirm('¿Leer este documento con el OCR de Google Drive?\n\nExtrae el texto (titulares, matrícula, partida, preguntas para escribanía…) y lo deja PENDIENTE DE REVISIÓN. No valida nada automáticamente.')) return;
+  toast('Leyendo con OCR de Google Drive… (~20-40s)', 'ok');
+  var d = await apiFetch('/crm/doc-inbox/ocr-drive', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+  if (d && d.ok) { toast('🔎 OCR listo: ' + (d.chars || 0) + ' caracteres' + (d.tipo ? ' · ' + d.tipo : '') + ' — pendiente de revisión', 'ok'); loadDocAuditoria(); }
+  else toast('OCR: ' + ((d && d.error) || 'no se pudo leer'), 'err');
+};
 // S59: agrupar por tanda (mismo remitente + ventana ≤5min). Mapa docId → grupo {docs, inmueble, hora, hermanosSinProp}
 window.docAuditCalcTandas = function (items) {
   var byId = {};
@@ -4330,12 +4347,14 @@ window.renderDocAuditoria = function () {
       (x.textoSugerencia ? '<div style="font-size:.74rem;color:#aee4ee;margin-top:5px;">🪽 ' + escHtml(x.textoSugerencia) + '</div>' : '') +
       // S59/S60: naturaleza honesta + aviso de OCR pausado (la UI no promete lectura automática)
       (nat ? '<div style="font-size:.72rem;color:#d9b38c;margin-top:5px;">' + escHtml(nat) +
-        '<div style="font-size:.64rem;color:var(--muted);margin-top:1px;">🔒 OCR/visión pausado — no se puede leer automáticamente todavía. Marcá el tipo o asociá a mano.</div></div>' : '') +
+        '<div style="font-size:.64rem;color:var(--muted);margin-top:1px;">' + (x.driveLink ? '🔎 Tocá «Leer con OCR Drive» para extraer el texto, o marcá el tipo a mano.' : 'Marcá el tipo o asociá a mano.') + '</div></div>' : '') +
       // S59: relación por tanda (solo sugiere, no asocia)
       (enTanda && g.inmueble && !docAuditInmueble(x) ? '<div style="font-size:.72rem;color:#9fd6a0;margin-top:4px;">🔗 Llegó junto con <b>' + escHtml(g.inmueble) + '</b> — revisar antes de asociar</div>' : '') +
       (x.nombreSugerido && x.nombreSugerido !== x.filename ? '<div style="font-size:.66rem;color:var(--muted);margin-top:2px;">Nombre sugerido: <span style="font-family:var(--mono);">' + escHtml(x.nombreSugerido) + '</span></div>' : '') +
       (x.redFlags ? '<div style="font-size:.7rem;color:var(--danger);margin-top:4px;">⚠️ ' + escHtml(x.redFlags) + '</div>' : '') +
       '<div class="btn-row" style="margin-top:6px;">' +
+        // S62B: leer escaneado/imagen con el OCR de Google Drive (manual, no automático, no valida solo)
+        (docPuedeOcr(x) ? '<button class="btn btn-gold btn-sm" onclick="docAuditOcrDrive(\'' + x.id + '\')" title="Lee el escaneado/imagen con el OCR de Google Drive y extrae los datos (queda pendiente de revisión, no se valida solo)">🔎 Leer con OCR Drive</button>' : '') +
         (x.estado !== 'Validado' && x.propiedadId ? '<button class="btn btn-gold btn-sm" onclick="docAuditValidar(\'' + x.id + '\',\'' + (x.tipo || '') + '\')">✓ Validar</button>' : '') +
         (x.estado === 'Validado' ? '<button class="btn btn-ghost btn-sm" onclick="docAuditDesvalidar(\'' + x.id + '\')" title="Volver a pendiente de revisión (desvalidar)">↩ Desvalidar</button>' : '') +
         // S55/S59: crear propiedad desde el doc; si hay hermanos de tanda, los asocia como pendientes
