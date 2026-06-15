@@ -1798,22 +1798,34 @@
       '<span class="badge" style="border:1.5px solid ' + (/legal|obligatorios/.test(sem.nivel) ? 'var(--danger)' : /comercial|operativo|proceso|pendiente|recibida/.test(sem.nivel) ? 'var(--warn)' : /Completo/.test(sem.nivel) ? 'var(--ok)' : 'var(--muted)') + ';font-size:.72rem;padding:3px 10px;">' + escHtml(sem.nivel || '—') + (sem.fase ? ' · ' + ({ captacion: 'captación', publicacion: 'publicación', operacion: 'operación' }[sem.fase] || sem.fase) : '') + '</span>' +
       '<div style="flex:1;min-width:140px;height:7px;border-radius:5px;background:rgba(255,255,255,0.07);overflow:hidden;"><div style="height:100%;width:' + pct + '%;border-radius:5px;background:linear-gradient(90deg,var(--gold),#e8c96a);transition:width .4s;"></div></div>' +
       '<span style="font-family:var(--mono);font-size:.74rem;color:var(--gold);">' + nRec + '/' + nTot + ' · ' + pct + '%</span></div>';
-    chk += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:7px;">';
-    chk += (d.checklist || []).map(function (c) {
+    // S63.1: checklist AGRUPADO por ETAPA (gate) — "qué falta para publicar / reserva / firma"
+    var GATE_LBL_FRONT = { captacion: '📋 Para captar', publicacion: '🎯 Para PUBLICAR', reserva: '🎯 Para RESERVA / operación', firma: '🎯 Para CIERRE / firma', opcional: '⚪ Opcionales' };
+    var GATE_SORT = ['captacion', 'publicacion', 'reserva', 'firma', 'opcional'];
+    var LEG_FRONT = ['Escritura', 'Testimonio / Declaratoria / Partición', 'Certif. dominio', 'Inhibiciones', 'Poder'];
+    var cardDoc = function (c) {
       var col = colorDe[c.estado] || '#999';
+      var nombre = c.etiqueta || c.tipo;
+      var esLeg = LEG_FRONT.indexOf(c.tipo) >= 0;
       return '<div style="border:1px solid rgba(255,255,255,0.07);border-left:3px solid ' + col + ';border-radius:9px;padding:7px 9px;background:rgba(255,255,255,0.015);' + (c.estado === 'no_aplica' ? 'opacity:.4;' : '') + '">' +
         '<div style="display:flex;align-items:center;gap:6px;">' +
-          '<span style="flex:1;font-size:.79rem;font-weight:600;' + (c.estado === 'no_aplica' ? 'text-decoration:line-through;' : '') + '">' + escHtml(c.tipo) + (c.driveLink ? ' <a href="' + escHtml(c.driveLink) + '" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:none;">↗</a>' : '') + '</span>' +
+          '<span style="flex:1;font-size:.79rem;font-weight:600;' + (c.estado === 'no_aplica' ? 'text-decoration:line-through;' : '') + '">' + escHtml(nombre) + (c.driveLink ? ' <a href="' + escHtml(c.driveLink) + '" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:none;">↗</a>' : '') + '</span>' +
           '<span style="font-size:.62rem;color:' + col + ';white-space:nowrap;">' + lblDe[c.estado] + '</span></div>' +
-        '<div style="display:flex;gap:3px;margin-top:5px;">' +
+        '<div style="display:flex;gap:3px;margin-top:5px;flex-wrap:wrap;">' +
           (c.estado !== 'recibido' ? '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Marcar pedido" onclick="lgDocAccion(\'' + c.tipo + '\',\'pedido\')">📨 pedir</button>' : '') +
-          (c.estado !== 'recibido' ? '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Validar: lo tengo y está OK (verde = validado, no solo recibido)" onclick="lgValidarDoc(\'' + c.tipo + '\')">✓ validar</button>' : '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Volver a pendiente de revisión (desvalidar)" onclick="lgDesvalidarTipo(\'' + c.tipo + '\')">↩ desvalidar</button>') +
+          (c.estado !== 'recibido' ? '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="' + (esLeg ? 'Validar LEGALMENTE: lo revisaste y está OK (revisión escribanía)' : 'Validar recepción: lo tengo y sirve') + '" onclick="lgValidarDoc(\'' + c.tipo + '\')">✓ ' + (esLeg ? 'validar legalmente' : 'validar recepción') + '</button>' : '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Volver a pendiente de revisión (desvalidar)" onclick="lgDesvalidarTipo(\'' + c.tipo + '\')">↩ desvalidar</button>') +
           (c.estado !== 'no_aplica' ? '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="No aplica" onclick="lgDocAccion(\'' + c.tipo + '\',\'no_aplica\')">🚫</button>' : '<button class="btn btn-ghost btn-sm" style="padding:1px 7px;font-size:.66rem;" title="Restaurar" onclick="lgDocAccion(\'' + c.tipo + '\',\'reset\')">↺</button>') +
         '</div>' +
         (c.redFlags ? '<div style="font-size:.68rem;color:var(--danger);margin-top:4px;">🚩 ' + escHtml(c.redFlags) + '</div>' : '') +
       '</div>';
-    }).join('');
-    chk += '</div>';
+    };
+    var grupos = {};
+    (d.checklist || []).forEach(function (c) { (grupos[c.gate] = grupos[c.gate] || []).push(c); });
+    GATE_SORT.forEach(function (gk) {
+      var items = grupos[gk]; if (!items || !items.length) return;
+      var nFalta = items.filter(function (c) { return c.estado === 'bloqueante'; }).length;
+      chk += '<div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:11px 0 5px;font-weight:700;">' + GATE_LBL_FRONT[gk] + (nFalta ? ' <span style="color:var(--danger);">· faltan ' + nFalta + '</span>' : '') + '</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:7px;">' + items.map(cardDoc).join('') + '</div>';
+    });
     // S44: DROPZONE — arrastrá el documento directo al legajo (o click para elegir)
     chk += '<div id="lg-dropzone" onclick="document.getElementById(\'lg-dropfile\').click()" style="margin-top:10px;border:2px dashed rgba(212,175,55,0.35);border-radius:11px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;font-size:.8rem;color:var(--muted);">' +
       '📎 <b style="color:var(--text);">Arrastrá acá</b> la escritura, expensas, ABL, plano… <span style="opacity:.7;">(o hacé click)</span> — va al Drive y tilda el checklist solo' +
@@ -2084,7 +2096,7 @@
   }
   window.lgDocAccion = lgDocAccion;
   // S62A.2: validar un ítem del checklist — CONFIRMA para legales (Escritura/Dominio/Inhibiciones/Poder)
-  var DOC_LEGALES_FRONT = ['Escritura', 'Certif. dominio', 'Inhibiciones', 'Poder'];
+  var DOC_LEGALES_FRONT = ['Escritura', 'Testimonio / Declaratoria / Partición', 'Certif. dominio', 'Inhibiciones', 'Poder'];
   window.lgValidarDoc = function (tipo) {
     if (DOC_LEGALES_FRONT.indexOf(tipo) >= 0 && !confirm('⚠️ ' + tipo + ' es un documento LEGAL.\n\n¿Confirmás que lo revisaste y está OK para marcarlo VALIDADO?\n(🟢 verde = validado legalmente, no solo recibido.)')) return;
     lgDocAccion(tipo, 'recibido');
@@ -4142,7 +4154,7 @@ window.loadDocInbox = async function () {
   el.innerHTML = html || '<div class="small muted">Bandeja vacía. Los documentos que te lleguen por WhatsApp aparecen acá automáticamente.</div>';
 };
 
-var DOC_LEGALES_AUD = ['Escritura', 'Certif. dominio', 'Inhibiciones', 'Poder']; // S62A.2: confirmar al validar legales
+var DOC_LEGALES_AUD = ['Escritura', 'Testimonio / Declaratoria / Partición', 'Certif. dominio', 'Inhibiciones', 'Poder']; // confirmar al validar legales
 window.docInboxValidar = async function (id, tipo) {
   if (DOC_LEGALES_AUD.indexOf(tipo) >= 0 && !confirm('⚠️ ' + tipo + ' es LEGAL. ¿Confirmás que lo revisaste y está OK para marcarlo VALIDADO?')) return;
   var d = await apiFetch('/crm/doc-inbox/validar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
