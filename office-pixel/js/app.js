@@ -3274,6 +3274,12 @@
   }
   function f360Usd(n) { return (n != null && n !== '') ? 'USD ' + Number(n).toLocaleString('es-AR') : null; }
   function f360Ph(txt) { return '<span style="color:var(--muted);font-style:italic;opacity:.7;">' + escHtml(txt || 'pendiente de mapear') + '</span>'; }
+  // S97 Paso 1.5: "dato faltante" REAL (el campo existe, falta vincular) — distinto del placeholder sin backend
+  function f360Falta(txt) { return '<span style="color:var(--muted);opacity:.9;">— ' + escHtml(txt || 'no disponible') + '</span>'; }
+  function f360Parte(p, faltaTxt) { return (p && p.nombre) ? (escHtml(p.nombre) + (p.telefono ? ' <span style="color:var(--muted);font-size:.68rem;font-family:var(--mono);">' + escHtml(p.telefono) + '</span>' : '')) : f360Falta(faltaTxt); }
+  function f360DocColor(estado) { var e = (estado || '').toLowerCase(); if (/validad/.test(e)) return 'var(--ok)'; if (/descart/.test(e)) return 'var(--muted)'; if (/ocr|revis|pendiente|asociad|clasific/.test(e)) return 'var(--warn)'; return 'var(--muted)'; }
+  function f360TrackIcon(a) { a = a || ''; if (a === 'crear') return '📌'; if (a === 'actualizar') return '🔄'; if (/doc/.test(a)) return '📎'; if (a === 'comentario') return '💬'; if (a === 'calcular' || a === 'pdf' || /comparable/.test(a)) return '🧮'; return '•'; }
+  function f360TrackLabel(e) { var a = (e && e.accion) || '', det = (e && e.detalle) || {}; var m = { crear: 'Operación creada', actualizar: 'Actualización' + (det && det.etapa ? ' → ' + det.etapa : ''), comentario: 'Nota', doc_inbound: 'Documento recibido', doc_validar: 'Documento validado', doc_asignar: 'Documento asignado', doc_gestion: 'Gestión documental', calcular: 'Tasación calculada', pdf: 'PDF generado', sugerencia_aprobar: 'Sugerencia aprobada' }; return m[a] || (a ? a.charAt(0).toUpperCase() + a.slice(1).replace(/_/g, ' ') : 'Evento'); }
   function ensureFicha360() {
     if (!document.getElementById('op-f360-style')) {
       var st = document.createElement('style'); st.id = 'op-f360-style';
@@ -3301,13 +3307,22 @@
     if (!window.crmOpsCache) { var d0 = await apiFetch('/crm/operaciones'); if (d0 && d0.ok) window.crmOpsCache = d0; }
     var op = ((window.crmOpsCache || {}).items || []).filter(function (o) { return o.id === id; })[0];
     if (!op) return toast('No encontré la operación', 'err');
-    ensureFicha360(); window.opF360 = op; renderFicha360();
+    ensureFicha360(); window.opF360 = op; window.opF360Ficha = null; renderFicha360();
     var o = document.getElementById('op-f360'); o.classList.remove('hidden'); o.scrollTop = 0;
+    // S97 Paso 1.5: enriquecer con el read-model real (partes + documentos + track); si falla, queda el render base
+    try {
+      var fx = await apiFetch('/crm/operacion/' + id + '/ficha');
+      if (fx && fx.ok && window.opF360 && window.opF360.id === id) { window.opF360Ficha = fx; renderFicha360(); }
+    } catch (e) { /* fallback silencioso: la Ficha ya está renderizada con los datos base */ }
   }
   window.abrirFicha360 = abrirFicha360;
   function renderFicha360() {
     var op = window.opF360; if (!op) return;
     var d = window.crmOpsCache || {};
+    var fx = window.opF360Ficha || {};                       // S97 Paso 1.5: read-model real (partes/documentos/track)
+    var partesOk = !!(fx && fx.ok), partes = fx.partes || {};
+    var fdocs = partesOk ? (fx.documentos || []) : null;     // null = endpoint no disponible → fallback visual
+    var ftrack = partesOk ? (fx.track || []) : null;         // null = endpoint no disponible → fallback derivado
     var precio = op.montoTotal, comPct = (op.honorariosEsperados && op.montoTotal) ? Math.round(op.honorariosEsperados / op.montoTotal * 1000) / 10 : null;
     var honCalc = op.honorariosEsperados != null ? op.honorariosEsperados : (precio && comPct ? Math.round(precio * comPct / 100) : null);
     var honCob = op.honorariosCobrados || 0, honPend = (op.honorariosEsperados || 0) - honCob;
@@ -3315,15 +3330,16 @@
     function row(l, v) { return '<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.8rem;"><span style="color:var(--muted);">' + l + '</span><span style="text-align:right;font-weight:600;">' + (v != null && v !== '' ? v : f360Ph()) + '</span></div>'; }
     var left =
       '<div class="f360-card" id="f360-resumen"><div class="f360-t">📋 Resumen</div>' +
-        row('Propiedad', op.propiedadId ? '<span style="font-family:var(--mono);font-size:.7rem;">vinculada</span>' : f360Ph('en el título — s/relación')) +
+        row('Propiedad', op.propiedadId ? ('<span style="font-family:var(--mono);font-size:.7rem;">vinculada</span>' + (partes.vendedor ? ' · ' + escHtml(partes.vendedor.nombre) : '')) : f360Falta('Propiedad no vinculada')) +
         row('Tipo', op.tipo) + row('Etapa', op.etapa) +
         row('Precio de cierre', f360Usd(precio)) + row('Reserva', f360Usd(op.reserva)) + row('Refuerzo', f360Usd(op.refuerzo)) +
         row('Comisión', comPct != null ? comPct + '% <span style="color:var(--muted);font-weight:400;">(derivada)</span>' : null) +
       '</div>' +
       '<div class="f360-card" id="f360-partes"><div class="f360-t">👥 Partes</div>' +
-        row('Vendedor / propietario', f360Ph()) + row('Comprador', f360Ph()) +
-        row('Pagador de la reserva', f360Ph('del chat — s/mapear')) +
-        row('Escribanía', f360Ph()) + row('Proveedor sellado / informes', f360Ph('Bolsa de Comercio u otro')) +
+        row('Vendedor / propietario', partesOk ? f360Parte(partes.vendedor, op.propiedadId ? 'Propiedad sin propietario vinculado' : 'Se deriva de la propiedad — no vinculada') : f360Ph()) +
+        row('Comprador', partesOk ? f360Parte(partes.comprador, 'Comprador no vinculado') : f360Ph()) +
+        row('Pagador de la reserva', f360Ph('pendiente — texto libre')) +
+        row('Escribanía', f360Ph('pendiente — texto libre')) + row('Proveedor sellado / informes', f360Ph('ej. Bolsa de Comercio de Bahía Blanca')) +
       '</div>' +
       '<div class="f360-card" id="f360-fechas"><div class="f360-t">📅 Fechas</div>' +
         row('Fecha de reserva', f360Ph('s/campo dedicado')) + row('Fecha firma (cargada)', op.fechaFirma) +
@@ -3359,18 +3375,38 @@
       msgs.map(function (m) { return '<div style="font-size:.74rem;border:1px solid var(--border);border-radius:8px;padding:5px 8px;margin-bottom:5px;color:var(--muted);">' + escHtml(m) + ' <span style="opacity:.5;">(placeholder)</span></div>'; }).join('') +
       '<div style="display:flex;gap:6px;margin-top:6px;"><button class="btn btn-ghost btn-sm" disabled style="opacity:.5;cursor:default;">Chat comprador (pronto)</button><button class="btn btn-ghost btn-sm" disabled style="opacity:.5;cursor:default;">Chat escribana (pronto)</button></div>' +
       '</div>';
-    var docs = '<div class="f360-card" id="f360-documentos"><div class="f360-t">📎 Documentos vinculados</div>' +
-      '<div style="font-size:.7rem;color:var(--muted);margin-bottom:8px;">Checklist operativo (visual — sin relación real todavía).</div>' +
-      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;">' +
-      OP_DOCS.map(function (dn, i) { var done = i === 0 && op.reserva; return '<div style="display:flex;align-items:center;gap:7px;font-size:.76rem;border:1px solid var(--border);border-radius:8px;padding:5px 9px;' + (done ? '' : 'opacity:.8;') + '">' + (done ? '🟢' : '⚪') + ' ' + escHtml(dn) + '</div>'; }).join('') +
-      '</div></div>';
-    var eventos = [];
-    if (op.creada) eventos.push(['📌', 'Operación creada', String(op.creada).slice(0, 10)]);
-    if (op.reserva) eventos.push(['💵', 'Reserva cargada (' + f360Usd(op.reserva) + ')', op.fechaFirma ? String(op.fechaFirma).slice(0, 10) : '']);
-    eventos.push(['🔄', 'Etapa actual: ' + (op.etapa || '—'), '']);
-    var hist = '<div class="f360-card" id="f360-historial"><div class="f360-t">🕑 Track record</div>' +
-      eventos.map(function (e) { return '<div style="font-size:.78rem;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);">' + e[0] + ' ' + escHtml(e[1]) + (e[2] ? ' <span style="color:var(--muted);font-size:.7rem;">· ' + e[2] + '</span>' : '') + '</div>'; }).join('') +
-      '<div style="font-size:.7rem;color:var(--muted);margin-top:6px;">Derivado de los datos actuales. El historial de eventos completo se registrará a futuro.</div></div>';
+    var docsBody;
+    if (fdocs === null) {  // endpoint no disponible → fallback visual (checklist operativo)
+      docsBody = '<div style="font-size:.7rem;color:var(--muted);margin-bottom:8px;">Checklist operativo (visual).</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;">' +
+        OP_DOCS.map(function (dn, i) { var done = i === 0 && op.reserva; return '<div style="display:flex;align-items:center;gap:7px;font-size:.76rem;border:1px solid var(--border);border-radius:8px;padding:5px 9px;' + (done ? '' : 'opacity:.8;') + '">' + (done ? '🟢' : '⚪') + ' ' + escHtml(dn) + '</div>'; }).join('') +
+        '</div>';
+    } else if (!op.propiedadId) {
+      docsBody = '<div style="font-size:.8rem;padding:4px 0;">' + f360Falta('Documentos no disponibles hasta vincular la propiedad') + '</div>';
+    } else if (!fdocs.length) {
+      docsBody = '<div style="font-size:.8rem;color:var(--muted);padding:4px 0;">Sin documentos asociados a la propiedad todavía.</div>';
+    } else {
+      docsBody = '<div style="font-size:.7rem;color:var(--muted);margin-bottom:8px;">Reales, de la propiedad vinculada (' + fdocs.length + ').</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;">' +
+        fdocs.map(function (dc) { var nm = dc.tipo || dc.documento || 'Documento'; return '<div style="display:flex;align-items:center;gap:7px;font-size:.76rem;border:1px solid var(--border);border-radius:8px;padding:5px 9px;"><span style="color:' + f360DocColor(dc.estado) + ';">●</span> <span>' + escHtml(nm) + '</span>' + (dc.estado ? ' <span style="color:var(--muted);font-size:.66rem;margin-left:auto;">' + escHtml(dc.estado) + '</span>' : '') + '</div>'; }).join('') +
+        '</div>';
+    }
+    var docs = '<div class="f360-card" id="f360-documentos"><div class="f360-t">📎 Documentos vinculados</div>' + docsBody + '</div>';
+    var hist;
+    if (ftrack !== null) {  // Track record REAL desde el audit del CRM
+      hist = '<div class="f360-card" id="f360-historial"><div class="f360-t">🕑 Track record</div>' +
+        (ftrack.length ? ftrack.map(function (e) { return '<div style="font-size:.78rem;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);">' + f360TrackIcon(e.accion) + ' ' + escHtml(f360TrackLabel(e)) + (e.propio ? '' : ' <span style="opacity:.55;font-size:.66rem;">· propiedad</span>') + (e.ts ? ' <span style="color:var(--muted);font-size:.7rem;">· ' + String(e.ts).slice(0, 10) + '</span>' : '') + '</div>'; }).join('')
+          : '<div style="font-size:.78rem;color:var(--muted);">Sin eventos registrados todavía.</div>') +
+        '<div style="font-size:.66rem;color:var(--muted);margin-top:6px;">Historial real desde el registro de auditoría del CRM.</div></div>';
+    } else {  // endpoint no disponible → fallback derivado de los datos actuales
+      var eventos = [];
+      if (op.creada) eventos.push(['📌', 'Operación creada', String(op.creada).slice(0, 10)]);
+      if (op.reserva) eventos.push(['💵', 'Reserva cargada (' + f360Usd(op.reserva) + ')', op.fechaFirma ? String(op.fechaFirma).slice(0, 10) : '']);
+      eventos.push(['🔄', 'Etapa actual: ' + (op.etapa || '—'), '']);
+      hist = '<div class="f360-card" id="f360-historial"><div class="f360-t">🕑 Track record</div>' +
+        eventos.map(function (e) { return '<div style="font-size:.78rem;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);">' + e[0] + ' ' + escHtml(e[1]) + (e[2] ? ' <span style="color:var(--muted);font-size:.7rem;">· ' + e[2] + '</span>' : '') + '</div>'; }).join('') +
+        '<div style="font-size:.7rem;color:var(--muted);margin-top:6px;">Derivado de los datos actuales (historial real al cargar).</div></div>';
+    }
     var nav = '<div class="f360-nav" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;">' +
       [['Resumen', 'f360-resumen'], ['Partes', 'f360-partes'], ['Flujo', 'f360-flujo'], ['Documentos', 'f360-documentos'], ['Fechas', 'f360-fechas'], ['Honorarios', 'f360-honorarios'], ['Hermes', 'f360-hermes'], ['Historial', 'f360-historial']]
         .map(function (n) { return '<a onclick="f360goto(\'' + n[1] + '\')">' + n[0] + '</a>'; }).join('') + '</div>';
