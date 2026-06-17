@@ -2277,8 +2277,11 @@
     var d = await apiFetch('/crm/tasacion/' + id);
     if (!d || d.__error || !d.ok) { el.innerHTML = '<span class="small muted">Error al abrir.</span>'; return; }
     window.tsDetalle = d;
-    // S50 (consultor): vista EJECUTIVA por default cuando ya hay resultado; técnica si falta calcular
-    window.tsVista = d.tasacion && d.tasacion.precioCierre ? (window.tsVista || 'ejecutiva') : 'tecnica';
+    // S95B.3 (regla Franco): EJECUTIVA solo si hay informe presentable (precio cerrado + estado informe/entregada/lista);
+    // si no, la ficha abre en TÉCNICA/INTAKE = la vista de trabajo. El toggle manual se respeta dentro de la misma tasación.
+    var t0 = d.tasacion || {};
+    var presentable = !!t0.precioCierre && /informe|entreg|lista|present/i.test(t0.estado || '');
+    if (window.tsVistaFor !== id) { window.tsVista = presentable ? 'ejecutiva' : 'tecnica'; window.tsVistaFor = id; }
     renderTasacionDetalle();
   }
   // S50: render separado — el toggle ejecutiva/técnica no refetchea
@@ -2350,30 +2353,39 @@
     // vista TÉCNICA = el laboratorio (diagnóstico, comparables, ajustes)
     var tecnicaHtml = '<div class="ts-subnav" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">' + [['Diagnóstico', 'ts-diag'], ['Importar', 'ts-import'], ['Comparables', 'ts-comps']].map(function (n) { return '<a onclick="f360goto(\'' + n[1] + '\')" style="font-size:.72rem;color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:2px 9px;cursor:pointer;text-decoration:none;white-space:nowrap;">' + n[0] + '</a>'; }).join('') + '</div><span id="ts-diag"></span>' +
       diagHtml +
-      '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">' +
-        '<input class="input" id="cmp-link" placeholder="Pegá un LINK de Zonaprop…" style="flex:2;min-width:200px;">' +
-        '<button class="btn btn-gold btn-sm" onclick="agregarComparable(\'' + t.id + '\',\'link\')">+ por link</button>' +
-      '</div>' +
-      '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">' +
-        '<textarea class="input" id="cmp-texto" placeholder="…o pegá el TEXTO del aviso (compartir → copiar)" style="flex:2;min-width:200px;min-height:44px;"></textarea>' +
-        '<button class="btn btn-ghost btn-sm" onclick="agregarComparable(\'' + t.id + '\',\'texto\')">+ por texto</button>' +
-      '</div>' +
       '<span id="ts-import"></span>' +
-      // S95B.3: intake híbrido — importar VARIOS comparables (links/textos) en BORRADOR (opt-IN al cálculo)
-      '<details style="border:1px dashed var(--gold);border-radius:10px;padding:8px 12px;margin-bottom:10px;">' +
-        '<summary style="font-size:.78rem;color:var(--gold);cursor:pointer;">📥 Importar varios comparables (links o textos)</summary>' +
-        '<div style="font-size:.7rem;color:var(--muted);margin:6px 0;">Un <b>link por línea</b>, o un aviso de <b>texto</b> (varias líneas) separado por una línea en blanco. Máx 40.</div>' +
-        '<textarea class="input" id="cmp-batch" placeholder="https://aviso-1&#10;https://aviso-2&#10;&#10;(o pegá el texto completo de un aviso acá)" style="width:100%;min-height:90px;"></textarea>' +
+      // S95B.3: intake híbrido HERO (abierto, no colapsado) — importar VARIOS comparables (links/textos) en BORRADOR (opt-IN)
+      '<div style="border:1px solid var(--gold);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:rgba(212,175,55,.05);">' +
+        '<div style="font-size:.82rem;color:var(--gold);font-weight:700;margin-bottom:4px;">📥 Importar comparables</div>' +
+        '<div style="font-size:.7rem;color:var(--muted);margin-bottom:6px;">Pegá <b>muchos</b>: un <b>link por línea</b>, o el <b>texto</b> de un aviso (varias líneas) separando cada aviso con una línea en blanco. Máx 40.</div>' +
+        '<textarea class="input" id="cmp-batch" placeholder="https://aviso-1&#10;https://aviso-2&#10;&#10;(o pegá el texto completo de un aviso acá)" style="width:100%;min-height:96px;"></textarea>' +
         '<div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;">' +
           '<button class="btn btn-gold btn-sm" onclick="importarComparablesBatch(\'' + t.id + '\')">📥 Importar comparables</button>' +
-          '<span style="font-size:.68rem;color:var(--muted);">Quedan en <b>Borrador</b> y <b>no entran al cálculo</b> hasta que los aceptes (✓).</span>' +
+          '<span style="font-size:.7rem;color:var(--muted);">Los comparables importados quedan en <b>Borrador</b> y <b>NO entran al cálculo</b> hasta que los aceptes (✓).</span>' +
         '</div>' +
         '<div id="cmp-batch-report" style="margin-top:8px;"></div>' +
-      '</details>' +
+        '<details style="margin-top:8px;border-top:1px dashed var(--border);padding-top:6px;">' +
+          '<summary style="font-size:.72rem;color:var(--muted);cursor:pointer;">＋ Agregar de a uno (un link o un texto)</summary>' +
+          '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">' +
+            '<input class="input" id="cmp-link" placeholder="Pegá un LINK de Zonaprop…" style="flex:2;min-width:200px;">' +
+            '<button class="btn btn-ghost btn-sm" onclick="agregarComparable(\'' + t.id + '\',\'link\')">+ por link</button>' +
+          '</div>' +
+          '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">' +
+            '<textarea class="input" id="cmp-texto" placeholder="…o pegá el TEXTO del aviso" style="flex:2;min-width:200px;min-height:44px;"></textarea>' +
+            '<button class="btn btn-ghost btn-sm" onclick="agregarComparable(\'' + t.id + '\',\'texto\')">+ por texto</button>' +
+          '</div>' +
+        '</details>' +
+      '</div>' +
       '<span id="ts-comps"></span>' +
       (comps.length ? '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="font-size:.66rem;color:var(--muted);text-transform:uppercase;"><th style="text-align:left;padding:4px 6px;">Comparable</th><th style="text-align:right;">Precio</th><th style="text-align:right;">Ajustado</th><th style="text-align:right;">m²</th><th style="text-align:right;">USD/m²</th><th style="text-align:right;">Días</th><th>Estado</th><th></th></tr></thead><tbody>' + filas + '</tbody></table></div>' : '<div class="small muted">Sin comparables todavía — pegá el primero ↑</div>');
     var nIncl = comps.filter(function (c) { return !(c.estadoAviso === 'Excluido' || c.outlier); }).length;
-    var ejecutivaHtml = '<div class="small muted" style="margin-bottom:4px;">' + nIncl + ' comparables en el cálculo (' + (comps.length - nIncl) + ' excluidos) · diagnóstico y ajustes en la 🔬 vista técnica</div>';
+    // S95B.3: vista ejecutiva con ACCIONES claras (no una línea pasiva)
+    var ejecutivaHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px;">' +
+      '<button class="btn btn-gold btn-sm" onclick="tsIntake()">📥 Importar comparables</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="window.tsVista=\'tecnica\';renderTasacionDetalle()">🔬 Revisar comparables' + (comps.length ? ' (' + comps.length + ')' : '') + '</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="calcularTasacion(\'' + t.id + '\')">🧮 Recalcular</button>' +
+      '<span class="small muted" style="margin-left:auto;">' + nIncl + ' en el cálculo · ' + (comps.length - nIncl) + ' excluidos</span>' +
+    '</div>';
     el.innerHTML =
       '<div style="border:1px solid var(--border);border-radius:12px;padding:12px;">' +
         '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
@@ -2382,6 +2394,7 @@
           '<span class="badge badge-muted">' + escHtml(t.estado || '') + '</span>' +
           '<span style="font-family:var(--mono);font-size:.74rem;color:var(--muted);">' + (t.m2Pond || '—') + ' m² pond.' + (t.cochera ? ' + 🚗' : '') + '</span>' +
           '<span style="margin-left:auto;"></span>' +
+          '<button class="btn btn-gold btn-sm" onclick="tsIntake()" title="Pegar/importar y revisar comparables">📥 Comparables' + (comps.length ? ' (' + comps.length + ')' : '') + '</button>' +
           (t.precioCierre ? '<button class="btn btn-ghost btn-sm" onclick="window.tsVista=\'' + (ejecutiva ? 'tecnica' : 'ejecutiva') + '\';renderTasacionDetalle()">' + (ejecutiva ? '🔬 Vista técnica' : '👔 Vista ejecutiva') + '</button>' : '') +
           (ejecutiva ? '' : '<button class="btn btn-gold btn-sm" onclick="calcularTasacion(\'' + t.id + '\')">🧮 Calcular</button>') +
           (t.precioCierre ? '<button class="btn btn-gold btn-sm" onclick="pdfTasacion(\'' + t.id + '\')">📄 Carpeta Wow</button>' : '') +
@@ -2391,6 +2404,8 @@
   }
   window.abrirTasacion = abrirTasacion;
   window.renderTasacionDetalle = renderTasacionDetalle;
+  // S95B.3: saltar directo al intake de comparables (entra a técnica + scrollea al importador) desde cualquier vista
+  window.tsIntake = function () { window.tsVista = 'tecnica'; renderTasacionDetalle(); setTimeout(function () { f360goto('ts-import'); }, 30); };
 
   async function agregarComparable(tasacionId, via) {
     var body = { tasacionId: tasacionId };
