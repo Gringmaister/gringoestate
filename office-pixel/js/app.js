@@ -2357,6 +2357,17 @@
         '<textarea class="input" id="cmp-texto" placeholder="…o pegá el TEXTO del aviso (compartir → copiar)" style="flex:2;min-width:200px;min-height:44px;"></textarea>' +
         '<button class="btn btn-ghost btn-sm" onclick="agregarComparable(\'' + t.id + '\',\'texto\')">+ por texto</button>' +
       '</div>' +
+      // S95B.3: intake híbrido — importar VARIOS comparables (links/textos) en BORRADOR (opt-IN al cálculo)
+      '<details style="border:1px dashed var(--gold);border-radius:10px;padding:8px 12px;margin-bottom:10px;">' +
+        '<summary style="font-size:.78rem;color:var(--gold);cursor:pointer;">📥 Importar varios comparables (links o textos)</summary>' +
+        '<div style="font-size:.7rem;color:var(--muted);margin:6px 0;">Un <b>link por línea</b>, o un aviso de <b>texto</b> (varias líneas) separado por una línea en blanco. Máx 40.</div>' +
+        '<textarea class="input" id="cmp-batch" placeholder="https://aviso-1&#10;https://aviso-2&#10;&#10;(o pegá el texto completo de un aviso acá)" style="width:100%;min-height:90px;"></textarea>' +
+        '<div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;">' +
+          '<button class="btn btn-gold btn-sm" onclick="importarComparablesBatch(\'' + t.id + '\')">📥 Importar comparables</button>' +
+          '<span style="font-size:.68rem;color:var(--muted);">Quedan en <b>Borrador</b> y <b>no entran al cálculo</b> hasta que los aceptes (✓).</span>' +
+        '</div>' +
+        '<div id="cmp-batch-report" style="margin-top:8px;"></div>' +
+      '</details>' +
       (comps.length ? '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="font-size:.66rem;color:var(--muted);text-transform:uppercase;"><th style="text-align:left;padding:4px 6px;">Comparable</th><th style="text-align:right;">Precio</th><th style="text-align:right;">Ajustado</th><th style="text-align:right;">m²</th><th style="text-align:right;">USD/m²</th><th style="text-align:right;">Días</th><th>Estado</th><th></th></tr></thead><tbody>' + filas + '</tbody></table></div>' : '<div class="small muted">Sin comparables todavía — pegá el primero ↑</div>');
     var nIncl = comps.filter(function (c) { return !(c.estadoAviso === 'Excluido' || c.outlier); }).length;
     var ejecutivaHtml = '<div class="small muted" style="margin-bottom:4px;">' + nIncl + ' comparables en el cálculo (' + (comps.length - nIncl) + ' excluidos) · diagnóstico y ajustes en la 🔬 vista técnica</div>';
@@ -2399,6 +2410,52 @@
     } else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
   }
   window.agregarComparable = agregarComparable;
+  // ── S95B.3: intake híbrido de comparables (batch links/textos → Borrador, opt-IN al cálculo) ──
+  // Parser reusable: un link por línea = 1 item; líneas de texto consecutivas = 1 item (separadas por línea en blanco).
+  function parseComparablesInput(raw) {
+    var lines = String(raw || '').split('\n');
+    var items = [], buf = [];
+    function flush() { var t = buf.join('\n').trim(); if (t) items.push({ texto: t }); buf = []; }
+    for (var i = 0; i < lines.length; i++) {
+      var t = lines[i].trim();
+      if (/^https?:\/\/\S+$/i.test(t)) { flush(); items.push({ link: t }); }
+      else if (t === '') { flush(); }
+      else buf.push(lines[i]);
+    }
+    flush();
+    return items;
+  }
+  function renderBatchReport(d) {
+    function chip(lbl, n, col) { return '<span style="display:inline-block;border:1px solid ' + col + ';color:' + col + ';border-radius:8px;padding:1px 7px;margin:2px 4px 0 0;font-size:.7rem;">' + lbl + ': <b>' + n + '</b></span>'; }
+    var h = '<div style="border:1px solid var(--border);border-radius:8px;padding:8px;">' +
+      '<div style="margin-bottom:4px;">' +
+        chip('Recibidos', d.totalRecibidos, 'var(--muted)') + chip('Importados', d.importados, 'var(--ok)') +
+        chip('Duplicados', d.duplicados, '#5ec8d8') + chip('Incompletos', d.incompletos, 'var(--warn)') +
+        chip('Fallidos', d.fallidos, 'var(--danger)') +
+      '</div>';
+    var rows = (d.items || []).map(function (it) {
+      var ic = it.status === 'imported' ? '✅' : it.status === 'deduped' ? '♻️' : it.status === 'incomplete' ? '🟡' : '❌';
+      var dud = (it.dudosos && it.dudosos.length) ? ' · <span style="color:var(--warn);">⚠ campos dudosos: ' + escHtml(it.dudosos.join(', ')) + '</span>' : '';
+      var err = it.error ? ' · <span style="color:var(--danger);">' + escHtml(it.error) + '</span>' : '';
+      return '<div style="font-size:.72rem;border-top:1px solid rgba(255,255,255,0.06);padding:3px 0;">' + ic + ' ' + escHtml(it.titulo || ('item ' + ((it.idx != null ? it.idx : 0) + 1))) + (it.usdM2 ? ' · <span style="color:var(--gold);font-family:var(--mono);">USD/m² ' + it.usdM2 + '</span>' : '') + dud + err + '</div>';
+    }).join('');
+    return h + rows + '<div style="font-size:.7rem;color:var(--muted);margin-top:6px;border-top:1px dashed var(--border);padding-top:5px;">Los comparables importados quedan en <b>Borrador</b> y <b>no entran al cálculo</b> hasta que los aceptes (✓ en cada fila).</div></div>';
+  }
+  async function importarComparablesBatch(tasacionId) {
+    var raw = (document.getElementById('cmp-batch') || {}).value || '';
+    var items = parseComparablesInput(raw);
+    var rep = document.getElementById('cmp-batch-report');
+    if (!items.length) { if (rep) rep.innerHTML = '<span style="font-size:.72rem;color:var(--danger);">Pegá al menos un link o un texto.</span>'; return; }
+    if (items.length > 40) { if (rep) rep.innerHTML = '<span style="font-size:.72rem;color:var(--danger);">Máximo 40 por tanda (pegaste ' + items.length + ').</span>'; return; }
+    if (rep) rep.innerHTML = '<span style="font-size:.72rem;" class="muted">Importando ' + items.length + ' comparable(s) con IA… (~' + (items.length * 15) + 's, no cierres)</span>';
+    var d = await apiFetch('/crm/tasacion/comparables/batch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tasacionId: tasacionId, items: items }) });
+    if (!d || d.ok === false) { if (rep) rep.innerHTML = '<span style="font-size:.72rem;color:var(--danger);">Error: ' + escHtml((d && d.error) || 'sin conexión') + '</span>'; return; }
+    if (rep) rep.innerHTML = renderBatchReport(d);
+    toast('📥 Importados ' + d.importados + ' · dup ' + d.duplicados + ' · incompletos ' + d.incompletos + ' · fallidos ' + d.fallidos + ' (en Borrador)', 'ok');
+    // refresca la lista (los Borrador aparecen en la tabla con su color) — NO auto-calcula
+    abrirTasacion(tasacionId);
+  }
+  window.importarComparablesBatch = importarComparablesBatch;
   // S70B: workflow humano del comparable (Aceptado/Descartado/Importado) — separado del Estado aviso técnico
   async function comparableAnalisis(cid, estado, tasId) {
     var motivo = '';
