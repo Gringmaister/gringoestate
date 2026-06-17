@@ -3227,6 +3227,20 @@
       '<input id="opd-firma" type="date" value="' + (op.fechaFirma || '') + '" style="font-size:.74rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px 6px;">' +
       '</div>' +
       '<input id="opd-bloqueo" placeholder="🔴 ¿Trabada? Escribí el bloqueo (queda en alertas)" value="' + escHtml(op.bloqueo || '') + '" style="width:100%;margin-top:8px;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' +
+      // S98B: datos de cierre (campos nuevos de la operación)
+      '<div style="border-top:1px dashed var(--border);margin-top:10px;padding-top:8px;">' +
+        '<div style="font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Datos de cierre</div>' +
+        '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">' +
+          '<label style="font-size:.66rem;color:var(--muted);">Fecha reserva<br><input id="opd-fecha-reserva" type="date" value="' + (op.fechaReserva ? String(op.fechaReserva).slice(0, 10) : '') + '" style="font-size:.74rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px 6px;"></label>' +
+          '<label style="font-size:.66rem;color:var(--muted);">Fecha posesión<br><input id="opd-fecha-posesion" type="date" value="' + (op.fechaPosesion ? String(op.fechaPosesion).slice(0, 10) : '') + '" style="font-size:.74rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px 6px;"></label>' +
+          '<label style="font-size:.66rem;color:var(--muted);">Instrumento<br><select id="opd-instrumento" style="font-size:.74rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px 6px;">' +
+            ['', 'Boleto', 'Cesión', 'Contrato', 'Escritura directa', 'Otro'].map(function (x) { return '<option' + ((op.instrumento || '') === x ? ' selected' : '') + '>' + x + '</option>'; }).join('') +
+          '</select></label>' +
+        '</div>' +
+        '<input id="opd-pagador" placeholder="Pagador de la reserva (ej. Alejandro)" value="' + escHtml(op.pagadorReserva || '') + '" style="width:100%;margin-top:6px;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' +
+        '<input id="opd-escribania" placeholder="Escribanía" value="' + escHtml(op.escribania || '') + '" style="width:100%;margin-top:6px;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' +
+        '<input id="opd-proveedor-sellado" placeholder="Proveedor de sellado / informes (ej. Bolsa de Comercio)" value="' + escHtml(op.proveedorSellado || '') + '" style="width:100%;margin-top:6px;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' +
+      '</div>' +
       '<div style="display:flex;gap:8px;margin-top:12px;">' +
         '<button class="btn btn-gold btn-sm" onclick="saveOpDetalle()">💾 Guardar</button>' +
         '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + (op.url || '#') + '" target="_blank" rel="noopener">↗ Abrir ficha</a>' +
@@ -3258,7 +3272,14 @@
       proximoPaso: proximo ? proximo.label : (tpl.length ? 'Checklist completo — cerrar' : ''),
       montoTotal: v('opd-monto') || undefined, reserva: v('opd-reserva') || undefined, refuerzo: v('opd-refuerzo') || undefined,
       honorariosEsperados: v('opd-honesp') || undefined, honorariosCobrados: v('opd-honcob') || undefined,
-      fechaFirma: v('opd-firma') || undefined
+      fechaFirma: v('opd-firma') || undefined,
+      // S98B campos nuevos (texto e instrumento se mandan crudos → permiten limpiar; fechas solo si hay valor)
+      fechaReserva: v('opd-fecha-reserva') || undefined,
+      fechaPosesion: v('opd-fecha-posesion') || undefined,
+      instrumento: v('opd-instrumento'),
+      pagadorReserva: v('opd-pagador'),
+      escribania: v('opd-escribania'),
+      proveedorSellado: v('opd-proveedor-sellado')
     };
     var r = await apiFetch('/crm/operacion/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (r && r.ok) { hideModal('modal-op-detalle'); toast('Operación actualizada — próximo paso: ' + (body.proximoPaso || '—'), 'ok'); window.crmOpsCache = null; loadCrmOperaciones(); }
@@ -3346,19 +3367,19 @@
     var left =
       '<div class="f360-card" id="f360-resumen"><div class="f360-t">📋 Resumen</div>' +
         row('Propiedad', op.propiedadId ? ('<span style="font-family:var(--mono);font-size:.7rem;">vinculada</span>' + (partes.vendedor ? ' · ' + escHtml(partes.vendedor.nombre) : '')) : f360Falta('Propiedad no vinculada')) +
-        row('Tipo', op.tipo) + row('Etapa', op.etapa) +
+        row('Tipo', op.tipo) + row('Etapa', op.etapa) + row('Instrumento', op.instrumento || f360Ph('pendiente')) +
         row('Precio de cierre', f360Usd(precio)) + row('Reserva', f360Usd(op.reserva)) + row('Refuerzo', f360Usd(op.refuerzo)) +
         row('Comisión', comPct != null ? comPct + '% <span style="color:var(--muted);font-weight:400;">(derivada)</span>' : null) +
       '</div>' +
       '<div class="f360-card" id="f360-partes"><div class="f360-t">👥 Partes</div>' +
         row('Vendedor / propietario', partesOk ? f360Parte(partes.vendedor, op.propiedadId ? 'Propiedad sin propietario vinculado' : 'Se deriva de la propiedad — no vinculada') : f360Ph()) +
         row('Comprador', partesOk ? f360Parte(partes.comprador, 'Comprador no vinculado') : f360Ph()) +
-        row('Pagador de la reserva', f360Ph('pendiente — texto libre')) +
-        row('Escribanía', f360Ph('pendiente — texto libre')) + row('Proveedor sellado / informes', f360Ph('ej. Bolsa de Comercio de Bahía Blanca')) +
+        row('Pagador de la reserva', op.pagadorReserva ? escHtml(op.pagadorReserva) : f360Ph('pendiente')) +
+        row('Escribanía', op.escribania ? escHtml(op.escribania) : f360Ph('pendiente')) + row('Proveedor sellado / informes', op.proveedorSellado ? escHtml(op.proveedorSellado) : f360Ph('ej. Bolsa de Comercio')) +
       '</div>' +
       '<div class="f360-card" id="f360-fechas"><div class="f360-t">📅 Fechas</div>' +
-        row('Fecha de reserva', f360Ph('s/campo dedicado')) + row('Fecha firma (cargada)', op.fechaFirma) +
-        row('Fecha estimada de firma', f360Ph()) + row('Fecha estimada de posesión', f360Ph()) +
+        row('Fecha de reserva', op.fechaReserva ? String(op.fechaReserva).slice(0, 10) : f360Ph('pendiente')) + row('Fecha firma (cargada)', op.fechaFirma) +
+        row('Fecha estimada de firma', f360Ph()) + row('Fecha de posesión', op.fechaPosesion ? String(op.fechaPosesion).slice(0, 10) : f360Ph('pendiente')) +
       '</div>' +
       '<div class="f360-card" id="f360-honorarios"><div class="f360-t">💰 Honorarios</div>' +
         (precio && comPct ? '<div style="font-size:.74rem;color:var(--muted);margin-bottom:6px;">' + f360Usd(precio) + ' × ' + comPct + '% = <b style="color:var(--gold);">' + f360Usd(honCalc) + '</b> <span style="opacity:.7;">(cálculo visual)</span></div>' : '') +
