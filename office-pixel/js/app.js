@@ -2348,7 +2348,8 @@
     var ejecutiva = window.tsVista === 'ejecutiva';
     // S50 (consultor): vista EJECUTIVA = lo mostrable (4 precios + semáforo + estrategia) ·
     // vista TÉCNICA = el laboratorio (diagnóstico, comparables, ajustes)
-    var tecnicaHtml = diagHtml +
+    var tecnicaHtml = '<div class="ts-subnav" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">' + [['Diagnóstico', 'ts-diag'], ['Importar', 'ts-import'], ['Comparables', 'ts-comps']].map(function (n) { return '<a onclick="f360goto(\'' + n[1] + '\')" style="font-size:.72rem;color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:2px 9px;cursor:pointer;text-decoration:none;white-space:nowrap;">' + n[0] + '</a>'; }).join('') + '</div><span id="ts-diag"></span>' +
+      diagHtml +
       '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">' +
         '<input class="input" id="cmp-link" placeholder="Pegá un LINK de Zonaprop…" style="flex:2;min-width:200px;">' +
         '<button class="btn btn-gold btn-sm" onclick="agregarComparable(\'' + t.id + '\',\'link\')">+ por link</button>' +
@@ -2357,6 +2358,7 @@
         '<textarea class="input" id="cmp-texto" placeholder="…o pegá el TEXTO del aviso (compartir → copiar)" style="flex:2;min-width:200px;min-height:44px;"></textarea>' +
         '<button class="btn btn-ghost btn-sm" onclick="agregarComparable(\'' + t.id + '\',\'texto\')">+ por texto</button>' +
       '</div>' +
+      '<span id="ts-import"></span>' +
       // S95B.3: intake híbrido — importar VARIOS comparables (links/textos) en BORRADOR (opt-IN al cálculo)
       '<details style="border:1px dashed var(--gold);border-radius:10px;padding:8px 12px;margin-bottom:10px;">' +
         '<summary style="font-size:.78rem;color:var(--gold);cursor:pointer;">📥 Importar varios comparables (links o textos)</summary>' +
@@ -2368,6 +2370,7 @@
         '</div>' +
         '<div id="cmp-batch-report" style="margin-top:8px;"></div>' +
       '</details>' +
+      '<span id="ts-comps"></span>' +
       (comps.length ? '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="font-size:.66rem;color:var(--muted);text-transform:uppercase;"><th style="text-align:left;padding:4px 6px;">Comparable</th><th style="text-align:right;">Precio</th><th style="text-align:right;">Ajustado</th><th style="text-align:right;">m²</th><th style="text-align:right;">USD/m²</th><th style="text-align:right;">Días</th><th>Estado</th><th></th></tr></thead><tbody>' + filas + '</tbody></table></div>' : '<div class="small muted">Sin comparables todavía — pegá el primero ↑</div>');
     var nIncl = comps.filter(function (c) { return !(c.estadoAviso === 'Excluido' || c.outlier); }).length;
     var ejecutivaHtml = '<div class="small muted" style="margin-bottom:4px;">' + nIncl + ' comparables en el cálculo (' + (comps.length - nIncl) + ' excluidos) · diagnóstico y ajustes en la 🔬 vista técnica</div>';
@@ -3076,15 +3079,29 @@
     });
     window.crmOpsCache = d;
     renderVista360();
+    // OP-004 (S96): banner de operación activa arriba de todo
+    var bn = document.getElementById('crm-ops-banner');
+    if (bn) {
+      var act = (d.items || []).filter(function (o) { return ['Cerrada', 'Caída'].indexOf(o.etapa) < 0; });
+      if (act.length) {
+        var oa = act[0], falt = [];
+        if (!oa.refuerzo) falt.push('refuerzo');
+        if (opFlujoIndex(oa.etapa) < 4) falt.push('cesión/escribanía', 'sellado');
+        if (!oa.honorariosCobrados) falt.push('honorarios');
+        bn.innerHTML = '<div onclick="abrirFicha360(\'' + oa.id + '\')" style="cursor:pointer;border:1px solid var(--gold);border-radius:12px;padding:11px 16px;margin-bottom:14px;background:rgba(212,175,55,.06);">' +
+          '<div style="font-size:.85rem;">Operación activa: <b>' + escHtml(oa.operacion) + '</b> · Etapa <b>' + escHtml(oa.etapa || '—') + '</b>.' + (falt.length ? ' Faltan definir: ' + escHtml(falt.join(', ')) + '.' : '') + '</div>' +
+          '<div style="font-size:.7rem;color:var(--gold);margin-top:3px;">Abrir Ficha 360 →</div></div>';
+      } else bn.innerHTML = '';
+    }
     var opsEmpty = !(d.items || []).length;
     el.innerHTML = (opsEmpty
       ? '<div style="border:1px dashed var(--border);border-radius:12px;padding:18px;text-align:center;margin-bottom:12px;"><div style="font-size:.82rem;color:var(--muted);margin-bottom:10px;">Sin operaciones activas. Cuando haya una oferta o reserva en la mesa, cargala acá (o aprobá la sugerencia de Hermes desde el Inbox).</div><button class="btn btn-gold btn-sm" onclick="showModal(\'modal-operacion\')">+ Primera operación</button></div>'
       : '') + crmFunnelHtml((d.etapas || []).map(function (e) {
-      return { etapa: e.etapa, count: e.count, cards: (e.items || []).map(function (i) { return { nombre: i.operacion + (i.montoTotal ? ' · $' + Number(i.montoTotal).toLocaleString('es-AR') : ''), onclick: 'abrirOperacion(\'' + i.id + '\')', title: 'Abrir flujo guiado de la operación' }; }) };
+      return { etapa: e.etapa, count: e.count, cards: (e.items || []).map(function (i) { return { nombre: i.operacion + (i.montoTotal ? ' · $' + Number(i.montoTotal).toLocaleString('es-AR') : ''), onclick: 'abrirFicha360(\'' + i.id + '\')', title: 'Abrir Ficha 360 de la operación' }; }) };
     })) + (function () {
       // S50 (consultor): próximo paso de cada operación viva, debajo del embudo
       var lineas = (d.items || []).filter(function (o) { return ['Cerrada', 'Caída'].indexOf(o.etapa) < 0 && o.proximoPaso; }).slice(0, 5).map(function (o) {
-        return '<div style="font-size:.74rem;padding:2px 0;color:var(--muted);cursor:pointer;" onclick="abrirOperacion(\'' + o.id + '\')" title="Abrir la operación">▶ <b style="color:var(--text);">' + escHtml(o.operacion) + '</b> → ' + escHtml(o.proximoPaso) + '</div>';
+        return '<div style="font-size:.74rem;padding:2px 0;color:var(--muted);cursor:pointer;" onclick="abrirFicha360(\'' + o.id + '\')" title="Abrir Ficha 360">▶ <b style="color:var(--text);">' + escHtml(o.operacion) + '</b> → ' + escHtml(o.proximoPaso) + '</div>';
       });
       return lineas.length ? '<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.06);padding-top:6px;">' + lineas.join('') + '</div>' : '';
     })();
@@ -3233,6 +3250,145 @@
     else toast('Error: ' + ((r && r.error) || 'sin conexión'), 'err');
   }
   window.saveOpDetalle = saveOpDetalle;
+
+  // ════════ S96: OPERACIONES — Ficha 360 front-first (vista READ workspace; edición real = modal quick-edit) ════════
+  var OP_FLUJO = [
+    { k: 'oferta', label: 'Oferta' }, { k: 'reserva', label: 'Reserva' }, { k: 'refuerzo', label: 'Refuerzo' },
+    { k: 'documentacion', label: 'Documentación' }, { k: 'escribania', label: 'Escribanía / contrato / cesión' },
+    { k: 'firma', label: 'Firma' }, { k: 'posesion', label: 'Entrega / posesión' },
+    { k: 'honorarios', label: 'Honorarios' }, { k: 'cierre', label: 'Cierre documentado' }
+  ];
+  var OP_DOCS = ['Reserva firmada', 'DNI / CUIT de las partes', 'Informes (dominio / inhibición)', 'Escritura / título', 'Reglamento de copropiedad', 'Plano', 'Comprobante de sellado', 'Boleto / cesión', 'Recibos de pago', 'Factura de honorarios'];
+  function opFlujoIndex(etapa) {
+    var e = (etapa || '').toLowerCase();
+    if (/cerrad|cierre/.test(e)) return 8;
+    if (/honorari/.test(e)) return 7;
+    if (/entrega|posesi/.test(e)) return 6;
+    if (/firma/.test(e)) return 5;
+    if (/escriban|contrato|cesi|boleto/.test(e)) return 4;
+    if (/document/.test(e)) return 3;
+    if (/refuerzo/.test(e)) return 2;
+    if (/reserva/.test(e)) return 1;
+    if (/oferta/.test(e)) return 0;
+    return 1;
+  }
+  function f360Usd(n) { return (n != null && n !== '') ? 'USD ' + Number(n).toLocaleString('es-AR') : null; }
+  function f360Ph(txt) { return '<span style="color:var(--muted);font-style:italic;opacity:.7;">' + escHtml(txt || 'pendiente de mapear') + '</span>'; }
+  function ensureFicha360() {
+    if (!document.getElementById('op-f360-style')) {
+      var st = document.createElement('style'); st.id = 'op-f360-style';
+      st.textContent = '#op-f360{align-items:flex-start;justify-content:center;overflow-y:auto;padding:0;z-index:60;}' +
+        '#op-f360 .f360-inner{width:100%;max-width:1480px;min-height:100vh;background:var(--bg);}' +
+        '#op-f360 .f360-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,.92fr);gap:14px;align-items:start;}' +
+        '@media(max-width:1000px){#op-f360 .f360-cols{grid-template-columns:1fr;}}' +
+        '#op-f360 .f360-card{border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px;background:rgba(255,255,255,.015);}' +
+        '#op-f360 .f360-t{font-size:.66rem;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px;}' +
+        '#op-f360 .f360-nav a{font-size:.72rem;color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:2px 9px;cursor:pointer;text-decoration:none;white-space:nowrap;}' +
+        '#op-f360 .f360-nav a:hover{color:var(--gold);border-color:var(--gold);}';
+      document.head.appendChild(st);
+    }
+    if (document.getElementById('op-f360')) return;
+    var dv = document.createElement('div');
+    dv.className = 'modal-overlay hidden'; dv.id = 'op-f360';
+    dv.innerHTML = '<div class="f360-inner" id="op-f360-inner"></div>';
+    document.body.appendChild(dv);
+  }
+  function cerrarFicha360() { var o = document.getElementById('op-f360'); if (o) o.classList.add('hidden'); }
+  window.cerrarFicha360 = cerrarFicha360;
+  function f360goto(a) { var el = document.getElementById(a); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  window.f360goto = f360goto;
+  async function abrirFicha360(id) {
+    if (!window.crmOpsCache) { var d0 = await apiFetch('/crm/operaciones'); if (d0 && d0.ok) window.crmOpsCache = d0; }
+    var op = ((window.crmOpsCache || {}).items || []).filter(function (o) { return o.id === id; })[0];
+    if (!op) return toast('No encontré la operación', 'err');
+    ensureFicha360(); window.opF360 = op; renderFicha360();
+    var o = document.getElementById('op-f360'); o.classList.remove('hidden'); o.scrollTop = 0;
+  }
+  window.abrirFicha360 = abrirFicha360;
+  function renderFicha360() {
+    var op = window.opF360; if (!op) return;
+    var d = window.crmOpsCache || {};
+    var precio = op.montoTotal, comPct = (op.honorariosEsperados && op.montoTotal) ? Math.round(op.honorariosEsperados / op.montoTotal * 1000) / 10 : null;
+    var honCalc = op.honorariosEsperados != null ? op.honorariosEsperados : (precio && comPct ? Math.round(precio * comPct / 100) : null);
+    var honCob = op.honorariosCobrados || 0, honPend = (op.honorariosEsperados || 0) - honCob;
+    var idx = opFlujoIndex(op.etapa), bloq = !!op.bloqueo;
+    function row(l, v) { return '<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.8rem;"><span style="color:var(--muted);">' + l + '</span><span style="text-align:right;font-weight:600;">' + (v != null && v !== '' ? v : f360Ph()) + '</span></div>'; }
+    var left =
+      '<div class="f360-card" id="f360-resumen"><div class="f360-t">📋 Resumen</div>' +
+        row('Propiedad', op.propiedadId ? '<span style="font-family:var(--mono);font-size:.7rem;">vinculada</span>' : f360Ph('en el título — s/relación')) +
+        row('Tipo', op.tipo) + row('Etapa', op.etapa) +
+        row('Precio de cierre', f360Usd(precio)) + row('Reserva', f360Usd(op.reserva)) + row('Refuerzo', f360Usd(op.refuerzo)) +
+        row('Comisión', comPct != null ? comPct + '% <span style="color:var(--muted);font-weight:400;">(derivada)</span>' : null) +
+      '</div>' +
+      '<div class="f360-card" id="f360-partes"><div class="f360-t">👥 Partes</div>' +
+        row('Vendedor / propietario', f360Ph()) + row('Comprador', f360Ph()) +
+        row('Pagador de la reserva', f360Ph('del chat — s/mapear')) +
+        row('Escribanía', f360Ph()) + row('Proveedor sellado / informes', f360Ph('Bolsa de Comercio u otro')) +
+      '</div>' +
+      '<div class="f360-card" id="f360-fechas"><div class="f360-t">📅 Fechas</div>' +
+        row('Fecha de reserva', f360Ph('s/campo dedicado')) + row('Fecha firma (cargada)', op.fechaFirma) +
+        row('Fecha estimada de firma', f360Ph()) + row('Fecha estimada de posesión', f360Ph()) +
+      '</div>' +
+      '<div class="f360-card" id="f360-honorarios"><div class="f360-t">💰 Honorarios</div>' +
+        (precio && comPct ? '<div style="font-size:.74rem;color:var(--muted);margin-bottom:6px;">' + f360Usd(precio) + ' × ' + comPct + '% = <b style="color:var(--gold);">' + f360Usd(honCalc) + '</b> <span style="opacity:.7;">(cálculo visual)</span></div>' : '') +
+        row('Esperados', f360Usd(honCalc)) + row('Cobrados', f360Usd(honCob)) +
+        row('Pendientes', honPend > 0 ? '<span style="color:var(--warn);">' + f360Usd(honPend) + '</span>' : f360Usd(0)) +
+      '</div>';
+    var pasos = OP_FLUJO.map(function (p, i) {
+      var estado = i < idx ? 'completado' : (i === idx ? (bloq ? 'bloqueado' : 'en curso') : 'pendiente');
+      var ic = estado === 'completado' ? '✅' : estado === 'en curso' ? '🔵' : estado === 'bloqueado' ? '🔴' : '⚪';
+      var col = estado === 'completado' ? 'var(--ok)' : estado === 'en curso' ? 'var(--gold)' : estado === 'bloqueado' ? 'var(--danger)' : 'var(--muted)';
+      return '<div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0 7px 14px;margin-left:8px;border-left:2px solid rgba(255,255,255,.08);">' +
+        '<span style="margin-left:-25px;">' + ic + '</span>' +
+        '<div><div style="font-size:.82rem;font-weight:' + (i === idx ? '700' : '500') + ';color:' + col + ';">' + escHtml(p.label) + '</div>' +
+        (i === idx ? '<div style="font-size:.68rem;color:var(--muted);">etapa actual' + (bloq ? ' · 🔴 trabada' : '') + '</div>' : '') + '</div></div>';
+    }).join('');
+    var center = '<div class="f360-card" id="f360-flujo"><div class="f360-t">🔄 Flujo operativo</div>' + pasos +
+      '<div style="font-size:.66rem;color:var(--muted);margin-top:8px;border-top:1px dashed var(--border);padding-top:6px;">Derivado de la etapa. Para cambiarla usá ✏️ Edición rápida.</div></div>';
+    var tipo = op.tipo, tpl = tipo ? ((d.checklists || {})[tipo] || []) : [];
+    var faltan = tpl.filter(function (i) { return !(op.checklist || {})[i.k]; }).slice(0, 4).map(function (i) { return i.label; });
+    var prox = op.proximoPaso || 'enviar documentación a escribanía y definir si se avanza con refuerzo o directo a cesión con entrega de posesión, + coordinar el cálculo de sellado con el proveedor';
+    var msgs = ['💬 Comprador — "Avanzamos con la cesión, ¿coordinamos la firma?"', '💬 Escribana — "Te paso la documentación para el estudio de títulos y el cálculo de sellado."'];
+    var right = '<div class="f360-card" id="f360-hermes" style="border-color:rgba(94,200,216,.35);">' +
+      '<div class="f360-t" style="color:#5ec8d8;">🪽 Hermes · Próximo paso</div>' +
+      '<div style="border:1px solid rgba(94,200,216,.3);border-radius:9px;padding:9px;margin-bottom:9px;background:rgba(94,200,216,.05);font-size:.8rem;"><b>▶ Sugerido:</b> ' + escHtml(prox) + '</div>' +
+      (faltan.length ? '<div style="font-size:.74rem;margin-bottom:8px;"><b>Falta:</b><ul style="margin:4px 0 0;padding-left:18px;color:var(--muted);">' + faltan.map(function (f) { return '<li>' + escHtml(f) + '</li>'; }).join('') + '</ul></div>' : '') +
+      (bloq ? '<div style="font-size:.76rem;color:var(--danger);margin-bottom:8px;">🔴 Bloqueo: ' + escHtml(op.bloqueo) + '</div>' : '') +
+      '<div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;border-top:1px dashed var(--border);padding-top:6px;">⚠ Alertas: sellado a coordinar · escribanía a confirmar · documentación a completar</div>' +
+      '<div style="font-size:.66rem;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Mensajes sugeridos</div>' +
+      msgs.map(function (m) { return '<div style="font-size:.74rem;border:1px solid var(--border);border-radius:8px;padding:5px 8px;margin-bottom:5px;color:var(--muted);">' + escHtml(m) + ' <span style="opacity:.5;">(placeholder)</span></div>'; }).join('') +
+      '<div style="display:flex;gap:6px;margin-top:6px;"><button class="btn btn-ghost btn-sm" disabled style="opacity:.5;cursor:default;">Chat comprador (pronto)</button><button class="btn btn-ghost btn-sm" disabled style="opacity:.5;cursor:default;">Chat escribana (pronto)</button></div>' +
+      '</div>';
+    var docs = '<div class="f360-card" id="f360-documentos"><div class="f360-t">📎 Documentos vinculados</div>' +
+      '<div style="font-size:.7rem;color:var(--muted);margin-bottom:8px;">Checklist operativo (visual — sin relación real todavía).</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;">' +
+      OP_DOCS.map(function (dn, i) { var done = i === 0 && op.reserva; return '<div style="display:flex;align-items:center;gap:7px;font-size:.76rem;border:1px solid var(--border);border-radius:8px;padding:5px 9px;' + (done ? '' : 'opacity:.8;') + '">' + (done ? '🟢' : '⚪') + ' ' + escHtml(dn) + '</div>'; }).join('') +
+      '</div></div>';
+    var eventos = [];
+    if (op.creada) eventos.push(['📌', 'Operación creada', String(op.creada).slice(0, 10)]);
+    if (op.reserva) eventos.push(['💵', 'Reserva cargada (' + f360Usd(op.reserva) + ')', op.fechaFirma ? String(op.fechaFirma).slice(0, 10) : '']);
+    eventos.push(['🔄', 'Etapa actual: ' + (op.etapa || '—'), '']);
+    var hist = '<div class="f360-card" id="f360-historial"><div class="f360-t">🕑 Track record</div>' +
+      eventos.map(function (e) { return '<div style="font-size:.78rem;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);">' + e[0] + ' ' + escHtml(e[1]) + (e[2] ? ' <span style="color:var(--muted);font-size:.7rem;">· ' + e[2] + '</span>' : '') + '</div>'; }).join('') +
+      '<div style="font-size:.7rem;color:var(--muted);margin-top:6px;">Derivado de los datos actuales. El historial de eventos completo se registrará a futuro.</div></div>';
+    var nav = '<div class="f360-nav" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;">' +
+      [['Resumen', 'f360-resumen'], ['Partes', 'f360-partes'], ['Flujo', 'f360-flujo'], ['Documentos', 'f360-documentos'], ['Fechas', 'f360-fechas'], ['Honorarios', 'f360-honorarios'], ['Hermes', 'f360-hermes'], ['Historial', 'f360-historial']]
+        .map(function (n) { return '<a onclick="f360goto(\'' + n[1] + '\')">' + n[0] + '</a>'; }).join('') + '</div>';
+    var header = '<div style="position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border);padding:14px 22px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
+        '<button class="btn btn-ghost btn-sm" onclick="cerrarFicha360()">← Volver</button>' +
+        '<h2 style="margin:0;font-size:1.05rem;">💼 ' + escHtml(op.operacion) + '</h2>' +
+        '<span class="badge badge-gold">' + escHtml(op.tipo || '—') + '</span>' +
+        '<span class="badge badge-muted">' + escHtml(op.etapa || '—') + '</span>' +
+        (bloq ? '<span class="badge" style="background:var(--danger);color:#fff;">🔴 Trabada</span>' : '') +
+        '<span style="margin-left:auto;"></span>' +
+        '<button class="btn btn-gold btn-sm" onclick="abrirOperacion(\'' + op.id + '\')">✏️ Edición rápida</button>' +
+        (op.url ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + op.url + '" target="_blank" rel="noopener">↗ Notion</a>' : '') +
+      '</div>' + nav + '</div>';
+    document.getElementById('op-f360-inner').innerHTML = header +
+      '<div style="padding:18px 22px;"><div class="f360-cols"><div>' + left + '</div><div>' + center + '</div><div>' + right + '</div></div>' + docs + hist + '</div>';
+  }
+  window.renderFicha360 = renderFicha360;
 
   /* ─── HUE ────────────────────────────────────────────────────────── */
   async function loadHue() {

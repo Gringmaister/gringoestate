@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/pixel.css?v=s72" />
+  <link rel="stylesheet" href="css/pixel.css?v=s73" />
 </head>
 <body>
 
@@ -1112,7 +1112,11 @@
       <div class="section-head">
         <h1>OPERACIONES</h1>
         <span class="badge badge-gold" id="crm-ops-total">—</span>
+        <!-- OP-002 (S96): Nueva operación SIEMPRE visible (no solo en empty state) -->
+        <button class="btn btn-gold btn-sm" style="margin-left:auto;" onclick="showModal('modal-operacion')">+ Nueva operación</button>
       </div>
+      <!-- OP-004 (S96): banner de operación activa -->
+      <div id="crm-ops-banner"></div>
       <!-- OPERACIONES funnel cierre (movida del tab interno del CRM en S80B2A) -->
       <div class="card" style="margin-bottom:14px;" role="region" aria-label="Operaciones — funnel de cierre">
         <div class="card-head">
@@ -1692,7 +1696,7 @@
 <!-- Scripts -->
 <!-- S45: ?v= cache-buster — subir la versión en cada deploy con cambios de JS/CSS
      (el HTML revalida siempre en Netlify; el query nuevo fuerza al browser a bajar el asset fresco) -->
-<script src="js/api.js?v=s72"></script>
-<script src="js/app.js?v=s72"></script>
+<script src="js/api.js?v=s73"></script>
+<script src="js/app.js?v=s73"></script>
 </body>
 </html>
