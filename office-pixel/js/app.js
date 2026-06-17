@@ -3168,6 +3168,7 @@
 
   async function abrirOperacion(id) {
     if (!window.crmOpsCache) { var d0 = await apiFetch('/crm/operaciones'); if (d0 && d0.ok) window.crmOpsCache = d0; }
+    if (!window.crmPipelineCache) { var dp = await apiFetch('/crm/pipeline'); if (dp && dp.ok) window.crmPipelineCache = dp; } // S100: poblar el selector de propiedad
     var d = window.crmOpsCache || {};
     var op = ((d.items) || []).filter(function (o) { return o.id === id; })[0];
     if (!op) return toast('No encontré la operación', 'err');
@@ -3241,6 +3242,15 @@
         '<input id="opd-escribania" placeholder="Escribanía" value="' + escHtml(op.escribania || '') + '" style="width:100%;margin-top:6px;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' +
         '<input id="opd-proveedor-sellado" placeholder="Proveedor de sellado / informes (ej. Bolsa de Comercio)" value="' + escHtml(op.proveedorSellado || '') + '" style="width:100%;margin-top:6px;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' +
       '</div>' +
+      // S100 A1: selector de propiedad vinculada (FUNCIONAL — no auto-vincula; se aplica al 💾 Guardar)
+      '<div style="border-top:1px dashed var(--border);margin-top:10px;padding-top:8px;">' +
+        '<div style="font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Propiedad vinculada</div>' +
+        '<select id="opd-propiedad" style="width:100%;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' +
+          '<option value="">— sin vincular —</option>' +
+          (((window.crmPipelineCache || {}).propiedades || {}).items || []).map(function (pp) { return '<option value="' + pp.id + '"' + (op.propiedadId === pp.id ? ' selected' : '') + '>' + escHtml(pp.propiedad || pp.id) + '</option>'; }).join('') +
+        '</select>' +
+        ((((window.crmPipelineCache || {}).propiedades || {}).items || []).length ? '<div style="font-size:.62rem;color:var(--muted);margin-top:4px;">Elegí una y tocá 💾 Guardar para vincular. No se vincula nada solo.</div>' : '<div style="font-size:.62rem;color:var(--warn);margin-top:4px;">No hay propiedades en cache — entrá a 🏢 Propiedades del CRM para cargarlas y reabrí.</div>') +
+      '</div>' +
       '<div style="display:flex;gap:8px;margin-top:12px;">' +
         '<button class="btn btn-gold btn-sm" onclick="saveOpDetalle()">💾 Guardar</button>' +
         '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + (op.url || '#') + '" target="_blank" rel="noopener">↗ Abrir ficha</a>' +
@@ -3279,7 +3289,8 @@
       instrumento: v('opd-instrumento'),
       pagadorReserva: v('opd-pagador'),
       escribania: v('opd-escribania'),
-      proveedorSellado: v('opd-proveedor-sellado')
+      proveedorSellado: v('opd-proveedor-sellado'),
+      propiedadId: v('opd-propiedad') || undefined
     };
     var r = await apiFetch('/crm/operacion/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (r && r.ok) { hideModal('modal-op-detalle'); toast('Operación actualizada — próximo paso: ' + (body.proximoPaso || '—'), 'ok'); window.crmOpsCache = null; loadCrmOperaciones(); }
@@ -3295,6 +3306,11 @@
     { k: 'honorarios', label: 'Honorarios' }, { k: 'cierre', label: 'Cierre documentado' }
   ];
   var OP_DOCS = ['Reserva firmada', 'DNI / CUIT de las partes', 'Informes (dominio / inhibición)', 'Escritura / título', 'Reglamento de copropiedad', 'Plano', 'Comprobante de sellado', 'Boleto / cesión', 'Recibos de pago', 'Factura de honorarios'];
+  // S100 A1: documentos ESPERADOS por tipo de operación (para "qué falta"; tipos alineados con la DB Documentos donde aplica)
+  var OP_DOCS_ESPERADOS = {
+    Venta: ['Reserva', 'DNI/CUIT', 'Boleto', 'Escritura', 'Certif. dominio', 'Inhibiciones', 'Plano', 'Comprobante sellado', 'Recibos de pago', 'Factura de honorarios'],
+    Alquiler: ['Reserva', 'DNI/CUIT', 'Garantía', 'Contrato', 'Inventario', 'Recibos de pago']
+  };
   function opFlujoIndex(etapa) {
     var e = (etapa || '').toLowerCase();
     if (/cerrad|cierre/.test(e)) return 8;
@@ -3313,7 +3329,7 @@
   // S97 Paso 1.5: "dato faltante" REAL (el campo existe, falta vincular) — distinto del placeholder sin backend
   function f360Falta(txt) { return '<span style="color:var(--muted);opacity:.9;">— ' + escHtml(txt || 'no disponible') + '</span>'; }
   function f360Parte(p, faltaTxt) { return (p && p.nombre) ? (escHtml(p.nombre) + (p.telefono ? ' <span style="color:var(--muted);font-size:.68rem;font-family:var(--mono);">' + escHtml(p.telefono) + '</span>' : '')) : f360Falta(faltaTxt); }
-  function f360DocColor(estado) { var e = (estado || '').toLowerCase(); if (/validad/.test(e)) return 'var(--ok)'; if (/descart/.test(e)) return 'var(--muted)'; if (/ocr|revis|pendiente|asociad|clasific/.test(e)) return 'var(--warn)'; return 'var(--muted)'; }
+  function f360DocColor(estado) { var e = (estado || '').toLowerCase(); if (/bloquea/.test(e)) return 'var(--danger)'; if (/validad|recib/.test(e)) return 'var(--ok)'; if (/observ|revis|pendiente|asociad|ocr|extra|analiz/.test(e)) return 'var(--warn)'; return 'var(--muted)'; }
   function f360TrackIcon(a) { a = a || ''; if (a === 'crear') return '📌'; if (a === 'actualizar') return '🔄'; if (/doc/.test(a)) return '📎'; if (a === 'comentario') return '💬'; if (a === 'calcular' || a === 'pdf' || /comparable/.test(a)) return '🧮'; return '•'; }
   function f360TrackLabel(e) { var a = (e && e.accion) || '', det = (e && e.detalle) || {}; var m = { crear: 'Operación creada', actualizar: 'Actualización' + (det && det.etapa ? ' → ' + det.etapa : ''), comentario: 'Nota', doc_inbound: 'Documento recibido', doc_validar: 'Documento validado', doc_asignar: 'Documento asignado', doc_gestion: 'Gestión documental', calcular: 'Tasación calculada', pdf: 'PDF generado', sugerencia_aprobar: 'Sugerencia aprobada' }; return m[a] || (a ? a.charAt(0).toUpperCase() + a.slice(1).replace(/_/g, ' ') : 'Evento'); }
   function ensureFicha360() {
@@ -3411,21 +3427,43 @@
       msgs.map(function (m) { return '<div style="font-size:.74rem;border:1px solid var(--border);border-radius:8px;padding:5px 8px;margin-bottom:5px;color:var(--muted);">' + escHtml(m) + ' <span style="opacity:.5;">(placeholder)</span></div>'; }).join('') +
       '<div style="display:flex;gap:6px;margin-top:6px;"><button class="btn btn-ghost btn-sm" disabled style="opacity:.5;cursor:default;">Chat comprador (pronto)</button><button class="btn btn-ghost btn-sm" disabled style="opacity:.5;cursor:default;">Chat escribana (pronto)</button></div>' +
       '</div>';
+    // S100 A1 (front-only): card Documentos enriquecida — color por estado + leyenda + alcance + "qué falta" por tipo + CTAs + estado honesto sin propiedad
+    var hayProp = !!op.propiedadId;
+    var tipoOp = /alquiler/i.test(op.tipo || '') ? 'Alquiler' : 'Venta';
+    var docPresentes = (Array.isArray(fdocs) ? fdocs : []).map(function (x) { return (x.tipo || '').toLowerCase(); });
+    var docFaltaHtml = (function () {
+      var esp = OP_DOCS_ESPERADOS[tipoOp] || []; if (!esp.length) return '';
+      return '<div style="margin-top:8px;font-size:.7rem;color:var(--muted);"><b>Checklist esperado (' + tipoOp + '):</b> <span style="opacity:.7;">✓ presente · ○ falta</span>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;">' +
+        esp.map(function (t) { var key = t.toLowerCase().slice(0, 5); var ok = docPresentes.some(function (p) { return p && (p.indexOf(key) >= 0 || t.toLowerCase().indexOf(p.slice(0, 5)) >= 0); }); return '<span style="border:1px solid var(--border);border-radius:7px;padding:2px 7px;font-size:.72rem;' + (ok ? 'color:var(--ok);' : 'opacity:.75;') + '">' + (ok ? '✓' : '○') + ' ' + escHtml(t) + '</span>'; }).join('') +
+        '</div></div>';
+    })();
+    var docLegend = '<div style="font-size:.62rem;color:var(--muted);margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;"><span style="color:var(--ok);">● validado/recibido</span><span style="color:var(--warn);">● observado/revisar</span><span style="color:var(--danger);">● bloqueante</span><span style="color:var(--muted);">● sin clasificar</span></div>';
+    var docCTAs = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">' +
+      (hayProp ? '<button class="btn btn-gold btn-sm" onclick="abrirDocUpload(\'' + op.propiedadId + '\')">📎 Subir documento</button>'
+               : '<button class="btn btn-ghost btn-sm" disabled style="opacity:.5;cursor:default;" title="Vinculá una propiedad para subir (carga directa a la operación = A2)">📎 Subir documento</button>') +
+      '<button class="btn btn-ghost btn-sm" onclick="nav(\'documentos\')">📥 Ir a Doc Inbox</button>' +
+      (hayProp ? '<button class="btn btn-ghost btn-sm" onclick="abrirLegajo(\'' + op.propiedadId + '\')">🏠 Ver documentos de propiedad</button>' : '') +
+      '<button class="btn btn-ghost btn-sm" onclick="abrirOperacion(\'' + op.id + '\')">🔗 ' + (hayProp ? 'Cambiar' : 'Vincular') + ' propiedad</button>' +
+      '</div>';
+    var docNotaA2 = '<div style="font-size:.64rem;color:var(--muted);margin-top:8px;border-top:1px dashed var(--border);padding-top:6px;">La vinculación <b>directa</b> documento ↔ operación llega en <b>A2</b>. Hoy se muestran los documentos de la <b>propiedad</b> vinculada.</div>';
     var docsBody;
-    if (fdocs === null) {  // endpoint no disponible → fallback visual (checklist operativo)
-      docsBody = '<div style="font-size:.7rem;color:var(--muted);margin-bottom:8px;">Checklist operativo (visual).</div>' +
+    if (fdocs === null) {  // endpoint no disponible → fallback visual + CTAs
+      docsBody = '<div style="font-size:.7rem;color:var(--muted);margin-bottom:8px;">Checklist operativo (visual — el detalle real carga al abrir la ficha).</div>' +
         '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;">' +
         OP_DOCS.map(function (dn, i) { var done = i === 0 && op.reserva; return '<div style="display:flex;align-items:center;gap:7px;font-size:.76rem;border:1px solid var(--border);border-radius:8px;padding:5px 9px;' + (done ? '' : 'opacity:.8;') + '">' + (done ? '🟢' : '⚪') + ' ' + escHtml(dn) + '</div>'; }).join('') +
-        '</div>';
-    } else if (!op.propiedadId) {
-      docsBody = '<div style="font-size:.8rem;padding:4px 0;">' + f360Falta('Documentos no disponibles hasta vincular la propiedad') + '</div>';
-    } else if (!fdocs.length) {
-      docsBody = '<div style="font-size:.8rem;color:var(--muted);padding:4px 0;">Sin documentos asociados a la propiedad todavía.</div>';
-    } else {
-      docsBody = '<div style="font-size:.7rem;color:var(--muted);margin-bottom:8px;">Reales, de la propiedad vinculada (' + fdocs.length + ').</div>' +
-        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;">' +
-        fdocs.map(function (dc) { var nm = dc.tipo || dc.documento || 'Documento'; return '<div style="display:flex;align-items:center;gap:7px;font-size:.76rem;border:1px solid var(--border);border-radius:8px;padding:5px 9px;"><span style="color:' + f360DocColor(dc.estado) + ';">●</span> <span>' + escHtml(nm) + '</span>' + (dc.estado ? ' <span style="color:var(--muted);font-size:.66rem;margin-left:auto;">' + escHtml(dc.estado) + '</span>' : '') + '</div>'; }).join('') +
-        '</div>';
+        '</div>' + docCTAs;
+    } else if (!hayProp) {  // sin propiedad (testigo) → honesto, sin inventar documentos
+      docsBody = '<div style="font-size:.8rem;padding:4px 0;">' + f360Falta('Documentos de propiedad no disponibles hasta vincular una propiedad') + '</div>' +
+        docFaltaHtml + docCTAs + docNotaA2;
+    } else if (!fdocs.length) {  // propiedad vinculada, sin documentos todavía
+      docsBody = '<div style="font-size:.8rem;color:var(--muted);padding:4px 0;">Sin documentos asociados a la propiedad todavía.</div>' +
+        docFaltaHtml + docCTAs + docNotaA2;
+    } else {  // documentos reales de la propiedad
+      docsBody = '<div style="font-size:.7rem;color:var(--muted);margin-bottom:8px;">De la propiedad vinculada (' + fdocs.length + ').</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px;">' +
+        fdocs.map(function (dc) { var nm = dc.tipo || dc.documento || 'Documento'; return '<div style="display:flex;align-items:center;gap:7px;font-size:.76rem;border:1px solid var(--border);border-radius:8px;padding:5px 9px;"><span style="color:' + f360DocColor(dc.estado) + ';font-size:.7rem;">●</span> <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(nm) + '</span><span class="badge badge-muted" style="font-size:.58rem;">🏠 propiedad</span>' + (dc.estado ? ' <span style="color:var(--muted);font-size:.62rem;">' + escHtml(dc.estado) + '</span>' : '') + '</div>'; }).join('') +
+        '</div>' + docLegend + docFaltaHtml + docCTAs + docNotaA2;
     }
     var docs = '<div class="f360-card" id="f360-documentos"><div class="f360-t">📎 Documentos vinculados</div>' + docsBody + '</div>';
     var hist;
