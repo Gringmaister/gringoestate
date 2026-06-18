@@ -3363,8 +3363,15 @@
       st.textContent = '#op-f360{align-items:flex-start;justify-content:center;overflow-y:auto;padding:0;z-index:60;}' +
         '#op-f360 .f360-inner{width:100%;max-width:1700px;min-height:100vh;background:var(--bg);}' +
         '#op-f360 .f360-cols{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.5fr) minmax(340px,1.05fr);gap:14px;align-items:start;}' +
-        '#op-f360 .f360-hermes-rail{position:sticky;top:84px;max-height:calc(100vh - 98px);overflow:auto;}' +
-        '@media(max-width:1100px){#op-f360 .f360-cols{grid-template-columns:1fr;}#op-f360 .f360-hermes-rail{position:static;max-height:none;overflow:visible;}}' +
+        '#op-f360 .f360-hermes-rail{position:sticky;top:84px;height:calc(100vh - 98px);}' +
+        '#op-f360 #f360-hermes{display:flex;flex-direction:column;height:100%;margin-bottom:0;}' +
+        '#op-f360 .oph-head{flex:0 0 auto;text-align:center;padding-bottom:12px;border-bottom:1px solid rgba(94,200,216,.18);margin-bottom:11px;}' +
+        '#op-f360 .oph-avatar{width:92px;height:92px;border-radius:50%;object-fit:cover;border:3px solid rgba(94,200,216,.7);box-shadow:0 0 22px rgba(94,200,216,.32);}' +
+        '#op-f360 .oph-name{color:#5ec8d8;font-weight:700;font-size:1.18rem;letter-spacing:.02em;margin-top:8px;}' +
+        '#op-f360 .oph-compose{flex:0 0 auto;margin-bottom:10px;}' +
+        '#op-f360 .oph-body{flex:1 1 auto;overflow-y:auto;min-height:0;padding-right:5px;}' +
+        '@media(max-width:1400px){#op-f360 .oph-avatar{width:80px;height:80px;}#op-f360 .oph-name{font-size:1.08rem;}}' +
+        '@media(max-width:1100px){#op-f360 .f360-cols{grid-template-columns:1fr;}#op-f360 .f360-hermes-rail{position:static;height:auto;}#op-f360 #f360-hermes{height:auto;}#op-f360 .oph-body{overflow:visible;}#op-f360 .oph-avatar{width:64px;height:64px;}}' +
         '#op-f360 .f360-card{border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px;background:rgba(255,255,255,.015);}' +
         '#op-f360 .f360-t{font-size:.66rem;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px;}' +
         '#op-f360 .f360-nav a{font-size:.72rem;color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:2px 9px;cursor:pointer;text-decoration:none;white-space:nowrap;}' +
@@ -3571,27 +3578,31 @@
     var hFaltan = faltan.length ? '<ul style="margin:0;padding-left:16px;font-size:.74rem;color:var(--muted);">' + faltan.map(function (f) { return '<li>' + escHtml(f) + '</li>'; }).join('') + '</ul>' : '<div style="font-size:.72rem;color:var(--ok);">Sin faltantes del checklist.</div>';
     var hProx = '<div style="font-size:.76rem;border:1px solid rgba(94,200,216,.3);border-radius:8px;padding:7px 9px;background:rgba(94,200,216,.05);">' + escHtml(prox) + '</div>' + (bloq ? '<div style="font-size:.74rem;color:var(--danger);margin-top:6px;">🔴 Bloqueo: ' + escHtml(op.bloqueo) + '</div>' : '');
     var hMsgs = msgs.map(function (m) { return '<div style="font-size:.73rem;border:1px solid var(--border);border-radius:8px;padding:5px 8px;margin-bottom:5px;color:var(--muted);">' + escHtml(m) + '</div>'; }).join('');
-    var right = '<div class="f360-card" id="f360-hermes" style="border-color:rgba(94,200,216,.4);background:linear-gradient(180deg,rgba(94,200,216,.06),rgba(94,200,216,.02));">' +
-      '<div style="display:flex;align-items:center;gap:11px;margin-bottom:12px;">' +
-        '<img src="/images/hermes-avatar.webp" alt="Hermes" style="width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid rgba(94,200,216,.7);box-shadow:0 0 16px rgba(94,200,216,.3);" onerror="this.outerHTML=\'<span style=&quot;font-size:2rem;&quot;>🪽</span>\'">' +
-        '<div style="flex:1;min-width:0;"><div style="color:#5ec8d8;font-weight:700;font-size:1.02rem;letter-spacing:.02em;">Hermes Operativo</div>' +
-        '<span class="badge badge-muted" style="font-size:.56rem;">Shadow · Preview only</span></div>' +
+    var right = '<div class="f360-card" id="f360-hermes" style="border-color:rgba(94,200,216,.4);background:linear-gradient(180deg,rgba(94,200,216,.07),rgba(94,200,216,.02));">' +
+      '<div class="oph-head">' +
+        '<img class="oph-avatar" src="/images/hermes-avatar.webp" alt="Hermes" onerror="this.outerHTML=\'<div style=&quot;font-size:3rem;line-height:1;&quot;>🪽</div>\'">' +
+        '<div class="oph-name">Hermes Operativo</div>' +
+        '<div style="margin-top:4px;"><span class="badge badge-muted" style="font-size:.58rem;">Shadow · Preview only</span></div>' +
       '</div>' +
-      '<div style="display:flex;gap:6px;margin-bottom:5px;">' +
-        '<input id="op-hermes-input" placeholder="Escribile o dictá a Hermes…" onkeydown="if(event.key===\'Enter\')opHermesAsk(\'' + op.id + '\')" style="flex:1;min-width:0;padding:7px 10px;font-size:.78rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;">' +
-        '<button id="op-hermes-mic" class="btn btn-ghost btn-xs" onclick="opHermesAudio(\'' + op.id + '\')" title="Nota de voz a Hermes (Whisper)">🎤</button>' +
-        '<button id="op-hermes-send" class="btn btn-gold btn-xs" onclick="opHermesAsk(\'' + op.id + '\')" title="Preguntar a Hermes (preview only)">➤</button>' +
+      '<div class="oph-compose">' +
+        '<div style="display:flex;gap:6px;">' +
+          '<input id="op-hermes-input" placeholder="Contale a Hermes qué cambió en la operación…" onkeydown="if(event.key===\'Enter\')opHermesAsk(\'' + op.id + '\')" style="flex:1;min-width:0;padding:9px 12px;font-size:.82rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:9px;">' +
+          '<button id="op-hermes-mic" class="btn btn-ghost btn-sm" onclick="opHermesAudio(\'' + op.id + '\')" title="Nota de voz a Hermes (Whisper)">🎤</button>' +
+          '<button id="op-hermes-send" class="btn btn-gold btn-sm" onclick="opHermesAsk(\'' + op.id + '\')" title="Preguntar a Hermes (preview only)">➤</button>' +
+        '</div>' +
+        '<div id="oph-status" style="min-height:14px;margin:5px 0 0;"></div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">' +
+          hChips.map(function (c) { return '<span onclick="opHermesChip(\'' + c + '\')" style="font-size:.66rem;background:rgba(94,200,216,.1);border:1px solid rgba(94,200,216,.3);color:#aee4ee;border-radius:12px;padding:3px 9px;cursor:pointer;">' + escHtml(c) + '</span>'; }).join('') +
+        '</div>' +
       '</div>' +
-      '<div id="oph-status" style="min-height:14px;margin-bottom:6px;"></div>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:13px;">' +
-        hChips.map(function (c) { return '<span onclick="opHermesChip(\'' + c + '\')" style="font-size:.66rem;background:rgba(94,200,216,.1);border:1px solid rgba(94,200,216,.3);color:#aee4ee;border-radius:12px;padding:3px 9px;cursor:pointer;">' + escHtml(c) + '</span>'; }).join('') +
+      '<div class="oph-body">' +
+        hSec('oph-entendido', 'Lo que entendí', null, 'Contale o dictá a Hermes qué cambió en la operación.') +
+        hSec('oph-propuestas', 'Propuestas de cambios', null, 'Sin propuestas todavía. Hermes propone, vos revisás — el botón Aplicar llega en S102B2.') +
+        hSec('oph-faltantes', 'Documentos faltantes', hFaltan) +
+        hSec('oph-pasos', 'Próximos pasos', hProx) +
+        hSec('oph-mensajes', 'Mensajes sugeridos', hMsgs || null, 'Sin mensajes sugeridos.') +
+        '<div id="oph-warnings"></div>' +
       '</div>' +
-      hSec('oph-entendido', 'Lo que entendí', null, 'Escribile o dictá algo a Hermes para que interprete la operación.') +
-      hSec('oph-propuestas', 'Propuestas de cambios', null, 'Sin propuestas todavía. Hermes propone, vos revisás — el botón Aplicar llega en S102B2.') +
-      hSec('oph-faltantes', 'Documentos faltantes', hFaltan) +
-      hSec('oph-pasos', 'Próximos pasos', hProx) +
-      hSec('oph-mensajes', 'Mensajes sugeridos', hMsgs || null, 'Sin mensajes sugeridos.') +
-      '<div id="oph-warnings"></div>' +
       '</div>';
     // S100 A1 (front-only): card Documentos enriquecida — color por estado + leyenda + alcance + "qué falta" por tipo + CTAs + estado honesto sin propiedad
     var hayProp = !!op.propiedadId;
