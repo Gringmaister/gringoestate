@@ -3376,9 +3376,22 @@
         '#op-f360 .oph-compose{flex:0 0 auto;margin-top:8px;border-top:1px solid rgba(94,200,216,.15);padding-top:9px;}' +
         '#op-f360 #f360-hermes.oph-dragover{outline:2px dashed rgba(94,200,216,.75);outline-offset:-5px;border-radius:14px;}' +
         '#op-f360 .oph-drop{margin-bottom:8px;border:1px solid var(--gold);border-radius:10px;padding:8px 10px;background:rgba(212,175,55,.06);}' +
-        '#op-f360 .oph-input{padding:9px 12px;font-size:.82rem;line-height:1.4;font-family:inherit;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:9px;resize:none;overflow-y:auto;max-height:148px;}' +
+        '#op-f360 .oph-input{padding:9px 12px;font-size:.82rem;line-height:1.4;font-family:inherit;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:9px;resize:none;overflow-y:auto;min-height:72px;max-height:180px;}' +
         '#op-f360 .oph-input.oph-input-big{max-height:340px;min-height:120px;}' +
         '#op-f360 .oph-input:focus{outline:none;border-color:rgba(94,200,216,.6);}' +
+        // S103A.3: scrollbar dark/fina (no blanca) en textarea + thread; recién aparece pasado el auto-grow máximo
+        '#op-f360 .oph-input,#op-f360 .oph-log{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.16) transparent;}' +
+        '#op-f360 .oph-input::-webkit-scrollbar,#op-f360 .oph-log::-webkit-scrollbar{width:8px;height:8px;}' +
+        '#op-f360 .oph-input::-webkit-scrollbar-track,#op-f360 .oph-log::-webkit-scrollbar-track{background:transparent;}' +
+        '#op-f360 .oph-input::-webkit-scrollbar-thumb,#op-f360 .oph-log::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:5px;}' +
+        '#op-f360 .oph-input::-webkit-scrollbar-thumb:hover,#op-f360 .oph-log::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.24);}' +
+        // S103A.3: mini-panel "Anotaciones de Hermes" (memoria visible derivada de /ficha)
+        '#op-f360 .oph-anot{flex:0 0 auto;border:1px solid rgba(94,200,216,.22);background:rgba(94,200,216,.05);border-radius:9px;padding:8px 10px;margin-bottom:9px;}' +
+        '#op-f360 .oph-anot-t{font-size:.6rem;color:#5ec8d8;text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:5px;}' +
+        '#op-f360 .oph-anot-row{display:flex;gap:8px;font-size:.7rem;line-height:1.55;}' +
+        '#op-f360 .oph-anot-k{flex:0 0 80px;color:var(--muted);}' +
+        '#op-f360 .oph-anot-v{flex:1;min-width:0;color:var(--text);}' +
+        '#op-f360 .oph-safe{flex:0 0 auto;font-size:.6rem;color:#aee4ee;opacity:.8;margin-bottom:9px;}' +
         '#op-f360 details > summary::-webkit-details-marker{display:none;}' +
         '#op-f360 .oph-log{flex:1 1 auto;overflow-y:auto;min-height:0;padding-right:5px;display:flex;flex-direction:column;gap:8px;}' +
         '#op-f360 .oph-b{font-size:.78rem;border-radius:10px;padding:8px 11px;max-width:92%;}' +
@@ -3542,7 +3555,7 @@
   // S102B: copiloto Hermes Operativo PREVIEW-ONLY (texto/audio → POST /crm/operacion/:id/hermes → propone, NUNCA escribe).
   window.opHermesChip = function (t) { var i = document.getElementById('op-hermes-input'); if (i) { i.value = t; i.focus(); if (window.ophGrow) ophGrow(i); } };
   // S103A.2 · A1/A2/A3: textarea auto-grow + teclado (Enter envía · Shift+Enter línea · Ctrl/Cmd+Enter envía) + ampliar.
-  window.ophGrow = function (el) { if (!el) return; var max = el.classList.contains('oph-input-big') ? 340 : 148; el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, max) + 'px'; };
+  window.ophGrow = function (el) { if (!el) return; var big = el.classList.contains('oph-input-big'), minH = big ? 120 : 72, maxH = big ? 340 : 180; el.style.height = 'auto'; el.style.height = Math.max(minH, Math.min(el.scrollHeight, maxH)) + 'px'; }; // S103A.3: arranca grande (3-4 líneas), scroll recién pasado el máximo
   window.ophKey = function (e, opId) { if (e.key !== 'Enter' || e.isComposing) return; if (e.shiftKey && !(e.ctrlKey || e.metaKey)) return; e.preventDefault(); opHermesAsk(opId); };
   window.ophToggleBig = function () { var t = document.getElementById('op-hermes-input'); if (!t) return; t.classList.toggle('oph-input-big'); ophGrow(t); t.focus(); };
   window.opHermesLoading = function (on) { var s = document.getElementById('oph-status'); if (s) s.innerHTML = on ? '<span style="font-size:.7rem;color:#5ec8d8;">🪽 Hermes pensando…</span>' : ''; var b = document.getElementById('op-hermes-send'); if (b) b.disabled = !!on; };
@@ -3831,20 +3844,44 @@
     var hProx = '<div style="font-size:.76rem;border:1px solid rgba(94,200,216,.3);border-radius:8px;padding:7px 9px;background:rgba(94,200,216,.05);">' + escHtml(prox) + '</div>' + (bloq ? '<div style="font-size:.74rem;color:var(--danger);margin-top:6px;">🔴 Bloqueo: ' + escHtml(op.bloqueo) + '</div>' : '');
     window.opHermesMsgs = msgs;
     var hMsgs = msgs.map(function (m, i) { return '<div style="font-size:.73rem;border:1px solid var(--border);border-radius:8px;padding:5px 8px;margin-bottom:5px;color:var(--muted);">' + escHtml(m) + '<div style="margin-top:4px;"><button class="btn btn-ghost btn-xs" onclick="opHermesCopy(' + i + ')" title="Copiar (no envía nada)">📋 Copiar</button></div></div>'; }).join('');
-    // S103A: rail Hermes = CHAT operativo. head + banner (fijos) → #oph-log (thread scrollable, re-pintado desde window.opHermesChat) → composer sticky abajo (+ · input · 🎤 · ➤).
+    // S103A.3: "Anotaciones de Hermes" — memoria visible, TODO derivado de /ficha (cero backend/LLM). Sin dato → pendiente.
+    var anotaciones = (function () {
+      var tipoOpA = /alquiler/i.test(op.tipo || '') ? 'Alquiler' : 'Venta';
+      var presA = (Array.isArray(fdocs) ? fdocs : []).map(function (x) { return (x.tipo || '').toLowerCase(); }).filter(Boolean);
+      var tiene = []; if (op.reserva) tiene.push('reserva');
+      presA.forEach(function (t) { if (tiene.indexOf(t) < 0) tiene.push(t); });
+      var faltaDocs = (OP_DOCS_ESPERADOS[tipoOpA] || []).filter(function (t) { var k = t.toLowerCase().slice(0, 5); return !presA.some(function (p) { return p && (p.indexOf(k) >= 0 || t.toLowerCase().indexOf(p.slice(0, 5)) >= 0); }); });
+      var falta = [];
+      if (!(partes && partes.comprador)) falta.push('comprador vinculado');
+      if (!op.propiedadId) falta.push('propiedad vinculada');
+      faltaDocs.slice(0, 2).forEach(function (t) { falta.push(t.toLowerCase()); });
+      faltan.slice(0, 1).forEach(function (f) { falta.push(String(f).toLowerCase()); });
+      var proxTxt = op.proximoPaso ? (op.proximoPaso.length > 72 ? op.proximoPaso.slice(0, 72) + '…' : op.proximoPaso) : 'pendiente';
+      var rows = [
+        ['📍 Estado', escHtml(op.etapa || 'pendiente') + ' <span style="opacity:.6;">· paso ' + (idx + 1) + '/' + OP_FLUJO.length + (bloq ? ' · 🔴 trabada' : '') + '</span>'],
+        ['📂 Tiene', tiene.length ? escHtml(tiene.slice(0, 4).join(' + ')) : '<span style="opacity:.6;">pendiente</span>'],
+        ['⚠️ Falta', falta.length ? escHtml(falta.slice(0, 2).join(' · ')) : '<span style="color:var(--ok);">nada crítico</span>'],
+        ['➡️ Siguiente', escHtml(proxTxt)],
+        ['🛡️ Riesgo', bloq ? escHtml(op.bloqueo) : '<span style="opacity:.85;">revisar sellos/VIR con escribanía</span>']
+      ];
+      return '<div class="oph-anot"><div class="oph-anot-t">📝 Anotaciones de Hermes <span style="opacity:.55;font-weight:400;text-transform:none;letter-spacing:0;">· memoria viva de la ficha</span></div>' +
+        rows.map(function (r2) { return '<div class="oph-anot-row"><span class="oph-anot-k">' + r2[0] + '</span><span class="oph-anot-v">' + r2[1] + '</span></div>'; }).join('') + '</div>';
+    })();
+    // S103A: rail Hermes = CHAT operativo. head + anotaciones + banner slim (fijos) → #oph-log (thread scrollable) → composer sticky abajo.
     var right = '<div class="f360-card" id="f360-hermes" ondragover="ophDragOver(event)" ondragleave="ophDragLeave(event)" ondrop="ophDrop(event,\'' + op.id + '\')" style="border-color:rgba(94,200,216,.4);background:linear-gradient(180deg,rgba(94,200,216,.07),rgba(94,200,216,.02));">' +
       '<div class="oph-head">' +
         '<img class="oph-avatar" src="/images/hermes-avatar.webp" alt="Hermes" onerror="this.outerHTML=\'<div style=&quot;font-size:3rem;line-height:1;&quot;>🪽</div>\'">' +
         '<div class="oph-name">Hermes Operativo</div>' +
         '<div style="margin-top:4px;"><span class="badge badge-muted" style="font-size:.58rem;">Shadow · Preview only</span></div>' +
       '</div>' +
-      '<div style="font-size:.64rem;color:#aee4ee;background:rgba(94,200,216,.08);border:1px solid rgba(94,200,216,.22);border-radius:8px;padding:6px 9px;margin-bottom:10px;">🛡 Hermes <b>propone</b>, vos <b>aprobás campo por campo</b> con confirmación. Solo los 🟡 se pueden aplicar; personas y temas fiscales/legales, nunca. Nada se aplica solo.</div>' +
+      anotaciones +
+      '<div class="oph-safe">🛡 Hermes <b>propone</b>, vos aprobás campo por campo. Nada se aplica solo.</div>' +
       '<div id="oph-log" class="oph-log">' + renderHermesThread(op.id) + '</div>' +
       '<div class="oph-compose">' +
         '<div id="oph-drop"></div>' + // S103A.1 · B: zona donde se stagea el archivo arrastrado (chip + botón explícito)
         '<div style="display:flex;gap:6px;align-items:flex-end;">' +
           '<button id="op-hermes-plus" class="btn btn-ghost btn-sm" onclick="opSubirDocModal(\'' + op.id + '\')" title="Adjuntar documento a la operación (o arrastrá un archivo al chat)">+</button>' +
-          '<textarea id="op-hermes-input" rows="1" placeholder="Contale a Hermes qué cambió… (Enter envía · Shift+Enter línea)" oninput="ophGrow(this)" onkeydown="ophKey(event,\'' + op.id + '\')" class="oph-input" style="flex:1;min-width:0;"></textarea>' +
+          '<textarea id="op-hermes-input" rows="3" placeholder="Contale a Hermes qué cambió… (Enter envía · Shift+Enter línea)" oninput="ophGrow(this)" onkeydown="ophKey(event,\'' + op.id + '\')" class="oph-input" style="flex:1;min-width:0;"></textarea>' +
           '<button id="op-hermes-expand" class="btn btn-ghost btn-sm" onclick="ophToggleBig()" title="Ampliar el área de redacción">↕</button>' +
           '<button id="op-hermes-mic" class="btn btn-ghost btn-sm" onclick="opHermesAudio(\'' + op.id + '\')" title="Nota de voz a Hermes (Whisper)">🎤</button>' +
           '<button id="op-hermes-send" class="btn btn-gold btn-sm" onclick="opHermesAsk(\'' + op.id + '\')" title="Preguntar a Hermes (Enter)">➤</button>' +
