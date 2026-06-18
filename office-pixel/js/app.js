@@ -2126,6 +2126,7 @@
       var prev = btnEl ? btnEl.innerHTML : '';
       rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
       rec.onstop = function () {
+        window.__ophRecStop = performance.now(); // S103A.1 · A6: stamp inerte para medir grabación/encoding (lo ignoran los demás usuarios del helper)
         stream.getTracks().forEach(function (t2) { t2.stop(); });
         window.audioRec = null;
         if (btnEl) { btnEl.innerHTML = prev; btnEl.classList.remove('btn-danger'); }
@@ -3373,6 +3374,9 @@
         '#op-f360 .oph-avatar{width:92px;height:92px;border-radius:50%;object-fit:cover;border:3px solid rgba(94,200,216,.7);box-shadow:0 0 22px rgba(94,200,216,.32);}' +
         '#op-f360 .oph-name{color:#5ec8d8;font-weight:700;font-size:1.18rem;letter-spacing:.02em;margin-top:8px;}' +
         '#op-f360 .oph-compose{flex:0 0 auto;margin-top:8px;border-top:1px solid rgba(94,200,216,.15);padding-top:9px;}' +
+        '#op-f360 #f360-hermes.oph-dragover{outline:2px dashed rgba(94,200,216,.75);outline-offset:-5px;border-radius:14px;}' +
+        '#op-f360 .oph-drop{margin-bottom:8px;border:1px solid var(--gold);border-radius:10px;padding:8px 10px;background:rgba(212,175,55,.06);}' +
+        '#op-f360 details > summary::-webkit-details-marker{display:none;}' +
         '#op-f360 .oph-log{flex:1 1 auto;overflow-y:auto;min-height:0;padding-right:5px;display:flex;flex-direction:column;gap:8px;}' +
         '#op-f360 .oph-b{font-size:.78rem;border-radius:10px;padding:8px 11px;max-width:92%;}' +
         '#op-f360 .oph-b-franco{align-self:flex-end;background:rgba(212,175,55,.14);border:1px solid rgba(212,175,55,.3);}' +
@@ -3489,6 +3493,49 @@
     reader.onerror = function () { if (btn) { btn.disabled = false; btn.textContent = '☁️ Subir'; } toast('No pude leer el archivo', 'err'); };
     reader.readAsDataURL(file);
   };
+  // S103A.1 · Parte B: drag & drop SEGURO al rail de Hermes. Arrastrar NO sube: stagea el archivo + chip; subir exige click explícito.
+  window.ophDropFile = null;
+  window.ophDragOver = function (e) { e.preventDefault(); e.stopPropagation(); var el = document.getElementById('f360-hermes'); if (el) el.classList.add('oph-dragover'); };
+  window.ophDragLeave = function (e) { if (e && e.stopPropagation) e.stopPropagation(); var el = document.getElementById('f360-hermes'); if (el) el.classList.remove('oph-dragover'); };
+  window.ophDrop = function (e, opId) {
+    e.preventDefault(); e.stopPropagation();
+    var el = document.getElementById('f360-hermes'); if (el) el.classList.remove('oph-dragover');
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!f) return;
+    if (f.size > 25 * 1024 * 1024) return toast('Máx 25MB', 'err');
+    window.ophDropFile = f;
+    var n = (f.name || '').toLowerCase(), tipo = 'Otro';
+    [['reserva', 'Reserva'], ['boleto', 'Boleto'], ['contrato', 'Contrato'], ['escritura', 'Escritura'], ['coti', 'COTI'], ['dni', 'DNI/CUIT'], ['cuit', 'DNI/CUIT'], ['poder', 'Poder']].forEach(function (p) { if (n.indexOf(p[0]) >= 0) tipo = p[1]; });
+    var TIPOS = ['Reserva', 'Boleto', 'Contrato', 'Escritura', 'COTI', 'DNI/CUIT', 'Poder', 'Otro'];
+    var kb = f.size < 1024 ? f.size + ' B' : (f.size / 1024 < 1024 ? Math.round(f.size / 1024) + ' KB' : (f.size / 1048576).toFixed(1) + ' MB');
+    var box = document.getElementById('oph-drop'); if (!box) return;
+    box.innerHTML = '<div class="oph-drop"><div style="font-size:.74rem;margin-bottom:5px;">📄 <b>' + escHtml(f.name) + '</b> <span style="color:var(--muted);">· ' + kb + '</span></div>' +
+      '<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">' +
+      '<select id="oph-drop-tipo" style="padding:5px 7px;font-size:.74rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:7px;">' + TIPOS.map(function (t) { return '<option' + (t === tipo ? ' selected' : '') + '>' + escHtml(t) + '</option>'; }).join('') + '</select>' +
+      '<button class="btn btn-gold btn-sm" onclick="ophDropUpload(\'' + opId + '\')">☁️ Subir documento</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="ophDropCancel()" title="Descartar">✕</button>' +
+      '</div><div style="font-size:.62rem;color:var(--muted);margin-top:5px;">Se guarda como <b style="color:var(--ok);">Recibido</b>. <b>No se sube</b> hasta que toques “Subir documento”.</div></div>';
+  };
+  window.ophDropCancel = function () { window.ophDropFile = null; var b = document.getElementById('oph-drop'); if (b) b.innerHTML = ''; };
+  window.ophDropUpload = function (opId) {
+    var f = window.ophDropFile; if (!f) return toast('No hay archivo', 'err');
+    var tipo = (document.getElementById('oph-drop-tipo') || {}).value || 'Otro';
+    var box = document.getElementById('oph-drop'); var btn = box ? box.querySelector('.btn-gold') : null;
+    if (btn) { btn.disabled = true; btn.textContent = 'Subiendo…'; }
+    var reader = new FileReader();
+    reader.onload = async function () {
+      var r = await apiFetch('/crm/operacion/' + opId + '/doc', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filename: f.name, base64: String(reader.result), tipoDoc: tipo, tambienPropiedad: false }) });
+      window.ophDropFile = null;
+      if (r && r.ok) {
+        var alc = r.alcance === 'ambos' ? '🔗 ambos' : r.alcance === 'operacion' ? '💼 operación' : '🏠 propiedad';
+        toast(r.yaExistia ? 'Ya existía — vinculado' : 'Documento subido · Recibido', 'ok');
+        if (window.ophPush) ophPush(opId, { role: 'system', icon: '📎', text: (r.yaExistia ? 'Documento ya existía — vinculado a la operación' : 'Documento subido y vinculado a la operación') + ' (' + alc + ')', color: 'ok' });
+        window.opF360Ficha = null; abrirFicha360(opId);
+      } else { if (btn) { btn.disabled = false; btn.textContent = '☁️ Subir documento'; } toast('Error: ' + ((r && r.error) || 'no pude subir'), 'err'); }
+    };
+    reader.onerror = function () { if (btn) { btn.disabled = false; btn.textContent = '☁️ Subir documento'; } toast('No pude leer el archivo', 'err'); };
+    reader.readAsDataURL(f);
+  };
   // S102B: copiloto Hermes Operativo PREVIEW-ONLY (texto/audio → POST /crm/operacion/:id/hermes → propone, NUNCA escribe).
   window.opHermesChip = function (t) { var i = document.getElementById('op-hermes-input'); if (i) { i.value = t; i.focus(); } };
   window.opHermesLoading = function (on) { var s = document.getElementById('oph-status'); if (s) s.innerHTML = on ? '<span style="font-size:.7rem;color:#5ec8d8;">🪽 Hermes pensando…</span>' : ''; var b = document.getElementById('op-hermes-send'); if (b) b.disabled = !!on; };
@@ -3506,31 +3553,64 @@
     var persW = [], fiscW = [], genW = [];
     W.forEach(function (w, i) { if (i === 0) { genW.push(w); return; } if (rePers.test(w)) persW.push(w); else if (reFisc.test(w)) fiscW.push(w); else genW.push(w); });
     var grupo = function (titulo, inner) { return '<div style="margin-bottom:6px;"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">' + titulo + '</div>' + inner + '</div>'; };
-    var btnsConfirmar = function (idx) { return '<div id="oph-apply-' + idx + '" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;">' +
-      '<button class="btn btn-gold btn-xs" onclick="opHermesAplicarCampo(' + idx + ')" title="Aplica este campo a la operación (pide confirmación)">✓ Aplicar campo</button>' +
-      '<button class="btn btn-ghost btn-xs" disabled style="opacity:.45;cursor:not-allowed;" title="Próximamente (S103B)">Agregar como nota</button>' +
-      '<button class="btn btn-ghost btn-xs" disabled style="opacity:.45;cursor:not-allowed;" title="Próximamente (S103B)">Crear tarea</button></div>'; };
-    var cardCampo = function (c, idx) {
-      var conf = Math.round((c.confianza || 0) * 100);
+    // S103A.1 · A3: detectar "ya aplicado" → valor propuesto == valor actual de la operación (normalizado; fechas a 10)
+    var opCur = window.opF360 || {};
+    var norm = function (v) { if (v == null) return ''; v = String(v).trim(); var m = v.match(/^(\d{4}-\d{2}-\d{2})/); return m ? m[1] : v.toLowerCase(); };
+    var yaAplic = function (c) { var cur = norm(opCur[c.campo]); return cur !== '' && cur === norm(c.valorPropuesto); };
+    // S103A.1 · A1: 1-click → opHermesAplicarCampoGo directo (el botón ES la confirmación)
+    var btnsConfirmar = function (idx) { return '<div id="oph-apply-' + idx + '" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;">' +
+      '<button class="btn btn-gold btn-xs" onclick="opHermesAplicarCampoGo(' + idx + ')" title="Aplica directo a la operación (el botón es la confirmación)">✓ Aplicar campo</button>' +
+      '<button class="btn btn-ghost btn-xs" disabled style="opacity:.45;cursor:not-allowed;" title="Próximamente (S103B)">Nota</button>' +
+      '<button class="btn btn-ghost btn-xs" disabled style="opacity:.45;cursor:not-allowed;" title="Próximamente (S103B)">Tarea</button></div>'; };
+    var cardCampo = function (c, idx, applied) {
+      var conf = Math.round((c.confianza || 0) * 100), lowConf = (c.confianza || 0) < 0.5;
       var av = (c.valorActual != null && c.valorActual !== '') ? escHtml(String(c.valorActual)) : '—';
       var aplicable = (typeof idx === 'number');
-      var col = aplicable ? 'var(--gold)' : 'var(--muted)';
-      return '<div style="border:1px solid var(--border);border-radius:8px;padding:6px 8px;margin-bottom:5px;font-size:.74rem;">' +
-        '<div style="display:flex;justify-content:space-between;gap:6px;"><b>' + escHtml(c.label) + '</b><span style="font-size:.58rem;color:var(--muted);">conf ' + conf + '%</span></div>' +
-        '<div style="color:var(--muted);font-size:.7rem;margin:2px 0;">' + av + ' → <span style="color:' + col + ';font-weight:600;">' + escHtml(String(c.valorPropuesto)) + '</span></div>' +
-        (aplicable ? btnsConfirmar(idx) : '') + '</div>';
+      var h = '<div style="border:1px solid ' + (applied ? 'rgba(74,222,128,.45)' : 'var(--border)') + ';border-radius:8px;padding:6px 8px;margin-bottom:5px;font-size:.74rem;">' +
+        '<div style="display:flex;justify-content:space-between;gap:6px;align-items:center;"><b>' + escHtml(c.label) + '</b><span style="font-size:.58rem;color:' + (applied ? 'var(--ok)' : (lowConf && aplicable ? 'var(--warn)' : 'var(--muted)')) + ';">' + (applied ? '✅ aplicado' : ('conf ' + conf + '%' + (lowConf && aplicable ? ' ⚠' : ''))) + '</span></div>';
+      if (applied) {
+        h += '<div style="font-size:.7rem;margin:2px 0;color:var(--muted);">ahora: <span style="color:var(--ok);font-weight:600;">' + escHtml(String(c.valorPropuesto)) + '</span></div>' +
+          '<button class="btn btn-ghost btn-xs" disabled style="opacity:.5;cursor:not-allowed;">✓ Ya aplicado</button>';
+      } else if (aplicable) {
+        // A2: valor EDITABLE antes de aplicar (resuelve nombres mal transcriptos)
+        h += '<div style="font-size:.66rem;color:var(--muted);margin:2px 0;">actual: ' + av + '</div>' +
+          '<div style="display:flex;gap:5px;align-items:center;margin:3px 0;"><span style="font-size:.66rem;color:var(--muted);">→</span><input id="oph-val-' + idx + '" value="' + escHtml(String(c.valorPropuesto)) + '" title="Corregí el valor antes de aplicar si hace falta" style="flex:1;min-width:0;padding:4px 7px;font-size:.74rem;background:var(--panel);color:var(--gold);font-weight:600;border:1px solid var(--border);border-radius:7px;"></div>' +
+          btnsConfirmar(idx);
+      } else {
+        h += '<div style="color:var(--muted);font-size:.7rem;margin:2px 0;">' + av + ' → <span style="font-weight:600;">' + escHtml(String(c.valorPropuesto)) + '</span></div>';
+      }
+      return h + '</div>';
     };
     var noteCard = function (w, btn) { return '<div style="border:1px solid var(--border);border-radius:8px;padding:6px 8px;margin-bottom:5px;font-size:.73rem;color:var(--muted);">' + escHtml(w) + (btn ? '<div style="margin-top:5px;"><button class="btn btn-ghost btn-xs" disabled style="opacity:.45;cursor:not-allowed;" title="Próximamente">' + escHtml(btn) + '</button></div>' : '') + '</div>'; };
-    var prop = '';
-    if (coincide.length) prop += grupo('🟢 Ya coincide', coincide.map(function (c) { return cardCampo(c); }).join(''));
-    if (confirmar.length) prop += grupo('🟡 Requiere confirmar', confirmar.map(function (c, idx) { return cardCampo(c, interactive ? idx : undefined); }).join(''));
-    if (persW.length) prop += grupo('👤 No aplicable directo — vincular a mano', persW.map(function (w) { return noteCard(w, 'Vincular contacto'); }).join(''));
-    if (fiscW.length) prop += grupo('🧾 Fiscal / legal pendiente <span style="text-transform:none;letter-spacing:0;opacity:.8;">(no se aplica a un campo — info para escribanía/gestor)</span>', fiscW.map(function (w) { return noteCard(w, null); }).join(''));
-    if (prop) out += lbl('Propuestas de cambios') + prop;
-    if ((r.documentosFaltantes || []).length) out += lbl('Documentos faltantes') + '<ul style="margin:0;padding-left:16px;font-size:.74rem;color:var(--muted);">' + r.documentosFaltantes.map(function (f) { return '<li>' + escHtml(f) + '</li>'; }).join('') + '</ul>';
-    if ((r.proximosPasos || []).length) out += lbl('Próximos pasos') + r.proximosPasos.map(function (p) { return '<div style="font-size:.74rem;border:1px solid rgba(94,200,216,.25);border-radius:8px;padding:5px 8px;margin-bottom:4px;">' + escHtml(p) + '</div>'; }).join('');
-    if ((r.mensajesSugeridos || []).length) out += lbl('Mensajes sugeridos') + r.mensajesSugeridos.map(function (m, i) { return '<div style="font-size:.73rem;border:1px solid var(--border);border-radius:8px;padding:5px 8px;margin-bottom:5px;color:var(--muted);">' + escHtml(m) + (interactive ? '<div style="margin-top:4px;"><button class="btn btn-ghost btn-xs" onclick="opHermesCopy(' + i + ')" title="Copiar (no envía nada)">📋 Copiar</button></div>' : '') + '</div>'; }).join('');
-    if (genW.length) out += genW.map(function (w) { return '<div style="font-size:.66rem;color:var(--warn);margin-top:3px;">⚠ ' + escHtml(w) + '</div>'; }).join('');
+    // ── A4 · ARRIBA (siempre): cambios aplicables + próximo paso + warning crítico ──
+    if (confirmar.length) out += lbl('Cambios propuestos') + confirmar.map(function (c, idx) { return cardCampo(c, interactive ? idx : undefined, interactive && yaAplic(c)); }).join('');
+    var prox = r.proximosPasos || [];
+    if (prox.length) {
+      var opId = opCur.id || '';
+      out += lbl('Próximo paso') + prox.map(function (p, i) {
+        return '<div style="font-size:.74rem;border:1px solid rgba(94,200,216,.25);border-radius:8px;padding:5px 8px;margin-bottom:4px;">' + escHtml(p) +
+          (interactive ? '<div style="margin-top:4px;"><button id="oph-prox-' + i + '" class="btn btn-ghost btn-xs" onclick="opHermesAplicarProx(\'' + opId + '\',' + i + ')" title="Aplica este texto al campo Próximo paso (1 click)">✓ Aplicar como próximo paso</button></div>' : '') +
+          '</div>';
+      }).join('');
+    }
+    if (genW.length) out += '<div style="font-size:.66rem;color:var(--warn);margin-top:5px;">⚠ ' + escHtml(genW[0]) + '</div>';
+    // ── A6 · latencia (audio/texto) ──
+    if (r.__lat) {
+      var L = r.__lat, lp = [];
+      if (L.record != null) lp.push('🎤 ' + (L.record / 1000).toFixed(1) + 's');
+      if (L.encode != null) lp.push('📦 ' + (L.encode / 1000).toFixed(1) + 's');
+      if (L.server != null) lp.push('☁️ ' + (L.server / 1000).toFixed(1) + 's');
+      if (lp.length) out += '<div style="font-size:.56rem;color:var(--muted);opacity:.7;margin-top:5px;text-align:right;">⏱ ' + lp.join(' · ') + '</div>';
+    }
+    // ── A4 · ABAJO (colapsado): coincide + no-aplicables + fiscal + docs faltantes + mensajes + warnings 2° ──
+    var down = '', ndown = 0;
+    if (coincide.length) { down += grupo('🟢 Ya coincide con la operación', coincide.map(function (c) { return cardCampo(c); }).join('')); ndown += coincide.length; }
+    if (persW.length) { down += grupo('👤 No aplicable directo — vincular a mano', persW.map(function (w) { return noteCard(w, 'Vincular contacto'); }).join('')); ndown += persW.length; }
+    if (fiscW.length) { down += grupo('🧾 Fiscal / legal pendiente <span style="text-transform:none;letter-spacing:0;opacity:.8;">(info para escribanía/gestor)</span>', fiscW.map(function (w) { return noteCard(w, null); }).join('')); ndown += fiscW.length; }
+    if ((r.documentosFaltantes || []).length) { down += lbl('Documentos faltantes') + '<ul style="margin:0;padding-left:16px;font-size:.74rem;color:var(--muted);">' + r.documentosFaltantes.map(function (f) { return '<li>' + escHtml(f) + '</li>'; }).join('') + '</ul>'; ndown += r.documentosFaltantes.length; }
+    if ((r.mensajesSugeridos || []).length) { down += lbl('Mensajes sugeridos') + r.mensajesSugeridos.map(function (m, i) { return '<div style="font-size:.73rem;border:1px solid var(--border);border-radius:8px;padding:5px 8px;margin-bottom:5px;color:var(--muted);">' + escHtml(m) + (interactive ? '<div style="margin-top:4px;"><button class="btn btn-ghost btn-xs" onclick="opHermesCopy(' + i + ')" title="Copiar (no envía nada)">📋 Copiar</button></div>' : '') + '</div>'; }).join(''); ndown += r.mensajesSugeridos.length; }
+    if (genW.length > 1) { down += genW.slice(1).map(function (w) { return '<div style="font-size:.66rem;color:var(--warn);margin-top:3px;">⚠ ' + escHtml(w) + '</div>'; }).join(''); ndown += genW.length - 1; }
+    if (down) out += '<details style="margin-top:8px;"><summary style="cursor:pointer;font-size:.66rem;color:var(--muted);user-select:none;list-style:none;">▸ Ver detalle' + (ndown ? ' (' + ndown + ')' : '') + ' — docs faltantes, mensajes, fiscal…</summary><div style="margin-top:6px;">' + down + '</div></details>';
     return out;
   };
   window.ophBubble = function (role, html) {
@@ -3549,6 +3629,7 @@
     var lr = (lastH >= 0 && turns[lastH].r) ? turns[lastH].r : null;
     window.opHermesCampos = lr ? (lr.camposDetectados || []).filter(function (c) { return c.accion !== 'sin_cambio'; }) : [];
     window.opHermesMsgs = lr ? (lr.mensajesSugeridos || []) : [];
+    window.opHermesProx = lr ? (lr.proximosPasos || []) : []; // S103A.1 · A5: próximos pasos aplicables por índice
     if (!turns.length) return '<div style="font-size:.74rem;color:var(--muted);font-style:italic;opacity:.85;padding:8px 4px;">🪽 Contale o dictá a Hermes qué cambió en la operación. Él propone; vos aprobás campo por campo. Nada se aplica solo.</div>';
     return turns.map(function (t, i) {
       if (t.role === 'franco') return ophBubble('franco', escHtml(t.text));
@@ -3561,34 +3642,46 @@
   window.ophRenderLog = function (opId) { var el = document.getElementById('oph-log'); if (el) { el.innerHTML = renderHermesThread(opId); el.scrollTop = el.scrollHeight; } };
   // S102C: Aplicar campo por campo (SOLO whitelist + requiere_confirmar + confirmación explícita). Reusa /operacion/actualizar. Nunca auto-write, nunca lote.
   window.CAMPOS_APLICABLES_OP = ['reserva', 'refuerzo', 'montoTotal', 'instrumento', 'fechaReserva', 'fechaPosesion', 'fechaFirma', 'pagadorReserva', 'escribania', 'proveedorSellado', 'bloqueo', 'proximoPaso'];
-  window.opHermesAplicarCampoReset = function (idx) { var box = document.getElementById('oph-apply-' + idx); if (!box) return; box.innerHTML = '<button class="btn btn-gold btn-xs" onclick="opHermesAplicarCampo(' + idx + ')" title="Aplica este campo a la operación (pide confirmación)">✓ Aplicar campo</button> <button class="btn btn-ghost btn-xs" disabled style="opacity:.45;cursor:not-allowed;">Agregar como nota</button> <button class="btn btn-ghost btn-xs" disabled style="opacity:.45;cursor:not-allowed;">Crear tarea</button>'; };
-  window.opHermesAplicarCampo = function (idx) {
-    var c = (window.opHermesCampos || [])[idx], op = window.opF360;
-    if (!c || !op) return;
-    if (c.accion === 'sin_cambio') return toast('Ese campo ya coincide — no hace falta aplicar', 'err');
-    if (window.CAMPOS_APLICABLES_OP.indexOf(c.campo) < 0) return toast('Campo no aplicable directo', 'err');
-    if (c.valorPropuesto == null || c.valorPropuesto === '') return toast('El valor propuesto está vacío', 'err');
-    var lowConf = (c.confianza || 0) < 0.5;
-    var box = document.getElementById('oph-apply-' + idx); if (!box) return;
-    box.innerHTML = '<div style="font-size:.7rem;color:var(--text);margin-bottom:5px;">¿Aplicar <b>' + escHtml(c.label) + '</b> = <span style="color:var(--gold);">' + escHtml(String(c.valorPropuesto)) + '</span> a la operación?' + (lowConf ? ' <span style="color:var(--danger);">⚠ confianza baja, revisá bien</span>' : '') + '</div>' +
-      '<button class="btn btn-gold btn-xs" onclick="opHermesAplicarCampoGo(' + idx + ')">✓ Sí, aplicar</button> <button class="btn btn-ghost btn-xs" onclick="opHermesAplicarCampoReset(' + idx + ')">✗ No</button>';
-  };
+  window.opHermesAplicarCampoReset = function (idx) { var box = document.getElementById('oph-apply-' + idx); if (!box) return; box.innerHTML = '<button class="btn btn-gold btn-xs" onclick="opHermesAplicarCampoGo(' + idx + ')" title="Aplica directo (el botón es la confirmación)">✓ Aplicar campo</button> <button class="btn btn-ghost btn-xs" disabled style="opacity:.45;cursor:not-allowed;">Nota</button> <button class="btn btn-ghost btn-xs" disabled style="opacity:.45;cursor:not-allowed;">Tarea</button>'; };
+  // S103A.1 · A1: el confirm intermedio se elimina del camino — opHermesAplicarCampo queda como alias directo a Go (compat).
+  window.opHermesAplicarCampo = function (idx) { return opHermesAplicarCampoGo(idx); };
   window.opHermesAplicarCampoGo = async function (idx) {
     var c = (window.opHermesCampos || [])[idx], op = window.opF360;
     if (!c || !op) return;
-    if (window.CAMPOS_APLICABLES_OP.indexOf(c.campo) < 0 || c.valorPropuesto == null || c.valorPropuesto === '') return toast('No aplicable', 'err');
+    if (window.CAMPOS_APLICABLES_OP.indexOf(c.campo) < 0) return toast('Campo no aplicable directo', 'err');
+    var input = document.getElementById('oph-val-' + idx);
+    var val = input ? String(input.value).trim() : (c.valorPropuesto != null ? String(c.valorPropuesto) : ''); // A2: aplica el valor EDITADO
+    if (val === '') return toast('El valor está vacío', 'err');
     var box = document.getElementById('oph-apply-' + idx); if (box) box.innerHTML = '<span style="font-size:.7rem;color:#5ec8d8;">Aplicando…</span>';
-    var body = { id: op.id }; body[c.campo] = c.valorPropuesto;
+    var body = { id: op.id }; body[c.campo] = val;
     try {
       var r = await apiFetch('/crm/operacion/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       if (r && r.ok) {
         if (box) box.innerHTML = '<span style="font-size:.72rem;color:var(--ok);font-weight:600;">✅ ' + escHtml(c.label) + ' aplicado a la operación</span>';
         toast('✅ ' + c.label + ' aplicado', 'ok');
-        ophPush(op.id, { role: 'system', icon: '✅', text: 'Apliqué ' + c.label + ' = ' + c.valorPropuesto, color: 'ok' }); // S103A: burbuja de sistema en el thread
+        c.valorPropuesto = val; // A3: que tras el refresh quede "ya aplicado" (incluso si edité el valor)
+        ophPush(op.id, { role: 'system', icon: '✅', text: 'Apliqué ' + c.label + ' = ' + val, color: 'ok' }); // burbuja de sistema en el thread
         window.crmOpsCache = null; window.opF360Ficha = null;
-        setTimeout(function () { abrirFicha360(op.id); }, 1000); // refresca /ficha + la operación (el thread se re-pinta desde opHermesChat)
+        setTimeout(function () { abrirFicha360(op.id); }, 900); // refresca /ficha + la operación (el thread se re-pinta desde opHermesChat)
       } else { opHermesAplicarCampoReset(idx); toast('No se aplicó: ' + ((r && r.error) || 'sin respuesta'), 'err'); }
     } catch (e) { opHermesAplicarCampoReset(idx); toast('No se aplicó: sin conexión', 'err'); }
+  };
+  // S103A.1 · A5: aplicar un próximo paso sugerido al campo "Próximo paso" (1 click, whitelist proximoPaso).
+  window.opHermesAplicarProx = async function (opId, i) {
+    var txt = (window.opHermesProx || [])[i], op = window.opF360;
+    if (txt == null || String(txt).trim() === '' || !op) return;
+    if (!opId) opId = op.id;
+    var btn = document.getElementById('oph-prox-' + i); if (btn) { btn.disabled = true; btn.textContent = 'Aplicando…'; }
+    try {
+      var r = await apiFetch('/crm/operacion/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: opId, proximoPaso: txt }) });
+      if (r && r.ok) {
+        if (btn) { btn.textContent = '✅ Aplicado'; btn.style.color = 'var(--ok)'; }
+        toast('✅ Próximo paso aplicado', 'ok');
+        ophPush(opId, { role: 'system', icon: '✅', text: 'Apliqué Próximo paso = ' + txt, color: 'ok' });
+        window.crmOpsCache = null; window.opF360Ficha = null;
+        setTimeout(function () { abrirFicha360(opId); }, 900);
+      } else { if (btn) { btn.disabled = false; btn.textContent = '✓ Aplicar como próximo paso'; } toast('No se aplicó: ' + ((r && r.error) || 'sin respuesta'), 'err'); }
+    } catch (e) { if (btn) { btn.disabled = false; btn.textContent = '✓ Aplicar como próximo paso'; } toast('No se aplicó: sin conexión', 'err'); }
   };
   window.opHermesAsk = async function (opId, msgOverride) {
     var inp = document.getElementById('op-hermes-input');
@@ -3599,10 +3692,11 @@
     ophPush(opId, { role: 'franco', text: msg });
     ophPush(opId, { role: 'thinking', text: '🪽 Hermes pensando…' });
     ophRenderLog(opId);
+    var t0 = performance.now(); // A6
     try {
       var r = await apiFetch('/crm/operacion/' + opId + '/hermes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mensaje: msg }) });
       ophPopThinking(opId);
-      if (r && r.ok) ophPush(opId, { role: 'hermes', r: r });
+      if (r && r.ok) { r.__lat = { server: Math.round(performance.now() - t0) }; console.log('[Hermes texto] servidor', r.__lat.server + 'ms'); ophPush(opId, { role: 'hermes', r: r }); }
       else ophPush(opId, { role: 'system', icon: '✗', text: 'Hermes: ' + ((r && r.error) || 'sin respuesta'), color: 'danger' });
     } catch (e) { ophPopThinking(opId); ophPush(opId, { role: 'system', icon: '✗', text: 'Hermes: sin conexión', color: 'danger' }); }
     if (sb) sb.disabled = false;
@@ -3611,19 +3705,25 @@
   window.opHermesCancelAudio = function () { if (window.cancelarAudioRec) window.cancelarAudioRec(); var st = document.getElementById('oph-status'); if (st) st.innerHTML = ''; };
   window.opHermesAudio = function (opId) {
     grabarAudioYProcesar(document.getElementById('op-hermes-mic'), async function (b64) {
+      var tB64 = performance.now(); // A6: audio codificado y listo
+      var rec0 = window.__ophRecStart || 0, rec1 = window.__ophRecStop || 0;
+      var lat = { record: (rec0 && rec1) ? Math.round(rec1 - rec0) : null, encode: rec1 ? Math.round(tB64 - rec1) : null, server: null };
       var st = document.getElementById('oph-status'); if (st) st.innerHTML = '';
-      ophPush(opId, { role: 'thinking', text: '🎤 Transcribiendo…' });
+      ophPush(opId, { role: 'thinking', text: '🧠 Transcribiendo…' });
       ophRenderLog(opId);
+      var t0 = performance.now();
       try {
         var r = await apiFetch('/crm/operacion/' + opId + '/hermes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ audio: b64 }) });
         ophPopThinking(opId);
         if (r && r.ok) {
+          lat.server = Math.round(performance.now() - t0); r.__lat = lat; // subida + Whisper + Hermes (fusionados server-side)
+          console.log('[Hermes audio]', { grabacion_ms: lat.record, encoding_ms: lat.encode, servidor_ms: lat.server, total_ms: (lat.record || 0) + (lat.encode || 0) + lat.server });
           if (r.transcripcion) ophPush(opId, { role: 'franco', text: r.transcripcion });
           ophPush(opId, { role: 'hermes', r: r });
         } else ophPush(opId, { role: 'system', icon: '✗', text: 'Hermes audio: ' + ((r && r.error) || 'error'), color: 'danger' });
       } catch (e) { ophPopThinking(opId); ophPush(opId, { role: 'system', icon: '✗', text: 'Hermes audio: sin conexión', color: 'danger' }); }
       ophRenderLog(opId);
-    }, function () { var st = document.getElementById('oph-status'); if (st) st.innerHTML = '<span style="color:var(--danger);font-size:.72rem;font-weight:600;">🎤 Grabando…</span> <span style="font-size:.64rem;color:var(--muted);">tocá ⏹ para enviar</span> <button class="btn btn-ghost btn-xs" onclick="opHermesCancelAudio()" style="margin-left:6px;">✕ Cancelar</button>'; });
+    }, function () { window.__ophRecStart = performance.now(); var st = document.getElementById('oph-status'); if (st) st.innerHTML = '<span style="color:var(--danger);font-size:.72rem;font-weight:600;">🎤 Grabando…</span> <span style="font-size:.64rem;color:var(--muted);">tocá ⏹ para enviar</span> <button class="btn btn-ghost btn-xs" onclick="opHermesCancelAudio()" style="margin-left:6px;">✕ Cancelar</button>'; });
   };
   function renderFicha360() {
     var op = window.opF360; if (!op) return;
@@ -3683,7 +3783,7 @@
     window.opHermesMsgs = msgs;
     var hMsgs = msgs.map(function (m, i) { return '<div style="font-size:.73rem;border:1px solid var(--border);border-radius:8px;padding:5px 8px;margin-bottom:5px;color:var(--muted);">' + escHtml(m) + '<div style="margin-top:4px;"><button class="btn btn-ghost btn-xs" onclick="opHermesCopy(' + i + ')" title="Copiar (no envía nada)">📋 Copiar</button></div></div>'; }).join('');
     // S103A: rail Hermes = CHAT operativo. head + banner (fijos) → #oph-log (thread scrollable, re-pintado desde window.opHermesChat) → composer sticky abajo (+ · input · 🎤 · ➤).
-    var right = '<div class="f360-card" id="f360-hermes" style="border-color:rgba(94,200,216,.4);background:linear-gradient(180deg,rgba(94,200,216,.07),rgba(94,200,216,.02));">' +
+    var right = '<div class="f360-card" id="f360-hermes" ondragover="ophDragOver(event)" ondragleave="ophDragLeave(event)" ondrop="ophDrop(event,\'' + op.id + '\')" style="border-color:rgba(94,200,216,.4);background:linear-gradient(180deg,rgba(94,200,216,.07),rgba(94,200,216,.02));">' +
       '<div class="oph-head">' +
         '<img class="oph-avatar" src="/images/hermes-avatar.webp" alt="Hermes" onerror="this.outerHTML=\'<div style=&quot;font-size:3rem;line-height:1;&quot;>🪽</div>\'">' +
         '<div class="oph-name">Hermes Operativo</div>' +
@@ -3692,8 +3792,9 @@
       '<div style="font-size:.64rem;color:#aee4ee;background:rgba(94,200,216,.08);border:1px solid rgba(94,200,216,.22);border-radius:8px;padding:6px 9px;margin-bottom:10px;">🛡 Hermes <b>propone</b>, vos <b>aprobás campo por campo</b> con confirmación. Solo los 🟡 se pueden aplicar; personas y temas fiscales/legales, nunca. Nada se aplica solo.</div>' +
       '<div id="oph-log" class="oph-log">' + renderHermesThread(op.id) + '</div>' +
       '<div class="oph-compose">' +
+        '<div id="oph-drop"></div>' + // S103A.1 · B: zona donde se stagea el archivo arrastrado (chip + botón explícito)
         '<div style="display:flex;gap:6px;">' +
-          '<button id="op-hermes-plus" class="btn btn-ghost btn-sm" onclick="opSubirDocModal(\'' + op.id + '\')" title="Adjuntar documento a la operación">+</button>' +
+          '<button id="op-hermes-plus" class="btn btn-ghost btn-sm" onclick="opSubirDocModal(\'' + op.id + '\')" title="Adjuntar documento a la operación (o arrastrá un archivo al chat)">+</button>' +
           '<input id="op-hermes-input" placeholder="Contale a Hermes qué cambió en la operación…" onkeydown="if(event.key===\'Enter\')opHermesAsk(\'' + op.id + '\')" style="flex:1;min-width:0;padding:9px 12px;font-size:.82rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:9px;">' +
           '<button id="op-hermes-mic" class="btn btn-ghost btn-sm" onclick="opHermesAudio(\'' + op.id + '\')" title="Nota de voz a Hermes (Whisper)">🎤</button>' +
           '<button id="op-hermes-send" class="btn btn-gold btn-sm" onclick="opHermesAsk(\'' + op.id + '\')" title="Preguntar a Hermes (preview only)">➤</button>' +
