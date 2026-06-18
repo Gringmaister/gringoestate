@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/pixel.css?v=s94" />
+  <link rel="stylesheet" href="css/pixel.css?v=s95" />
 </head>
 <body>
 
@@ -1153,6 +1153,30 @@
           <span class="tsp-step real" title="ACCIÓN REAL: genera PDF, sube a Drive y puede enviar por WhatsApp"><span class="n">6</span> Carpeta Wow · real</span>
         </div>
         <details class="tsp-det">
+          <summary>🛰️ Radar de Comparables — próximamente</summary>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:8px;line-height:1.5;">Próxima fase: buscará propiedades similares en la zona, las normalizará y las dejará en <b style="color:var(--warn);">Borrador</b> para que apruebes / descartes. <i>Preview no funcional — todavía no busca nada real.</i></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin-top:10px;opacity:.6;pointer-events:none;">
+            <div><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">Dirección objetivo</div><input class="input" disabled placeholder="ej. Juncal 1200, Recoleta" style="width:100%;"></div>
+            <div><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">m² objetivo</div><input class="input" disabled placeholder="80" style="width:100%;"></div>
+            <div><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">Tipología</div><select class="input" disabled style="width:100%;"><option>Departamento</option></select></div>
+            <div><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">Ambientes</div><input class="input" disabled placeholder="3" style="width:100%;"></div>
+            <div><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">Tolerancia m²</div><input class="input" disabled placeholder="±20%" style="width:100%;"></div>
+            <div><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">Operación</div><select class="input" disabled style="width:100%;"><option>Venta</option></select></div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:9px;opacity:.6;">
+            <span style="font-size:.62rem;color:var(--muted);">Radio:</span>
+            <span style="font-size:.66rem;border:1px solid var(--gold);color:var(--gold);border-radius:14px;padding:2px 11px;">500 m</span>
+            <span style="font-size:.66rem;border:1px solid var(--border);color:var(--muted);border-radius:14px;padding:2px 11px;">800 m</span>
+            <span style="font-size:.66rem;border:1px solid var(--border);color:var(--muted);border-radius:14px;padding:2px 11px;">1000 m</span>
+            <span style="font-size:.62rem;color:var(--muted);margin-left:8px;">Fuentes:</span>
+            <span style="font-size:.66rem;border:1px solid var(--border);border-radius:7px;padding:2px 8px;color:var(--muted);">☑ Mercado Libre</span>
+            <span style="font-size:.66rem;border:1px solid var(--border);border-radius:7px;padding:2px 8px;color:var(--muted);">☐ CRM propio</span>
+            <span style="font-size:.66rem;border:1px solid var(--border);border-radius:7px;padding:2px 8px;color:var(--muted);">☐ Import manual</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" disabled style="margin-top:10px;opacity:.5;cursor:not-allowed;" title="Próxima fase — todavía no funcional">🛰️ Buscar comparables por zona · próximamente</button>
+          <div style="font-size:.6rem;color:var(--muted);margin-top:8px;opacity:.75;">Roadmap S104B — fuente visible, revisión humana, sin scraping de portales con anti-bot. Detalle en Reports/Audits.</div>
+        </details>
+        <details class="tsp-det">
           <summary>🔎 Para tasar mejor, cargá más contexto</summary>
           <div class="tsp-tags">
             <span class="tsp-tag">Dirección exacta</span><span class="tsp-tag">m² cubiertos y descubiertos</span><span class="tsp-tag">Piso</span><span class="tsp-tag">Orientación</span><span class="tsp-tag">Disposición</span><span class="tsp-tag">Estado</span><span class="tsp-tag">Antigüedad</span><span class="tsp-tag">Amenities</span><span class="tsp-tag">Expensas</span><span class="tsp-tag">Cochera</span><span class="tsp-tag">Baulera</span><span class="tsp-tag">Fotos</span><span class="tsp-tag">Planos</span><span class="tsp-tag">Escritura / superficie real</span><span class="tsp-tag">Comparables de venta cerrada</span><span class="tsp-tag">Precio pretendido</span><span class="tsp-tag">Urgencia</span><span class="tsp-tag">NURC del propietario</span>
@@ -1774,7 +1798,7 @@
 <!-- Scripts -->
 <!-- S45: ?v= cache-buster — subir la versión en cada deploy con cambios de JS/CSS
      (el HTML revalida siempre en Netlify; el query nuevo fuerza al browser a bajar el asset fresco) -->
-<script src="js/api.js?v=s94"></script>
-<script src="js/app.js?v=s94"></script>
+<script src="js/api.js?v=s95"></script>
+<script src="js/app.js?v=s95"></script>
 </body>
 </html>
