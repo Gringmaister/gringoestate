@@ -3827,17 +3827,19 @@
         row('Esperados', f360Usd(honCalc)) + row('Cobrados', f360Usd(honCob)) +
         row('Pendientes', honPend > 0 ? '<span style="color:var(--warn);">' + f360Usd(honPend) + '</span>' : f360Usd(0)) +
       '</div>';
+    // S103A.5: Flujo operativo COMPACTO — stepper horizontal de chips (wrap), etapa actual resaltada. Muestra los 9 pasos sin ocupar alto vertical.
     var pasos = OP_FLUJO.map(function (p, i) {
-      var estado = i < idx ? 'completado' : (i === idx ? (bloq ? 'bloqueado' : 'en curso') : 'pendiente');
-      var ic = estado === 'completado' ? '✅' : estado === 'en curso' ? '🔵' : estado === 'bloqueado' ? '🔴' : '⚪';
-      var col = estado === 'completado' ? 'var(--ok)' : estado === 'en curso' ? 'var(--gold)' : estado === 'bloqueado' ? 'var(--danger)' : 'var(--muted)';
-      return '<div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0 7px 14px;margin-left:8px;border-left:2px solid rgba(255,255,255,.08);">' +
-        '<span style="margin-left:-25px;">' + ic + '</span>' +
-        '<div><div style="font-size:.82rem;font-weight:' + (i === idx ? '700' : '500') + ';color:' + col + ';">' + escHtml(p.label) + '</div>' +
-        (i === idx ? '<div style="font-size:.68rem;color:var(--muted);">etapa actual' + (bloq ? ' · 🔴 trabada' : '') + '</div>' : '') + '</div></div>';
+      var estado = i < idx ? 'completado' : (i === idx ? (bloq ? 'bloqueado' : 'actual') : 'pendiente');
+      var ic = estado === 'completado' ? '✓' : estado === 'actual' ? '●' : estado === 'bloqueado' ? '🔴' : '○';
+      var isCur = (i === idx);
+      var col = estado === 'completado' ? 'var(--ok)' : estado === 'actual' ? 'var(--gold)' : estado === 'bloqueado' ? 'var(--danger)' : 'var(--muted)';
+      var bg = isCur ? (bloq ? 'rgba(239,68,68,.12)' : 'rgba(212,175,55,.14)') : 'rgba(255,255,255,.015)';
+      var bd = isCur ? (bloq ? 'rgba(239,68,68,.55)' : 'rgba(212,175,55,.55)') : 'var(--border)';
+      return '<span title="' + escHtml(p.label) + (isCur ? ' · etapa actual' : '') + '" style="display:inline-flex;align-items:center;gap:5px;font-size:.68rem;border:1px solid ' + bd + ';background:' + bg + ';border-radius:8px;padding:4px 9px;color:' + col + ';font-weight:' + (isCur ? '700' : '400') + ';white-space:nowrap;"><span style="opacity:.9;">' + ic + '</span>' + escHtml(p.label) + '</span>';
     }).join('');
-    var center = '<div class="f360-card" id="f360-flujo"><div class="f360-t">🔄 Flujo operativo</div>' + pasos +
-      '<div style="font-size:.66rem;color:var(--muted);margin-top:8px;border-top:1px dashed var(--border);padding-top:6px;">Derivado de la etapa. Para cambiarla usá ✏️ Edición rápida.</div></div>';
+    var center = '<div class="f360-card" id="f360-flujo"><div class="f360-t">🔄 Flujo operativo <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">· ' + (idx + 1) + '/' + OP_FLUJO.length + '</span></div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:5px;">' + pasos + '</div>' +
+      '<div style="font-size:.64rem;color:var(--muted);margin-top:9px;border-top:1px dashed var(--border);padding-top:6px;">✓ completada · ● actual · ○ pendiente. Para cambiar la etapa usá ✏️ Edición rápida.</div></div>';
     var tipo = op.tipo, tpl = tipo ? ((d.checklists || {})[tipo] || []) : [];
     var faltan = tpl.filter(function (i) { return !(op.checklist || {})[i.k]; }).slice(0, 4).map(function (i) { return i.label; });
     var prox = op.proximoPaso || 'enviar documentación a escribanía y definir si se avanza con refuerzo o directo a cesión con entrega de posesión, + coordinar el cálculo de sellado con el proveedor';
@@ -4004,7 +4006,7 @@
         : '<div style="font-size:.7rem;color:var(--ok);">✅ Sin faltantes ni alertas críticas.</div>') +
       '</div>';
     var nav = '<div class="f360-nav" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;">' +
-      [['Mando', 'f360-comando'], ['Resumen', 'f360-resumen'], ['Partes', 'f360-partes'], ['Flujo', 'f360-flujo'], ['Documentos', 'f360-documentos'], ['Fiscal', 'f360-fiscal'], ['Fechas', 'f360-fechas'], ['Honorarios', 'f360-honorarios'], ['Hermes', 'f360-hermes'], ['Historial', 'f360-historial']]
+      [['Mando', 'f360-comando'], ['Documentos', 'f360-documentos'], ['Flujo', 'f360-flujo'], ['Resumen', 'f360-resumen'], ['Partes', 'f360-partes'], ['Fiscal', 'f360-fiscal'], ['Fechas', 'f360-fechas'], ['Honorarios', 'f360-honorarios'], ['Hermes', 'f360-hermes'], ['Historial', 'f360-historial']]
         .map(function (n) { return '<a onclick="f360goto(\'' + n[1] + '\')">' + n[0] + '</a>'; }).join('') + '</div>';
     var header = '<div style="position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border);padding:14px 22px;">' +
       '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
@@ -4018,7 +4020,7 @@
         (op.url ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + op.url + '" target="_blank" rel="noopener">↗ Notion</a>' : '') +
       '</div>' + nav + '</div>';
     document.getElementById('op-f360-inner').innerHTML = header +
-      '<div style="padding:18px 22px;"><div class="f360-cols"><div>' + left + hist + '</div><div>' + opCmd + center + docs + fiscal + '</div><div class="f360-hermes-rail">' + right + '</div></div></div>';
+      '<div style="padding:18px 22px;"><div class="f360-cols"><div>' + left + hist + '</div><div>' + opCmd + docs + center + fiscal + '</div><div class="f360-hermes-rail">' + right + '</div></div></div>';
   }
   window.renderFicha360 = renderFicha360;
 
