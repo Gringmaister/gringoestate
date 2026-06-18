@@ -3420,6 +3420,55 @@
     };
     window.vincdocRender(); showModal('op-vincdoc');
   };
+  // S101B: subir un documento NUEVO directo a la operación (POST /crm/operacion/:id/doc) — Estado Recibido, dedup por hash, opcional también propiedad
+  window.opSubirDocModal = function (opId) {
+    var op = window.opF360 || {};
+    var fx = window.opF360Ficha || {};
+    var opPropId = (fx.partes && fx.partes.propiedadId) || op.propiedadId || null;
+    var opPropNom = op.propiedad || '';
+    if (!opPropNom && opPropId) { try { var pc = (window.crmPipelineCache && crmPipelineCache.propiedades && crmPipelineCache.propiedades.items) || []; var pp = pc.filter(function (x) { return x.id === opPropId; })[0]; if (pp) opPropNom = pp.propiedad; } catch (e) { } }
+    var TIPOS = ['Reserva', 'Boleto', 'Contrato', 'Escritura', 'COTI', 'DNI/CUIT', 'Poder', 'Otro']; // opciones EXISTENTES del select Tipo (no se crean nuevas)
+    var ov = document.getElementById('op-subirdoc'); if (ov) ov.remove(); // re-crear con el contexto fresco de ESTA operación
+    ov = document.createElement('div'); ov.id = 'op-subirdoc'; ov.className = 'modal-overlay hidden'; ov.style.cssText = 'z-index:79;background:rgba(0,0,0,.55);';
+    ov.innerHTML = '<div class="modal" style="max-width:520px;width:calc(100vw - 40px);">' +
+      '<h3 style="margin:0 0 10px;font-size:1rem;color:var(--gold);">📎 Subir documento a la operación</h3>' +
+      '<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:4px;">Archivo (PDF/imagen, máx 25MB)</label>' +
+      '<input id="osd-file" type="file" accept=".pdf,.jpg,.jpeg,.png,.docx" style="width:100%;margin-bottom:10px;font-size:.78rem;color:var(--text);">' +
+      '<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:4px;">Tipo de documento</label>' +
+      '<select id="osd-tipo" style="width:100%;margin-bottom:10px;padding:6px 8px;font-size:.78rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;">' +
+      TIPOS.map(function (t) { return '<option value="' + escHtml(t) + '"' + (t === 'Reserva' ? ' selected' : '') + '>' + escHtml(t) + '</option>'; }).join('') + '</select>' +
+      (opPropId ? '<label style="display:flex;align-items:center;gap:8px;font-size:.78rem;margin-bottom:10px;cursor:pointer;"><input type="checkbox" id="osd-prop"> También vincular a la propiedad <b>' + escHtml(opPropNom || 'vinculada') + '</b> (🔗 ambos)</label>' : '<div style="font-size:.68rem;color:var(--muted);margin-bottom:10px;">La operación no tiene propiedad vinculada — el documento queda solo en la operación 💼.</div>') +
+      '<div style="font-size:.68rem;color:var(--muted);margin-bottom:12px;border-top:1px dashed var(--border);padding-top:8px;">Se guarda con estado <b style="color:var(--ok);">Recibido</b> (la validación es siempre manual). Si el mismo archivo ya existe, se vincula sin duplicar.</div>' +
+      '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
+      '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'op-subirdoc\')">Cancelar</button>' +
+      '<button id="osd-btn" class="btn btn-gold btn-sm" onclick="window.opSubirDocGo(\'' + opId + '\')">☁️ Subir</button>' +
+      '</div></div>';
+    document.body.appendChild(ov); if (typeof initModalUX === 'function') initModalUX(); showModal('op-subirdoc');
+  };
+  window.opSubirDocGo = function (opId) {
+    var input = document.getElementById('osd-file');
+    var file = input && input.files && input.files[0];
+    if (!file) return toast('Elegí un archivo', 'err');
+    if (file.size > 25 * 1024 * 1024) return toast('Máx 25MB', 'err');
+    var tipo = (document.getElementById('osd-tipo') || {}).value || null;
+    var tambienProp = !!(document.getElementById('osd-prop') && document.getElementById('osd-prop').checked);
+    var btn = document.getElementById('osd-btn'); if (btn) { btn.disabled = true; btn.textContent = 'Subiendo…'; }
+    var reader = new FileReader();
+    reader.onload = async function () {
+      var r = await apiFetch('/crm/operacion/' + opId + '/doc', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filename: file.name, base64: String(reader.result), tipoDoc: tipo, tambienPropiedad: tambienProp }) });
+      if (btn) { btn.disabled = false; btn.textContent = '☁️ Subir'; }
+      if (r && r.ok) {
+        var alc = r.alcance === 'ambos' ? '🔗 ambos' : r.alcance === 'operacion' ? '💼 operación' : '🏠 propiedad';
+        var msg = r.yaExistia ? ('Ya existía — vinculado (' + alc + ')') : ('Documento subido (' + alc + ') · Recibido');
+        if (r.warnings && r.warnings.length) msg += ' ⚠️ ' + r.warnings[0];
+        toast(msg, 'ok');
+        hideModal('op-subirdoc');
+        window.opF360Ficha = null; abrirFicha360(opId); // refresca /ficha (partes/docs/track reales)
+      } else toast('Error: ' + ((r && r.error) || 'no pude subir'), 'err');
+    };
+    reader.onerror = function () { if (btn) { btn.disabled = false; btn.textContent = '☁️ Subir'; } toast('No pude leer el archivo', 'err'); };
+    reader.readAsDataURL(file);
+  };
   function renderFicha360() {
     var op = window.opF360; if (!op) return;
     var d = window.crmOpsCache || {};
@@ -3493,14 +3542,14 @@
     })();
     var docLegend = '<div style="font-size:.62rem;color:var(--muted);margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;"><span style="color:var(--ok);">● validado/recibido</span><span style="color:var(--warn);">● observado/revisar</span><span style="color:var(--danger);">● bloqueante</span><span style="color:var(--muted);">● sin clasificar</span></div>';
     var docCTAs = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">' +
-      '<button class="btn btn-gold btn-sm" onclick="opVincularDoc(\'' + op.id + '\')">🔗 Vincular documento</button>' +
-      (hayProp ? '<button class="btn btn-ghost btn-sm" onclick="abrirDocUpload(\'' + op.propiedadId + '\')">📎 Subir a propiedad</button>'
-               : '<button class="btn btn-ghost btn-sm" disabled style="opacity:.5;cursor:default;" title="Subir directo a la operación = S101B; por ahora vinculá una propiedad o un doc existente">📎 Subir a propiedad</button>') +
+      '<button class="btn btn-gold btn-sm" onclick="opSubirDocModal(\'' + op.id + '\')">📎 Subir documento</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="opVincularDoc(\'' + op.id + '\')">🔗 Vincular existente</button>' +
+      (hayProp ? '<button class="btn btn-ghost btn-sm" onclick="abrirDocUpload(\'' + op.propiedadId + '\')" title="Sube a la propiedad con tick de checklist + análisis legal">🏠 Subir a propiedad (con análisis)</button>' : '') +
       '<button class="btn btn-ghost btn-sm" onclick="nav(\'documentos\')">📥 Doc Inbox</button>' +
       (hayProp ? '<button class="btn btn-ghost btn-sm" onclick="abrirLegajo(\'' + op.propiedadId + '\')">🏠 Ver docs de propiedad</button>' : '') +
       '<button class="btn btn-ghost btn-sm" onclick="abrirOperacion(\'' + op.id + '\')">' + (hayProp ? 'Cambiar' : 'Vincular') + ' propiedad</button>' +
       '</div>';
-    var docNotaA2 = '<div style="font-size:.64rem;color:var(--muted);margin-top:8px;border-top:1px dashed var(--border);padding-top:6px;">Se muestran los documentos de la <b>propiedad</b> 🏠 y los vinculados directo a la <b>operación</b> 💼 (sin duplicar). Usá <b>🔗 Vincular documento</b> para sumar uno existente del Doc Inbox.</div>';
+    var docNotaA2 = '<div style="font-size:.64rem;color:var(--muted);margin-top:8px;border-top:1px dashed var(--border);padding-top:6px;">Se muestran los documentos de la <b>propiedad</b> 🏠 y los vinculados directo a la <b>operación</b> 💼 (sin duplicar). <b>📎 Subir documento</b> carga uno nuevo (estado Recibido, sin duplicar por hash, opcional también a la propiedad); <b>🔗 Vincular existente</b> suma uno del Doc Inbox.</div>';
     var docsBody;
     if (fdocs === null) {  // endpoint no disponible → fallback visual + CTAs
       docsBody = '<div style="font-size:.7rem;color:var(--muted);margin-bottom:8px;">Checklist operativo (visual — el detalle real carga al abrir la ficha).</div>' +
