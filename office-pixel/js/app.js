@@ -3392,6 +3392,11 @@
         '#op-f360 .oph-anot-k{flex:0 0 80px;color:var(--muted);}' +
         '#op-f360 .oph-anot-v{flex:1;min-width:0;color:var(--text);}' +
         '#op-f360 .oph-safe{flex:0 0 auto;font-size:.6rem;color:#aee4ee;opacity:.8;margin-bottom:9px;}' +
+        // S103A.4: pills/chips del Centro de mando
+        '#op-f360 .oph-pill{font-size:.56rem;padding:1px 8px;border-radius:10px;white-space:nowrap;font-weight:600;}' +
+        '#op-f360 .oph-chip-ok{font-size:.66rem;border:1px solid rgba(74,222,128,.35);color:var(--ok);background:rgba(74,222,128,.07);border-radius:7px;padding:2px 7px;}' +
+        '#op-f360 .oph-chip-mute{font-size:.66rem;border:1px solid var(--border);color:var(--muted);border-radius:7px;padding:2px 7px;}' +
+        '#op-f360 .oph-chip-warn{font-size:.66rem;border:1px solid rgba(245,158,11,.4);color:var(--warn);background:rgba(245,158,11,.07);border-radius:7px;padding:2px 7px;}' +
         '#op-f360 details > summary::-webkit-details-marker{display:none;}' +
         '#op-f360 .oph-log{flex:1 1 auto;overflow-y:auto;min-height:0;padding-right:5px;display:flex;flex-direction:column;gap:8px;}' +
         '#op-f360 .oph-b{font-size:.78rem;border-radius:10px;padding:8px 11px;max-width:92%;}' +
@@ -3964,17 +3969,39 @@
     if (bloq) riesgos.push('Operación trabada: ' + op.bloqueo);
     if (!op.propiedadId) riesgos.push('Sin propiedad vinculada');
     if (!op.compradorId) riesgos.push('Comprador sin vincular');
-    var opCmd = '<div class="f360-card" id="f360-comando" style="border-color:rgba(212,175,55,.3);">' +
+    // S103A.4: Centro de mando = centro operativo VIVO (todo derivado de /ficha, cero lógica nueva)
+    var pct = Math.round((idx + 1) / OP_FLUJO.length * 100);
+    var nextStep = OP_FLUJO[idx + 1] ? OP_FLUJO[idx + 1].label : null;
+    var docPresNames = []; (Array.isArray(fdocs) ? fdocs : []).forEach(function (x) { var t = x.tipo; if (t && docPresNames.indexOf(t) < 0) docPresNames.push(t); });
+    var miniCard = function (inner) { return '<div style="border:1px solid var(--border);border-radius:9px;padding:8px 10px;background:rgba(255,255,255,.02);">' + inner + '</div>'; };
+    var opCmd = '<div class="f360-card" id="f360-comando" style="border-color:rgba(212,175,55,.3);background:linear-gradient(180deg,rgba(212,175,55,.045),transparent);">' +
       '<div class="f360-t" style="color:var(--gold);">🎯 Centro de mando</div>' +
-      '<div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">Próxima acción</div>' +
-      '<div style="font-size:.8rem;border:1px solid rgba(94,200,216,.25);border-radius:8px;padding:6px 9px;margin:3px 0 9px;">' + escHtml(prox) + '</div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;">' +
-        '<div><div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;">Estado de cierre</div><div style="font-size:.8rem;font-weight:600;">' + escHtml(op.etapa || '—') + '</div><div style="font-size:.64rem;color:var(--muted);">paso ' + (idx + 1) + '/' + OP_FLUJO.length + (bloq ? ' · 🔴 trabada' : '') + '</div></div>' +
-        '<div><div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;">Honorarios</div><div style="font-size:.8rem;font-weight:600;color:var(--gold);">' + (f360Usd(honCalc) || '—') + '</div><div style="font-size:.64rem;color:var(--muted);">pend. ' + (f360Usd(honPend) || f360Usd(0)) + '</div></div>' +
+      // Próxima acción protagonista
+      '<div style="border:1px solid rgba(94,200,216,.35);border-radius:10px;padding:9px 11px;margin-bottom:11px;background:rgba(94,200,216,.06);">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px;"><span style="font-size:.58rem;color:#5ec8d8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">➡️ Próxima acción</span><span class="oph-pill" style="background:rgba(94,200,216,.16);color:#aee4ee;">paso ' + (idx + 1) + '/' + OP_FLUJO.length + '</span></div>' +
+        '<div style="font-size:.82rem;line-height:1.4;">' + escHtml(prox) + '</div>' +
       '</div>' +
-      (docsFaltanList.length ? '<div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;margin-top:9px;">Documentos prioritarios</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;">' + docsFaltanList.map(function (t) { return '<span style="font-size:.66rem;border:1px solid var(--border);border-radius:7px;padding:2px 7px;opacity:.85;">○ ' + escHtml(t) + '</span>'; }).join('') + '</div>' : '') +
-      (faltan.length ? '<div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;margin-top:9px;">Faltantes del checklist</div><ul style="margin:3px 0 0;padding-left:16px;font-size:.72rem;color:var(--muted);">' + faltan.map(function (f) { return '<li>' + escHtml(f) + '</li>'; }).join('') + '</ul>' : '') +
-      (riesgos.length ? '<div style="font-size:.6rem;color:var(--danger);text-transform:uppercase;margin-top:9px;">Riesgos / alertas</div>' + riesgos.map(function (rk) { return '<div style="font-size:.72rem;color:var(--warn);margin-top:2px;">⚠ ' + escHtml(rk) + '</div>'; }).join('') : '<div style="font-size:.66rem;color:var(--ok);margin-top:9px;">✅ Sin alertas críticas.</div>') +
+      // Estado de cierre + timeline segmentado de etapas
+      '<div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Estado de cierre · ' + pct + '%</div>' +
+      '<div style="display:flex;gap:3px;margin-bottom:6px;">' +
+        OP_FLUJO.map(function (p, i) { var st = i < idx ? 'var(--ok)' : (i === idx ? (bloq ? 'var(--danger)' : 'var(--gold)') : 'rgba(255,255,255,.1)'); return '<div title="' + escHtml(p.label) + '" style="flex:1;height:7px;border-radius:3px;background:' + st + ';"></div>'; }).join('') +
+      '</div>' +
+      '<div style="font-size:.74rem;margin-bottom:11px;">' + (idx > 0 ? '<span style="color:var(--ok);">✓</span> ' : '') + '<b style="color:' + (bloq ? 'var(--danger)' : 'var(--gold)') + ';">' + escHtml(op.etapa || '—') + '</b>' + (nextStep ? ' <span style="color:var(--muted);">→ ' + escHtml(nextStep) + '</span>' : ' <span style="color:var(--ok);">· última etapa</span>') + (bloq ? ' <span style="color:var(--danger);">· 🔴 trabada</span>' : '') + '</div>' +
+      // mini-cards: honorarios + documentos
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:11px;">' +
+        miniCard('<div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;">Honorarios</div><div style="font-size:.95rem;font-weight:700;color:var(--gold);line-height:1.2;">' + (f360Usd(honCalc) || '—') + '</div><div style="font-size:.62rem;color:var(--muted);">pendiente ' + (f360Usd(honPend) || f360Usd(0)) + '</div>') +
+        miniCard('<div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;">Documentos</div><div style="font-size:.95rem;font-weight:700;line-height:1.2;">' + docPresNames.length + ' <span style="font-size:.6rem;color:var(--muted);font-weight:400;">cargados</span></div><div style="font-size:.62rem;color:' + (docsFaltanList.length ? 'var(--warn)' : 'var(--ok)') + ';">' + (docsFaltanList.length ? docsFaltanList.length + ' prioritarios faltan' : 'al día') + '</div>') +
+      '</div>' +
+      // Documentos: presentes ✓ vs faltantes ○
+      ((docPresNames.length || docsFaltanList.length) ? '<div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Documentos</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:11px;">' +
+        docPresNames.slice(0, 4).map(function (t) { return '<span class="oph-chip-ok">✓ ' + escHtml(t) + '</span>'; }).join('') +
+        docsFaltanList.map(function (t) { return '<span class="oph-chip-mute">○ ' + escHtml(t) + '</span>'; }).join('') + '</div>' : '') +
+      // Faltantes críticos + riesgos como pills
+      ((faltan.length || riesgos.length) ?
+        '<div style="font-size:.58rem;color:var(--danger);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Faltantes / riesgos</div><div style="display:flex;flex-wrap:wrap;gap:4px;">' +
+        riesgos.map(function (rk) { return '<span class="oph-chip-warn">⚠ ' + escHtml(rk) + '</span>'; }).join('') +
+        faltan.map(function (f) { return '<span class="oph-chip-mute">○ ' + escHtml(f) + '</span>'; }).join('') + '</div>'
+        : '<div style="font-size:.7rem;color:var(--ok);">✅ Sin faltantes ni alertas críticas.</div>') +
       '</div>';
     var nav = '<div class="f360-nav" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;">' +
       [['Mando', 'f360-comando'], ['Resumen', 'f360-resumen'], ['Partes', 'f360-partes'], ['Flujo', 'f360-flujo'], ['Documentos', 'f360-documentos'], ['Fiscal', 'f360-fiscal'], ['Fechas', 'f360-fechas'], ['Honorarios', 'f360-honorarios'], ['Hermes', 'f360-hermes'], ['Historial', 'f360-historial']]
