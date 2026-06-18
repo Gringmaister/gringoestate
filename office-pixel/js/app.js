@@ -3376,6 +3376,9 @@
         '#op-f360 .oph-compose{flex:0 0 auto;margin-top:8px;border-top:1px solid rgba(94,200,216,.15);padding-top:9px;}' +
         '#op-f360 #f360-hermes.oph-dragover{outline:2px dashed rgba(94,200,216,.75);outline-offset:-5px;border-radius:14px;}' +
         '#op-f360 .oph-drop{margin-bottom:8px;border:1px solid var(--gold);border-radius:10px;padding:8px 10px;background:rgba(212,175,55,.06);}' +
+        '#op-f360 .oph-input{padding:9px 12px;font-size:.82rem;line-height:1.4;font-family:inherit;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:9px;resize:none;overflow-y:auto;max-height:148px;}' +
+        '#op-f360 .oph-input.oph-input-big{max-height:340px;min-height:120px;}' +
+        '#op-f360 .oph-input:focus{outline:none;border-color:rgba(94,200,216,.6);}' +
         '#op-f360 details > summary::-webkit-details-marker{display:none;}' +
         '#op-f360 .oph-log{flex:1 1 auto;overflow-y:auto;min-height:0;padding-right:5px;display:flex;flex-direction:column;gap:8px;}' +
         '#op-f360 .oph-b{font-size:.78rem;border-radius:10px;padding:8px 11px;max-width:92%;}' +
@@ -3537,7 +3540,11 @@
     reader.readAsDataURL(f);
   };
   // S102B: copiloto Hermes Operativo PREVIEW-ONLY (texto/audio → POST /crm/operacion/:id/hermes → propone, NUNCA escribe).
-  window.opHermesChip = function (t) { var i = document.getElementById('op-hermes-input'); if (i) { i.value = t; i.focus(); } };
+  window.opHermesChip = function (t) { var i = document.getElementById('op-hermes-input'); if (i) { i.value = t; i.focus(); if (window.ophGrow) ophGrow(i); } };
+  // S103A.2 · A1/A2/A3: textarea auto-grow + teclado (Enter envía · Shift+Enter línea · Ctrl/Cmd+Enter envía) + ampliar.
+  window.ophGrow = function (el) { if (!el) return; var max = el.classList.contains('oph-input-big') ? 340 : 148; el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, max) + 'px'; };
+  window.ophKey = function (e, opId) { if (e.key !== 'Enter' || e.isComposing) return; if (e.shiftKey && !(e.ctrlKey || e.metaKey)) return; e.preventDefault(); opHermesAsk(opId); };
+  window.ophToggleBig = function () { var t = document.getElementById('op-hermes-input'); if (!t) return; t.classList.toggle('oph-input-big'); ophGrow(t); t.focus(); };
   window.opHermesLoading = function (on) { var s = document.getElementById('oph-status'); if (s) s.innerHTML = on ? '<span style="font-size:.7rem;color:#5ec8d8;">🪽 Hermes pensando…</span>' : ''; var b = document.getElementById('op-hermes-send'); if (b) b.disabled = !!on; };
   // S102B.2: copiar un mensaje sugerido al portapapeles (no escribe ni envía nada).
   window.opHermesCopy = function (i) { var t = (window.opHermesMsgs || [])[i]; if (t == null) return; if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(function () { toast('Mensaje copiado', 'ok'); }, function () { toast('No pude copiar', 'err'); }); } else toast('Clipboard no disponible', 'err'); };
@@ -3557,25 +3564,29 @@
     var opCur = window.opF360 || {};
     var norm = function (v) { if (v == null) return ''; v = String(v).trim(); var m = v.match(/^(\d{4}-\d{2}-\d{2})/); return m ? m[1] : v.toLowerCase(); };
     var yaAplic = function (c) { var cur = norm(opCur[c.campo]); return cur !== '' && cur === norm(c.valorPropuesto); };
-    // S103A.1 · A1: 1-click → opHermesAplicarCampoGo directo (el botón ES la confirmación)
-    var btnsConfirmar = function (idx) { return '<div id="oph-apply-' + idx + '" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;">' +
+    // S103A.1 · A1 1-click + S103A.2 · D7 (sin Nota/Tarea muertos) · C6 (🗑 Vaciar en clearables)
+    var btnsConfirmar = function (idx, clearable) { return '<div id="oph-apply-' + idx + '" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;">' +
       '<button class="btn btn-gold btn-xs" onclick="opHermesAplicarCampoGo(' + idx + ')" title="Aplica directo a la operación (el botón es la confirmación)">✓ Aplicar campo</button>' +
-      '<button class="btn btn-ghost btn-xs" disabled style="opacity:.45;cursor:not-allowed;" title="Próximamente (S103B)">Nota</button>' +
-      '<button class="btn btn-ghost btn-xs" disabled style="opacity:.45;cursor:not-allowed;" title="Próximamente (S103B)">Tarea</button></div>'; };
+      (clearable ? '<button class="btn btn-ghost btn-xs" onclick="ophVaciarCampo(' + idx + ')" title="Dejar este campo vacío en la operación">🗑 Vaciar</button>' : '') + '</div>'; };
+    var clearableOp = window.CLEARABLE_OP || [];
     var cardCampo = function (c, idx, applied) {
       var conf = Math.round((c.confianza || 0) * 100), lowConf = (c.confianza || 0) < 0.5;
       var av = (c.valorActual != null && c.valorActual !== '') ? escHtml(String(c.valorActual)) : '—';
-      var aplicable = (typeof idx === 'number');
+      var aplicable = (typeof idx === 'number'), label = opLabelOf(c.campo, c.label); // D8: bloqueo→"Pendiente / condición"
       var h = '<div style="border:1px solid ' + (applied ? 'rgba(74,222,128,.45)' : 'var(--border)') + ';border-radius:8px;padding:6px 8px;margin-bottom:5px;font-size:.74rem;">' +
-        '<div style="display:flex;justify-content:space-between;gap:6px;align-items:center;"><b>' + escHtml(c.label) + '</b><span style="font-size:.58rem;color:' + (applied ? 'var(--ok)' : (lowConf && aplicable ? 'var(--warn)' : 'var(--muted)')) + ';">' + (applied ? '✅ aplicado' : ('conf ' + conf + '%' + (lowConf && aplicable ? ' ⚠' : ''))) + '</span></div>';
+        '<div style="display:flex;justify-content:space-between;gap:6px;align-items:center;"><b>' + escHtml(label) + '</b><span style="font-size:.58rem;color:' + (applied ? 'var(--ok)' : (lowConf && aplicable ? 'var(--warn)' : 'var(--muted)')) + ';">' + (applied ? '✅ aplicado' : ('conf ' + conf + '%' + (lowConf && aplicable ? ' ⚠' : ''))) + '</span></div>';
       if (applied) {
         h += '<div style="font-size:.7rem;margin:2px 0;color:var(--muted);">ahora: <span style="color:var(--ok);font-weight:600;">' + escHtml(String(c.valorPropuesto)) + '</span></div>' +
           '<button class="btn btn-ghost btn-xs" disabled style="opacity:.5;cursor:not-allowed;">✓ Ya aplicado</button>';
       } else if (aplicable) {
-        // A2: valor EDITABLE antes de aplicar (resuelve nombres mal transcriptos)
+        // A2: valor EDITABLE antes de aplicar (resuelve nombres mal transcriptos · y permite vaciar)
         h += '<div style="font-size:.66rem;color:var(--muted);margin:2px 0;">actual: ' + av + '</div>' +
-          '<div style="display:flex;gap:5px;align-items:center;margin:3px 0;"><span style="font-size:.66rem;color:var(--muted);">→</span><input id="oph-val-' + idx + '" value="' + escHtml(String(c.valorPropuesto)) + '" title="Corregí el valor antes de aplicar si hace falta" style="flex:1;min-width:0;padding:4px 7px;font-size:.74rem;background:var(--panel);color:var(--gold);font-weight:600;border:1px solid var(--border);border-radius:7px;"></div>' +
-          btnsConfirmar(idx);
+          '<div style="display:flex;gap:5px;align-items:center;margin:3px 0;"><span style="font-size:.66rem;color:var(--muted);">→</span><input id="oph-val-' + idx + '" value="' + escHtml(String(c.valorPropuesto)) + '" title="Corregí o vaciá el valor antes de aplicar" style="flex:1;min-width:0;padding:4px 7px;font-size:.74rem;background:var(--panel);color:var(--gold);font-weight:600;border:1px solid var(--border);border-radius:7px;"></div>';
+        // D8: si es "bloqueo" pero parece un pendiente/condición → nudge para aplicarlo como Próximo paso
+        if (c.campo === 'bloqueo' && /falta|pendiente|c[oó]nyuge|conyug|consentimiento|\bdni\b|datos|informaci|requisito|firma/i.test(String(c.valorPropuesto))) {
+          h += '<div style="font-size:.62rem;color:var(--warn);margin:1px 0 3px;">⚠ Parece un pendiente/condición, no una traba dura. <button class="btn btn-ghost btn-xs" onclick="ophBloqueoAProx(' + idx + ')" title="Aplicar como Próximo paso">→ Mejor como próximo paso</button></div>';
+        }
+        h += btnsConfirmar(idx, clearableOp.indexOf(c.campo) >= 0);
       } else {
         h += '<div style="color:var(--muted);font-size:.7rem;margin:2px 0;">' + av + ' → <span style="font-weight:600;">' + escHtml(String(c.valorPropuesto)) + '</span></div>';
       }
@@ -3634,7 +3645,12 @@
     return turns.map(function (t, i) {
       if (t.role === 'franco') return ophBubble('franco', escHtml(t.text));
       if (t.role === 'thinking') return ophBubble('thinking', escHtml(t.text || '🪽 Hermes pensando…'));
-      if (t.role === 'system') return ophBubble('system', '<span style="color:var(--' + (t.color || 'muted') + ');">' + (t.icon || '') + ' ' + escHtml(t.text) + '</span>');
+      if (t.role === 'system') {
+        var ex = '';
+        if (t.undo && !t.undo.done) ex = ' <button class="btn btn-ghost btn-xs" onclick="ophUndoTurn(\'' + opId + '\',' + i + ')" title="Volver al valor anterior">↩ Deshacer</button>';
+        else if (t.undo && t.undo.done) ex = ' <span style="opacity:.5;font-size:.62rem;">↩ revertido</span>';
+        return ophBubble('system', '<span style="color:var(--' + (t.color || 'muted') + ');">' + (t.icon || '') + ' ' + escHtml(t.text) + '</span>' + ex);
+      }
       if (t.role === 'hermes') return ophBubble('hermes', ophRenderParts(t.r, i === lastH));
       return '';
     }).join('');
@@ -3642,7 +3658,44 @@
   window.ophRenderLog = function (opId) { var el = document.getElementById('oph-log'); if (el) { el.innerHTML = renderHermesThread(opId); el.scrollTop = el.scrollHeight; } };
   // S102C: Aplicar campo por campo (SOLO whitelist + requiere_confirmar + confirmación explícita). Reusa /operacion/actualizar. Nunca auto-write, nunca lote.
   window.CAMPOS_APLICABLES_OP = ['reserva', 'refuerzo', 'montoTotal', 'instrumento', 'fechaReserva', 'fechaPosesion', 'fechaFirma', 'pagadorReserva', 'escribania', 'proveedorSellado', 'bloqueo', 'proximoPaso'];
-  window.opHermesAplicarCampoReset = function (idx) { var box = document.getElementById('oph-apply-' + idx); if (!box) return; box.innerHTML = '<button class="btn btn-gold btn-xs" onclick="opHermesAplicarCampoGo(' + idx + ')" title="Aplica directo (el botón es la confirmación)">✓ Aplicar campo</button> <button class="btn btn-ghost btn-xs" disabled style="opacity:.45;cursor:not-allowed;">Nota</button> <button class="btn btn-ghost btn-xs" disabled style="opacity:.45;cursor:not-allowed;">Tarea</button>'; };
+  // S103A.2 · C6: campos de TEXTO/select que el endpoint YA limpia con "" (las FECHAS no → bridge, preview). Numéricos NUNCA se vacían acá.
+  window.CLEARABLE_OP = ['escribania', 'proveedorSellado', 'proximoPaso', 'bloqueo', 'pagadorReserva', 'instrumento'];
+  // S103A.2 · D8: el campo `bloqueo` se muestra como "Pendiente / condición" (no todo es traba dura).
+  window.opLabelOf = function (campo, fallback) { return campo === 'bloqueo' ? 'Pendiente / condición' : (fallback || campo); };
+  // S103A.2 · B5: helper único de aplicación → POST /actualizar + burbuja con valor anterior (undo) + refresca. val==='' limpia.
+  window.ophApplyField = async function (opId, campo, val, label, prev, note) {
+    try {
+      var body = { id: opId }; body[campo] = val;
+      var r = await apiFetch('/crm/operacion/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      if (r && r.ok) {
+        var vacio = (val == null || val === '');
+        var txt = (vacio ? 'Vacié ' + label : 'Apliqué ' + label + ' = ' + val) + (note ? ' ' + note : '');
+        ophPush(opId, { role: 'system', icon: '✅', text: txt, color: 'ok', undo: { campo: campo, prev: (prev != null ? String(prev) : ''), label: label } });
+        toast('✅ ' + label + (vacio ? ' vaciado' : ' aplicado'), 'ok');
+        window.crmOpsCache = null; window.opF360Ficha = null;
+        setTimeout(function () { abrirFicha360(opId); }, 900);
+        return true;
+      } else { toast('No se aplicó: ' + ((r && r.error) || 'sin respuesta'), 'err'); return false; }
+    } catch (e) { toast('No se aplicó: sin conexión', 'err'); return false; }
+  };
+  // S103A.2 · B5: revertir un cambio desde su burbuja (vuelve al valor anterior guardado en el turno).
+  window.ophUndoTurn = async function (opId, i) {
+    var turns = (window.opHermesChat || {})[opId] || [], t = turns[i];
+    if (!t || !t.undo || t.undo.done) return;
+    var u = t.undo;
+    try {
+      var body = { id: opId }; body[u.campo] = (u.prev != null ? u.prev : '');
+      var r = await apiFetch('/crm/operacion/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      if (r && r.ok) {
+        u.done = true;
+        ophPush(opId, { role: 'system', icon: '↩', text: 'Revertí ' + u.label + ' a ' + (u.prev != null && u.prev !== '' ? u.prev : 'vacío'), color: 'muted' });
+        window.crmOpsCache = null; window.opF360Ficha = null;
+        toast('↩ Revertido', 'ok');
+        setTimeout(function () { abrirFicha360(opId); }, 900);
+      } else toast('No pude revertir: ' + ((r && r.error) || 'sin respuesta'), 'err');
+    } catch (e) { toast('No pude revertir: sin conexión', 'err'); }
+  };
+  window.opHermesAplicarCampoReset = function (idx) { var box = document.getElementById('oph-apply-' + idx); if (!box) return; box.innerHTML = '<button class="btn btn-gold btn-xs" onclick="opHermesAplicarCampoGo(' + idx + ')" title="Aplica directo (el botón es la confirmación)">✓ Aplicar campo</button>'; };
   // S103A.1 · A1: el confirm intermedio se elimina del camino — opHermesAplicarCampo queda como alias directo a Go (compat).
   window.opHermesAplicarCampo = function (idx) { return opHermesAplicarCampoGo(idx); };
   window.opHermesAplicarCampoGo = async function (idx) {
@@ -3651,20 +3704,24 @@
     if (window.CAMPOS_APLICABLES_OP.indexOf(c.campo) < 0) return toast('Campo no aplicable directo', 'err');
     var input = document.getElementById('oph-val-' + idx);
     var val = input ? String(input.value).trim() : (c.valorPropuesto != null ? String(c.valorPropuesto) : ''); // A2: aplica el valor EDITADO
-    if (val === '') return toast('El valor está vacío', 'err');
+    if (val === '' && window.CLEARABLE_OP.indexOf(c.campo) < 0) return toast('Ese campo no se puede dejar vacío acá', 'err'); // C6: solo texto/select se vacían
+    var label = opLabelOf(c.campo, c.label);
+    var prev = (op[c.campo] != null) ? op[c.campo] : '';
     var box = document.getElementById('oph-apply-' + idx); if (box) box.innerHTML = '<span style="font-size:.7rem;color:#5ec8d8;">Aplicando…</span>';
-    var body = { id: op.id }; body[c.campo] = val;
-    try {
-      var r = await apiFetch('/crm/operacion/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      if (r && r.ok) {
-        if (box) box.innerHTML = '<span style="font-size:.72rem;color:var(--ok);font-weight:600;">✅ ' + escHtml(c.label) + ' aplicado a la operación</span>';
-        toast('✅ ' + c.label + ' aplicado', 'ok');
-        c.valorPropuesto = val; // A3: que tras el refresh quede "ya aplicado" (incluso si edité el valor)
-        ophPush(op.id, { role: 'system', icon: '✅', text: 'Apliqué ' + c.label + ' = ' + val, color: 'ok' }); // burbuja de sistema en el thread
-        window.crmOpsCache = null; window.opF360Ficha = null;
-        setTimeout(function () { abrirFicha360(op.id); }, 900); // refresca /ficha + la operación (el thread se re-pinta desde opHermesChat)
-      } else { opHermesAplicarCampoReset(idx); toast('No se aplicó: ' + ((r && r.error) || 'sin respuesta'), 'err'); }
-    } catch (e) { opHermesAplicarCampoReset(idx); toast('No se aplicó: sin conexión', 'err'); }
+    var okk = await ophApplyField(op.id, c.campo, val, label, prev, null);
+    if (okk) { c.valorPropuesto = val; if (box) box.innerHTML = '<span style="font-size:.72rem;color:var(--ok);font-weight:600;">✅ ' + escHtml(label) + (val === '' ? ' vaciado' : ' aplicado') + '</span>'; }
+    else opHermesAplicarCampoReset(idx);
+  };
+  // S103A.2 · C6: vaciar un campo de texto (limpia el input y aplica vacío).
+  window.ophVaciarCampo = function (idx) { var inp = document.getElementById('oph-val-' + idx); if (inp) inp.value = ''; opHermesAplicarCampoGo(idx); };
+  // S103A.2 · D8: aplicar el texto propuesto como Próximo paso en vez de Bloqueo (cuando parece un pendiente).
+  window.ophBloqueoAProx = async function (idx) {
+    var c = (window.opHermesCampos || [])[idx], op = window.opF360; if (!c || !op) return;
+    var inp = document.getElementById('oph-val-' + idx), val = inp ? String(inp.value).trim() : String(c.valorPropuesto || '');
+    if (!val) return toast('Vacío', 'err');
+    var box = document.getElementById('oph-apply-' + idx); if (box) box.innerHTML = '<span style="font-size:.7rem;color:#5ec8d8;">Aplicando…</span>';
+    var okk = await ophApplyField(op.id, 'proximoPaso', val, 'Próximo paso', (op.proximoPaso != null ? op.proximoPaso : ''), '(en vez de bloqueo)');
+    if (!okk) opHermesAplicarCampoReset(idx);
   };
   // S103A.1 · A5: aplicar un próximo paso sugerido al campo "Próximo paso" (1 click, whitelist proximoPaso).
   window.opHermesAplicarProx = async function (opId, i) {
@@ -3672,22 +3729,14 @@
     if (txt == null || String(txt).trim() === '' || !op) return;
     if (!opId) opId = op.id;
     var btn = document.getElementById('oph-prox-' + i); if (btn) { btn.disabled = true; btn.textContent = 'Aplicando…'; }
-    try {
-      var r = await apiFetch('/crm/operacion/actualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: opId, proximoPaso: txt }) });
-      if (r && r.ok) {
-        if (btn) { btn.textContent = '✅ Aplicado'; btn.style.color = 'var(--ok)'; }
-        toast('✅ Próximo paso aplicado', 'ok');
-        ophPush(opId, { role: 'system', icon: '✅', text: 'Apliqué Próximo paso = ' + txt, color: 'ok' });
-        window.crmOpsCache = null; window.opF360Ficha = null;
-        setTimeout(function () { abrirFicha360(opId); }, 900);
-      } else { if (btn) { btn.disabled = false; btn.textContent = '✓ Aplicar como próximo paso'; } toast('No se aplicó: ' + ((r && r.error) || 'sin respuesta'), 'err'); }
-    } catch (e) { if (btn) { btn.disabled = false; btn.textContent = '✓ Aplicar como próximo paso'; } toast('No se aplicó: sin conexión', 'err'); }
+    var okk = await ophApplyField(opId, 'proximoPaso', String(txt), 'Próximo paso', (op.proximoPaso != null ? op.proximoPaso : ''), null);
+    if (!okk && btn) { btn.disabled = false; btn.textContent = '✓ Aplicar como próximo paso'; }
   };
   window.opHermesAsk = async function (opId, msgOverride) {
     var inp = document.getElementById('op-hermes-input');
     var msg = (typeof msgOverride === 'string') ? msgOverride : (inp ? inp.value.trim() : '');
     if (!msg) return toast('Escribile algo a Hermes', 'err');
-    if (inp) inp.value = '';
+    if (inp) { inp.value = ''; inp.classList.remove('oph-input-big'); if (window.ophGrow) ophGrow(inp); }
     var sb = document.getElementById('op-hermes-send'); if (sb) sb.disabled = true;
     ophPush(opId, { role: 'franco', text: msg });
     ophPush(opId, { role: 'thinking', text: '🪽 Hermes pensando…' });
@@ -3793,11 +3842,12 @@
       '<div id="oph-log" class="oph-log">' + renderHermesThread(op.id) + '</div>' +
       '<div class="oph-compose">' +
         '<div id="oph-drop"></div>' + // S103A.1 · B: zona donde se stagea el archivo arrastrado (chip + botón explícito)
-        '<div style="display:flex;gap:6px;">' +
+        '<div style="display:flex;gap:6px;align-items:flex-end;">' +
           '<button id="op-hermes-plus" class="btn btn-ghost btn-sm" onclick="opSubirDocModal(\'' + op.id + '\')" title="Adjuntar documento a la operación (o arrastrá un archivo al chat)">+</button>' +
-          '<input id="op-hermes-input" placeholder="Contale a Hermes qué cambió en la operación…" onkeydown="if(event.key===\'Enter\')opHermesAsk(\'' + op.id + '\')" style="flex:1;min-width:0;padding:9px 12px;font-size:.82rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:9px;">' +
+          '<textarea id="op-hermes-input" rows="1" placeholder="Contale a Hermes qué cambió… (Enter envía · Shift+Enter línea)" oninput="ophGrow(this)" onkeydown="ophKey(event,\'' + op.id + '\')" class="oph-input" style="flex:1;min-width:0;"></textarea>' +
+          '<button id="op-hermes-expand" class="btn btn-ghost btn-sm" onclick="ophToggleBig()" title="Ampliar el área de redacción">↕</button>' +
           '<button id="op-hermes-mic" class="btn btn-ghost btn-sm" onclick="opHermesAudio(\'' + op.id + '\')" title="Nota de voz a Hermes (Whisper)">🎤</button>' +
-          '<button id="op-hermes-send" class="btn btn-gold btn-sm" onclick="opHermesAsk(\'' + op.id + '\')" title="Preguntar a Hermes (preview only)">➤</button>' +
+          '<button id="op-hermes-send" class="btn btn-gold btn-sm" onclick="opHermesAsk(\'' + op.id + '\')" title="Preguntar a Hermes (Enter)">➤</button>' +
         '</div>' +
         '<div id="oph-status" style="min-height:14px;margin:5px 0 0;"></div>' +
         '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">' +
