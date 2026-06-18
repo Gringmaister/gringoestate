@@ -2307,6 +2307,11 @@
       '.ts-mag-row .track .fill{display:block;height:100%;border-radius:4px;}' +
       '.ts-mag-row .v{flex:0 0 46px;text-align:right;font-family:var(--mono);font-weight:600;}' +
       '.ts-empty{border:1px dashed var(--border);border-radius:11px;padding:14px;text-align:center;margin-bottom:12px;background:rgba(255,255,255,.01);}' +
+      '.ts-escs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px;}' +
+      '.ts-esc{flex:1;min-width:142px;border:1px solid var(--border);border-radius:11px;padding:9px 12px;background:rgba(255,255,255,.015);}' +
+      '.ts-esc .h{font-size:.68rem;font-weight:700;}' +
+      '.ts-esc .n{font-family:var(--mono);font-size:1.05rem;font-weight:700;margin-top:3px;}' +
+      '.ts-esc .d{font-size:.62rem;color:var(--muted);margin-top:2px;}' +
       '@media(max-width:700px){.ts-price-hero{flex:1 1 100%;}}';
     document.head.appendChild(st);
   }
@@ -2454,9 +2459,21 @@
       '</div></details>';
     })();
     var emptyState = t.precioCierre ? '' : '<div class="ts-empty"><div style="font-size:.9rem;font-weight:700;color:var(--gold);margin-bottom:3px;">Esta tasación todavía no tiene informe</div><div style="font-size:.74rem;color:var(--muted);">Cargá los datos, pegá comparables de Zonaprop, revisalos y calculá ↓</div></div>';
+    // S104D: escenarios de precio = REENCUADRE de los precios ya calculados (sin cálculo nuevo, sin motor)
+    var escenarios = '';
+    if (t.precioCierre) {
+      var esc = function (icon, lbl, val, desc, col) { return '<div class="ts-esc" style="border-color:' + col + ';"><div class="h" style="color:' + col + ';">' + icon + ' ' + lbl + '</div><div class="n">' + (val != null ? 'USD ' + nf(val) : '—') + '</div><div class="d">' + desc + '</div></div>'; };
+      escenarios = '<div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Escenarios de precio</div>' +
+        '<div class="ts-escs">' +
+          esc('🛡️', 'Conservador', t.precioRapida, 'venta rápida · prioriza liquidez', 'var(--ok)') +
+          esc('⚖️', 'Equilibrado', t.precioCierre, 'cierre probable · realista', 'var(--gold)') +
+          esc('🚀', 'Agresivo', t.precioPublicacion, 'publicación · testea el techo', '#5ec8d8') +
+        '</div>' +
+        '<div style="font-size:.6rem;color:var(--muted);opacity:.7;margin-bottom:11px;">Reencuadre de los precios ya calculados — sin recálculo.</div>';
+    }
     ensureTsStyle();
     el.innerHTML = '<div class="ts-detalle">' + hero + ctas +
-      (ejecutiva ? (preciosHtml + magninBlock) : (emptyState + tecnicaHtml + magninBlock)) +
+      (ejecutiva ? (preciosHtml + escenarios + magninBlock) : (emptyState + tecnicaHtml + magninBlock)) +
     '</div>';
   }
   window.abrirTasacion = abrirTasacion;
