@@ -3333,7 +3333,7 @@
   var OP_DOCS = ['Reserva firmada', 'DNI / CUIT de las partes', 'Informes (dominio / inhibición)', 'Escritura / título', 'Reglamento de copropiedad', 'Plano', 'Comprobante de sellado', 'Boleto / cesión', 'Recibos de pago', 'Factura de honorarios'];
   // S100 A1: documentos ESPERADOS por tipo de operación (para "qué falta"; tipos alineados con la DB Documentos donde aplica)
   var OP_DOCS_ESPERADOS = {
-    Venta: ['Reserva', 'DNI/CUIT', 'Boleto', 'Escritura', 'Certif. dominio', 'Inhibiciones', 'Plano', 'Comprobante sellado', 'Recibos de pago', 'Factura de honorarios'],
+    Venta: ['Reserva firmada', 'Comprobante de reserva', 'DNI / CUIT partes', 'Boleto / cesión / instrumento', 'Escritura / título', 'Informe de dominio', 'Informe de inhibición', 'Reglamento de copropiedad', 'Plano', 'ABL', 'AySA', 'Expensas', 'Libre deuda', 'Comprobante de sellado', 'Factura honorarios', 'Recibos', 'Documentación de escribanía'],
     Alquiler: ['Reserva', 'DNI/CUIT', 'Garantía', 'Contrato', 'Inventario', 'Recibos de pago']
   };
   function opFlujoIndex(etapa) {
@@ -3361,9 +3361,10 @@
     if (!document.getElementById('op-f360-style')) {
       var st = document.createElement('style'); st.id = 'op-f360-style';
       st.textContent = '#op-f360{align-items:flex-start;justify-content:center;overflow-y:auto;padding:0;z-index:60;}' +
-        '#op-f360 .f360-inner{width:100%;max-width:1480px;min-height:100vh;background:var(--bg);}' +
-        '#op-f360 .f360-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,.92fr);gap:14px;align-items:start;}' +
-        '@media(max-width:1000px){#op-f360 .f360-cols{grid-template-columns:1fr;}}' +
+        '#op-f360 .f360-inner{width:100%;max-width:1700px;min-height:100vh;background:var(--bg);}' +
+        '#op-f360 .f360-cols{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.55fr) minmax(300px,.95fr);gap:14px;align-items:start;}' +
+        '#op-f360 .f360-hermes-rail{position:sticky;top:84px;max-height:calc(100vh - 98px);overflow:auto;}' +
+        '@media(max-width:1100px){#op-f360 .f360-cols{grid-template-columns:1fr;}#op-f360 .f360-hermes-rail{position:static;max-height:none;overflow:visible;}}' +
         '#op-f360 .f360-card{border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px;background:rgba(255,255,255,.015);}' +
         '#op-f360 .f360-t{font-size:.66rem;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px;}' +
         '#op-f360 .f360-nav a{font-size:.72rem;color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:2px 9px;cursor:pointer;text-decoration:none;white-space:nowrap;}' +
@@ -3469,6 +3470,9 @@
     reader.onerror = function () { if (btn) { btn.disabled = false; btn.textContent = '☁️ Subir'; } toast('No pude leer el archivo', 'err'); };
     reader.readAsDataURL(file);
   };
+  // S102A: scaffold del copiloto Hermes en la Ficha 360 (preview-only, sin backend). El conversacional real = S102B.
+  window.opHermesChip = function (t) { var i = document.getElementById('op-hermes-input'); if (i) { i.value = t; i.focus(); } };
+  window.opHermesScaffold = function () { toast('Hermes Operativo conversacional: se activa en S102B (preview only, nunca auto-write).', 'ok'); };
   function renderFicha360() {
     var op = window.opF360; if (!op) return;
     var d = window.crmOpsCache || {};
@@ -3519,15 +3523,31 @@
     var faltan = tpl.filter(function (i) { return !(op.checklist || {})[i.k]; }).slice(0, 4).map(function (i) { return i.label; });
     var prox = op.proximoPaso || 'enviar documentación a escribanía y definir si se avanza con refuerzo o directo a cesión con entrega de posesión, + coordinar el cálculo de sellado con el proveedor';
     var msgs = ['💬 Comprador — "Avanzamos con la cesión, ¿coordinamos la firma?"', '💬 Escribana — "Te paso la documentación para el estudio de títulos y el cálculo de sellado."'];
-    var right = '<div class="f360-card" id="f360-hermes" style="border-color:rgba(94,200,216,.35);">' +
-      '<div class="f360-t" style="color:#5ec8d8;">🪽 Hermes · Próximo paso</div>' +
-      '<div style="border:1px solid rgba(94,200,216,.3);border-radius:9px;padding:9px;margin-bottom:9px;background:rgba(94,200,216,.05);font-size:.8rem;"><b>▶ Sugerido:</b> ' + escHtml(prox) + '</div>' +
-      (faltan.length ? '<div style="font-size:.74rem;margin-bottom:8px;"><b>Falta:</b><ul style="margin:4px 0 0;padding-left:18px;color:var(--muted);">' + faltan.map(function (f) { return '<li>' + escHtml(f) + '</li>'; }).join('') + '</ul></div>' : '') +
-      (bloq ? '<div style="font-size:.76rem;color:var(--danger);margin-bottom:8px;">🔴 Bloqueo: ' + escHtml(op.bloqueo) + '</div>' : '') +
-      '<div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;border-top:1px dashed var(--border);padding-top:6px;">⚠ Alertas: sellado a coordinar · escribanía a confirmar · documentación a completar</div>' +
-      '<div style="font-size:.66rem;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Mensajes sugeridos</div>' +
-      msgs.map(function (m) { return '<div style="font-size:.74rem;border:1px solid var(--border);border-radius:8px;padding:5px 8px;margin-bottom:5px;color:var(--muted);">' + escHtml(m) + ' <span style="opacity:.5;">(placeholder)</span></div>'; }).join('') +
-      '<div style="display:flex;gap:6px;margin-top:6px;"><button class="btn btn-ghost btn-sm" disabled style="opacity:.5;cursor:default;">Chat comprador (pronto)</button><button class="btn btn-ghost btn-sm" disabled style="opacity:.5;cursor:default;">Chat escribana (pronto)</button></div>' +
+    // S102A: rail Hermes Operativo (scaffold preview-only). "Lo que entendí" y "Propuestas" quedan vacías hasta S102B; el resto es derivado REAL.
+    var hSec = function (titulo, contenido, vacio) { return '<div style="margin-bottom:10px;"><div style="font-size:.6rem;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">' + titulo + '</div>' + (contenido ? contenido : '<div style="font-size:.72rem;color:var(--muted);font-style:italic;opacity:.7;">' + escHtml(vacio || 'pendiente') + '</div>') + '</div>'; };
+    var hChips = ['La reserva fue USD 1.000', 'El vendedor es Juan Carlos', 'Esto va por cesión', 'Falta averiguar VIR', 'Está exento de sellos'];
+    var hFaltan = faltan.length ? '<ul style="margin:0;padding-left:16px;font-size:.74rem;color:var(--muted);">' + faltan.map(function (f) { return '<li>' + escHtml(f) + '</li>'; }).join('') + '</ul>' : '<div style="font-size:.72rem;color:var(--ok);">Sin faltantes del checklist.</div>';
+    var hProx = '<div style="font-size:.76rem;border:1px solid rgba(94,200,216,.3);border-radius:8px;padding:7px 9px;background:rgba(94,200,216,.05);">' + escHtml(prox) + '</div>' + (bloq ? '<div style="font-size:.74rem;color:var(--danger);margin-top:6px;">🔴 Bloqueo: ' + escHtml(op.bloqueo) + '</div>' : '');
+    var hMsgs = msgs.map(function (m) { return '<div style="font-size:.73rem;border:1px solid var(--border);border-radius:8px;padding:5px 8px;margin-bottom:5px;color:var(--muted);">' + escHtml(m) + '</div>'; }).join('');
+    var right = '<div class="f360-card" id="f360-hermes" style="border-color:rgba(94,200,216,.35);background:rgba(94,200,216,.03);">' +
+      '<div style="display:flex;align-items:center;gap:9px;margin-bottom:11px;">' +
+        '<img src="/images/hermes-avatar.webp" alt="Hermes" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid rgba(94,200,216,.6);box-shadow:0 0 12px rgba(94,200,216,.25);" onerror="this.outerHTML=\'<span style=&quot;font-size:1.5rem;&quot;>🪽</span>\'">' +
+        '<div style="flex:1;min-width:0;"><div style="color:#5ec8d8;font-weight:700;font-size:.92rem;letter-spacing:.02em;">Hermes Operativo</div>' +
+        '<span class="badge badge-muted" style="font-size:.54rem;">Shadow · Preview only</span></div>' +
+      '</div>' +
+      '<div style="display:flex;gap:6px;margin-bottom:7px;">' +
+        '<input id="op-hermes-input" placeholder="Escribile a Hermes…" style="flex:1;min-width:0;padding:6px 9px;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;">' +
+        '<button class="btn btn-ghost btn-xs" title="Audio: se habilita en S102B" disabled style="opacity:.45;cursor:not-allowed;">🎤</button>' +
+        '<button class="btn btn-gold btn-xs" onclick="window.opHermesScaffold()" title="El copiloto conversacional se activa en S102B">➤</button>' +
+      '</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;">' +
+        hChips.map(function (c) { return '<span onclick="opHermesChip(\'' + c + '\')" style="font-size:.66rem;background:rgba(94,200,216,.1);border:1px solid rgba(94,200,216,.3);color:#aee4ee;border-radius:12px;padding:3px 9px;cursor:pointer;">' + escHtml(c) + '</span>'; }).join('') +
+      '</div>' +
+      hSec('Lo que entendí', null, 'El copiloto conversacional se activa en S102B.') +
+      hSec('Propuestas de cambios', null, 'Sin propuestas todavía (S102B · preview only, nunca auto-write).') +
+      hSec('Documentos faltantes', hFaltan) +
+      hSec('Próximos pasos', hProx) +
+      hSec('Mensajes sugeridos', hMsgs || null, 'Sin mensajes sugeridos.') +
       '</div>';
     // S100 A1 (front-only): card Documentos enriquecida — color por estado + leyenda + alcance + "qué falta" por tipo + CTAs + estado honesto sin propiedad
     var hayProp = !!op.propiedadId;
@@ -3566,6 +3586,20 @@
         docFaltaHtml + docCTAs + docNotaA2;
     }
     var docs = '<div class="f360-card" id="f360-documentos"><div class="f360-t">📎 Documentos vinculados</div>' + docsBody + '</div>';
+    // S102A: card Fiscal / Sellos ORIENTATIVA — datos reales donde existen, el resto "pendiente". Sin cálculo, sin %, sin reglas legales hardcodeadas.
+    var fiscalRows = [
+      ['Precio de cierre', f360Usd(precio)],
+      ['Instrumento', op.instrumento ? escHtml(op.instrumento) : null],
+      ['Escribanía', op.escribania ? escHtml(op.escribania) : null],
+      ['Proveedor sellado', op.proveedorSellado ? escHtml(op.proveedorSellado) : null],
+      ['Valor de escrituración', null], ['Base de sellos', null], ['% sellos', null], ['Impuesto estimado', null],
+      ['Quién paga sellos', null], ['Quién gestiona sellos', null], ['Exento de sellos', null], ['VIR / valuación fiscal', null]
+    ];
+    var fiscal = '<div class="f360-card" id="f360-fiscal" style="border-color:rgba(212,175,55,.28);">' +
+      '<div class="f360-t" style="color:var(--gold);">🧾 Fiscal / Sellos · orientativo</div>' +
+      fiscalRows.map(function (fr) { return row(fr[0], fr[1] != null ? fr[1] : f360Ph('pendiente')); }).join('') +
+      '<div style="font-size:.64rem;color:var(--muted);margin-top:9px;border-top:1px dashed var(--border);padding-top:7px;font-style:italic;">⚠ Orientativo — confirmar con escribanía/gestor. Sellos / exención / VIR se cargan con su tabla por jurisdicción (futuro), sin reglas hardcodeadas.</div>' +
+      '</div>';
     var hist;
     if (ftrack !== null) {  // Track record REAL desde el audit del CRM
       hist = '<div class="f360-card" id="f360-historial"><div class="f360-t">🕑 Track record</div>' +
@@ -3582,7 +3616,7 @@
         '<div style="font-size:.7rem;color:var(--muted);margin-top:6px;">Derivado de los datos actuales (historial real al cargar).</div></div>';
     }
     var nav = '<div class="f360-nav" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;">' +
-      [['Resumen', 'f360-resumen'], ['Partes', 'f360-partes'], ['Flujo', 'f360-flujo'], ['Documentos', 'f360-documentos'], ['Fechas', 'f360-fechas'], ['Honorarios', 'f360-honorarios'], ['Hermes', 'f360-hermes'], ['Historial', 'f360-historial']]
+      [['Resumen', 'f360-resumen'], ['Partes', 'f360-partes'], ['Flujo', 'f360-flujo'], ['Documentos', 'f360-documentos'], ['Fiscal', 'f360-fiscal'], ['Fechas', 'f360-fechas'], ['Honorarios', 'f360-honorarios'], ['Hermes', 'f360-hermes'], ['Historial', 'f360-historial']]
         .map(function (n) { return '<a onclick="f360goto(\'' + n[1] + '\')">' + n[0] + '</a>'; }).join('') + '</div>';
     var header = '<div style="position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border);padding:14px 22px;">' +
       '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
@@ -3596,7 +3630,7 @@
         (op.url ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + op.url + '" target="_blank" rel="noopener">↗ Notion</a>' : '') +
       '</div>' + nav + '</div>';
     document.getElementById('op-f360-inner').innerHTML = header +
-      '<div style="padding:18px 22px;"><div class="f360-cols"><div>' + left + '</div><div>' + center + '</div><div>' + right + '</div></div>' + docs + hist + '</div>';
+      '<div style="padding:18px 22px;"><div class="f360-cols"><div>' + left + '</div><div>' + center + docs + fiscal + '</div><div class="f360-hermes-rail">' + right + '</div></div>' + hist + '</div>';
   }
   window.renderFicha360 = renderFicha360;
 
