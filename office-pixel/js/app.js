@@ -3362,7 +3362,7 @@
       var st = document.createElement('style'); st.id = 'op-f360-style';
       st.textContent = '#op-f360{align-items:flex-start;justify-content:center;overflow-y:auto;padding:0;z-index:60;}' +
         '#op-f360 .f360-inner{width:100%;max-width:1700px;min-height:100vh;background:var(--bg);}' +
-        '#op-f360 .f360-cols{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.55fr) minmax(300px,.95fr);gap:14px;align-items:start;}' +
+        '#op-f360 .f360-cols{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.5fr) minmax(340px,1.05fr);gap:14px;align-items:start;}' +
         '#op-f360 .f360-hermes-rail{position:sticky;top:84px;max-height:calc(100vh - 98px);overflow:auto;}' +
         '@media(max-width:1100px){#op-f360 .f360-cols{grid-template-columns:1fr;}#op-f360 .f360-hermes-rail{position:static;max-height:none;overflow:visible;}}' +
         '#op-f360 .f360-card{border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px;background:rgba(255,255,255,.015);}' +
@@ -3470,9 +3470,51 @@
     reader.onerror = function () { if (btn) { btn.disabled = false; btn.textContent = '☁️ Subir'; } toast('No pude leer el archivo', 'err'); };
     reader.readAsDataURL(file);
   };
-  // S102A: scaffold del copiloto Hermes en la Ficha 360 (preview-only, sin backend). El conversacional real = S102B.
+  // S102B: copiloto Hermes Operativo PREVIEW-ONLY (texto/audio → POST /crm/operacion/:id/hermes → propone, NUNCA escribe).
   window.opHermesChip = function (t) { var i = document.getElementById('op-hermes-input'); if (i) { i.value = t; i.focus(); } };
-  window.opHermesScaffold = function () { toast('Hermes Operativo conversacional: se activa en S102B (preview only, nunca auto-write).', 'ok'); };
+  window.opHermesLoading = function (on) { var s = document.getElementById('oph-status'); if (s) s.innerHTML = on ? '<span style="font-size:.7rem;color:#5ec8d8;">🪽 Hermes pensando…</span>' : ''; var b = document.getElementById('op-hermes-send'); if (b) b.disabled = !!on; };
+  window.opHermesRender = function (r) {
+    var ph = function (t) { return '<div style="font-size:.72rem;color:var(--muted);font-style:italic;opacity:.7;">' + escHtml(t) + '</div>'; };
+    var set = function (id, html) { var el = document.getElementById(id); if (el) el.innerHTML = html; };
+    set('oph-entendido', r.entendido ? '<div style="font-size:.78rem;">' + escHtml(r.entendido) + '</div>' : ph('Sin interpretación.'));
+    var cd = r.camposDetectados || [];
+    set('oph-propuestas', cd.length ? cd.map(function (c) {
+      var col = c.accion === 'sin_cambio' ? 'var(--muted)' : 'var(--gold)';
+      var conf = Math.round((c.confianza || 0) * 100);
+      var av = (c.valorActual != null && c.valorActual !== '') ? escHtml(String(c.valorActual)) : '—';
+      return '<div style="border:1px solid var(--border);border-radius:8px;padding:6px 8px;margin-bottom:5px;font-size:.74rem;">' +
+        '<div style="display:flex;justify-content:space-between;gap:6px;"><b>' + escHtml(c.label) + '</b><span style="font-size:.58rem;color:var(--muted);">conf ' + conf + '%</span></div>' +
+        '<div style="color:var(--muted);font-size:.7rem;margin:2px 0;">' + av + ' → <span style="color:' + col + ';font-weight:600;">' + escHtml(String(c.valorPropuesto)) + '</span>' + (c.accion === 'sin_cambio' ? ' <span style="font-size:.6rem;">(sin cambio)</span>' : '') + '</div>' +
+        '<button class="btn btn-ghost btn-xs" disabled style="opacity:.5;cursor:not-allowed;" title="El Aplicar por-campo llega en S102B2">Aplicar (S102B2)</button>' +
+        '</div>';
+    }).join('') : ph('Sin cambios propuestos.'));
+    if ((r.documentosFaltantes || []).length) set('oph-faltantes', '<ul style="margin:0;padding-left:16px;font-size:.74rem;color:var(--muted);">' + r.documentosFaltantes.map(function (f) { return '<li>' + escHtml(f) + '</li>'; }).join('') + '</ul>');
+    if ((r.proximosPasos || []).length) set('oph-pasos', r.proximosPasos.map(function (p) { return '<div style="font-size:.74rem;border:1px solid rgba(94,200,216,.25);border-radius:8px;padding:5px 8px;margin-bottom:4px;">' + escHtml(p) + '</div>'; }).join(''));
+    if ((r.mensajesSugeridos || []).length) set('oph-mensajes', r.mensajesSugeridos.map(function (m) { return '<div style="font-size:.73rem;border:1px solid var(--border);border-radius:8px;padding:5px 8px;margin-bottom:5px;color:var(--muted);">' + escHtml(m) + '</div>'; }).join(''));
+    set('oph-warnings', (r.warnings || []).length ? r.warnings.map(function (w) { return '<div style="font-size:.66rem;color:var(--warn);margin-top:3px;">⚠ ' + escHtml(w) + '</div>'; }).join('') : '');
+    if (r.transcripcion) { var inp = document.getElementById('op-hermes-input'); if (inp) inp.value = r.transcripcion; }
+  };
+  window.opHermesAsk = async function (opId, msgOverride) {
+    var inp = document.getElementById('op-hermes-input');
+    var msg = (typeof msgOverride === 'string') ? msgOverride : (inp ? inp.value.trim() : '');
+    if (!msg) return toast('Escribile algo a Hermes', 'err');
+    window.opHermesLoading(true);
+    try {
+      var r = await apiFetch('/crm/operacion/' + opId + '/hermes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mensaje: msg }) });
+      window.opHermesLoading(false);
+      if (r && r.ok) window.opHermesRender(r); else toast('Hermes: ' + ((r && r.error) || 'sin respuesta'), 'err');
+    } catch (e) { window.opHermesLoading(false); toast('Hermes: sin conexión', 'err'); }
+  };
+  window.opHermesAudio = function (opId) {
+    grabarAudioYProcesar(document.getElementById('op-hermes-mic'), async function (b64) {
+      window.opHermesLoading(true);
+      try {
+        var r = await apiFetch('/crm/operacion/' + opId + '/hermes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ audio: b64 }) });
+        window.opHermesLoading(false);
+        if (r && r.ok) window.opHermesRender(r); else toast('Hermes audio: ' + ((r && r.error) || 'error'), 'err');
+      } catch (e) { window.opHermesLoading(false); toast('Hermes audio: sin conexión', 'err'); }
+    });
+  };
   function renderFicha360() {
     var op = window.opF360; if (!op) return;
     var d = window.crmOpsCache || {};
@@ -3523,31 +3565,33 @@
     var faltan = tpl.filter(function (i) { return !(op.checklist || {})[i.k]; }).slice(0, 4).map(function (i) { return i.label; });
     var prox = op.proximoPaso || 'enviar documentación a escribanía y definir si se avanza con refuerzo o directo a cesión con entrega de posesión, + coordinar el cálculo de sellado con el proveedor';
     var msgs = ['💬 Comprador — "Avanzamos con la cesión, ¿coordinamos la firma?"', '💬 Escribana — "Te paso la documentación para el estudio de títulos y el cálculo de sellado."'];
-    // S102A: rail Hermes Operativo (scaffold preview-only). "Lo que entendí" y "Propuestas" quedan vacías hasta S102B; el resto es derivado REAL.
-    var hSec = function (titulo, contenido, vacio) { return '<div style="margin-bottom:10px;"><div style="font-size:.6rem;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">' + titulo + '</div>' + (contenido ? contenido : '<div style="font-size:.72rem;color:var(--muted);font-style:italic;opacity:.7;">' + escHtml(vacio || 'pendiente') + '</div>') + '</div>'; };
+    // S102B: rail Hermes Operativo FUNCIONAL preview-only. Derivados reales como estado inicial; al preguntar, el endpoint llena las secciones por id (sin escribir nada).
+    var hSec = function (id, titulo, contenido, vacio) { return '<div style="margin-bottom:11px;"><div style="font-size:.6rem;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">' + titulo + '</div><div id="' + id + '">' + (contenido ? contenido : '<div style="font-size:.72rem;color:var(--muted);font-style:italic;opacity:.7;">' + escHtml(vacio || 'pendiente') + '</div>') + '</div></div>'; };
     var hChips = ['La reserva fue USD 1.000', 'El vendedor es Juan Carlos', 'Esto va por cesión', 'Falta averiguar VIR', 'Está exento de sellos'];
     var hFaltan = faltan.length ? '<ul style="margin:0;padding-left:16px;font-size:.74rem;color:var(--muted);">' + faltan.map(function (f) { return '<li>' + escHtml(f) + '</li>'; }).join('') + '</ul>' : '<div style="font-size:.72rem;color:var(--ok);">Sin faltantes del checklist.</div>';
     var hProx = '<div style="font-size:.76rem;border:1px solid rgba(94,200,216,.3);border-radius:8px;padding:7px 9px;background:rgba(94,200,216,.05);">' + escHtml(prox) + '</div>' + (bloq ? '<div style="font-size:.74rem;color:var(--danger);margin-top:6px;">🔴 Bloqueo: ' + escHtml(op.bloqueo) + '</div>' : '');
     var hMsgs = msgs.map(function (m) { return '<div style="font-size:.73rem;border:1px solid var(--border);border-radius:8px;padding:5px 8px;margin-bottom:5px;color:var(--muted);">' + escHtml(m) + '</div>'; }).join('');
-    var right = '<div class="f360-card" id="f360-hermes" style="border-color:rgba(94,200,216,.35);background:rgba(94,200,216,.03);">' +
-      '<div style="display:flex;align-items:center;gap:9px;margin-bottom:11px;">' +
-        '<img src="/images/hermes-avatar.webp" alt="Hermes" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid rgba(94,200,216,.6);box-shadow:0 0 12px rgba(94,200,216,.25);" onerror="this.outerHTML=\'<span style=&quot;font-size:1.5rem;&quot;>🪽</span>\'">' +
-        '<div style="flex:1;min-width:0;"><div style="color:#5ec8d8;font-weight:700;font-size:.92rem;letter-spacing:.02em;">Hermes Operativo</div>' +
-        '<span class="badge badge-muted" style="font-size:.54rem;">Shadow · Preview only</span></div>' +
+    var right = '<div class="f360-card" id="f360-hermes" style="border-color:rgba(94,200,216,.4);background:linear-gradient(180deg,rgba(94,200,216,.06),rgba(94,200,216,.02));">' +
+      '<div style="display:flex;align-items:center;gap:11px;margin-bottom:12px;">' +
+        '<img src="/images/hermes-avatar.webp" alt="Hermes" style="width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid rgba(94,200,216,.7);box-shadow:0 0 16px rgba(94,200,216,.3);" onerror="this.outerHTML=\'<span style=&quot;font-size:2rem;&quot;>🪽</span>\'">' +
+        '<div style="flex:1;min-width:0;"><div style="color:#5ec8d8;font-weight:700;font-size:1.02rem;letter-spacing:.02em;">Hermes Operativo</div>' +
+        '<span class="badge badge-muted" style="font-size:.56rem;">Shadow · Preview only</span></div>' +
       '</div>' +
-      '<div style="display:flex;gap:6px;margin-bottom:7px;">' +
-        '<input id="op-hermes-input" placeholder="Escribile a Hermes…" style="flex:1;min-width:0;padding:6px 9px;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;">' +
-        '<button class="btn btn-ghost btn-xs" title="Audio: se habilita en S102B" disabled style="opacity:.45;cursor:not-allowed;">🎤</button>' +
-        '<button class="btn btn-gold btn-xs" onclick="window.opHermesScaffold()" title="El copiloto conversacional se activa en S102B">➤</button>' +
+      '<div style="display:flex;gap:6px;margin-bottom:5px;">' +
+        '<input id="op-hermes-input" placeholder="Escribile o dictá a Hermes…" onkeydown="if(event.key===\'Enter\')opHermesAsk(\'' + op.id + '\')" style="flex:1;min-width:0;padding:7px 10px;font-size:.78rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;">' +
+        '<button id="op-hermes-mic" class="btn btn-ghost btn-xs" onclick="opHermesAudio(\'' + op.id + '\')" title="Nota de voz a Hermes (Whisper)">🎤</button>' +
+        '<button id="op-hermes-send" class="btn btn-gold btn-xs" onclick="opHermesAsk(\'' + op.id + '\')" title="Preguntar a Hermes (preview only)">➤</button>' +
       '</div>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;">' +
+      '<div id="oph-status" style="min-height:14px;margin-bottom:6px;"></div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:13px;">' +
         hChips.map(function (c) { return '<span onclick="opHermesChip(\'' + c + '\')" style="font-size:.66rem;background:rgba(94,200,216,.1);border:1px solid rgba(94,200,216,.3);color:#aee4ee;border-radius:12px;padding:3px 9px;cursor:pointer;">' + escHtml(c) + '</span>'; }).join('') +
       '</div>' +
-      hSec('Lo que entendí', null, 'El copiloto conversacional se activa en S102B.') +
-      hSec('Propuestas de cambios', null, 'Sin propuestas todavía (S102B · preview only, nunca auto-write).') +
-      hSec('Documentos faltantes', hFaltan) +
-      hSec('Próximos pasos', hProx) +
-      hSec('Mensajes sugeridos', hMsgs || null, 'Sin mensajes sugeridos.') +
+      hSec('oph-entendido', 'Lo que entendí', null, 'Escribile o dictá algo a Hermes para que interprete la operación.') +
+      hSec('oph-propuestas', 'Propuestas de cambios', null, 'Sin propuestas todavía. Hermes propone, vos revisás — el botón Aplicar llega en S102B2.') +
+      hSec('oph-faltantes', 'Documentos faltantes', hFaltan) +
+      hSec('oph-pasos', 'Próximos pasos', hProx) +
+      hSec('oph-mensajes', 'Mensajes sugeridos', hMsgs || null, 'Sin mensajes sugeridos.') +
+      '<div id="oph-warnings"></div>' +
       '</div>';
     // S100 A1 (front-only): card Documentos enriquecida — color por estado + leyenda + alcance + "qué falta" por tipo + CTAs + estado honesto sin propiedad
     var hayProp = !!op.propiedadId;
@@ -3630,7 +3674,7 @@
         (op.url ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + op.url + '" target="_blank" rel="noopener">↗ Notion</a>' : '') +
       '</div>' + nav + '</div>';
     document.getElementById('op-f360-inner').innerHTML = header +
-      '<div style="padding:18px 22px;"><div class="f360-cols"><div>' + left + '</div><div>' + center + docs + fiscal + '</div><div class="f360-hermes-rail">' + right + '</div></div>' + hist + '</div>';
+      '<div style="padding:18px 22px;"><div class="f360-cols"><div>' + left + hist + '</div><div>' + center + docs + fiscal + '</div><div class="f360-hermes-rail">' + right + '</div></div></div>';
   }
   window.renderFicha360 = renderFicha360;
 
