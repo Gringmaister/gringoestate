@@ -2275,6 +2275,42 @@
   }
   window.crearTasacion = crearTasacion;
 
+  // S104A: estilos del detalle de tasación (premium, dark) — inyectados una vez, scopeados por clase ts-*.
+  function ensureTsStyle() {
+    if (document.getElementById('ts-style')) return;
+    var st = document.createElement('style'); st.id = 'ts-style';
+    st.textContent =
+      '.ts-detalle{border:1px solid var(--border);border-radius:14px;padding:14px;background:rgba(255,255,255,.012);}' +
+      '.ts-hero{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;padding-bottom:11px;margin-bottom:11px;border-bottom:1px solid var(--border);}' +
+      '.ts-sem{display:inline-block;border:1.5px solid;border-radius:20px;padding:4px 13px;font-size:.84rem;font-weight:700;white-space:nowrap;}' +
+      '.ts-ctas{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}' +
+      '.ts-pdf{border:1px solid var(--gold);background:rgba(212,175,55,.12);color:var(--gold);}' +
+      '.ts-pdf:hover{background:rgba(212,175,55,.22);}' +
+      '.ts-prices{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px;}' +
+      '.ts-price{flex:1;min-width:128px;border:1px solid var(--border);border-radius:11px;padding:9px 12px;background:rgba(255,255,255,.015);}' +
+      '.ts-price .lbl{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}' +
+      '.ts-price .num{font-family:var(--mono);font-size:1rem;font-weight:700;margin-top:2px;}' +
+      '.ts-price .exp{font-size:.62rem;color:var(--muted);margin-top:2px;}' +
+      '.ts-price-hero{flex:1.5;min-width:172px;border-color:var(--gold);background:rgba(212,175,55,.07);}' +
+      '.ts-price-hero .num{font-size:1.45rem;color:var(--gold);}' +
+      '.ts-price-hero .lbl{color:var(--gold);}' +
+      '.ts-insights{margin-bottom:12px;}' +
+      '.ts-meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.72rem;color:var(--muted);margin-bottom:7px;}' +
+      '.ts-meta b{color:var(--text);}' +
+      '.ts-estrategia{font-size:.78rem;line-height:1.45;border-left:3px solid var(--gold);background:rgba(212,175,55,.05);border-radius:0 8px 8px 0;padding:7px 11px;color:var(--text);}' +
+      '.ts-mag{border:1px solid var(--border);border-radius:11px;padding:9px 12px;margin-bottom:11px;background:rgba(255,255,255,.012);}' +
+      '.ts-mag summary{font-size:.76rem;color:var(--gold);cursor:pointer;list-style:none;}' +
+      '.ts-mag summary::-webkit-details-marker{display:none;}' +
+      '.ts-mag-row{display:flex;align-items:center;gap:8px;font-size:.72rem;margin:3px 0;}' +
+      '.ts-mag-row .k{flex:0 0 92px;color:var(--muted);}' +
+      '.ts-mag-row .track{flex:1;height:7px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;}' +
+      '.ts-mag-row .track .fill{display:block;height:100%;border-radius:4px;}' +
+      '.ts-mag-row .v{flex:0 0 46px;text-align:right;font-family:var(--mono);font-weight:600;}' +
+      '.ts-empty{border:1px dashed var(--border);border-radius:11px;padding:14px;text-align:center;margin-bottom:12px;background:rgba(255,255,255,.01);}' +
+      '@media(max-width:700px){.ts-price-hero{flex:1 1 100%;}}';
+    document.head.appendChild(st);
+  }
+
   async function abrirTasacion(id) {
     var el = document.getElementById('crm-tasacion-detalle');
     if (!el) return;
@@ -2321,20 +2357,25 @@
           '<button class="btn btn-ghost btn-sm" style="padding:0 5px;" title="' + (c.estadoAviso === 'Excluido' ? 'Re-incluir en el cálculo' : 'Excluir del cálculo (técnico)') + '" onclick="toggleComparable(\'' + c.id + '\',\'' + (c.estadoAviso === 'Excluido' ? 'Incluido' : 'Excluido') + '\',\'' + t.id + '\')">' + (c.estadoAviso === 'Excluido' ? '↩' : '🚫') + '</button></td>' +
       '</tr>';
     }).join('');
+    var nf = function (v) { return Number(v || 0).toLocaleString('es-AR'); };
     var preciosHtml = '';
     if (t.precioCierre) {
-      var px = function (lbl, val, hl) { return '<div style="border:1px solid ' + (hl ? 'var(--gold)' : 'var(--border)') + ';border-radius:10px;padding:7px 10px;min-width:130px;flex:1;"><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;">' + lbl + '</div><div style="font-family:var(--mono);font-size:.95rem;color:' + (hl ? 'var(--gold)' : 'var(--text)') + ';font-weight:700;">USD ' + Number(val).toLocaleString('es-AR') + '</div></div>'; };
-      preciosHtml = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
-        px('Cierre probable', t.precioCierre, true) + px('Publicación (+' + (t.margenPublicacion || 6) + '%)', t.precioPublicacion) +
-        px('Venta rápida', t.precioRapida) + px('Neto bolsillo', t.netoBolsillo) + '</div>' +
-        '<div style="font-size:.74rem;color:var(--muted);margin-bottom:10px;">' +
-          'Rango: ' + Number(t.rangoDesde || 0).toLocaleString('es-AR') + '–' + Number(t.rangoHasta || 0).toLocaleString('es-AR') +
-          ' · USD/m² ajustado: ' + (t.usdM2Zona || '—') + ' · Ajuste Magnin: ' + ((t.ajTotal > 0 ? '+' : '') + (t.ajTotal || 0)) + '%' +
-          ' · Confianza: <b>' + (t.confianza || '—') + '</b>' +
-          (t.semaforo ? ' · Captación: <b>' + escHtml(t.semaforo) + '</b>' : '') +
-          (t.priceGap != null ? ' · Price Gap: <b style="color:' + (t.priceGap > 15 ? 'var(--danger)' : t.priceGap > 5 ? 'var(--warn)' : 'var(--ok)') + ';">' + (t.priceGap > 0 ? '+' : '') + t.priceGap + '%</b>' : '') +
-        '</div>' +
-        (t.estrategia ? '<div style="font-size:.76rem;border-left:2px solid var(--gold);padding:4px 10px;margin-bottom:10px;color:var(--muted);">' + escHtml(t.estrategia) + '</div>' : '');
+      var pcard = function (lbl, val, exp, hero2) { return '<div class="ts-price' + (hero2 ? ' ts-price-hero' : '') + '"><div class="lbl">' + lbl + '</div><div class="num">USD ' + nf(val) + '</div>' + (exp ? '<div class="exp">' + exp + '</div>' : '') + '</div>'; };
+      preciosHtml = '<div class="ts-prices">' +
+        pcard('🎯 Cierre probable', t.precioCierre, 'valor realista de cierre', true) +
+        pcard('📢 Publicación (+' + (t.margenPublicacion || 6) + '%)', t.precioPublicacion, 'a qué salir al mercado') +
+        pcard('⚡ Venta rápida', t.precioRapida, 'si necesita liquidez') +
+        pcard('💵 Neto bolsillo', t.netoBolsillo, 'lo que recibe el dueño') +
+      '</div>' +
+      '<div class="ts-insights"><div class="ts-meta">' +
+        '<span>Rango <b>' + nf(t.rangoDesde) + '–' + nf(t.rangoHasta) + '</b></span>' +
+        '<span>USD/m² aj. <b>' + (t.usdM2Zona || '—') + '</b></span>' +
+        '<span>Confianza <b>' + escHtml(t.confianza || '—') + '</b></span>' +
+        (t.priceGap != null ? '<span>Price Gap <b style="color:' + (t.priceGap > 15 ? 'var(--danger)' : t.priceGap > 5 ? 'var(--warn)' : 'var(--ok)') + ';">' + (t.priceGap > 0 ? '+' : '') + t.priceGap + '%</b></span>' : '') +
+      '</div>' +
+      (t.estrategia ? '<div class="ts-estrategia">💡 ' + escHtml(t.estrategia) + '</div>' : '') +
+      '<div style="font-size:.6rem;color:var(--muted);opacity:.7;margin-top:6px;">El semáforo de captabilidad ya pondera el NURC del propietario.</div>' +
+      '</div>';
     }
     var diagHtml = '<details style="border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:10px;"' + (t.precioCierre ? '' : ' open') + '>' +
       '<summary style="font-size:.78rem;color:var(--gold);cursor:pointer;">📋 Diagnóstico Magnin (scores 1-10 + ajustes) — completalo antes de calcular</summary>' +
@@ -2384,28 +2425,39 @@
       '<span id="ts-comps"></span>' +
       (comps.length ? '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="font-size:.66rem;color:var(--muted);text-transform:uppercase;"><th style="text-align:left;padding:4px 6px;">Comparable</th><th style="text-align:right;">Precio</th><th style="text-align:right;">Ajustado</th><th style="text-align:right;">m²</th><th style="text-align:right;">USD/m²</th><th style="text-align:right;">Días</th><th>Estado</th><th></th></tr></thead><tbody>' + filas + '</tbody></table></div>' : '<div class="small muted">Sin comparables todavía — pegá el primero ↑</div>');
     var nIncl = comps.filter(function (c) { return !(c.estadoAviso === 'Excluido' || c.outlier); }).length;
-    // S95B.3: vista ejecutiva con ACCIONES claras (no una línea pasiva)
-    var ejecutivaHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px;">' +
-      '<button class="btn btn-gold btn-sm" onclick="tsIntake()">📥 Importar comparables</button>' +
-      '<button class="btn btn-ghost btn-sm" onclick="window.tsVista=\'tecnica\';renderTasacionDetalle()">🔬 Revisar comparables' + (comps.length ? ' (' + comps.length + ')' : '') + '</button>' +
-      '<button class="btn btn-ghost btn-sm" onclick="calcularTasacion(\'' + t.id + '\')">🧮 Recalcular</button>' +
-      '<span class="small muted" style="margin-left:auto;">' + nIncl + ' en el cálculo · ' + (comps.length - nIncl) + ' excluidos</span>' +
+    // S104A: semáforo protagonista + hero
+    var semTxt = t.semaforo || '';
+    var semColor = /🔴|no recomend/i.test(semTxt) ? 'var(--danger)' : /🟠|riesg|dif/i.test(semTxt) ? '#f59e0b' : /🟡|ajuste|revisar/i.test(semTxt) ? 'var(--warn)' : /🟢|captable/i.test(semTxt) ? 'var(--ok)' : 'var(--muted)';
+    var hero = '<div class="ts-hero"><div style="flex:1;min-width:0;">' +
+      '<div style="font-size:1.05rem;font-weight:700;line-height:1.2;">' + escHtml(t.tasacion) + '</div>' +
+      '<div style="font-size:.72rem;color:var(--muted);margin-top:3px;">' + escHtml(t.barrio || '—') + ' · ' + (t.m2Pond || '—') + ' m² pond.' + (t.cochera ? ' · 🚗' : '') + ' · <span class="badge badge-muted" style="font-size:.56rem;">' + escHtml(t.estado || '—') + '</span></div>' +
+      '</div>' +
+      (semTxt ? '<div style="text-align:right;flex-shrink:0;"><span class="ts-sem" style="border-color:' + semColor + ';color:' + semColor + ';">' + escHtml(semTxt) + '</span>' + (t.priceGap != null ? '<div style="font-size:.62rem;color:var(--muted);margin-top:5px;">Price Gap <b style="color:' + (t.priceGap > 15 ? 'var(--danger)' : t.priceGap > 5 ? 'var(--warn)' : 'var(--ok)') + ';">' + (t.priceGap > 0 ? '+' : '') + t.priceGap + '%</b></div>' : '') + '</div>' : '') +
     '</div>';
-    el.innerHTML =
-      '<div style="border:1px solid var(--border);border-radius:12px;padding:12px;">' +
-        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
-          '<strong style="font-size:.9rem;">' + escHtml(t.tasacion) + '</strong>' +
-          '<span class="badge badge-muted">' + escHtml(t.barrio || '') + '</span>' +
-          '<span class="badge badge-muted">' + escHtml(t.estado || '') + '</span>' +
-          '<span style="font-family:var(--mono);font-size:.74rem;color:var(--muted);">' + (t.m2Pond || '—') + ' m² pond.' + (t.cochera ? ' + 🚗' : '') + '</span>' +
-          '<span style="margin-left:auto;"></span>' +
-          '<button class="btn btn-gold btn-sm" onclick="tsIntake()" title="Pegar/importar y revisar comparables">📥 Comparables' + (comps.length ? ' (' + comps.length + ')' : '') + '</button>' +
-          (t.precioCierre ? '<button class="btn btn-ghost btn-sm" onclick="window.tsVista=\'' + (ejecutiva ? 'tecnica' : 'ejecutiva') + '\';renderTasacionDetalle()">' + (ejecutiva ? '🔬 Vista técnica' : '👔 Vista ejecutiva') + '</button>' : '') +
-          (ejecutiva ? '' : '<button class="btn btn-gold btn-sm" onclick="calcularTasacion(\'' + t.id + '\')">🧮 Calcular</button>') +
-          (t.precioCierre ? '<button class="btn btn-gold btn-sm" onclick="pdfTasacion(\'' + t.id + '\')">📄 Carpeta Wow</button>' : '') +
-        '</div>' +
-        preciosHtml + (ejecutiva ? ejecutivaHtml : tecnicaHtml) +
-      '</div>';
+    // S104A: CTAs ordenados — Importar · Vista · Recalcular · Carpeta Wow (ACCIÓN REAL, marcada)
+    var ctas = '<div class="ts-ctas">' +
+      '<button class="btn btn-gold btn-sm" onclick="tsIntake()" title="Pegar/importar y revisar comparables">📥 Importar comparables' + (comps.length ? ' (' + comps.length + ')' : '') + '</button>' +
+      (t.precioCierre ? '<button class="btn btn-ghost btn-sm" onclick="window.tsVista=\'' + (ejecutiva ? 'tecnica' : 'ejecutiva') + '\';renderTasacionDetalle()">' + (ejecutiva ? '🔬 Vista técnica' : '👔 Vista ejecutiva') + '</button>' : '') +
+      '<button class="btn btn-ghost btn-sm" onclick="calcularTasacion(\'' + t.id + '\')">🧮 ' + (t.precioCierre ? 'Recalcular' : 'Calcular') + '</button>' +
+      (t.precioCierre ? '<button class="btn btn-sm ts-pdf" onclick="pdfTasacion(\'' + t.id + '\')" title="ACCIÓN REAL: genera el PDF, lo sube a Drive y lo manda por WhatsApp">📄 Carpeta Wow PDF · <span style="opacity:.85;">real</span></button>' : '') +
+      '<span class="small muted" style="margin-left:auto;">' + nIncl + ' en cálculo · ' + (comps.length - nIncl) + ' excluidos</span>' +
+    '</div>';
+    // S104A: desglose Magnin (solo componentes persistidos, sin inventar) + tope ±25%
+    var magninBlock = (function () {
+      var cmp = [['Ubicación', t.ajUbicacion], ['Edificio', t.ajEdificio], ['Superficie', t.ajSuperficie], ['Estado', t.ajEstado]].filter(function (x) { return x[1] != null; });
+      if (!cmp.length && (t.ajManual == null || t.ajManual === 0) && !t.ajTotal) return '';
+      var bar = function (lbl, v) { var w = Math.min(100, Math.abs(v) / 25 * 100), col = v >= 0 ? 'var(--ok)' : 'var(--danger)'; return '<div class="ts-mag-row"><span class="k">' + lbl + '</span><span class="track"><span class="fill" style="width:' + w + '%;background:' + col + ';"></span></span><span class="v" style="color:' + col + ';">' + (v > 0 ? '+' : '') + v + '%</span></div>'; };
+      return '<details class="ts-mag"' + (ejecutiva ? '' : ' open') + '><summary>⚖️ Ajuste Magnin · total <b>' + (t.ajTotal > 0 ? '+' : '') + (t.ajTotal || 0) + '%</b> <span style="opacity:.6;font-weight:400;">(tope ±25%)</span></summary><div style="margin-top:8px;">' +
+        cmp.map(function (x) { return bar(x[0], x[1]); }).join('') +
+        (t.ajManual != null && t.ajManual !== 0 ? '<div class="ts-mag-row"><span class="k" style="color:var(--gold);">Override manual</span><span class="track"></span><span class="v" style="color:var(--gold);">' + (t.ajManual > 0 ? '+' : '') + t.ajManual + '%</span></div>' : '') +
+        '<div style="font-size:.6rem;color:var(--muted);margin-top:7px;">Solo los componentes cargados (sin inventar). Total topado a ±25% (Magnin).</div>' +
+      '</div></details>';
+    })();
+    var emptyState = t.precioCierre ? '' : '<div class="ts-empty"><div style="font-size:.9rem;font-weight:700;color:var(--gold);margin-bottom:3px;">Esta tasación todavía no tiene informe</div><div style="font-size:.74rem;color:var(--muted);">Cargá los datos, pegá comparables de Zonaprop, revisalos y calculá ↓</div></div>';
+    ensureTsStyle();
+    el.innerHTML = '<div class="ts-detalle">' + hero + ctas +
+      (ejecutiva ? (preciosHtml + magninBlock) : (emptyState + tecnicaHtml + magninBlock)) +
+    '</div>';
   }
   window.abrirTasacion = abrirTasacion;
   window.renderTasacionDetalle = renderTasacionDetalle;
