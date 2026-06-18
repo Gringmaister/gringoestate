@@ -3154,11 +3154,23 @@
 
   /* ─── P4 consultor (S43): OPERACIÓN GUIADA — checklist por tipo, no formulario genérico ─── */
   function ensureOpModal() {
+    if (!document.getElementById('opd-modal-style')) {  // S100C: modal usable (z-index encima del Ficha 360, ancho, backdrop suave, footer sticky, bloques)
+      var stl = document.createElement('style'); stl.id = 'opd-modal-style';
+      stl.textContent = '#modal-op-detalle{z-index:70;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);}' +
+        '#modal-op-detalle .modal{max-width:720px;width:calc(100vw - 32px);max-height:90vh;display:flex;flex-direction:column;padding:22px 22px 0;}' +
+        '#opd-body{flex:1;overflow-y:auto;margin-top:6px;padding-right:4px;}' +
+        '#opd-footer{position:sticky;bottom:0;background:rgba(20,20,20,0.98);border-top:1px solid var(--border);padding:10px 0;margin-top:6px;display:flex;gap:8px;align-items:center;}' +
+        '.opd-sec{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;}' +
+        '.opd-sec-t{font-size:.66rem;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}' +
+        '.opd-fld{font-size:.66rem;color:var(--muted);display:block;margin-bottom:2px;}' +
+        '.opd-help{font-size:.66rem;color:var(--muted);opacity:.9;margin-top:6px;}';
+      document.head.appendChild(stl);
+    }
     if (document.getElementById('modal-op-detalle')) return;
     var div = document.createElement('div');
-    div.innerHTML = '<div class="modal-overlay hidden" id="modal-op-detalle"><div class="modal" style="max-width:560px;">' +
+    div.innerHTML = '<div class="modal-overlay hidden" id="modal-op-detalle"><div class="modal">' +
       '<h3 id="opd-titulo" style="margin:0 18px 0 0;font-size:.95rem;">Operación</h3>' +
-      '<div id="opd-body" style="margin-top:10px;max-height:70vh;overflow-y:auto;"></div>' +
+      '<div id="opd-body"></div>' +
       '</div></div>';
     document.body.appendChild(div.firstChild);
     initModalUX(); // suma la ✕ + click-afuera + Esc (mismo wiring que los demás modales)
@@ -3189,72 +3201,81 @@
     var tpl = tipo ? ((d.checklists || {})[tipo] || []) : [];
     var hechos = tpl.filter(function (i) { return st.checklist[i.k]; }).length;
     var proximo = tpl.filter(function (i) { return !st.checklist[i.k]; })[0];
-    var html = '';
-    // tipo (si falta, elegirlo activa la guía)
-    html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">' +
-      '<span style="font-size:.72rem;color:var(--muted);">Tipo:</span>' +
-      ['Venta', 'Alquiler'].map(function (tp) {
-        var on = op.tipo === tp;
-        return '<button class="btn btn-sm ' + (on ? 'btn-gold' : 'btn-ghost') + '" onclick="setOpTipo(\'' + tp + '\')">' + tp + '</button>';
-      }).join('') +
-      '<span style="margin-left:auto;font-size:.72rem;color:var(--muted);">Etapa:</span>' +
-      '<select id="opd-etapa" style="font-size:.74rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:3px 6px;">' +
-      ((d.etapas || []).map(function (e) { return e.etapa; })).map(function (e) { return '<option' + (op.etapa === e ? ' selected' : '') + '>' + e + '</option>'; }).join('') +
-      '</select></div>';
-    if (!tipo) {
-      html += '<div style="border:1px dashed var(--border);border-radius:10px;padding:12px;font-size:.78rem;color:var(--muted);">Elegí <b>Venta</b> o <b>Alquiler</b> y aparece el flujo guiado con su checklist (informes, escribanía, garantías…).</div>';
-    } else {
-      // próxima acción ENORME (mismo patrón que el legajo)
-      if (proximo) {
-        html += '<div style="border:1px solid var(--gold);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:rgba(212,175,55,0.06);">' +
-          '<div style="font-size:.66rem;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">▶ Próximo paso (' + hechos + '/' + tpl.length + ')</div>' +
-          '<div style="font-size:.86rem;font-weight:700;">' + escHtml(proximo.label) + '</div></div>';
-      } else if (tpl.length) {
-        html += '<div style="border:1px solid var(--ok);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:.82rem;">✅ Checklist completo — si cobraste, pasala a <b>Cerrada</b> (y cargá el cierre como comparable 💎)</div>';
-      }
-      html += '<div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Checklist ' + tipo + '</div>';
-      html += tpl.map(function (i) {
-        var on = !!st.checklist[i.k];
-        return '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;font-size:.8rem;' + (on ? 'color:var(--muted);' : '') + '">' +
-          '<input type="checkbox"' + (on ? ' checked' : '') + ' onchange="toggleOpItem(\'' + i.k + '\',this.checked)">' +
-          '<span style="' + (on ? 'text-decoration:line-through;' : '') + '">' + escHtml(i.label) + '</span></label>';
-      }).join('');
-    }
-    // montos + bloqueo
-    var num = function (id2, ph, val) { return '<input id="' + id2 + '" type="number" placeholder="' + ph + '" value="' + (val == null ? '' : val) + '" style="width:110px;font-size:.74rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px 6px;">'; };
-    html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">' +
-      num('opd-monto', 'Monto USD', op.montoTotal) + num('opd-reserva', 'Reserva', op.reserva) + num('opd-refuerzo', 'Refuerzo', op.refuerzo) +
-      num('opd-honesp', 'Honor. esp.', op.honorariosEsperados) + num('opd-honcob', 'Honor. cobrados', op.honorariosCobrados) +
-      '<input id="opd-firma" type="date" value="' + (op.fechaFirma || '') + '" style="font-size:.74rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px 6px;">' +
-      '</div>' +
-      '<input id="opd-bloqueo" placeholder="🔴 ¿Trabada? Escribí el bloqueo (queda en alertas)" value="' + escHtml(op.bloqueo || '') + '" style="width:100%;margin-top:8px;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' +
-      // S98B: datos de cierre (campos nuevos de la operación)
-      '<div style="border-top:1px dashed var(--border);margin-top:10px;padding-top:8px;">' +
-        '<div style="font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Datos de cierre</div>' +
-        '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">' +
-          '<label style="font-size:.66rem;color:var(--muted);">Fecha reserva<br><input id="opd-fecha-reserva" type="date" value="' + (op.fechaReserva ? String(op.fechaReserva).slice(0, 10) : '') + '" style="font-size:.74rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px 6px;"></label>' +
-          '<label style="font-size:.66rem;color:var(--muted);">Fecha posesión<br><input id="opd-fecha-posesion" type="date" value="' + (op.fechaPosesion ? String(op.fechaPosesion).slice(0, 10) : '') + '" style="font-size:.74rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px 6px;"></label>' +
-          '<label style="font-size:.66rem;color:var(--muted);">Instrumento<br><select id="opd-instrumento" style="font-size:.74rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px 6px;">' +
-            ['', 'Boleto', 'Cesión', 'Contrato', 'Escritura directa', 'Otro'].map(function (x) { return '<option' + ((op.instrumento || '') === x ? ' selected' : '') + '>' + x + '</option>'; }).join('') +
-          '</select></label>' +
-        '</div>' +
-        '<input id="opd-pagador" placeholder="Pagador de la reserva (ej. Alejandro)" value="' + escHtml(op.pagadorReserva || '') + '" style="width:100%;margin-top:6px;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' +
-        '<input id="opd-escribania" placeholder="Escribanía" value="' + escHtml(op.escribania || '') + '" style="width:100%;margin-top:6px;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' +
-        '<input id="opd-proveedor-sellado" placeholder="Proveedor de sellado / informes (ej. Bolsa de Comercio)" value="' + escHtml(op.proveedorSellado || '') + '" style="width:100%;margin-top:6px;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' +
-      '</div>' +
-      // S100 A1: selector de propiedad vinculada (FUNCIONAL — no auto-vincula; se aplica al 💾 Guardar)
-      '<div style="border-top:1px dashed var(--border);margin-top:10px;padding-top:8px;">' +
-        '<div style="font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Propiedad vinculada</div>' +
-        '<select id="opd-propiedad" style="width:100%;font-size:.76rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' +
-          '<option value="">— sin vincular —</option>' +
-          (((window.crmPipelineCache || {}).propiedades || {}).items || []).map(function (pp) { return '<option value="' + pp.id + '"' + (op.propiedadId === pp.id ? ' selected' : '') + '>' + escHtml(pp.propiedad || pp.id) + '</option>'; }).join('') +
-        '</select>' +
-        ((((window.crmPipelineCache || {}).propiedades || {}).items || []).length ? '<div style="font-size:.62rem;color:var(--muted);margin-top:4px;">Elegí una y tocá 💾 Guardar para vincular. No se vincula nada solo.</div>' : '<div style="font-size:.62rem;color:var(--warn);margin-top:4px;">No hay propiedades en cache — entrá a 🏢 Propiedades del CRM para cargarlas y reabrí.</div>') +
-      '</div>' +
-      '<div style="display:flex;gap:8px;margin-top:12px;">' +
-        '<button class="btn btn-gold btn-sm" onclick="saveOpDetalle()">💾 Guardar</button>' +
-        '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + (op.url || '#') + '" target="_blank" rel="noopener">↗ Abrir ficha</a>' +
+    var fUsd = function (n) { return 'USD ' + Number(n || 0).toLocaleString('es-AR'); };
+    var inp = 'font-size:.78rem;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;';
+    var numFld = function (id2, label, val) { return '<label style="display:inline-block;margin:0 10px 8px 0;"><span class="opd-fld">' + label + '</span><input id="' + id2 + '" type="number" value="' + (val == null ? '' : val) + '" style="width:150px;padding:5px 8px;' + inp + '"></label>'; };
+    var dateFld = function (id2, label, val) { return '<label style="display:inline-block;margin:0 10px 8px 0;"><span class="opd-fld">' + label + '</span><input id="' + id2 + '" type="date" value="' + (val ? String(val).slice(0, 10) : '') + '" style="padding:4px 7px;' + inp + '"></label>'; };
+    var txtFld = function (id2, label, val, ph) { return '<label class="opd-fld" style="margin-top:8px;">' + label + '<input id="' + id2 + '" value="' + escHtml(val || '') + '" placeholder="' + ph + '" style="width:100%;padding:6px 8px;margin-top:2px;' + inp + '"></label>'; };
+    var html = '<div style="font-size:.68rem;color:var(--muted);background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:7px 9px;margin-bottom:10px;">Estás editando la <b style="color:var(--text);">operación</b>. Los datos internos de la <b>propiedad</b> se editan desde su ficha (botón <b>Abrir propiedad</b>).</div>';
+
+    // ── Operación ──
+    html += '<div class="opd-sec"><div class="opd-sec-t">Operación</div>' +
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+        '<span class="opd-fld" style="margin:0;">Tipo:</span>' +
+        ['Venta', 'Alquiler'].map(function (tp) { var on = op.tipo === tp; return '<button class="btn btn-sm ' + (on ? 'btn-gold' : 'btn-ghost') + '" onclick="setOpTipo(\'' + tp + '\')">' + tp + '</button>'; }).join('') +
+        '<span class="opd-fld" style="margin:0 0 0 8px;">Etapa:</span>' +
+        '<select id="opd-etapa" style="padding:4px 7px;' + inp + '">' + ((d.etapas || []).map(function (e) { return e.etapa; })).map(function (e) { return '<option' + (op.etapa === e ? ' selected' : '') + '>' + e + '</option>'; }).join('') + '</select>' +
+        '<span class="opd-fld" style="margin:0 0 0 8px;">Instrumento:</span>' +
+        '<select id="opd-instrumento" style="padding:4px 7px;' + inp + '">' + ['', 'Boleto', 'Cesión', 'Contrato', 'Escritura directa', 'Otro'].map(function (x) { return '<option' + ((op.instrumento || '') === x ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select>' +
+      '</div></div>';
+
+    // ── Propiedad vinculada (selector funcional + abrir ficha; no se vincula solo) ──
+    var propItems = ((window.crmPipelineCache || {}).propiedades || {}).items || [];
+    var propObj = op.propiedadId ? propItems.filter(function (p) { return p.id === op.propiedadId; })[0] : null;
+    html += '<div class="opd-sec"><div class="opd-sec-t">Propiedad vinculada</div>' +
+      '<select id="opd-propiedad" style="width:100%;padding:6px 8px;' + inp + '"><option value="">— sin vincular —</option>' +
+        propItems.map(function (pp) { return '<option value="' + pp.id + '"' + (op.propiedadId === pp.id ? ' selected' : '') + '>' + escHtml(pp.propiedad || pp.id) + '</option>'; }).join('') + '</select>' +
+      '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px;">' +
+        (op.propiedadId ? '<button class="btn btn-ghost btn-sm" onclick="abrirLegajo(\'' + op.propiedadId + '\')">🏠 Abrir ficha de propiedad</button>' : '') +
+        '<span class="opd-help" style="margin:0;">' + (op.propiedadId ? ('Vinculada' + (propObj && propObj.docsPct != null ? ' · docs ' + propObj.docsPct + '%' : '') + '. Propietario/documentos se completan en su ficha.') : 'Elegí una y tocá 💾 Guardar para vincular (no se vincula solo).') + '</span>' +
+      '</div>' + (propItems.length ? '' : '<div style="font-size:.62rem;color:var(--warn);margin-top:4px;">No hay propiedades en cache — entrá a 🏢 Propiedades y reabrí.</div>') +
       '</div>';
+
+    // ── Valores (labels claros + honorarios sugeridos) ──
+    var comPct = (op.honorariosEsperados && op.montoTotal) ? Math.round(op.honorariosEsperados / op.montoTotal * 1000) / 10 : null;
+    var honSug = (comPct && op.montoTotal) ? Math.round(op.montoTotal * comPct / 100) : null;
+    html += '<div class="opd-sec"><div class="opd-sec-t">Valores</div>' +
+      '<div>' + numFld('opd-monto', 'Precio de cierre USD', op.montoTotal) + numFld('opd-reserva', 'Reserva USD', op.reserva) + numFld('opd-refuerzo', 'Refuerzo USD', op.refuerzo) + '</div>' +
+      '<div>' + numFld('opd-honesp', 'Honorarios esperados USD', op.honorariosEsperados) + numFld('opd-honcob', 'Honorarios cobrados USD', op.honorariosCobrados) + '</div>' +
+      (honSug != null ? '<div class="opd-help">' + fUsd(op.montoTotal) + ' × ' + comPct + '% = <b style="color:var(--gold);">' + fUsd(honSug) + '</b> <button class="btn btn-ghost btn-sm" style="padding:1px 8px;" onclick="opdSugerirHonorarios(' + comPct + ')">Sugerir ' + fUsd(honSug) + '</button> <span style="opacity:.7;">(no escribe hasta Guardar)</span></div>' : '<div class="opd-help">Cargá precio + honorarios para que sugiera el % automático.</div>') +
+      '</div>';
+
+    // ── Datos de cierre ──
+    html += '<div class="opd-sec"><div class="opd-sec-t">Datos de cierre</div>' +
+      '<div>' + dateFld('opd-fecha-reserva', 'Fecha reserva', op.fechaReserva) + dateFld('opd-firma', 'Fecha firma', op.fechaFirma) + dateFld('opd-fecha-posesion', 'Fecha posesión', op.fechaPosesion) + '</div>' +
+      txtFld('opd-pagador', 'Pagador de la reserva', op.pagadorReserva, 'ej. Alejandro') +
+      txtFld('opd-escribania', 'Escribanía', op.escribania, 'nombre de la escribanía') +
+      txtFld('opd-proveedor-sellado', 'Proveedor de sellado / informes', op.proveedorSellado, 'ej. Bolsa de Comercio') +
+      '</div>';
+
+    // ── Bloqueo (checkbox + motivo) ──
+    var trabada = !!(op.bloqueo && String(op.bloqueo).trim());
+    html += '<div class="opd-sec"><div class="opd-sec-t">Bloqueo</div>' +
+      '<label style="display:flex;align-items:center;gap:8px;font-size:.82rem;cursor:pointer;"><input type="checkbox" id="opd-trabada"' + (trabada ? ' checked' : '') + ' onchange="opdToggleTrabada(this.checked)"> ¿Operación trabada?</label>' +
+      '<input id="opd-bloqueo" value="' + escHtml(op.bloqueo || '') + '"' + (trabada ? '' : ' disabled') + ' placeholder="Motivo del bloqueo — ej: falta informe de dominio, falta escribanía, comprador no confirmó refuerzo" style="width:100%;margin-top:6px;padding:6px 8px;' + inp + (trabada ? '' : 'opacity:.5;') + '">' +
+      '</div>';
+
+    // ── Checklist ──
+    html += '<div class="opd-sec"><div class="opd-sec-t">Checklist ' + (tipo || '') + '</div>';
+    if (!tipo) {
+      html += '<div style="font-size:.78rem;color:var(--muted);">Elegí <b>Venta</b> o <b>Alquiler</b> (bloque Operación) y aparece el flujo guiado con su checklist.</div>';
+    } else {
+      if (proximo) {
+        html += '<div style="border:1px solid var(--gold);border-radius:10px;padding:9px 11px;margin-bottom:9px;background:rgba(212,175,55,0.06);"><div style="font-size:.64rem;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">▶ Próximo paso (' + hechos + '/' + tpl.length + ')</div><div style="font-size:.84rem;font-weight:700;">' + escHtml(proximo.label) + '</div></div>';
+      } else if (tpl.length) {
+        html += '<div style="border:1px solid var(--ok);border-radius:10px;padding:9px 11px;margin-bottom:9px;font-size:.82rem;">✅ Checklist completo — si cobraste, pasala a <b>Cerrada</b>.</div>';
+      }
+      html += tpl.map(function (i) { var on = !!st.checklist[i.k]; return '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;font-size:.8rem;' + (on ? 'color:var(--muted);' : '') + '"><input type="checkbox"' + (on ? ' checked' : '') + ' onchange="toggleOpItem(\'' + i.k + '\',this.checked)"><span style="' + (on ? 'text-decoration:line-through;' : '') + '">' + escHtml(i.label) + '</span></label>'; }).join('');
+    }
+    html += '</div>';
+
+    // ── Footer sticky ──
+    html += '<div id="opd-footer">' +
+      '<button class="btn btn-gold btn-sm" onclick="saveOpDetalle()">💾 Guardar</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="hideModal(\'modal-op-detalle\')">Cancelar</button>' +
+      '<a class="btn btn-ghost btn-sm" style="text-decoration:none;margin-left:auto;" href="' + (op.url || '#') + '" target="_blank" rel="noopener">↗ Notion</a>' +
+      '</div>';
+
     var body = document.getElementById('opd-body');
     if (body) body.innerHTML = html;
   }
@@ -3267,6 +3288,10 @@
     renderOpDetalle();
   }
   window.toggleOpItem = toggleOpItem;
+  // S100C: sugerir honorarios (precio × %) — rellena visualmente, NO escribe hasta Guardar
+  window.opdSugerirHonorarios = function (pct) { var m = parseFloat((document.getElementById('opd-monto') || {}).value || '0'); var h = document.getElementById('opd-honesp'); if (m > 0 && h) { h.value = Math.round(m * pct / 100); toast('Honorarios sugeridos — revisá y tocá 💾 Guardar', 'ok'); } };
+  // S100C: checkbox ¿trabada? habilita/limpia el motivo del bloqueo
+  window.opdToggleTrabada = function (on) { var b = document.getElementById('opd-bloqueo'); if (b) { b.disabled = !on; b.style.opacity = on ? '1' : '.5'; if (!on) b.value = ''; else b.focus(); } };
 
   async function saveOpDetalle() {
     var st = window.crmOpDetalle; if (!st) return;
@@ -3379,10 +3404,11 @@
     var honCalc = op.honorariosEsperados != null ? op.honorariosEsperados : (precio && comPct ? Math.round(precio * comPct / 100) : null);
     var honCob = op.honorariosCobrados || 0, honPend = (op.honorariosEsperados || 0) - honCob;
     var idx = opFlujoIndex(op.etapa), bloq = !!op.bloqueo;
+    var propNom = op.propiedadId ? ((((window.crmPipelineCache || {}).propiedades || {}).items || []).filter(function (pp) { return pp.id === op.propiedadId; })[0] || {}).propiedad : null; // S100C: nombre real de la propiedad
     function row(l, v) { return '<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.8rem;"><span style="color:var(--muted);">' + l + '</span><span style="text-align:right;font-weight:600;">' + (v != null && v !== '' ? v : f360Ph()) + '</span></div>'; }
     var left =
       '<div class="f360-card" id="f360-resumen"><div class="f360-t">📋 Resumen</div>' +
-        row('Propiedad', op.propiedadId ? ('<span style="font-family:var(--mono);font-size:.7rem;">vinculada</span>' + (partes.vendedor ? ' · ' + escHtml(partes.vendedor.nombre) : '')) : f360Falta('Propiedad no vinculada')) +
+        row('Propiedad', op.propiedadId ? (escHtml(propNom || 'vinculada') + ' <button class="btn btn-ghost btn-xs" style="padding:1px 7px;font-size:.6rem;" onclick="abrirLegajo(\'' + op.propiedadId + '\')">Abrir propiedad</button>' + (partes.vendedor ? ' · ' + escHtml(partes.vendedor.nombre) : '')) : f360Falta('Propiedad no vinculada')) +
         row('Tipo', op.tipo) + row('Etapa', op.etapa) + row('Instrumento', op.instrumento || f360Ph('pendiente')) +
         row('Precio de cierre', f360Usd(precio)) + row('Reserva', f360Usd(op.reserva)) + row('Refuerzo', f360Usd(op.refuerzo)) +
         row('Comisión', comPct != null ? comPct + '% <span style="color:var(--muted);font-weight:400;">(derivada)</span>' : null) +
@@ -3391,11 +3417,11 @@
         row('Vendedor / propietario', partesOk ? f360Parte(partes.vendedor, op.propiedadId ? 'Propiedad sin propietario vinculado' : 'Se deriva de la propiedad — no vinculada') : f360Ph()) +
         row('Comprador', partesOk ? f360Parte(partes.comprador, 'Comprador no vinculado') : f360Ph()) +
         row('Pagador de la reserva', op.pagadorReserva ? escHtml(op.pagadorReserva) : f360Ph('pendiente')) +
-        row('Escribanía', op.escribania ? escHtml(op.escribania) : f360Ph('pendiente')) + row('Proveedor sellado / informes', op.proveedorSellado ? escHtml(op.proveedorSellado) : f360Ph('ej. Bolsa de Comercio')) +
+        row('Escribanía', op.escribania ? escHtml(op.escribania) : (f360Ph('pendiente') + ' <button class="btn btn-ghost btn-xs" style="padding:1px 6px;font-size:.6rem;" onclick="abrirOperacion(\'' + op.id + '\')">Cargar</button>')) + row('Proveedor sellado / informes', op.proveedorSellado ? escHtml(op.proveedorSellado) : f360Ph('ej. Bolsa de Comercio')) +
       '</div>' +
       '<div class="f360-card" id="f360-fechas"><div class="f360-t">📅 Fechas</div>' +
         row('Fecha de reserva', op.fechaReserva ? String(op.fechaReserva).slice(0, 10) : f360Ph('pendiente')) + row('Fecha firma (cargada)', op.fechaFirma) +
-        row('Fecha estimada de firma', f360Ph()) + row('Fecha de posesión', op.fechaPosesion ? String(op.fechaPosesion).slice(0, 10) : f360Ph('pendiente')) +
+        row('Fecha estimada de firma', f360Ph()) + row('Fecha de posesión', op.fechaPosesion ? String(op.fechaPosesion).slice(0, 10) : (f360Ph('pendiente') + ' <button class="btn btn-ghost btn-xs" style="padding:1px 6px;font-size:.6rem;" onclick="abrirOperacion(\'' + op.id + '\')">Cargar</button>')) +
       '</div>' +
       '<div class="f360-card" id="f360-honorarios"><div class="f360-t">💰 Honorarios</div>' +
         (precio && comPct ? '<div style="font-size:.74rem;color:var(--muted);margin-bottom:6px;">' + f360Usd(precio) + ' × ' + comPct + '% = <b style="color:var(--gold);">' + f360Usd(honCalc) + '</b> <span style="opacity:.7;">(cálculo visual)</span></div>' : '') +
