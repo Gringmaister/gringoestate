@@ -2312,6 +2312,14 @@
       '.ts-esc .h{font-size:.68rem;font-weight:700;}' +
       '.ts-esc .n{font-family:var(--mono);font-size:1.05rem;font-weight:700;margin-top:3px;}' +
       '.ts-esc .d{font-size:.62rem;color:var(--muted);margin-top:2px;}' +
+      '.ts-radar{border:1px solid rgba(94,200,216,.3);border-radius:12px;padding:11px 13px;margin-bottom:12px;background:rgba(94,200,216,.04);}' +
+      '.ts-radar>summary{font-size:.82rem;font-weight:700;color:#5ec8d8;cursor:pointer;list-style:none;}' +
+      '.ts-radar>summary::-webkit-details-marker{display:none;}' +
+      '.rad-radio.rad-on{border-color:var(--gold);color:var(--gold);background:rgba(212,175,55,.12);}' +
+      '.ts-rstats{display:flex;flex-wrap:wrap;gap:7px;}' +
+      '.ts-rstat{flex:1;min-width:92px;border:1px solid var(--border);border-radius:9px;padding:6px 9px;background:rgba(255,255,255,.012);}' +
+      '.ts-rstat .l{font-size:.56rem;color:var(--muted);text-transform:uppercase;}' +
+      '.ts-rstat .v{font-family:var(--mono);font-size:.92rem;font-weight:700;margin-top:1px;}' +
       '@media(max-width:700px){.ts-price-hero{flex:1 1 100%;}}';
     document.head.appendChild(st);
   }
@@ -2471,13 +2479,58 @@
         '</div>' +
         '<div style="font-size:.6rem;color:var(--muted);opacity:.7;margin-bottom:11px;">Reencuadre de los precios ya calculados — sin recálculo.</div>';
     }
+    // S104B.1: Radar de Comparables — formulario "listo para enchufar" + resultados VACÍOS (no inventa). Búsqueda real = S104B (bridge).
+    var rf = function (lbl, inner) { return '<div><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">' + lbl + '</div>' + inner + '</div>'; };
+    var rstat = function (lbl, val) { return '<div class="ts-rstat"><div class="l">' + lbl + '</div><div class="v">' + val + '</div></div>'; };
+    var radarBlock = '<details class="ts-radar">' +
+      '<summary>🛰️ Radar de Comparables — buscar por zona <span style="opacity:.55;font-weight:400;text-transform:none;letter-spacing:0;">· listo para enchufar (S104B)</span></summary>' +
+      '<div style="margin-top:10px;">' +
+        '<div style="font-size:.66rem;color:var(--muted);margin-bottom:9px;line-height:1.5;">Buscá comparables similares en la zona. El formulario ya arma el payload real; la <b>búsqueda</b> (Mercado Libre API + geocoding) se conecta en S104B. <b>No inventa resultados.</b></div>' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:8px;">' +
+          rf('Dirección objetivo', '<input id="rad-dir" class="input" value="' + escHtml(t.direccion || t.barrio || '') + '" placeholder="ej. Juncal 1200, Recoleta" style="width:100%;">') +
+          rf('m² objetivo', '<input id="rad-m2" class="input" type="number" value="' + (t.m2Pond || '') + '" style="width:100%;">') +
+          rf('Tolerancia m² (±%)', '<input id="rad-tol" class="input" type="number" value="20" style="width:100%;">') +
+          rf('Tipología', '<select id="rad-tipo" class="input" style="width:100%;"><option' + (/casa/i.test(t.tipoPropiedad || '') ? ' selected' : '') + '>Casa</option><option' + (/\bph\b/i.test(t.tipoPropiedad || '') ? ' selected' : '') + '>PH</option><option' + (!/casa|\bph\b/i.test(t.tipoPropiedad || '') ? ' selected' : '') + '>Departamento</option></select>') +
+          rf('Ambientes', '<input id="rad-amb" class="input" type="number" placeholder="opcional" style="width:100%;">') +
+          rf('Operación', '<select id="rad-op" class="input" style="width:100%;"><option>Venta</option><option>Alquiler</option></select>') +
+        '</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;">' +
+          '<span style="font-size:.62rem;color:var(--muted);">Radio:</span>' +
+          '<button class="btn btn-ghost btn-xs rad-radio rad-on" data-r="500" onclick="radarRadio(this)">500 m</button>' +
+          '<button class="btn btn-ghost btn-xs rad-radio" data-r="800" onclick="radarRadio(this)">800 m</button>' +
+          '<button class="btn btn-ghost btn-xs rad-radio" data-r="1000" onclick="radarRadio(this)">1000 m</button>' +
+          '<span style="font-size:.62rem;color:var(--muted);margin-left:8px;">Fuentes:</span>' +
+          '<label style="font-size:.66rem;color:var(--muted);display:inline-flex;gap:4px;align-items:center;"><input type="checkbox" id="rad-src-ml" checked> Mercado Libre</label>' +
+          '<label style="font-size:.66rem;color:var(--muted);display:inline-flex;gap:4px;align-items:center;"><input type="checkbox" id="rad-src-crm"> CRM propio</label>' +
+          '<label style="font-size:.66rem;color:var(--muted);display:inline-flex;gap:4px;align-items:center;"><input type="checkbox" id="rad-src-man" checked> Import manual</label>' +
+        '</div>' +
+        '<button class="btn btn-gold btn-sm" style="margin-top:11px;" onclick="radarPreparar(\'' + t.id + '\')" title="Construye el payload del Radar — la búsqueda real se conecta en S104B">🛰️ Preparar búsqueda · pendiente de conectar API</button>' +
+        '<div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:15px 0 6px;">Resultados <span style="opacity:.6;">(vacío — sin búsqueda real)</span></div>' +
+        '<div class="ts-rstats">' +
+          rstat('Encontrados', '0') + rstat('Deduplicados', '0') + rstat('Candidatos', '0') + rstat('Aprobados', '0') + rstat('Descartados', '0') +
+          rstat('Prom. USD/m²', '—') + rstat('Mediana USD/m²', '—') + rstat('Expensas prom.', '—') + rstat('Radio usado', '—') +
+        '</div>' +
+        '<div style="overflow-x:auto;margin-top:10px;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="font-size:.6rem;color:var(--muted);text-transform:uppercase;"><th style="text-align:left;padding:4px 6px;">Fuente</th><th style="text-align:left;">Link</th><th style="text-align:right;">Dist.</th><th style="text-align:right;">Precio</th><th style="text-align:right;">m²</th><th style="text-align:right;">USD/m²</th><th style="text-align:right;">Expensas</th><th style="text-align:right;">Score</th><th>Estado</th><th>Acción</th></tr></thead><tbody><tr><td colspan="10" style="padding:16px;text-align:center;font-size:.72rem;color:var(--muted);">Sin resultados todavía — la búsqueda por zona se conecta en S104B. Mientras tanto, usá <b>📥 Importar comparables</b> (paste de links/texto, ya funcional).</td></tr></tbody></table></div>' +
+      '</div>' +
+    '</details>';
     ensureTsStyle();
     el.innerHTML = '<div class="ts-detalle">' + hero + ctas +
-      (ejecutiva ? (preciosHtml + escenarios + magninBlock) : (emptyState + tecnicaHtml + magninBlock)) +
+      (ejecutiva ? (preciosHtml + escenarios + magninBlock) : (emptyState + radarBlock + tecnicaHtml + magninBlock)) +
     '</div>';
   }
   window.abrirTasacion = abrirTasacion;
   window.renderTasacionDetalle = renderTasacionDetalle;
+  // S104B.1: Radar — selección de radio + "preparar búsqueda" (arma el payload real; NO llama backend; la API se conecta en S104B).
+  window.radarRadio = function (btn) { Array.prototype.forEach.call(document.querySelectorAll('.rad-radio'), function (b) { b.classList.remove('rad-on'); }); if (btn) btn.classList.add('rad-on'); };
+  window.radarPreparar = function (tasId) {
+    var v = function (id) { var e = document.getElementById(id); return e ? e.value : ''; };
+    var ck = function (id) { var e = document.getElementById(id); return !!(e && e.checked); };
+    var rb = document.querySelector('.rad-radio.rad-on'); var radio = rb ? Number(rb.getAttribute('data-r')) : 500;
+    var fuentes = []; if (ck('rad-src-ml')) fuentes.push('mercadolibre'); if (ck('rad-src-crm')) fuentes.push('crm'); if (ck('rad-src-man')) fuentes.push('manual');
+    var payload = { radioM: radio, direccion: v('rad-dir'), tipologia: v('rad-tipo'), m2Objetivo: Number(v('rad-m2')) || null, toleranciaM2: Number(v('rad-tol')) || 20, ambientes: Number(v('rad-amb')) || null, fuentes: fuentes, operacion: v('rad-op'), modo: 'preview' };
+    console.log('[Radar] payload listo para POST /api/crm/tasacion/' + tasId + '/radar →', payload);
+    toast('🛰️ Radar listo — el formulario arma el payload. La búsqueda real (Mercado Libre API) se conecta en S104B. Payload en consola.', 'ok');
+  };
   // S95B.3: saltar directo al intake de comparables (entra a técnica + scrollea al importador) desde cualquier vista
   window.tsIntake = function () { window.tsVista = 'tecnica'; renderTasacionDetalle(); setTimeout(function () { f360goto('ts-import'); }, 30); };
 
