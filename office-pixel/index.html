@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/pixel.css?v=s92" />
+  <link rel="stylesheet" href="css/pixel.css?v=s93" />
 </head>
 <body>
 
@@ -1096,6 +1096,84 @@
         <h1>TASACIONES</h1>
         <span class="badge badge-gold">Comparables · Magnin</span>
       </div>
+      <!-- S104A.1: Portada metodológica (estática, explicativa — no inventa datos, no toca el motor) -->
+      <style>
+        #view-tasaciones .tsp-hero{border:1px solid rgba(212,175,55,.35);border-radius:14px;padding:14px 16px;background:linear-gradient(180deg,rgba(212,175,55,.08),rgba(212,175,55,.02));margin-bottom:12px;}
+        #view-tasaciones .tsp-hero-title{font-size:1.15rem;font-weight:800;color:var(--gold);}
+        #view-tasaciones .tsp-hero-sub{font-size:.84rem;color:var(--text);margin-top:5px;line-height:1.45;}
+        #view-tasaciones .tsp-hero-note{font-size:.68rem;color:var(--muted);margin-top:7px;border-top:1px dashed rgba(212,175,55,.2);padding-top:6px;}
+        #view-tasaciones .tsp-pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:12px;}
+        #view-tasaciones .tsp-pillar{border:1px solid var(--border);border-radius:12px;padding:11px 13px;background:rgba(255,255,255,.015);}
+        #view-tasaciones .tsp-p-h{font-size:.82rem;font-weight:700;margin-bottom:6px;}
+        #view-tasaciones .tsp-pillar ul{margin:0;padding-left:15px;font-size:.72rem;color:var(--muted);line-height:1.6;}
+        #view-tasaciones .tsp-metrics{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+        #view-tasaciones .tsp-metric{font-size:.66rem;border:1px solid var(--border);border-radius:8px;padding:3px 9px;color:var(--muted);}
+        #view-tasaciones .tsp-metric b{color:var(--text);}
+        #view-tasaciones .tsp-flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:12px;}
+        #view-tasaciones .tsp-step{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;border:1px solid var(--border);border-radius:9px;padding:4px 10px;}
+        #view-tasaciones .tsp-step .n{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:rgba(212,175,55,.18);color:var(--gold);font-size:.62rem;font-weight:700;flex-shrink:0;}
+        #view-tasaciones .tsp-step.real{border-color:var(--gold);background:rgba(212,175,55,.1);color:var(--gold);}
+        #view-tasaciones .tsp-arrow{color:var(--muted);opacity:.45;font-size:.7rem;}
+        #view-tasaciones .tsp-det{border:1px solid var(--border);border-radius:11px;padding:9px 13px;margin-bottom:10px;background:rgba(255,255,255,.012);}
+        #view-tasaciones .tsp-det>summary{font-size:.78rem;font-weight:600;color:var(--gold);cursor:pointer;list-style:none;}
+        #view-tasaciones .tsp-det>summary::-webkit-details-marker{display:none;}
+        #view-tasaciones .tsp-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+        #view-tasaciones .tsp-tag{font-size:.66rem;border:1px solid var(--border);border-radius:7px;padding:2px 8px;color:var(--muted);}
+        #view-tasaciones .tsp-road{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:7px;margin-top:9px;}
+        #view-tasaciones .tsp-road-item{font-size:.7rem;border:1px solid rgba(94,200,216,.25);border-radius:8px;padding:6px 9px;color:#aee4ee;background:rgba(94,200,216,.04);}
+        @media(max-width:700px){#view-tasaciones .tsp-pillars{grid-template-columns:1fr;}}
+      </style>
+      <div class="tsp">
+        <div class="tsp-hero">
+          <div class="tsp-hero-title">🧮 Tasador híbrido Gringo</div>
+          <div class="tsp-hero-sub">Estima el <b>precio probable de cierre</b> combinando <b>comparables de mercado</b>, <b>ajustes Magnin</b> y <b>señales de captabilidad comercial</b>.</div>
+          <div class="tsp-hero-note">⚠️ Herramienta operativa para decidir precio de <b>publicación, cierre y estrategia</b> — no es una tasación legal ni un valor mágico.</div>
+        </div>
+        <div class="tsp-pillars">
+          <div class="tsp-pillar"><div class="tsp-p-h">📊 Comparables de mercado</div><ul><li>links / manual / import</li><li>propiedades similares</li><li>precio · m² · USD/m²</li><li>estado del aviso</li><li>inclusión / exclusión</li></ul></div>
+          <div class="tsp-pillar"><div class="tsp-p-h">⚖️ Ajuste Magnin</div><ul><li>ajusta diferencias vs la propiedad objetivo</li><li>ubicación · edificio · superficie · estado · manual</li><li><b>tope ±25%</b></li><li>evita que un comparable distorsione todo</li></ul></div>
+          <div class="tsp-pillar"><div class="tsp-p-h">🎯 Salida comercial</div><ul><li>cierre probable · publicación</li><li>venta rápida · neto bolsillo</li><li>semáforo captabilidad · Price Gap</li><li>estrategia recomendada</li></ul></div>
+        </div>
+        <div class="tsp-metrics">
+          <span class="tsp-metric" title="Valor realista al que cerraría"><b>Cierre probable</b></span>
+          <span class="tsp-metric" title="A qué salir al mercado"><b>Publicación sugerida</b></span>
+          <span class="tsp-metric" title="Si necesita liquidez"><b>Venta rápida</b></span>
+          <span class="tsp-metric" title="Lo que recibe el dueño"><b>Neto bolsillo</b></span>
+          <span class="tsp-metric" title="Desvío vs el precio pretendido"><b>Price Gap</b></span>
+          <span class="tsp-metric" title="Captabilidad comercial"><b>Semáforo</b></span>
+          <span class="tsp-metric" title="Calidad del cálculo"><b>Confianza</b></span>
+          <span class="tsp-metric" title="Base del cálculo"><b>Comparables usados</b></span>
+        </div>
+        <div class="tsp-flow">
+          <span class="tsp-step"><span class="n">1</span> Cargar propiedad objetivo</span><span class="tsp-arrow">→</span>
+          <span class="tsp-step"><span class="n">2</span> Importar comparables</span><span class="tsp-arrow">→</span>
+          <span class="tsp-step"><span class="n">3</span> Revisar / excluir</span><span class="tsp-arrow">→</span>
+          <span class="tsp-step"><span class="n">4</span> Recalcular</span><span class="tsp-arrow">→</span>
+          <span class="tsp-step"><span class="n">5</span> Ejecutiva / Técnica</span><span class="tsp-arrow">→</span>
+          <span class="tsp-step real" title="ACCIÓN REAL: genera PDF, sube a Drive y puede enviar por WhatsApp"><span class="n">6</span> Carpeta Wow · real</span>
+        </div>
+        <details class="tsp-det">
+          <summary>🔎 Para tasar mejor, cargá más contexto</summary>
+          <div class="tsp-tags">
+            <span class="tsp-tag">Dirección exacta</span><span class="tsp-tag">m² cubiertos y descubiertos</span><span class="tsp-tag">Piso</span><span class="tsp-tag">Orientación</span><span class="tsp-tag">Disposición</span><span class="tsp-tag">Estado</span><span class="tsp-tag">Antigüedad</span><span class="tsp-tag">Amenities</span><span class="tsp-tag">Expensas</span><span class="tsp-tag">Cochera</span><span class="tsp-tag">Baulera</span><span class="tsp-tag">Fotos</span><span class="tsp-tag">Planos</span><span class="tsp-tag">Escritura / superficie real</span><span class="tsp-tag">Comparables de venta cerrada</span><span class="tsp-tag">Precio pretendido</span><span class="tsp-tag">Urgencia</span><span class="tsp-tag">NURC del propietario</span>
+          </div>
+          <div style="font-size:.64rem;color:var(--muted);margin-top:8px;opacity:.8;">Más contexto = ajuste Magnin más fino y semáforo más confiable. (Explicativo — no agrega campos nuevos.)</div>
+        </details>
+        <details class="tsp-det">
+          <summary>🚀 Próximas mejoras del Tasador (roadmap)</summary>
+          <div class="tsp-road">
+            <div class="tsp-road-item">🪽 <b>Hermes Tasador</b> — pegás links/comparables y Hermes los interpreta</div>
+            <div class="tsp-road-item">🎚️ <b>Escenarios de precio</b> — agresivo / equilibrado / conservador</div>
+            <div class="tsp-road-item">📈 <b>Renta / ROI</b> para inversión</div>
+            <div class="tsp-road-item">🔁 <b>Backtesting</b> contra operaciones cerradas</div>
+            <div class="tsp-road-item">⭐ <b>Calidad de comparable</b></div>
+            <div class="tsp-road-item">💧 <b>Liquidez por zona</b></div>
+            <div class="tsp-road-item">🚨 <b>Alertas</b> de precio fuera de mercado</div>
+            <div class="tsp-road-item">📄 <b>PDF Wow más comercial</b></div>
+          </div>
+          <div style="font-size:.64rem;color:var(--muted);margin-top:8px;opacity:.8;">Roadmap visual — todavía no implementado.</div>
+        </details>
+      </div>
       <!-- TASACIONES por comparables (movida de Propiedades en S80B2A) -->
       <div class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.3);" role="region" aria-label="Tasaciones por comparables">
         <div class="card-head">
@@ -1696,7 +1774,7 @@
 <!-- Scripts -->
 <!-- S45: ?v= cache-buster — subir la versión en cada deploy con cambios de JS/CSS
      (el HTML revalida siempre en Netlify; el query nuevo fuerza al browser a bajar el asset fresco) -->
-<script src="js/api.js?v=s92"></script>
-<script src="js/app.js?v=s92"></script>
+<script src="js/api.js?v=s93"></script>
+<script src="js/app.js?v=s93"></script>
 </body>
 </html>
