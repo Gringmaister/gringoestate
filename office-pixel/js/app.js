@@ -2559,7 +2559,12 @@
     toast('Calculando…', 'ok');
     var d = await apiFetch('/crm/tasacion/calcular', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
     if (d && d.ok) {
-      toast('🧮 TASACIÓN: USD ' + d.tasacionUsd.toLocaleString('es-AR') + ' (' + d.usdM2Zona + ' USD/m² × ' + d.m2Ponderados + 'm²)' + (d.outliers.length ? ' · ' + d.outliers.length + ' outlier(s) excluidos' : ''), 'ok');
+      // S104A.2: el endpoint devuelve precios.{cierre…} + usdM2Ajustado + outliers (NO tasacionUsd/usdM2Zona) → guards para no crashear el toast.
+      var precio = (d.precios && d.precios.cierre != null) ? d.precios.cierre : d.tasacionUsd;
+      var usdm2 = (d.usdM2Ajustado != null) ? d.usdM2Ajustado : (d.usdM2Zona != null ? d.usdM2Zona : d.usdM2Base);
+      var nOut = (d.outliers || []).length;
+      var det = (precio != null ? 'USD ' + Number(precio).toLocaleString('es-AR') : 'calculada') + (usdm2 != null && d.m2Ponderados != null ? ' (' + usdm2 + ' USD/m² × ' + d.m2Ponderados + 'm²)' : '') + (nOut ? ' · ' + nOut + ' outlier(s) excluidos' : '');
+      toast('🧮 TASACIÓN: ' + det, 'ok');
       abrirTasacion(id); loadTasaciones();
     } else toast('Error: ' + ((d && d.error) || 'sin conexión'), 'err');
   }
