@@ -2504,7 +2504,8 @@
           '<label style="font-size:.66rem;color:var(--muted);display:inline-flex;gap:4px;align-items:center;"><input type="checkbox" id="rad-src-crm"> CRM propio</label>' +
           '<label style="font-size:.66rem;color:var(--muted);display:inline-flex;gap:4px;align-items:center;"><input type="checkbox" id="rad-src-man" checked> Import manual</label>' +
         '</div>' +
-        '<button class="btn btn-gold btn-sm" style="margin-top:11px;" onclick="radarPreparar(\'' + t.id + '\')" title="Construye el payload del Radar — la búsqueda real se conecta en S104B">🛰️ Preparar búsqueda · pendiente de conectar API</button>' +
+        '<button id="rad-btn" class="btn btn-gold btn-sm" style="margin-top:11px;" onclick="radarPreparar(\'' + t.id + '\')" title="Llama al Radar en modo dry-run (sin búsqueda real hasta configurar Mercado Libre OAuth)">🛰️ Preparar búsqueda</button>' +
+        '<div id="rad-status" style="font-size:.7rem;margin-top:8px;min-height:15px;line-height:1.5;"></div>' +
         '<div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:15px 0 6px;">Resultados <span style="opacity:.6;">(vacío — sin búsqueda real)</span></div>' +
         '<div class="ts-rstats">' +
           rstat('Encontrados', '0') + rstat('Deduplicados', '0') + rstat('Candidatos', '0') + rstat('Aprobados', '0') + rstat('Descartados', '0') +
@@ -2522,14 +2523,35 @@
   window.renderTasacionDetalle = renderTasacionDetalle;
   // S104B.1: Radar — selección de radio + "preparar búsqueda" (arma el payload real; NO llama backend; la API se conecta en S104B).
   window.radarRadio = function (btn) { Array.prototype.forEach.call(document.querySelectorAll('.rad-radio'), function (b) { b.classList.remove('rad-on'); }); if (btn) btn.classList.add('rad-on'); };
-  window.radarPreparar = function (tasId) {
+  window.radarPreparar = async function (tasId) {
     var v = function (id) { var e = document.getElementById(id); return e ? e.value : ''; };
     var ck = function (id) { var e = document.getElementById(id); return !!(e && e.checked); };
     var rb = document.querySelector('.rad-radio.rad-on'); var radio = rb ? Number(rb.getAttribute('data-r')) : 500;
     var fuentes = []; if (ck('rad-src-ml')) fuentes.push('mercadolibre'); if (ck('rad-src-crm')) fuentes.push('crm'); if (ck('rad-src-man')) fuentes.push('manual');
-    var payload = { radioM: radio, direccion: v('rad-dir'), tipologia: v('rad-tipo'), m2Objetivo: Number(v('rad-m2')) || null, toleranciaM2: Number(v('rad-tol')) || 20, ambientes: Number(v('rad-amb')) || null, fuentes: fuentes, operacion: v('rad-op'), modo: 'preview' };
-    console.log('[Radar] payload listo para POST /api/crm/tasacion/' + tasId + '/radar →', payload);
-    toast('🛰️ Radar listo — el formulario arma el payload. La búsqueda real (Mercado Libre API) se conecta en S104B. Payload en consola.', 'ok');
+    var payload = { radioM: radio, direccion: v('rad-dir'), tipologia: v('rad-tipo'), m2Objetivo: Number(v('rad-m2')) || null, toleranciaM2: Number(v('rad-tol')) || 20, ambientes: Number(v('rad-amb')) || null, fuentes: fuentes, operacion: v('rad-op'), modo: 'dry-run' };
+    var st = document.getElementById('rad-status'), btn = document.getElementById('rad-btn');
+    if (st) st.innerHTML = '<span style="color:#5ec8d8;">🛰️ Preparando (dry-run)…</span>';
+    if (btn) btn.disabled = true;
+    try {
+      var r = await apiFetch('/crm/tasacion/' + tasId + '/radar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      console.log('[Radar] respuesta dry-run →', r);
+      var extra = (r && r.warnings && r.warnings.length) ? '<div style="color:var(--muted);font-size:.62rem;margin-top:3px;">⚠ ' + escHtml(r.warnings.join(' · ')) + '</div>' : '';
+      if (r && r.requires_config) {
+        if (st) st.innerHTML = '<span style="color:var(--warn);font-weight:600;">⚙️ Radar listo — falta configurar Mercado Libre OAuth.</span> <span style="color:var(--muted);font-size:.64rem;">(ver guía S104B-ML-OAUTH-SETUP)</span>' + extra;
+        toast('Radar listo — falta configurar Mercado Libre OAuth (S104B).', 'ok');
+      } else if (r && r.ok) {
+        var n = (r.resumen && r.resumen.candidatos) || 0;
+        if (st) st.innerHTML = '<span style="color:var(--ok);font-weight:600;">✅ Búsqueda preparada — ' + n + ' candidatos.</span>' + extra;
+        toast('Radar: búsqueda preparada (' + n + ' candidatos).', 'ok');
+      } else {
+        if (st) st.innerHTML = '<span style="color:var(--danger);">' + escHtml((r && r.error) || 'No pude preparar la búsqueda — revisá el formulario.') + '</span>';
+        toast((r && r.error) || 'Radar: revisá el formulario', 'err');
+      }
+    } catch (e) {
+      if (st) st.innerHTML = '<span style="color:var(--warn);">⚙️ Radar listo — el backend todavía no responde. Reintentá en un momento.</span>';
+      toast('Radar listo — backend pendiente.', 'ok');
+    }
+    if (btn) btn.disabled = false;
   };
   // S95B.3: saltar directo al intake de comparables (entra a técnica + scrollea al importador) desde cualquier vista
   window.tsIntake = function () { window.tsVista = 'tecnica'; renderTasacionDetalle(); setTimeout(function () { f360goto('ts-import'); }, 30); };
