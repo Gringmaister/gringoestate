@@ -4166,6 +4166,7 @@
         (bloq ? '<span class="badge" style="background:var(--danger);color:#fff;">🔴 Trabada</span>' : '') +
         '<span style="margin-left:auto;"></span>' +
         '<button class="btn btn-gold btn-sm" onclick="abrirOperacion(\'' + op.id + '\')">✏️ Edición rápida</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="ContratoAlq.open(ContratoAlq.prefillFromOp(window.opF360))" title="Armar el borrador del contrato de alquiler (front-only · revisión legal)">📄 ' + (op.tipo === 'Alquiler' ? 'Contrato de alquiler' : 'Preparar contrato de alquiler') + '</button>' +
         (op.url ? '<a class="btn btn-ghost btn-sm" style="text-decoration:none;" href="' + op.url + '" target="_blank" rel="noopener">↗ Notion</a>' : '') +
       '</div>' + nav + '</div>';
     document.getElementById('op-f360-inner').innerHTML = header +

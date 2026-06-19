@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/pixel.css?v=s98" />
+  <link rel="stylesheet" href="css/pixel.css?v=s99" />
 </head>
 <body>
 
@@ -1071,6 +1071,14 @@
         <h1>DOCUMENTOS</h1>
         <span class="badge badge-muted" id="crm-audit-count">—</span>
       </div>
+      <!-- S105: Generador rápido de contrato de alquiler (front-only, funciona sin operación) -->
+      <div class="card" style="margin-bottom:14px;border-color:rgba(212,175,55,0.3);" role="region" aria-label="Generador de contrato de alquiler">
+        <div class="card-head">
+          <div><h2 class="card-title" style="color:var(--gold);">📄 Generador rápido de contrato de alquiler</h2><div class="card-sub">intake + checklist + vista previa + copiar · <b>borrador operativo</b> (revisión legal/escribanía/gestor) · no persiste en CRM</div></div>
+          <button class="btn btn-gold btn-sm" onclick="ContratoAlq.open()">📄 Abrir generador</button>
+        </div>
+        <div class="small muted" style="margin-top:4px;">Funciona aunque todavía no hayas creado la operación. Lo cargado se puede guardar local en este navegador.</div>
+      </div>
       <!-- AUDITORÍA DE CARGAS (movida de Contactos en S80B2A) -->
       <div id="cblock-auditoria" class="card" style="margin-bottom:14px;border-color:rgba(212,166,64,0.3);" role="region" aria-label="Auditoría de cargas de archivos">
         <div class="card-head">
@@ -1798,7 +1806,8 @@
 <!-- Scripts -->
 <!-- S45: ?v= cache-buster — subir la versión en cada deploy con cambios de JS/CSS
      (el HTML revalida siempre en Netlify; el query nuevo fuerza al browser a bajar el asset fresco) -->
-<script src="js/api.js?v=s98"></script>
-<script src="js/app.js?v=s98"></script>
+<script src="js/api.js?v=s99"></script>
+<script src="js/app.js?v=s99"></script>
+<script src="js/contrato.js?v=s99"></script>
 </body>
 </html>
