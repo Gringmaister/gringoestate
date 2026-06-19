@@ -1708,6 +1708,148 @@
     #analyticsSection > .analytics-stack {
       display: none !important;
     }
+
+    /* ─── Finance Dashboard ─── */
+    .finance-shell {
+      border-radius: var(--radius-xl);
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .finance-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .finance-tabs {
+      display: flex;
+      gap: 6px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 14px;
+      padding: 4px;
+      border: 1px solid var(--border);
+    }
+    .fin-tab {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 7px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+    }
+    .fin-tab.active {
+      background: rgba(212,166,64,0.18);
+      color: var(--gold);
+      border: 1px solid rgba(212,166,64,0.3);
+    }
+    .fin-tab[data-fin="metropolitan"].active {
+      background: rgba(91,155,213,0.18);
+      color: #5b9bd5;
+      border: 1px solid rgba(91,155,213,0.3);
+    }
+    .finance-meta {
+      font-size: 11px;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .fin-kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 12px;
+    }
+    .fin-kpi {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .fin-kpi-label {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .fin-kpi-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      line-height: 1;
+      color: var(--gold);
+    }
+    .fin-kpi.metro .fin-kpi-value { color: #5b9bd5; }
+    .fin-kpi.danger .fin-kpi-value { color: var(--danger); }
+    .fin-kpi-sub {
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .fin-charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 18px;
+    }
+    .fin-chart-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015));
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .fin-chart-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .fin-chart-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .fin-chart-badge {
+      font-size: 10px;
+      padding: 3px 9px;
+      border-radius: 8px;
+      background: rgba(212,166,64,0.12);
+      color: var(--gold);
+      border: 1px solid rgba(212,166,64,0.2);
+    }
+    .fin-chart-badge.metro {
+      background: rgba(91,155,213,0.12);
+      color: #5b9bd5;
+      border-color: rgba(91,155,213,0.2);
+    }
+    .fin-chart-stage {
+      position: relative;
+      min-height: 200px;
+      background: rgba(0,0,0,0.12);
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.05);
+      padding: 8px;
+    }
+    .fin-chart-stage canvas { border-radius: 10px; }
+    .fin-panel { display: flex; flex-direction: column; gap: 20px; }
+    .fin-panel.hidden { display: none; }
+    .fin-empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px 20px;
+      font-size: 13px;
+    }
+    @media (max-width: 760px) {
+      .fin-kpi-row { grid-template-columns: repeat(3, 1fr); }
+      .fin-charts-grid { grid-template-columns: 1fr; }
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -2366,6 +2508,86 @@
       </article>
     </section>
 
+    <!-- Finance Dashboard Section -->
+    <section class="section-card finance-shell" id="financeSection">
+      <div class="finance-header">
+        <div>
+          <div class="section-kicker">FINANZAS / FINANCE DASHBOARD</div>
+          <h2 style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:0.04em;margin-top:4px;">Financial Overview</h2>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <div class="finance-tabs">
+            <button class="fin-tab active" data-fin="ambbi">AMBBI</button>
+            <button class="fin-tab" data-fin="metropolitan">METROPOLITAN</button>
+          </div>
+          <span class="finance-meta" id="finMetaUpdated">—</span>
+        </div>
+      </div>
+
+      <!-- AMBBI panel -->
+      <div class="fin-panel" id="finAmbbiPanel">
+        <div class="fin-kpi-row" id="finAmbbiKpis"></div>
+        <div class="fin-charts-grid">
+          <div class="fin-chart-card">
+            <div class="fin-chart-head">
+              <span class="fin-chart-title">Ingresos vs EBITDA</span>
+              <span class="fin-chart-badge">últimos 7 meses</span>
+            </div>
+            <div class="fin-chart-stage"><canvas id="chartAmbbiTrend"></canvas></div>
+          </div>
+          <div class="fin-chart-card">
+            <div class="fin-chart-head">
+              <span class="fin-chart-title">Ocupación %</span>
+              <span class="fin-chart-badge">tendencia</span>
+            </div>
+            <div class="fin-chart-stage"><canvas id="chartAmbbiOcup"></canvas></div>
+          </div>
+          <div class="fin-chart-card" style="grid-column: 1 / -1;">
+            <div class="fin-chart-head">
+              <span class="fin-chart-title">Performance por Unidad — MAYO 2026</span>
+              <span class="fin-chart-badge">ingresos USD</span>
+            </div>
+            <div class="fin-chart-stage" style="min-height:320px;"><canvas id="chartAmbbiUnits"></canvas></div>
+          </div>
+          <div class="fin-chart-card">
+            <div class="fin-chart-head">
+              <span class="fin-chart-title">Gastos por Categoría</span>
+              <span class="fin-chart-badge" id="finExpMes">—</span>
+            </div>
+            <div class="fin-chart-stage" style="min-height:240px;display:flex;align-items:center;justify-content:center;"><canvas id="chartExpenses" style="max-width:260px;max-height:260px;"></canvas></div>
+          </div>
+          <div class="fin-chart-card">
+            <div class="fin-chart-head">
+              <span class="fin-chart-title">ADR Promedio (USD)</span>
+              <span class="fin-chart-badge">tarifa por noche</span>
+            </div>
+            <div class="fin-chart-stage"><canvas id="chartAmbbiAdr"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- METROPOLITAN panel -->
+      <div class="fin-panel hidden" id="finMetroPanel">
+        <div class="fin-kpi-row" id="finMetroKpis"></div>
+        <div class="fin-charts-grid">
+          <div class="fin-chart-card">
+            <div class="fin-chart-head">
+              <span class="fin-chart-title">Resultado Mensual</span>
+              <span class="fin-chart-badge metro">últimos meses</span>
+            </div>
+            <div class="fin-chart-stage"><canvas id="chartMetroTrend"></canvas></div>
+          </div>
+          <div class="fin-chart-card">
+            <div class="fin-chart-head">
+              <span class="fin-chart-title">Resultado por Unidad — último cierre</span>
+              <span class="fin-chart-badge metro">USD</span>
+            </div>
+            <div class="fin-chart-stage"><canvas id="chartMetroUnits"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <div class="footer-note">Wispy Office · command center operativo</div>
   </main>
 
@@ -2455,6 +2677,7 @@
     const brokerageSection = document.getElementById('brokerageSection');
     const modulesSection = document.getElementById('modulesSection');
     const smartHomeSection = document.getElementById('smartHomeSection');
+    const financeSection = document.getElementById('financeSection');
 
     const brokerageKpis = document.getElementById('brokerageKpis');
     const brokerageQueue = document.getElementById('brokerageQueue');
@@ -2568,6 +2791,7 @@
             <button class="nav-btn" data-view="team"><span class="nav-main"><span class="muted-half">EQUIPO</span> <span class="gold-half">TEAM</span></span><span class="nav-sub">👥 collaborators / sla</span></button>
             <button class="nav-btn" data-view="skills"><span class="nav-main"><span class="muted-half">SKILLS</span> <span class="gold-half">MODULES</span></span><span class="nav-sub">🧩 gpts / subagents</span></button>
             <button class="nav-btn" data-view="runtime"><span class="nav-main"><span class="muted-half">RUNTIME</span> <span class="gold-half">LIVE</span></span><span class="nav-sub">📡 bridge / telemetry</span></button>
+            <button class="nav-btn" data-view="finance"><span class="nav-main"><span class="muted-half">FINANZAS</span> <span class="gold-half">CFO</span></span><span class="nav-sub">💰 ambbi / metropolitan</span></button>
           </div>
         </section>
       `;
@@ -2587,11 +2811,12 @@
       modulesSection.classList.add('view-panel', 'view-skills', 'hidden');
       runtimeSection.classList.add('view-panel', 'view-runtime', 'hidden');
       smartHomeSection.classList.add('view-panel', 'view-smarthome', 'hidden');
+      financeSection.classList.add('view-panel', 'view-finance', 'hidden');
 
       mainGrid.before(shell);
       shell.append(leftSidebar, workspaceMain);
       leftSidebar.appendChild(sideStack);
-      workspaceMain.append(topGrid, heroDeck, brainSection, analyticsSection, opsSection, collaboratorsSection, pipelineSection, brokerageSection, modulesSection, runtimeSection, smartHomeSection);
+      workspaceMain.append(topGrid, heroDeck, brainSection, analyticsSection, opsSection, collaboratorsSection, pipelineSection, brokerageSection, modulesSection, runtimeSection, smartHomeSection, financeSection);
       mainGrid.remove();
 
       leftSidebar.querySelectorAll('.nav-btn').forEach((button) => {
@@ -3895,6 +4120,399 @@
   }
 
   document.addEventListener("DOMContentLoaded", loadAdvancedTokenTelemetry);
+</script>
+
+<script>
+/* ─── Finance Dashboard ─── */
+(function () {
+  const GOLD = '#d4a640';
+  const GOLD_DIM = 'rgba(212,166,64,0.18)';
+  const BLUE = '#5b9bd5';
+  const BLUE_DIM = 'rgba(91,155,213,0.18)';
+  const GREEN = '#4dde95';
+  const RED = '#ff7b7b';
+  const GRID = 'rgba(255,255,255,0.07)';
+  const TEXT = '#9f988d';
+
+  const finCharts = {};
+  let finLoaded = false;
+  let finActiveTab = 'ambbi';
+
+  function usd(v) {
+    const n = Number(v || 0);
+    const abs = Math.abs(n);
+    const fmt = abs >= 1000 ? `$${(abs/1000).toFixed(1)}k` : `$${abs.toFixed(0)}`;
+    return n < 0 ? `-${fmt}` : fmt;
+  }
+  function pct(v) { return `${(Number(v||0)*100).toFixed(0)}%`; }
+  function adr(v) { return `$${Number(v||0).toFixed(0)}`; }
+
+  function makeKpi(label, value, sub, cls) {
+    return `<div class="fin-kpi${cls?' '+cls:''}">
+      <div class="fin-kpi-label">${label}</div>
+      <div class="fin-kpi-value">${value}</div>
+      ${sub ? `<div class="fin-kpi-sub">${sub}</div>` : ''}
+    </div>`;
+  }
+
+  function destroyChart(id) {
+    if (finCharts[id]) { try { finCharts[id].destroy(); } catch {} delete finCharts[id]; }
+  }
+
+  function baseLineOptions(yLabel) {
+    return {
+      responsive: true,
+      maintainAspectRatio: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { color: TEXT, boxWidth: 10, usePointStyle: true } },
+        tooltip: { backgroundColor: '#111', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, titleColor: '#f5f1e8', bodyColor: TEXT }
+      },
+      scales: {
+        x: { grid: { color: GRID }, ticks: { color: TEXT, font: { size: 10 } } },
+        y: {
+          grid: { color: GRID }, ticks: { color: TEXT, font: { size: 10 },
+            callback: (v) => `$${(v/1000).toFixed(0)}k`
+          },
+          title: yLabel ? { display: false } : undefined
+        }
+      }
+    };
+  }
+
+  function renderAmbbiTrendChart(history) {
+    destroyChart('ambbiTrend');
+    const ambbi = history.filter(m => m.empresa === 'Ambbi');
+    const labels = ambbi.map(m => m.mes.slice(0,3));
+    const ctx = document.getElementById('chartAmbbiTrend');
+    if (!ctx) return;
+    finCharts['ambbiTrend'] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Ingresos',
+            data: ambbi.map(m => m.ingresosUSD),
+            borderColor: GOLD,
+            backgroundColor: GOLD_DIM,
+            fill: true,
+            tension: 0.35,
+            pointRadius: 4,
+            pointBackgroundColor: GOLD
+          },
+          {
+            label: 'EBITDA',
+            data: ambbi.map(m => m.ebitdaUSD),
+            borderColor: GREEN,
+            backgroundColor: 'rgba(77,222,149,0.08)',
+            fill: true,
+            tension: 0.35,
+            pointRadius: 4,
+            pointBackgroundColor: GREEN
+          }
+        ]
+      },
+      options: baseLineOptions()
+    });
+  }
+
+  function renderAmbbiOcupChart(history) {
+    destroyChart('ambbiOcup');
+    const ambbi = history.filter(m => m.empresa === 'Ambbi');
+    const ctx = document.getElementById('chartAmbbiOcup');
+    if (!ctx) return;
+    finCharts['ambbiOcup'] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ambbi.map(m => m.mes.slice(0,3)),
+        datasets: [{
+          label: 'Ocupación %',
+          data: ambbi.map(m => Math.round((m.ocupacionPct||0)*100)),
+          borderColor: BLUE,
+          backgroundColor: BLUE_DIM,
+          fill: true,
+          tension: 0.35,
+          pointRadius: 4,
+          pointBackgroundColor: BLUE
+        }]
+      },
+      options: {
+        ...baseLineOptions(),
+        scales: {
+          x: { grid: { color: GRID }, ticks: { color: TEXT, font: { size: 10 } } },
+          y: {
+            min: 0, max: 100,
+            grid: { color: GRID }, ticks: { color: TEXT, font: { size: 10 }, callback: v => `${v}%` }
+          }
+        }
+      }
+    });
+  }
+
+  function renderAmbbiAdrChart(history) {
+    destroyChart('ambbiAdr');
+    const ambbi = history.filter(m => m.empresa === 'Ambbi');
+    const ctx = document.getElementById('chartAmbbiAdr');
+    if (!ctx) return;
+    finCharts['ambbiAdr'] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ambbi.map(m => m.mes.slice(0,3)),
+        datasets: [{
+          label: 'ADR (USD/noche)',
+          data: ambbi.map(m => m.adrUSD||0),
+          backgroundColor: GOLD_DIM,
+          borderColor: GOLD,
+          borderWidth: 1.5,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        ...baseLineOptions(),
+        scales: {
+          x: { grid: { color: GRID }, ticks: { color: TEXT, font: { size: 10 } } },
+          y: { grid: { color: GRID }, ticks: { color: TEXT, font: { size: 10 }, callback: v => `$${v}` } }
+        }
+      }
+    });
+  }
+
+  function renderAmbbiUnitsChart(units) {
+    destroyChart('ambbiUnits');
+    const ctx = document.getElementById('chartAmbbiUnits');
+    if (!ctx) return;
+    const sorted = [...units].sort((a,b) => b.ingresosUSD - a.ingresosUSD);
+    const labels = sorted.map(u => u.nombre.replace('Uriburu ','#'));
+    finCharts['ambbiUnits'] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Ingresos',
+            data: sorted.map(u => u.ingresosUSD),
+            backgroundColor: GOLD_DIM,
+            borderColor: GOLD,
+            borderWidth: 1.5,
+            borderRadius: 4
+          },
+          {
+            label: 'Resultado neto',
+            data: sorted.map(u => u.resultadoUSD),
+            backgroundColor: 'rgba(77,222,149,0.12)',
+            borderColor: GREEN,
+            borderWidth: 1.5,
+            borderRadius: 4
+          }
+        ]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: TEXT, boxWidth: 10, usePointStyle: true } },
+          tooltip: { backgroundColor: '#111', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, titleColor: '#f5f1e8', bodyColor: TEXT }
+        },
+        scales: {
+          x: { grid: { color: GRID }, ticks: { color: TEXT, font: { size: 10 }, callback: v => `$${v}` } },
+          y: { grid: { color: GRID }, ticks: { color: TEXT, font: { size: 9 } } }
+        }
+      }
+    });
+  }
+
+  function renderExpensesChart(expenses) {
+    destroyChart('expenses');
+    const ctx = document.getElementById('chartExpenses');
+    if (!ctx) return;
+    const cats = (expenses.byCategory || []).slice(0, 6);
+    const pill = document.getElementById('finExpMes');
+    if (pill) pill.textContent = expenses.mes || '—';
+    const colors = [GOLD, BLUE, GREEN, '#a78bfa', '#f97316', '#e879f9'];
+    finCharts['expenses'] = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: cats.map(c => c.cat),
+        datasets: [{
+          data: cats.map(c => c.usd),
+          backgroundColor: colors.slice(0, cats.length).map(c => c + '55'),
+          borderColor: colors.slice(0, cats.length),
+          borderWidth: 1.5,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        cutout: '65%',
+        plugins: {
+          legend: { position: 'bottom', labels: { color: TEXT, boxWidth: 10, usePointStyle: true, font: { size: 10 } } },
+          tooltip: {
+            backgroundColor: '#111', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, titleColor: '#f5f1e8', bodyColor: TEXT,
+            callbacks: { label: ctx => ` $${ctx.raw.toLocaleString()}` }
+          }
+        }
+      }
+    });
+  }
+
+  function renderMetroTrendChart(history) {
+    destroyChart('metroTrend');
+    const metro = history.filter(m => m.empresa === 'Metropolitan');
+    const ctx = document.getElementById('chartMetroTrend');
+    if (!ctx) return;
+    finCharts['metroTrend'] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: metro.map(m => m.mes.slice(0,3)),
+        datasets: [{
+          label: 'Resultado USD',
+          data: metro.map(m => m.ebitdaUSD),
+          backgroundColor: metro.map(m => m.ebitdaUSD >= 0 ? BLUE_DIM : 'rgba(255,123,123,0.18)'),
+          borderColor: metro.map(m => m.ebitdaUSD >= 0 ? BLUE : RED),
+          borderWidth: 1.5,
+          borderRadius: 5
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { labels: { color: TEXT, boxWidth: 10, usePointStyle: true } },
+          tooltip: { backgroundColor: '#111', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, titleColor: '#f5f1e8', bodyColor: TEXT }
+        },
+        scales: {
+          x: { grid: { color: GRID }, ticks: { color: TEXT, font: { size: 10 } } },
+          y: { grid: { color: GRID }, ticks: { color: TEXT, font: { size: 10 }, callback: v => `$${v}` } }
+        }
+      }
+    });
+  }
+
+  function renderMetroUnitsChart(units) {
+    destroyChart('metroUnits');
+    const ctx = document.getElementById('chartMetroUnits');
+    if (!ctx) return;
+    finCharts['metroUnits'] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: units.map(u => u.nombre),
+        datasets: [{
+          label: 'Resultado USD',
+          data: units.map(u => u.resultadoUSD),
+          backgroundColor: units.map(u => u.resultadoUSD >= 0 ? BLUE_DIM : 'rgba(255,123,123,0.18)'),
+          borderColor: units.map(u => u.resultadoUSD >= 0 ? BLUE : RED),
+          borderWidth: 1.5,
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { backgroundColor: '#111', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, titleColor: '#f5f1e8', bodyColor: TEXT }
+        },
+        scales: {
+          x: { grid: { color: GRID }, ticks: { color: TEXT, font: { size: 10 } } },
+          y: { grid: { color: GRID }, ticks: { color: TEXT, font: { size: 10 }, callback: v => `$${v}` } }
+        }
+      }
+    });
+  }
+
+  function renderFinanceData(data) {
+    const a = data.companies && data.companies.Ambbi;
+    const m = data.companies && data.companies.Metropolitan;
+    const history = data.monthlyHistory || [];
+    const byUnit = data.byUnit || {};
+
+    // Meta timestamp
+    const metaEl = document.getElementById('finMetaUpdated');
+    if (metaEl && data.updatedAt) {
+      const dt = new Date(data.updatedAt);
+      metaEl.textContent = `Actualizado: ${dt.toLocaleDateString('es-AR')} ${dt.toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'})}`;
+    }
+
+    // ── AMBBI KPIs ──
+    const ambbiKpis = document.getElementById('finAmbbiKpis');
+    if (ambbiKpis && a) {
+      ambbiKpis.innerHTML = [
+        makeKpi('Ingresos', usd(a.ingresosUSD), `${a.mes} ${a.anio}`, ''),
+        makeKpi('EBITDA', usd(a.ebitdaUSD), `margen ${pct(a.margenPct)}`, a.ebitdaUSD < 0 ? 'danger' : ''),
+        makeKpi('Ocupación', pct(a.ocupacionPct), `${a.nochesVendidas}/${a.nochesDisp} noches`, ''),
+        makeKpi('ADR', adr(a.adrUSD), 'USD/noche', ''),
+        makeKpi('RevPAR', adr(a.revparUSD), 'ingresos/noche disp.', ''),
+        makeKpi('Reservas', String(a.nReservas||0), `${a.nUnidActivas} unidades activas`, '')
+      ].join('');
+    }
+
+    // ── METROPOLITAN KPIs ──
+    const metroKpis = document.getElementById('finMetroKpis');
+    if (metroKpis && m) {
+      const metroUnits = byUnit.Metropolitan || [];
+      metroKpis.innerHTML = [
+        makeKpi('Resultado', usd(m.ebitdaUSD), `${m.mes} ${m.anio}`, m.ebitdaUSD < 0 ? 'metro danger' : 'metro'),
+        makeKpi('Ingresos', usd(m.ingresosUSD), 'cobrado', 'metro'),
+        makeKpi('Gastos Op.', usd(m.gastosOperativosUSD), 'estructura', 'metro'),
+        makeKpi('Unidades', String(metroUnits.length), 'Juncal + 602 + Migueletes', 'metro'),
+        makeKpi('Ocupación', pct(m.ocupacionPct), `${m.nochesVendidas} noches vendidas`, 'metro'),
+        makeKpi('ADR', adr(m.adrUSD), m.adrUSD > 0 ? 'USD/noche' : 'sin ingresos', 'metro')
+      ].join('');
+    }
+
+    // ── AMBBI charts ──
+    renderAmbbiTrendChart(history);
+    renderAmbbiOcupChart(history);
+    renderAmbbiAdrChart(history);
+    renderAmbbiUnitsChart(byUnit.Ambbi || []);
+    if (data.expenses && data.expenses.byCategory) renderExpensesChart(data.expenses);
+
+    // ── METROPOLITAN charts ──
+    renderMetroTrendChart(history);
+    renderMetroUnitsChart(byUnit.Metropolitan || []);
+  }
+
+  async function loadFinanceData() {
+    if (finLoaded) return;
+    try {
+      const resp = await fetch('/.netlify/functions/wispy-panel-finance');
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const data = await resp.json();
+      if (!data.ok) throw new Error(data.error || 'sin datos');
+      renderFinanceData(data);
+      finLoaded = true;
+    } catch (e) {
+      const el = document.getElementById('finAmbbiKpis');
+      if (el) el.innerHTML = `<div class="fin-empty">No se pudo cargar el snapshot financiero.<br><small>${e.message}</small></div>`;
+    }
+  }
+
+  // Tab switcher within finance section
+  document.addEventListener('DOMContentLoaded', function () {
+    const finSection = document.getElementById('financeSection');
+    if (!finSection) return;
+
+    finSection.querySelectorAll('.fin-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        finSection.querySelectorAll('.fin-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        finActiveTab = btn.dataset.fin;
+        document.getElementById('finAmbbiPanel').classList.toggle('hidden', finActiveTab !== 'ambbi');
+        document.getElementById('finMetroPanel').classList.toggle('hidden', finActiveTab !== 'metropolitan');
+      });
+    });
+
+    // Hook into the nav view switching — load data when finance view is activated
+    const origSwitch = window.__wispyViewSwitch;
+    document.querySelectorAll('.nav-btn[data-view="finance"]').forEach(btn => {
+      btn.addEventListener('click', () => loadFinanceData());
+    });
+  });
+})();
 </script>
 </body>
 </html>
