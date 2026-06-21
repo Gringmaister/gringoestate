@@ -83,7 +83,7 @@
 
     if (section === 'home')      { loadHome(); }
     if (section === 'agentes')   { loadWispy(); loadBambiAgent(); loadAgentActivity('wispy'); }
-    if (section === 'ambbi')     { loadAmbbiResumen(); renderPortfolio(); loadTasks(); }
+    if (section === 'ambbi')     { loadAmbbiResumen(); renderPortfolio(); loadAmbbiHistorico(); loadTasks(); }
     if (section === 'gebroker')  { loadCrm(); }
     if (section === 'documentos'){ if (window.loadDocAuditoria) window.loadDocAuditoria(); if (window.loadDocInbox) window.loadDocInbox(); }
     if (section === 'tasaciones'){ loadTasaciones(); }
@@ -91,6 +91,7 @@
     if (section === 'smarthome') { loadHue(); }
     if (section === 'infra')     { loadDocker(); }
     if (section === 'canarian')  { checkCanaSession(); }
+    if (section === 'gringosletter') { if (window.loadGringosletter) window.loadGringosletter(); }
   }
   window.nav = nav;
 
@@ -482,6 +483,78 @@
     ctx.closePath();
     ctx.fillStyle = grad;
     ctx.fill();
+  }
+
+  /* ─── BAR CHART (nativo Canvas 2D) ─────────────────────────────────── */
+  function drawBarChart(canvasId, data, opts) {
+    var canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    var parent = canvas.parentElement;
+    var W = parent ? parent.clientWidth - 20 : 400;
+    var H = parent ? parent.clientHeight - 20 : 160;
+    if (H < 60) H = 160;
+    canvas.width  = W;
+    canvas.height = H;
+    var ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+
+    var padL = 38, padR = 10, padT = 16, padB = 28;
+    var cW = W - padL - padR;
+    var cH = H - padT - padB;
+    var color  = (opts && opts.color)  ? opts.color  : '#d4a640';
+    var maxVal = (opts && opts.maxVal) ? opts.maxVal : 100;
+
+    if (!data || !data.length) {
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.font = '11px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Sin datos', W / 2, H / 2);
+      return;
+    }
+
+    var n    = data.length;
+    var gapX = Math.max(2, cW * 0.04 / n);
+    var barW = Math.max(4, (cW - gapX * (n + 1)) / n);
+
+    // Grid lines + Y labels
+    [0, 25, 50, 75, 100].forEach(function (pct) {
+      if (pct > maxVal) return;
+      var gy = padT + cH - (cH * pct / maxVal);
+      ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(padL + cW, gy);
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = 'rgba(159,152,141,0.65)';
+      ctx.font = '9px JetBrains Mono, monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(pct + '%', padL - 4, gy + 3);
+    });
+
+    data.forEach(function (d, i) {
+      var x    = padL + gapX + i * (barW + gapX);
+      var barH = Math.max(1, cH * Math.min(d.value, maxVal) / maxVal);
+      var y    = padT + cH - barH;
+      var alpha = 0.55 + 0.45 * (d.value / maxVal);
+
+      // Bar gradient
+      var grad = ctx.createLinearGradient(0, y, 0, padT + cH);
+      grad.addColorStop(0, 'rgba(212,166,64,' + alpha + ')');
+      grad.addColorStop(1, 'rgba(212,166,64,0.25)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, y, barW, barH);
+
+      // Value label on top
+      if (d.value > 0) {
+        ctx.fillStyle = barH > 14 ? 'rgba(255,255,255,0.9)' : 'rgba(212,166,64,0.9)';
+        ctx.font = 'bold 8px JetBrains Mono, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(Math.round(d.value) + '%', x + barW / 2, barH > 14 ? y + 10 : y - 3);
+      }
+
+      // X label
+      ctx.fillStyle = 'rgba(159,152,141,0.7)';
+      ctx.font = '8px JetBrains Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(d.label || '', x + barW / 2, H - 6);
+    });
   }
 
   async function loadIAChart() {
@@ -1351,6 +1424,64 @@
     } catch (e) {}
   }
   window.renderPortfolio = renderPortfolio;
+
+  /* ─── AMBBI · EVOLUCIÓN MENSUAL HISTÓRICA ────────────────────────── */
+  async function loadAmbbiHistorico() {
+    try {
+      var d = await apiFetch('/business/monthly-history?empresa=Ambbi');
+      if (!d || d.__error || !d.ok) return;
+      var history = d.history || [];
+      if (!history.length) return;
+
+      // Label período
+      var first = history[0], last = history[history.length - 1];
+      var el = document.getElementById('hist-period');
+      if (el) el.textContent = 'histórico · ' + (first.mes || '') + ' ' + (first.anio || '') + ' → ' + (last.mes || '') + ' ' + (last.anio || '');
+
+      // Bar chart: ocupación mensual
+      var barData = history.map(function (h) {
+        var ocPct = Math.abs(h.ocupacionPct || 0) <= 1 ? (h.ocupacionPct || 0) * 100 : (h.ocupacionPct || 0);
+        var lbl = h.mes ? h.mes.slice(0, 3).toUpperCase() : '';
+        if (h.anio) lbl += ' \'' + String(h.anio).slice(2);
+        return { label: lbl, value: Math.round(ocPct) };
+      });
+      var canvas = document.getElementById('chart-ambbi-monthly-ocup');
+      if (canvas) {
+        var stage = canvas.closest('.chart-stage');
+        if (stage) { canvas.width = stage.clientWidth - 20; canvas.height = stage.clientHeight - 20; }
+      }
+      drawBarChart('chart-ambbi-monthly-ocup', barData, { color: '#d4a640', maxVal: 100 });
+
+      // Tabla de métricas financieras
+      var container = document.getElementById('ambbi-hist-metrics');
+      if (!container) return;
+      var rows = history.map(function (h) {
+        var ocPct  = Math.abs(h.ocupacionPct || 0) <= 1 ? (h.ocupacionPct || 0) * 100 : (h.ocupacionPct || 0);
+        var marPct = Math.abs(h.margenPct   || 0) <= 1 ? (h.margenPct    || 0) * 100 : (h.margenPct    || 0);
+        var label  = (h.mes || '').slice(0, 3).toUpperCase() + ' ' + String(h.anio || '').slice(2);
+        var eColor = (h.ebitdaUSD || 0) >= 0 ? 'var(--ok)' : 'var(--danger)';
+        var ocColor = ocPct >= 80 ? 'var(--ok)' : ocPct >= 50 ? 'var(--warn)' : 'var(--danger)';
+        return '<div style="display:grid;grid-template-columns:54px 1fr 1fr 1fr 1fr;gap:4px;align-items:center;' +
+               'padding:6px 4px;border-bottom:1px solid rgba(255,255,255,0.04);">' +
+          '<span style="font-size:.7rem;font-family:var(--mono);color:var(--gold);font-weight:700;">' + label + '</span>' +
+          '<div style="text-align:right;line-height:1.3;">' +
+            '<span style="font-size:.6rem;color:var(--muted);display:block;">Ingresos</span>' +
+            '<strong style="font-family:var(--mono);font-size:.76rem;">$' + Math.round(h.ingresosUSD || 0).toLocaleString('es-AR') + '</strong></div>' +
+          '<div style="text-align:right;line-height:1.3;">' +
+            '<span style="font-size:.6rem;color:var(--muted);display:block;">EBITDA</span>' +
+            '<strong style="font-family:var(--mono);font-size:.76rem;color:' + eColor + ';">$' + Math.round(h.ebitdaUSD || 0).toLocaleString('es-AR') + '</strong></div>' +
+          '<div style="text-align:right;line-height:1.3;">' +
+            '<span style="font-size:.6rem;color:var(--muted);display:block;">Margen</span>' +
+            '<strong style="font-family:var(--mono);font-size:.76rem;">' + Math.round(marPct) + '%</strong></div>' +
+          '<div style="text-align:right;line-height:1.3;">' +
+            '<span style="font-size:.6rem;color:var(--muted);display:block;">Ocupación</span>' +
+            '<strong style="font-family:var(--mono);font-size:.76rem;color:' + ocColor + ';">' + Math.round(ocPct) + '%</strong></div>' +
+        '</div>';
+      }).join('');
+      container.innerHTML = '<div style="margin-top:6px;">' + rows + '</div>';
+    } catch (e) {}
+  }
+  window.loadAmbbiHistorico = loadAmbbiHistorico;
 
   /* ─── AMBBI TAB SWITCHER ─────────────────────────────────────────── */
   function ambiTab(which) {
@@ -4101,47 +4232,193 @@
   /* ─── HUE ────────────────────────────────────────────────────────── */
   async function loadHue() {
     var d = await apiFetch('/smart-home/hue');
-    var lightsEl = document.getElementById('hue-lights');
-    var setupEl  = document.getElementById('hue-setup');
-    var badgeEl  = document.getElementById('hue-badge');
-    var subEl    = document.getElementById('hue-sub');
+    var lightsEl  = document.getElementById('hue-lights');
+    var setupEl   = document.getElementById('hue-setup');
+    var badgeEl   = document.getElementById('hue-badge');
+    var subEl     = document.getElementById('hue-sub');
+    var toolbarEl = document.getElementById('hue-toolbar');
+    var groupsEl  = document.getElementById('hue-groups');
+    var scenesEl  = document.getElementById('hue-scenes');
 
     if (!d || !d.available) {
-      if (lightsEl) lightsEl.style.display = 'none';
-      if (setupEl)  setupEl.style.display  = '';
-      if (subEl)    subEl.textContent = 'Bridge no configurado';
-      if (badgeEl)  badgeEl.textContent = 'Sin configurar';
+      if (lightsEl)  lightsEl.style.display = 'none';
+      if (toolbarEl) toolbarEl.style.display = 'none';
+      if (groupsEl)  groupsEl.style.display = 'none';
+      if (scenesEl)  scenesEl.style.display = 'none';
+      if (setupEl)   setupEl.style.display  = '';
+      var needsOauth = d && d.reason === 'needs_oauth';
+      if (subEl)   subEl.textContent = needsOauth ? 'Conectá tu cuenta Philips Hue' : 'Bridge no configurado';
+      if (badgeEl) { badgeEl.textContent = needsOauth ? 'Sin conectar' : 'Sin configurar'; badgeEl.className = 'badge badge-muted'; }
       return;
     }
-    if (setupEl)  setupEl.style.display = 'none';
-    if (lightsEl) lightsEl.style.display = '';
-    if (badgeEl)  { badgeEl.textContent = d.total + ' luces'; badgeEl.className = 'badge badge-ok'; }
-    if (subEl)    subEl.textContent = d.total + ' dispositivos encontrados';
+    if (setupEl)   setupEl.style.display = 'none';
+    if (lightsEl)  lightsEl.style.display = '';
+    if (toolbarEl) toolbarEl.style.display = '';
+    var on = d.on_count != null ? d.on_count : (d.lights || []).filter(function (l) { return l.on; }).length;
+    if (badgeEl) { badgeEl.textContent = on + '/' + d.total + ' encendidas'; badgeEl.className = 'badge ' + (on ? 'badge-ok' : 'badge-muted'); }
+    if (subEl)   subEl.textContent = d.total + ' luces · ' + on + ' encendidas';
 
+    // Mapa de luces por id (para la meta "N/M encendidas" de cada ambiente)
     var lights = d.lights || [];
+    var lightById = {};
+    lights.forEach(function (l) { lightById[String(l.id)] = l; });
+
+    // Ambientes / habitaciones — cards
+    var groups = d.groups || [];
+    if (groupsEl) {
+      if (groups.length) {
+        groupsEl.style.display = '';
+        groupsEl.innerHTML = groups.map(function (g) {
+          var anyOn = g.on != null ? g.on : g.any_on;
+          var ids = g.lights || [];
+          var onN = ids.filter(function (id) { var x = lightById[String(id)]; return x && x.on; }).length;
+          var meta = ids.length ? (onN + '/' + ids.length + ' encendidas') : (anyOn ? 'Encendida' : 'Apagada');
+          return '<button class="hue-room ' + (anyOn ? 'on' : '') + '" onclick="toggleGroup(' + g.id + ',' + (!anyOn) + ')">' +
+            '<span class="hue-room-ico">' + (anyOn ? '💡' : '🌑') + '</span>' +
+            '<span class="hue-room-txt">' +
+              '<span class="hue-room-name">' + escHtml(g.name || 'Habitación') + '</span>' +
+              '<span class="hue-room-meta">' + meta + '</span>' +
+            '</span>' +
+          '</button>';
+        }).join('');
+      } else { groupsEl.style.display = 'none'; }
+    }
+
+    // Luces — bombita que brilla con su color y brillo reales
     if (lightsEl) {
       lightsEl.innerHTML = lights.map(function (l) {
-        var dotCls = l.on && l.reachable ? 'ok' : l.reachable ? 'err' : 'warn';
-        return '<div class="docker-item" style="cursor:pointer;" onclick="toggleHue(' + l.id + ',' + (!l.on) + ')">' +
-          '<div class="d-name"><span class="dot ' + dotCls + '"></span>' + escHtml(l.name || '—') + '</div>' +
-          '<div class="d-status" style="color:' + (l.on ? 'var(--gold)' : 'var(--muted)') + ';">' +
-            (l.on ? 'ON' : 'OFF') + ' · ' + Math.round((l.brightness || 0) / 2.55) + '%' +
-          '</div>' +
+        var pct = Math.round((l.brightness || 0) / 2.55);
+        var color = l.color || '#ffd9a0';
+        var gi = l.on ? Math.max(0.15, (l.brightness || 1) / 254) : 0;
+        var cls = !l.reachable ? 'is-dead' : (l.on ? 'is-on' : 'is-off');
+        var state = !l.reachable ? '⚠ sin energía' : (l.on ? 'On · ' + pct + '%' : 'Off');
+        var ctrls = l.reachable
+          ? '<div class="hue-card-ctrls">' +
+              '<input type="range" class="hue-bri" min="1" max="254" value="' + (l.brightness || 1) + '" ' +
+                'oninput="huePreviewBri(this)" onchange="setHueBri(' + l.id + ', this.value)">' +
+              '<input type="color" class="hue-color" value="' + color + '" title="Color" ' +
+                'onchange="setHueColor(' + l.id + ', this.value)">' +
+            '</div>'
+          : '';
+        return '<div class="hue-card ' + cls + '" style="--lc:' + color + ';--gi:' + gi.toFixed(2) + ';">' +
+          '<button class="hue-orb" title="Prender / apagar" onclick="toggleHue(' + l.id + ',' + (!l.on) + ')">💡</button>' +
+          '<div class="hue-card-name">' + escHtml(l.name || '—') + '</div>' +
+          '<div class="hue-card-state">' + state + '</div>' +
+          ctrls +
         '</div>';
       }).join('');
     }
+
+    loadScenes();
   }
   window.loadHue = loadHue;
 
-  async function toggleHue(id, on) {
-    await apiFetch('/smart-home/hue/toggle', {
+  async function loadScenes() {
+    var scenesEl = document.getElementById('hue-scenes');
+    if (!scenesEl) return;
+    var d = await apiFetch('/smart-home/hue/scenes');
+    var scenes = (d && d.available && d.scenes) ? d.scenes : [];
+    if (!scenes.length) { scenesEl.style.display = 'none'; return; }
+    scenesEl.style.display = '';
+    scenesEl.innerHTML = '<div class="hue-scenes-lbl">🎬 Escenas</div>' +
+      scenes.map(function (s) {
+        return '<button class="hue-scene" style="--sc:' + sceneGradient(s.name) + ';" onclick="activateScene(\'' + s.id + '\', this)">' + escHtml(s.name) + '</button>';
+      }).join('');
+  }
+  window.loadScenes = loadScenes;
+
+  // Preview en vivo del brillo mientras se arrastra el slider (glow + texto).
+  function huePreviewBri(slider) {
+    var card = slider.closest('.hue-card');
+    if (!card) return;
+    card.style.setProperty('--gi', Math.max(0.15, slider.value / 254).toFixed(2));
+    var st = card.querySelector('.hue-card-state');
+    if (st) st.textContent = 'On · ' + Math.round(slider.value / 2.55) + '%';
+  }
+  window.huePreviewBri = huePreviewBri;
+
+  // Color de preview determinístico por nombre de escena (no tenemos el color real).
+  function sceneGradient(name) {
+    var s = String(name || ''), h = 0;
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
+    return 'radial-gradient(circle at 30% 30%,hsl(' + h + ',85%,72%),hsl(' + ((h + 30) % 360) + ',75%,45%) 75%)';
+  }
+
+  async function huePut(payload) {
+    return apiFetch('/smart-home/hue/toggle', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'light', id: id, state: { on: on } })
+      body: JSON.stringify(payload)
     });
+  }
+
+  async function toggleHue(id, on) {
+    await huePut({ type: 'light', id: id, state: { on: on } });
     loadHue();
   }
   window.toggleHue = toggleHue;
+
+  async function toggleGroup(id, on) {
+    await huePut({ type: 'group', id: id, state: { on: on } });
+    loadHue();
+  }
+  window.toggleGroup = toggleGroup;
+
+  async function hueAllOff() {
+    await huePut({ type: 'group', id: 0, state: { on: false } });
+    loadHue();
+  }
+  window.hueAllOff = hueAllOff;
+
+  async function hueAllOn() {
+    await huePut({ type: 'group', id: 0, state: { on: true } });
+    loadHue();
+  }
+  window.hueAllOn = hueAllOn;
+
+  // Color global: aplica el mismo tono a TODAS las luces vía group 0.
+  async function setHueAllColor(hex) {
+    var c = hexToHueSat(hex);
+    await huePut({ type: 'group', id: 0, state: { on: true, hue: c.hue, sat: c.sat } });
+    setTimeout(loadHue, 400);
+  }
+  window.setHueAllColor = setHueAllColor;
+
+  async function setHueBri(id, bri) {
+    bri = parseInt(bri, 10);
+    // bri>0 implica encender
+    await huePut({ type: 'light', id: id, state: { on: true, bri: bri } });
+  }
+  window.setHueBri = setHueBri;
+
+  function hexToHueSat(hex) {
+    var r = parseInt(hex.substr(1, 2), 16) / 255;
+    var g = parseInt(hex.substr(3, 2), 16) / 255;
+    var b = parseInt(hex.substr(5, 2), 16) / 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b), dlt = max - min;
+    var h = 0;
+    if (dlt) {
+      if (max === r) h = ((g - b) / dlt) % 6;
+      else if (max === g) h = (b - r) / dlt + 2;
+      else h = (r - g) / dlt + 4;
+      h *= 60; if (h < 0) h += 360;
+    }
+    var s = max ? dlt / max : 0;
+    return { hue: Math.round(h / 360 * 65535), sat: Math.round(s * 254) };
+  }
+
+  async function setHueColor(id, hex) {
+    var c = hexToHueSat(hex);
+    await huePut({ type: 'light', id: id, state: { on: true, hue: c.hue, sat: c.sat } });
+  }
+  window.setHueColor = setHueColor;
+
+  async function activateScene(sceneId, btn) {
+    if (btn) { btn.classList.add('active'); setTimeout(function () { btn.classList.remove('active'); }, 1200); }
+    await huePut({ type: 'group', id: 0, state: { scene: sceneId } });
+    setTimeout(loadHue, 400);
+  }
+  window.activateScene = activateScene;
 
   /* ─── CANARIAN ────────────────────────────────────────────────────── */
   function checkCanaSession() {
@@ -4174,7 +4451,7 @@
     var errEl = document.getElementById('pin-error');
     try {
       var r = await fetch(API + '/canarian/ledger', {
-        headers: { Accept: 'application/json', 'X-Canarian-Pin': pin }
+        headers: { Accept: 'application/json', 'X-Canarian-Pin': pin, 'x-office-token': window.GO.officeToken() }
       });
       if (r.status === 401) {
         if (errEl) errEl.textContent = 'PIN incorrecto';
@@ -4312,13 +4589,13 @@
     try {
       var r = await fetch(API + '/canarian/ledger', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Canarian-Pin': canarianPin },
+        headers: { 'Content-Type': 'application/json', 'X-Canarian-Pin': canarianPin, 'x-office-token': window.GO.officeToken() },
         body: JSON.stringify(body)
       });
       if (r.ok) {
         hideModal('modal-canarian');
         toast('Movimiento registrado', 'ok');
-        var fresh = await fetch(API + '/canarian/ledger', { headers: { 'X-Canarian-Pin': canarianPin } });
+        var fresh = await fetch(API + '/canarian/ledger', { headers: { 'X-Canarian-Pin': canarianPin, 'x-office-token': window.GO.officeToken() } });
         var fdata = await fresh.json();
         renderLedger(fdata.entries || []);
       } else {
@@ -4336,11 +4613,11 @@
     try {
       var r = await fetch(API + '/canarian/ledger/' + id, {
         method: 'DELETE',
-        headers: { 'X-Canarian-Pin': canarianPin }
+        headers: { 'X-Canarian-Pin': canarianPin, 'x-office-token': window.GO.officeToken() }
       });
       if (r.ok) {
         toast('Movimiento eliminado', 'ok');
-        var fresh = await fetch(API + '/canarian/ledger', { headers: { 'X-Canarian-Pin': canarianPin } });
+        var fresh = await fetch(API + '/canarian/ledger', { headers: { 'X-Canarian-Pin': canarianPin, 'x-office-token': window.GO.officeToken() } });
         var fdata = await fresh.json();
         renderLedger(fdata.entries || []);
       } else {
@@ -5492,4 +5769,1015 @@ window.docAuditReasignar = async function (id) {
 window.docAuditDesasociar = async function (id) {
   var d = await apiFetch('/crm/doc-inbox/desasociar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
   if (d && d.ok) { toast('Desasociado → Sin clasificar', 'ok'); loadDocAuditoria(); } else toast('Error al desasociar', 'err');
+};
+/* ════════════════ GRINGOSLETTER — Editor + Memoria editorial del mercado ════════════════
+ * Modelo de datos pensado para migrar a backend/DB (schemaVersion). Cada edición es un
+ * SNAPSHOT completo e inmutable una vez enviada: si se reedita, se forkea a una versión
+ * nueva sin pisar el histórico. El Historial es la memoria editorial: qué decíamos y cuándo.
+ * Persistencia MVP en localStorage; sin backend, sin costo, offline. */
+var gl_draft = null;
+var gl_noticiaEdit = -1; // índice de noticia en edición (-1 = agregar nueva)
+
+var GL_ESTADOS = {
+  borrador:  { label: 'Borrador',    badge: 'badge-muted' },
+  revision:  { label: 'En revisión', badge: 'badge-warn'  },
+  enviado:   { label: 'Enviado',     badge: 'badge-ok'    },
+  archivado: { label: 'Archivado',   badge: 'badge-muted' }
+};
+var GL_AUD = { interno: 'Interno', equipo: 'Equipo', beta: 'Beta', publico: 'Público' };
+var GL_TAGS = [
+  'compraventa', 'alquileres', 'crédito hipotecario', 'oficinas', 'dólar', 'construcción',
+  'rentabilidad', 'tasaciones', 'captación', 'propietarios', 'compradores', 'inversores',
+  'Recoleta', 'Palermo', 'Belgrano', 'Núñez', 'Colegiales', 'Chacarita', 'Barrio Norte', 'Retiro'
+];
+
+function _glNowISO() { return new Date().toISOString(); }
+
+/* ID único garantizado aun dentro del mismo milisegundo (hay varios sitios que crean
+ * ediciones/forks; Date.now() solo podría colisionar y hacer que _glUpsert pise en vez de agregar). */
+var _glIdSeq = 0;
+function _glNewId() { return 'gl_' + Date.now().toString(36) + '_' + (_glIdSeq++).toString(36) + Math.random().toString(36).slice(2, 6); }
+
+/* Arg JS seguro para incrustar dentro de onclick="fn('...')" (escHtml NO escapa comillas simples) */
+function _glJsArg(s) {
+  return "'" + String(s)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '\\x3C') + "'";
+}
+function _glVal(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+function _glSafeUrl(u) { u = String(u || '').trim(); return /^(https?:|mailto:)/i.test(u) ? u : ''; }
+function _glFindById(arr, id) { for (var i = 0; i < arr.length; i++) { if (arr[i].id === id) return arr[i]; } return null; }
+
+/* ── Persistencia + migración de esquema ── */
+function _glMigrate(e) {
+  if (!e || typeof e !== 'object') return e;
+  if (!e.id) e.id = _glNewId(); // id es load-bearing (todo el CRUD indexa por id) — nunca dejarlo vacío
+  if (e.schemaVersion === 2) return e;
+  e.schemaVersion = 2;
+  if (typeof e.version !== 'number') e.version = 1;
+  if (!('parentId' in e)) e.parentId = null;
+  if (!e.audiencia) e.audiencia = 'interno';
+  if (!Array.isArray(e.tags)) e.tags = [];
+  if (!e.estado) e.estado = 'borrador';
+  if (!e.createdAt) e.createdAt = e.sentAt || _glNowISO();
+  if (!e.updatedAt) e.updatedAt = e.createdAt;
+  if (!('sentAt' in e)) e.sentAt = (e.estado === 'enviado' ? e.updatedAt : null);
+  (e.indicadores || []).forEach(function (i) { if (!('fuente' in i)) i.fuente = ''; });
+  (e.noticias || []).forEach(function (n) { if (!('fuente' in n)) n.fuente = ''; });
+  return e;
+}
+function _glGetAllNl() {
+  var arr;
+  try { arr = JSON.parse(localStorage.getItem('gl_newsletters') || '[]'); } catch (e) { arr = []; }
+  if (!Array.isArray(arr)) arr = [];
+  var changed = false;
+  arr.forEach(function (e) { if (e && (e.schemaVersion !== 2 || !e.id)) { _glMigrate(e); changed = true; } });
+  if (changed) _glSaveAllNl(arr);
+  return arr;
+}
+function _glSaveAllNl(arr) {
+  try { localStorage.setItem('gl_newsletters', JSON.stringify(arr)); return true; }
+  catch (e) { toast('No se pudo guardar (almacenamiento lleno)', 'err'); return false; }
+}
+function _glUpsert(d) {
+  var all = _glGetAllNl();
+  var idx = -1;
+  for (var i = 0; i < all.length; i++) { if (all[i].id === d.id) { idx = i; break; } }
+  if (idx >= 0) all[idx] = d; else all.push(d);
+  return _glSaveAllNl(all);
+}
+function _glNextEdicion() {
+  var max = 0;
+  _glGetAllNl().forEach(function (e) { var n = parseInt(e.edicion); if (n > max) max = n; });
+  return max + 1;
+}
+function _glNewEdition() {
+  var now = _glNowISO();
+  return {
+    id: _glNewId(),
+    schemaVersion: 2,
+    edicion: _glNextEdicion(),
+    version: 1,
+    parentId: null,
+    fecha: now.slice(0, 10),
+    asunto: '',
+    destinatarios: '',
+    audiencia: 'interno',
+    indicadores: [
+      { label: 'Dólar Blue',    valor: '', var: '', varColor: '', fuente: '' },
+      { label: 'Dólar MEP',     valor: '', var: '', varColor: '', fuente: '' },
+      { label: 'm² prom. CABA', valor: '', var: '', varColor: '', fuente: '' },
+      { label: 'UVA',           valor: '', var: '', varColor: '', fuente: '' }
+    ],
+    noticias: [],
+    perspectiva: '',
+    tags: [],
+    estado: 'borrador',
+    createdAt: now,
+    updatedAt: now,
+    sentAt: null
+  };
+}
+/* Forkea un snapshot congelado a una versión nueva (sin pisar el original) */
+function _glFork(src, opts) {
+  opts = opts || {};
+  var clone = JSON.parse(JSON.stringify(src));
+  var now = _glNowISO();
+  clone.id = _glNewId();
+  clone.parentId = src.id;
+  clone.sentAt = null;
+  clone.estado = 'borrador';
+  clone.createdAt = now;
+  clone.updatedAt = now;
+  if (opts.newEdition) { clone.edicion = _glNextEdicion(); clone.version = 1; }
+  else { clone.version = (src.version || 1) + 1; }
+  return clone;
+}
+
+function _glGetOrInitDraft() {
+  if (gl_draft) return gl_draft;
+  var curId = null;
+  try { curId = localStorage.getItem('gl_draft_current'); } catch (e) {}
+  // Compat: versión vieja guardaba el draft como JSON completo en gl_draft_current
+  if (curId && curId.charAt(0) === '{') {
+    try {
+      var obj = JSON.parse(curId); _glMigrate(obj);
+      gl_draft = obj; _glUpsert(obj);
+      localStorage.setItem('gl_draft_current', obj.id);
+      return gl_draft;
+    } catch (e) {}
+  }
+  if (curId) {
+    var found = _glFindById(_glGetAllNl(), curId);
+    if (found) { gl_draft = JSON.parse(JSON.stringify(found)); return gl_draft; }
+  }
+  gl_draft = _glNewEdition();
+  return gl_draft;
+}
+
+/* ── Render del editor ── */
+function _glPoblateForm(d) {
+  var sv = function (id, val) { var el = document.getElementById(id); if (el) el.value = (val !== undefined && val !== null ? val : '') + ''; };
+  sv('gl-edicion', d.edicion);
+  sv('gl-fecha', d.fecha);
+  sv('gl-asunto', d.asunto);
+  sv('gl-destinatarios', d.destinatarios);
+  sv('gl-perspectiva', d.perspectiva);
+  var aud = document.getElementById('gl-audiencia'); if (aud) aud.value = d.audiencia || 'interno';
+  _glRenderEstadoControl(d);
+}
+function _glRenderEstadoControl(d) {
+  var sel = document.getElementById('gl-estado');
+  var locked = (d.estado === 'enviado' || d.estado === 'archivado');
+  if (sel) {
+    if (locked) {
+      sel.innerHTML = '<option>' + (GL_ESTADOS[d.estado] ? GL_ESTADOS[d.estado].label : d.estado) + '</option>';
+      sel.disabled = true;
+    } else {
+      sel.disabled = false;
+      sel.innerHTML =
+        '<option value="borrador"' + (d.estado === 'borrador' ? ' selected' : '') + '>Borrador</option>' +
+        '<option value="revision"' + (d.estado === 'revision' ? ' selected' : '') + '>En revisión</option>';
+    }
+  }
+  _glRenderFrozen(d);
+}
+function _glRenderFrozen(d) {
+  var locked = (d.estado === 'enviado' || d.estado === 'archivado');
+  var v = document.getElementById('view-gringosletter');
+  if (v) v.classList.toggle('gl-frozen-mode', locked); // bloquea inputs de contenido por CSS
+  var b = document.getElementById('gl-frozen-banner');
+  if (!b) return;
+  if (locked) {
+    b.style.display = '';
+    b.innerHTML = '🔒 Esta edición está <b>' + (d.estado === 'enviado' ? 'enviada' : 'archivada') +
+      '</b> y su snapshot quedó congelado (read-only). ' +
+      '<button class="btn btn-ghost btn-sm" style="margin-left:8px;" onclick="glForkParaEditar()">✏️ Editar como versión nueva (v' + ((d.version || 1) + 1) + ')</button>';
+  } else { b.style.display = 'none'; b.innerHTML = ''; }
+}
+
+function _glCollectForm() {
+  var gv = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  var d = _glGetOrInitDraft();
+  var edNum = parseInt(gv('gl-edicion'));
+  if (edNum > 0) d.edicion = edNum;
+  d.fecha         = gv('gl-fecha') || d.fecha;
+  d.asunto        = gv('gl-asunto');
+  d.destinatarios = gv('gl-destinatarios');
+  var aud = document.getElementById('gl-audiencia'); if (aud) d.audiencia = aud.value;
+  d.perspectiva   = gv('gl-perspectiva');
+  (d.indicadores || []).forEach(function (ind, i) {
+    ind.valor    = gv('gl-ind-val-' + i);
+    ind.var      = gv('gl-ind-var-' + i);
+    var sel = document.getElementById('gl-ind-col-' + i); ind.varColor = sel ? sel.value : (ind.varColor || '');
+    ind.fuente   = gv('gl-ind-src-' + i);
+  });
+  return d;
+}
+
+function _glRenderIndicadores(indicadores) {
+  var el = document.getElementById('gl-indicadores-grid');
+  if (!el) return;
+  el.innerHTML = (indicadores || []).map(function (ind, i) {
+    var colOpts = [
+      { v: '', l: '— Tendencia' },
+      { v: 'ok', l: '🟢 Sube' },
+      { v: 'danger', l: '🔴 Baja' },
+      { v: 'muted', l: '⚪ Estable' }
+    ].map(function (o) {
+      return '<option value="' + o.v + '"' + (ind.varColor === o.v ? ' selected' : '') + '>' + o.l + '</option>';
+    }).join('');
+    return '<div class="gl-ind-card">' +
+      '<div class="gl-ind-label">' + escHtml(ind.label) + '</div>' +
+      '<input class="input gl-ind-val" id="gl-ind-val-' + i + '" placeholder="ej: $1.420" value="' + escHtml(ind.valor || '') + '" style="margin-bottom:4px;font-size:.82rem;padding:5px 8px;">' +
+      '<div style="display:flex;gap:4px;margin-bottom:4px;">' +
+        '<input class="input" id="gl-ind-var-' + i + '" placeholder="ej: ↑2.3%" value="' + escHtml(ind.var || '') + '" style="flex:1;font-size:.78rem;padding:4px 7px;">' +
+        '<select class="input" id="gl-ind-col-' + i + '" style="width:96px;font-size:.72rem;padding:4px 6px;" title="Tendencia">' + colOpts + '</select>' +
+      '</div>' +
+      '<input class="input" id="gl-ind-src-' + i + '" placeholder="fuente (ej: BCRA)" value="' + escHtml(ind.fuente || '') + '" style="font-size:.68rem;padding:3px 7px;color:var(--muted);">' +
+    '</div>';
+  }).join('');
+}
+
+function _glRenderNoticias(noticias) {
+  var el = document.getElementById('gl-noticias-list');
+  if (!el) return;
+  if (!noticias || !noticias.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:.78rem;padding:4px 0;">Sin noticias todavía — hacé clic en "+ Noticia".</div>';
+    return;
+  }
+  el.innerHTML = noticias.map(function (n, i) {
+    var safe = _glSafeUrl(n.url);
+    return '<div class="gl-noticia-item">' +
+      '<div class="gl-noticia-head">' +
+        '<strong style="font-size:.84rem;line-height:1.4;">' + escHtml(n.titulo) + '</strong>' +
+        '<div style="display:flex;gap:3px;flex-shrink:0;">' +
+          '<button class="btn btn-ghost btn-sm" onclick="glEditarNoticia(' + i + ')" style="padding:1px 7px;" title="Editar">✎</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="glRemoverNoticia(' + i + ')" style="color:var(--danger);padding:1px 7px;" title="Quitar">✕</button>' +
+        '</div>' +
+      '</div>' +
+      (n.resumen ? '<p style="font-size:.75rem;color:var(--muted);margin-top:4px;line-height:1.5;">' + escHtml(n.resumen) + '</p>' : '') +
+      (n.fuente ? '<div style="font-size:.66rem;color:var(--muted);margin-top:3px;opacity:.85;">Fuente: ' + escHtml(n.fuente) + '</div>' : '') +
+      (safe ? '<a href="' + escHtml(safe) + '" target="_blank" rel="noopener" style="font-size:.68rem;color:var(--blue);display:inline-block;margin-top:3px;word-break:break-all;">' + escHtml(n.url) + '</a>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function _glRenderTags(tags) {
+  tags = tags || [];
+  var sel = document.getElementById('gl-tags-selected');
+  if (sel) {
+    sel.innerHTML = tags.length ? tags.map(function (t) {
+      return '<span class="gl-tag active" onclick="glRemoveTag(' + _glJsArg(t) + ')" title="Quitar">' + escHtml(t) + ' ✕</span>';
+    }).join('') : '<span style="color:var(--muted);font-size:.72rem;">Sin tags — elegí abajo o agregá uno propio.</span>';
+  }
+  var sug = document.getElementById('gl-tags-suggested');
+  if (sug) {
+    sug.innerHTML = GL_TAGS.map(function (t) {
+      var active = tags.indexOf(t) >= 0;
+      return '<span class="gl-tag' + (active ? ' active' : '') + '" onclick="glToggleTag(' + _glJsArg(t) + ')">' + escHtml(t) + '</span>';
+    }).join('');
+  }
+}
+
+/* ── Construcción del email (HTML + texto), con escaping ── */
+function _glBuildEmailHtml(d) {
+  var esc = escHtml;
+  var varColor = function (c) { return c === 'ok' ? '#4dde95' : c === 'danger' ? '#ff7b7b' : '#9f988d'; };
+  var indsHtml = (d.indicadores || []).filter(function (i) { return i.valor; }).map(function (i) {
+    var vHtml = i.var ? ' <span style="font-size:.72rem;color:' + varColor(i.varColor) + ';">' + esc(i.var) + '</span>' : '';
+    var src = i.fuente ? '<div style="font-size:.62rem;color:#6f6a60;">' + esc(i.fuente) + '</div>' : '';
+    return '<tr><td style="padding:5px 0;color:#9f988d;font-size:.8rem;">' + esc(i.label) + src + '</td>' +
+      '<td style="padding:5px 0;text-align:right;font-weight:700;font-size:.88rem;vertical-align:top;">' + esc(i.valor) + vHtml + '</td></tr>';
+  }).join('');
+  var notsHtml = (d.noticias || []).map(function (n) {
+    var safe = _glSafeUrl(n.url);
+    return '<div style="border-left:3px solid #d4a640;padding:6px 12px;margin-bottom:10px;background:rgba(212,166,64,0.06);border-radius:0 8px 8px 0;">' +
+      '<strong style="font-size:.88rem;display:block;margin-bottom:3px;">' + esc(n.titulo) + '</strong>' +
+      (n.resumen ? '<p style="margin:0 0 4px;font-size:.76rem;color:#9f988d;line-height:1.5;">' + esc(n.resumen) + '</p>' : '') +
+      (n.fuente ? '<div style="font-size:.64rem;color:#6f6a60;margin-bottom:2px;">Fuente: ' + esc(n.fuente) + '</div>' : '') +
+      (safe ? '<a href="' + esc(safe) + '" style="font-size:.68rem;color:#5b9cf6;" target="_blank" rel="noopener">→ Leer más</a>' : '') +
+    '</div>';
+  }).join('');
+  var persHtml = esc(d.perspectiva || '').replace(/\n/g, '<br>');
+  var verTxt = (d.version && d.version > 1) ? (' v' + d.version) : '';
+
+  return '<div style="font-family:Inter,sans-serif;background:#0a0a0a;color:#f5f1e8;border-radius:12px;overflow:hidden;">' +
+    '<div style="background:linear-gradient(135deg,#1a1300,#0c0c0c);padding:24px 28px;border-bottom:2px solid #d4a640;">' +
+      '<div style="font-size:1.35rem;font-weight:800;letter-spacing:.22em;color:#d4a640;">GRINGOSLETTER</div>' +
+      '<div style="font-size:.66rem;color:#9f988d;letter-spacing:.14em;margin-top:2px;text-transform:uppercase;">Mercado Inmobiliario · Gringo Labs</div>' +
+      (d.asunto ? '<div style="font-size:.95rem;font-weight:700;margin-top:10px;">' + esc(d.asunto) + '</div>' : '') +
+      '<div style="font-size:.66rem;color:#9f988d;margin-top:4px;">Edición #' + esc(String(d.edicion || '—')) + verTxt + ' · ' + esc(d.fecha || '—') + '</div>' +
+    '</div>' +
+    '<div style="padding:22px 28px;">' +
+    (indsHtml ? '<div style="margin-bottom:20px;">' +
+      '<div style="font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:#9f988d;margin-bottom:8px;">📊 Indicadores</div>' +
+      '<table style="width:100%;border-collapse:collapse;">' + indsHtml + '</table>' +
+    '</div>' : '') +
+    (notsHtml ? '<div style="margin-bottom:20px;">' +
+      '<div style="font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:#9f988d;margin-bottom:8px;">📰 Noticias del sector</div>' +
+      notsHtml +
+    '</div>' : '') +
+    (persHtml ? '<div style="margin-bottom:20px;">' +
+      '<div style="font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:#9f988d;margin-bottom:8px;">✍️ Perspectiva</div>' +
+      '<p style="font-size:.84rem;line-height:1.65;margin:0;">' + persHtml + '</p>' +
+    '</div>' : '') +
+    '</div>' +
+    '<div style="padding:12px 28px;border-top:1px solid rgba(255,255,255,0.06);font-size:.62rem;color:#9f988d;text-align:center;">Gringo Labs · Buenos Aires · ' + esc(d.fecha || '') + '</div>' +
+  '</div>';
+}
+function _glBuildEmailText(d) {
+  var lines = ['--- GRINGOSLETTER · Edición #' + (d.edicion || '—') + ((d.version && d.version > 1) ? (' v' + d.version) : '') + ' · ' + (d.fecha || '') + ' ---', ''];
+  if (d.asunto) { lines.push(d.asunto); lines.push(''); }
+  var inds = (d.indicadores || []).filter(function (i) { return i.valor; });
+  if (inds.length) {
+    lines.push('📊 INDICADORES DE MERCADO');
+    inds.forEach(function (i) { lines.push('· ' + i.label + ': ' + i.valor + (i.var ? ('  ' + i.var) : '') + (i.fuente ? ('  (' + i.fuente + ')') : '')); });
+    lines.push('');
+  }
+  if (d.noticias && d.noticias.length) {
+    lines.push('📰 NOTICIAS DEL SECTOR');
+    d.noticias.forEach(function (n) {
+      lines.push('· ' + n.titulo);
+      if (n.resumen) lines.push('  ' + n.resumen);
+      if (n.fuente) lines.push('  Fuente: ' + n.fuente);
+      if (n.url) lines.push('  → ' + n.url);
+    });
+    lines.push('');
+  }
+  if (d.perspectiva) { lines.push('✍️ PERSPECTIVA'); lines.push(d.perspectiva); lines.push(''); }
+  lines.push('—'); lines.push('Gringo Labs · Buenos Aires');
+  return lines.join('\n');
+}
+
+/* ── Helpers de salida ── */
+function _glClipboard(text, msg) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () { toast(msg || 'Copiado', 'ok'); }, function () { toast('No se pudo copiar', 'err'); });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta); toast(msg || 'Copiado', 'ok');
+  }
+}
+function _glDownload(filename, content, mime) {
+  try {
+    var blob = new Blob([content], { type: mime || 'text/plain;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+    return true;
+  } catch (e) { return false; }
+}
+
+/* ── API pública ── */
+window.loadGringosletter = function () {
+  var d = _glGetOrInitDraft();
+  _glPoblateForm(d);
+  _glRenderIndicadores(d.indicadores);
+  _glRenderNoticias(d.noticias);
+  _glRenderTags(d.tags);
+};
+
+window.glTab = function (tab) {
+  var tabs = ['redactar', 'historial', 'fuentes', 'radar'];
+  tabs.forEach(function (t) {
+    var el = document.getElementById('gl-tab-' + t);
+    if (el) el.style.display = (t === tab ? '' : 'none');
+  });
+  document.querySelectorAll('#gl-tabs .sub-tab').forEach(function (btn, i) { btn.classList.toggle('active', tabs[i] === tab); });
+  if (tab === 'historial') window.glLoadHistory();
+  if (tab === 'fuentes') window.glLoadFuentes();
+  if (tab === 'radar') window.glLoadRadar();
+};
+
+window.glSetEstado = function (val) {
+  var d = _glGetOrInitDraft();
+  if (d.estado === 'enviado' || d.estado === 'archivado') return; // congelada
+  d.estado = val;
+  d.updatedAt = _glNowISO();
+  if (!_glUpsert(d)) return;
+  localStorage.setItem('gl_draft_current', d.id);
+  toast('Estado: ' + (GL_ESTADOS[val] ? GL_ESTADOS[val].label : val), 'ok');
+};
+
+// Forkea explícitamente una edición congelada (enviada/archivada) a una versión nueva editable
+window.glForkParaEditar = function () {
+  var d = _glGetOrInitDraft();
+  if (d.estado !== 'enviado' && d.estado !== 'archivado') return;
+  var fork = _glFork(d, { newEdition: false });
+  gl_draft = fork;
+  if (!_glUpsert(fork)) { toast('No se pudo crear la versión (almacenamiento lleno)', 'err'); return; }
+  localStorage.setItem('gl_draft_current', fork.id);
+  _glPoblateForm(fork);
+  _glRenderIndicadores(fork.indicadores);
+  _glRenderNoticias(fork.noticias);
+  _glRenderTags(fork.tags);
+  toast('Editando como versión nueva v' + fork.version + ' (borrador)', 'ok');
+};
+
+window.glNuevaEdicion = function () {
+  if (!confirm('¿Crear una nueva edición en blanco? El borrador actual queda guardado en el historial.')) return;
+  if (gl_draft && gl_draft.estado !== 'enviado' && gl_draft.estado !== 'archivado') window.glSaveDraft(true);
+  gl_draft = _glNewEdition();
+  window.loadGringosletter();
+  window.glTab('redactar');
+  toast('Nueva edición #' + gl_draft.edicion + ' iniciada', 'ok');
+};
+
+window.glAgregarNoticia = function () {
+  gl_noticiaEdit = -1;
+  var btn = document.getElementById('gl-n-confirm'); if (btn) btn.textContent = 'Agregar';
+  ['gl-n-titulo', 'gl-n-url', 'gl-n-fuente', 'gl-n-resumen'].forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ''; });
+  var f = document.getElementById('gl-noticia-form');
+  if (f) f.style.display = '';
+  var t = document.getElementById('gl-n-titulo');
+  if (t) t.focus();
+};
+window.glEditarNoticia = function (idx) {
+  var d = _glGetOrInitDraft();
+  var n = (d.noticias || [])[idx];
+  if (!n) return;
+  gl_noticiaEdit = idx;
+  var sv = function (id, v) { var el = document.getElementById(id); if (el) el.value = v || ''; };
+  sv('gl-n-titulo', n.titulo); sv('gl-n-url', n.url); sv('gl-n-fuente', n.fuente); sv('gl-n-resumen', n.resumen);
+  var btn = document.getElementById('gl-n-confirm'); if (btn) btn.textContent = 'Guardar';
+  var f = document.getElementById('gl-noticia-form');
+  if (f) f.style.display = '';
+  var t = document.getElementById('gl-n-titulo');
+  if (t) t.focus();
+};
+window.glCancelarNoticia = function () {
+  gl_noticiaEdit = -1;
+  var btn = document.getElementById('gl-n-confirm'); if (btn) btn.textContent = 'Agregar';
+  var f = document.getElementById('gl-noticia-form');
+  if (f) f.style.display = 'none';
+  ['gl-n-titulo', 'gl-n-url', 'gl-n-fuente', 'gl-n-resumen'].forEach(function (id) {
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+};
+window.glConfirmarNoticia = function () {
+  var gv = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  var titulo = gv('gl-n-titulo');
+  if (!titulo) return toast('El titular es obligatorio', 'err');
+  var d = _glGetOrInitDraft();
+  if (!Array.isArray(d.noticias)) d.noticias = [];
+  var nueva = { titulo: titulo, url: gv('gl-n-url'), fuente: gv('gl-n-fuente'), resumen: gv('gl-n-resumen') };
+  if (gl_noticiaEdit >= 0 && d.noticias[gl_noticiaEdit]) d.noticias[gl_noticiaEdit] = nueva;
+  else d.noticias.push(nueva);
+  _glRenderNoticias(d.noticias);
+  window.glCancelarNoticia();
+};
+window.glRemoverNoticia = function (idx) {
+  var d = _glGetOrInitDraft();
+  d.noticias.splice(idx, 1);
+  _glRenderNoticias(d.noticias);
+};
+
+window.glToggleTag = function (t) {
+  var d = _glGetOrInitDraft();
+  if (!Array.isArray(d.tags)) d.tags = [];
+  var i = d.tags.indexOf(t);
+  if (i >= 0) d.tags.splice(i, 1); else d.tags.push(t);
+  _glRenderTags(d.tags);
+};
+window.glRemoveTag = function (t) {
+  var d = _glGetOrInitDraft();
+  var i = (d.tags || []).indexOf(t);
+  if (i >= 0) d.tags.splice(i, 1);
+  _glRenderTags(d.tags);
+};
+window.glAddCustomTag = function () {
+  var inp = document.getElementById('gl-tag-custom');
+  if (!inp) return;
+  var t = inp.value.trim();
+  if (!t) return;
+  var d = _glGetOrInitDraft();
+  if (!Array.isArray(d.tags)) d.tags = [];
+  if (d.tags.indexOf(t) < 0) d.tags.push(t);
+  inp.value = '';
+  _glRenderTags(d.tags);
+};
+
+window.glSaveDraft = function (silent) {
+  var d = _glCollectForm();
+  // Snapshot congelado (enviado/archivado): no se pisa — se forkea a versión nueva
+  if (d.estado === 'enviado' || d.estado === 'archivado') {
+    var fork = _glFork(d, { newEdition: false });
+    gl_draft = fork;
+    if (!_glUpsert(fork)) return null;
+    localStorage.setItem('gl_draft_current', fork.id);
+    _glPoblateForm(fork);
+    _glRenderIndicadores(fork.indicadores);
+    _glRenderNoticias(fork.noticias);
+    _glRenderTags(fork.tags);
+    toast('La edición enviada quedó congelada → creé la versión v' + fork.version, 'ok');
+    return fork;
+  }
+  d.updatedAt = _glNowISO();
+  if (!_glUpsert(d)) return null;
+  localStorage.setItem('gl_draft_current', d.id);
+  if (!silent) toast('Borrador guardado', 'ok');
+  return d;
+};
+
+window.glPreview = function () {
+  var d = _glCollectForm();
+  var el = document.getElementById('gl-preview-body');
+  if (el) el.innerHTML = _glBuildEmailHtml(d);
+  showModal('modal-gl-preview');
+};
+window.glCopyHtml = function () {
+  var d = _glCollectForm();
+  _glClipboard(_glBuildEmailHtml(d), 'HTML copiado al portapapeles');
+};
+
+window.glEnviar = function () {
+  var d = _glCollectForm();
+  if (!d.asunto) return toast('Completá el asunto antes de enviar', 'err');
+  // No pisar un snapshot ya enviado/archivado: forkear a versión nueva y enviar esa
+  if (d.estado === 'enviado' || d.estado === 'archivado') {
+    d = _glFork(d, { newEdition: false });
+    gl_draft = d;
+  }
+  d.estado = 'enviado';
+  d.sentAt = _glNowISO();
+  d.updatedAt = d.sentAt;
+  if (!_glUpsert(d)) {
+    toast('No se pudo guardar la edición — exportá HTML/Texto como respaldo antes de cerrar', 'err');
+    return;
+  }
+  localStorage.setItem('gl_draft_current', d.id);
+  var body = _glBuildEmailText(d);
+  var dest = (d.destinatarios || '').replace(/\s/g, '');
+  window.open('mailto:' + dest + '?subject=' + encodeURIComponent(d.asunto) + '&body=' + encodeURIComponent(body));
+  toast('Edición #' + d.edicion + (d.version > 1 ? (' v' + d.version) : '') + ' enviada y congelada', 'ok');
+  hideModal('modal-gl-preview');
+  _glPoblateForm(d);
+  _glRenderTags(d.tags);
+  window.glLoadHistory();
+};
+
+/* ── Historial: memoria editorial con filtros ── */
+function _glPopulateTagFilter(all) {
+  var sel = document.getElementById('gl-hist-tag');
+  if (!sel) return;
+  var cur = sel.value;
+  var set = {};
+  all.forEach(function (e) { (e.tags || []).forEach(function (t) { set[t] = 1; }); });
+  var tags = Object.keys(set).sort();
+  sel.innerHTML = '<option value="">Todos los tags</option>' +
+    tags.map(function (t) { return '<option value="' + escHtml(t) + '"' + (t === cur ? ' selected' : '') + '>' + escHtml(t) + '</option>'; }).join('');
+}
+function _glEstadoBadge(estado) {
+  var e = GL_ESTADOS[estado] || GL_ESTADOS.borrador;
+  return '<span class="badge ' + e.badge + '"' + (estado === 'archivado' ? ' style="opacity:.6;"' : '') + '>' + e.label + '</span>';
+}
+function _glHistRow(n) {
+  var idArg = _glJsArg(n.id);
+  var verTxt = (n.version && n.version > 1) ? (' · v' + n.version) : '';
+  var nInds = (n.indicadores || []).filter(function (i) { return i.valor; }).length;
+  var nNoticias = (n.noticias || []).length;
+  var sentTxt = n.sentAt ? ('✅ enviada ' + escHtml(n.sentAt.slice(0, 10))) : '';
+  var tagsHtml = (n.tags || []).slice(0, 10).map(function (t) { return '<span class="gl-chip-stat">' + escHtml(t) + '</span>'; }).join(' ');
+  var canSend = (n.estado === 'borrador' || n.estado === 'revision');
+  return '<div class="gl-hist-row">' +
+    '<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;">' +
+      '<div style="min-width:0;">' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+          '<strong style="color:var(--gold);font-size:.95rem;">#' + escHtml(String(n.edicion || '—')) + verTxt + '</strong>' +
+          _glEstadoBadge(n.estado) +
+          '<span class="gl-chip-stat">' + escHtml(GL_AUD[n.audiencia] || n.audiencia || 'Interno') + '</span>' +
+        '</div>' +
+        '<div style="font-size:.86rem;margin-top:4px;">' + escHtml(n.asunto || '(sin asunto)') + '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">' +
+        '<span class="gl-chip-stat">📅 ' + escHtml(n.fecha || '—') + '</span>' +
+        '<span class="gl-chip-stat">📊 ' + nInds + '</span>' +
+        '<span class="gl-chip-stat">📰 ' + nNoticias + '</span>' +
+        (sentTxt ? ('<span class="gl-chip-stat">' + sentTxt + '</span>') : '') +
+      '</div>' +
+    '</div>' +
+    (tagsHtml ? ('<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:7px;">' + tagsHtml + '</div>') : '') +
+    '<div class="gl-hist-actions">' +
+      '<button class="btn btn-ghost btn-sm" onclick="glCargarEdicion(' + idArg + ')">✏️ Cargar</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="glDuplicar(' + idArg + ')">⧉ Duplicar</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="glPreviewEdicion(' + idArg + ')">👁 Preview</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="glToggleDetail(' + idArg + ')">🔎 Detalle</button>' +
+      (canSend ? ('<button class="btn btn-ghost btn-sm" onclick="glMarcarEnviada(' + idArg + ')">📤 Marcar enviada</button>') : '') +
+      (n.estado !== 'archivado'
+        ? ('<button class="btn btn-ghost btn-sm" onclick="glArchivar(' + idArg + ')">🗄 Archivar</button>')
+        : ('<button class="btn btn-ghost btn-sm" onclick="glDesarchivar(' + idArg + ')">↩ Restaurar</button>')) +
+      '<button class="btn btn-ghost btn-sm" onclick="glExportHtml(' + idArg + ')">⬇ HTML</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="glExportTexto(' + idArg + ')">⬇ Texto</button>' +
+      '<button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="glEliminar(' + idArg + ')" title="Eliminar definitivamente">🗑</button>' +
+    '</div>' +
+    '<div class="gl-hist-detail" id="gl-detail-' + escHtml(n.id) + '" style="display:none;"></div>' +
+  '</div>';
+}
+function _glRenderSnapshot(f) {
+  if (!f) return '<span style="opacity:.6;">Edición no encontrada.</span>';
+  var out = '';
+  var inds = (f.indicadores || []).filter(function (i) { return i.valor; });
+  if (inds.length) {
+    out += '<div style="margin-bottom:8px;"><b>📊 Indicadores (snapshot):</b><br>' +
+      inds.map(function (i) {
+        return '· ' + escHtml(i.label) + ': <b>' + escHtml(i.valor) + '</b>' + (i.var ? (' ' + escHtml(i.var)) : '') + (i.fuente ? (' <span style="opacity:.7;">[' + escHtml(i.fuente) + ']</span>') : '');
+      }).join('<br>') + '</div>';
+  }
+  if ((f.noticias || []).length) {
+    out += '<div style="margin-bottom:8px;"><b>📰 Noticias:</b><br>' +
+      f.noticias.map(function (n) {
+        var safe = _glSafeUrl(n.url);
+        return '· ' + escHtml(n.titulo) + (n.fuente ? (' <span style="opacity:.7;">(' + escHtml(n.fuente) + ')</span>') : '') + (safe ? (' <a href="' + escHtml(safe) + '" target="_blank" rel="noopener" style="color:var(--blue);">↗</a>') : '');
+      }).join('<br>') + '</div>';
+  }
+  if (f.perspectiva) {
+    out += '<div style="margin-bottom:8px;"><b>✍️ Perspectiva:</b><br>' + escHtml(f.perspectiva).replace(/\n/g, '<br>') + '</div>';
+  }
+  if (f.destinatarios) {
+    out += '<div style="margin-bottom:8px;"><b>📬 Destinatarios:</b> ' + escHtml(f.destinatarios) + '</div>';
+  }
+  var linaje = '';
+  if (f.parentId) {
+    var p = _glFindById(_glGetAllNl(), f.parentId);
+    linaje = p
+      ? (' · derivada de <a href="#" onclick="glToggleDetail(' + _glJsArg(p.id) + ');return false;" style="color:var(--blue);">#' + escHtml(String(p.edicion || '—')) + ' v' + escHtml(String(p.version || 1)) + '</a>')
+      : ' · derivada de una edición eliminada';
+  }
+  out += '<div style="opacity:.7;font-size:.68rem;">creada ' + escHtml((f.createdAt || '').slice(0, 16).replace('T', ' ')) +
+    ' · última edición ' + escHtml((f.updatedAt || '').slice(0, 16).replace('T', ' ')) + linaje + '</div>';
+  return out || '<span style="opacity:.6;">Sin contenido todavía.</span>';
+}
+
+window.glLoadHistory = function () {
+  var el = document.getElementById('gl-historial-list');
+  if (!el) return;
+  var all = _glGetAllNl();
+  _glPopulateTagFilter(all);
+  if (!all.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:.8rem;padding:10px 0;">Todavía no hay ediciones guardadas. Redactá y guardá tu primera Gringosletter.</div>';
+    return;
+  }
+  var q = (_glVal('gl-hist-search') || '').toLowerCase();
+  var fEstado = _glVal('gl-hist-estado');
+  var fTag = _glVal('gl-hist-tag');
+  var rows = all.filter(function (n) {
+    if (fEstado && n.estado !== fEstado) return false;
+    if (fTag && (n.tags || []).indexOf(fTag) < 0) return false;
+    if (q) {
+      var hay = ((n.asunto || '') + ' ' + (n.perspectiva || '') + ' ' + ((n.tags || []).join(' ')) + ' ' + (n.fecha || '')).toLowerCase();
+      if (hay.indexOf(q) < 0) return false;
+    }
+    return true;
+  });
+  rows.sort(function (a, b) {
+    return ((b.edicion || 0) - (a.edicion || 0)) ||
+           ((b.version || 1) - (a.version || 1)) ||
+           ((b.updatedAt || '') < (a.updatedAt || '') ? -1 : 1);
+  });
+  if (!rows.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:.8rem;padding:10px 0;">Sin resultados para el filtro actual.</div>';
+    return;
+  }
+  el.innerHTML = rows.map(_glHistRow).join('');
+};
+
+window.glToggleDetail = function (id) {
+  var box = document.getElementById('gl-detail-' + id);
+  if (!box) return;
+  if (box.style.display === 'none' || !box.style.display) {
+    box.innerHTML = _glRenderSnapshot(_glFindById(_glGetAllNl(), id));
+    box.style.display = '';
+  } else { box.style.display = 'none'; }
+};
+
+window.glCargarEdicion = function (id) {
+  var f = _glFindById(_glGetAllNl(), id);
+  if (!f) return toast('Edición no encontrada', 'err');
+  gl_draft = JSON.parse(JSON.stringify(f));
+  localStorage.setItem('gl_draft_current', f.id);
+  _glPoblateForm(gl_draft);
+  _glRenderIndicadores(gl_draft.indicadores);
+  _glRenderNoticias(gl_draft.noticias);
+  _glRenderTags(gl_draft.tags);
+  window.glTab('redactar');
+  var locked = (f.estado === 'enviado' || f.estado === 'archivado');
+  toast('Edición #' + f.edicion + (f.version > 1 ? (' v' + f.version) : '') + ' cargada' + (locked ? ' (congelada — editar crea versión nueva)' : ''), 'ok');
+};
+
+window.glPreviewEdicion = function (id) {
+  var f = _glFindById(_glGetAllNl(), id);
+  if (!f) return toast('Edición no encontrada', 'err');
+  gl_draft = JSON.parse(JSON.stringify(f));
+  localStorage.setItem('gl_draft_current', f.id);
+  _glPoblateForm(gl_draft);
+  _glRenderIndicadores(gl_draft.indicadores);
+  _glRenderNoticias(gl_draft.noticias);
+  _glRenderTags(gl_draft.tags);
+  var el = document.getElementById('gl-preview-body');
+  if (el) el.innerHTML = _glBuildEmailHtml(gl_draft);
+  showModal('modal-gl-preview');
+};
+
+window.glDuplicar = function (id) {
+  var f = _glFindById(_glGetAllNl(), id);
+  if (!f) return toast('Edición no encontrada', 'err');
+  var clone = _glFork(f, { newEdition: true });
+  clone.fecha = _glNowISO().slice(0, 10);
+  gl_draft = clone;
+  if (!_glUpsert(clone)) { toast('No se pudo guardar el duplicado (almacenamiento lleno)', 'err'); return; }
+  localStorage.setItem('gl_draft_current', clone.id);
+  _glPoblateForm(clone);
+  _glRenderIndicadores(clone.indicadores);
+  _glRenderNoticias(clone.noticias);
+  _glRenderTags(clone.tags);
+  window.glTab('redactar');
+  toast('Edición #' + f.edicion + ' duplicada → nueva #' + clone.edicion + ' (borrador)', 'ok');
+};
+
+window.glMarcarEnviada = function (id) {
+  var f = _glFindById(_glGetAllNl(), id);
+  if (!f) return;
+  if (f.estado === 'enviado') return toast('Ya estaba marcada como enviada', 'ok');
+  f.estado = 'enviado'; f.sentAt = _glNowISO(); f.updatedAt = f.sentAt;
+  if (!_glUpsert(f)) return;
+  if (gl_draft && gl_draft.id === id) { gl_draft.estado = 'enviado'; gl_draft.sentAt = f.sentAt; gl_draft.updatedAt = f.updatedAt; _glRenderEstadoControl(gl_draft); }
+  toast('Edición #' + f.edicion + ' marcada como enviada', 'ok');
+  window.glLoadHistory();
+};
+
+window.glArchivar = function (id) {
+  var f = _glFindById(_glGetAllNl(), id);
+  if (!f) return;
+  if (f.estado !== 'archivado') f._prevEstado = f.estado;
+  f.estado = 'archivado'; f.updatedAt = _glNowISO();
+  if (!_glUpsert(f)) return;
+  if (gl_draft && gl_draft.id === id) { gl_draft.estado = 'archivado'; _glRenderEstadoControl(gl_draft); }
+  toast('Edición #' + f.edicion + ' archivada', 'ok');
+  window.glLoadHistory();
+};
+window.glDesarchivar = function (id) {
+  var f = _glFindById(_glGetAllNl(), id);
+  if (!f) return;
+  f.estado = f.sentAt ? 'enviado' : (f._prevEstado && f._prevEstado !== 'archivado' ? f._prevEstado : 'borrador');
+  delete f._prevEstado; f.updatedAt = _glNowISO();
+  if (!_glUpsert(f)) return;
+  if (gl_draft && gl_draft.id === id) { gl_draft.estado = f.estado; _glRenderEstadoControl(gl_draft); }
+  toast('Edición #' + f.edicion + ' restaurada (' + (GL_ESTADOS[f.estado] ? GL_ESTADOS[f.estado].label : f.estado) + ')', 'ok');
+  window.glLoadHistory();
+};
+
+window.glEliminar = function (id) {
+  var all = _glGetAllNl();
+  var f = _glFindById(all, id);
+  if (!f) return;
+  if (!confirm('¿Eliminar definitivamente la edición #' + f.edicion + (f.version > 1 ? (' v' + f.version) : '') + '? Esta acción no se puede deshacer.')) return;
+  if (!_glSaveAllNl(all.filter(function (x) { return x.id !== id; }))) return;
+  if (gl_draft && gl_draft.id === id) { gl_draft = null; try { localStorage.removeItem('gl_draft_current'); } catch (e) {} }
+  toast('Edición eliminada', 'ok');
+  window.glLoadHistory();
+};
+
+window.glExportHtml = function (id) {
+  var f = _glFindById(_glGetAllNl(), id);
+  if (!f) return;
+  var doc = '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Gringosletter #' + (f.edicion || '') + '</title></head><body style="margin:0;background:#050505;padding:18px;">' + _glBuildEmailHtml(f) + '</body></html>';
+  var name = 'gringosletter-' + (f.edicion || 'x') + (f.version > 1 ? ('-v' + f.version) : '') + '.html';
+  if (_glDownload(name, doc, 'text/html;charset=utf-8')) toast('HTML exportado: ' + name, 'ok');
+  else _glClipboard(doc, 'No se pudo descargar — HTML copiado al portapapeles');
+};
+window.glExportTexto = function (id) {
+  var f = _glFindById(_glGetAllNl(), id);
+  if (!f) return;
+  var txt = _glBuildEmailText(f);
+  var name = 'gringosletter-' + (f.edicion || 'x') + (f.version > 1 ? ('-v' + f.version) : '') + '.txt';
+  if (_glDownload(name, txt, 'text/plain;charset=utf-8')) toast('Texto exportado: ' + name, 'ok');
+  else _glClipboard(txt, 'No se pudo descargar — texto copiado al portapapeles');
+};
+// Exportar el borrador en curso (guarda primero → respeta inmutabilidad: una enviada forkea a v+1)
+window.glExportHtmlDraft = function () { var d = window.glSaveDraft(true); if (d) window.glExportHtml(d.id); };
+window.glExportTextoDraft = function () { var d = window.glSaveDraft(true); if (d) window.glExportTexto(d.id); };
+
+/* ════════════ GRINGOSLETTER · FUENTES (Fase 0A — mapa + diagnóstico, NO captura) ════════════ */
+var GL_METODO_LABEL = {
+  rss: 'RSS', news_sitemap: 'News-sitemap', google_news_feed: 'Google News feed',
+  sitemap: 'Sitemap', section_scrape: 'Scraping liviano', api: 'API/Serie',
+  pdf: 'PDF', email: 'Newsletter/Email', manual: 'Manual'
+};
+function _glMetodoClass(m) {
+  if (m === 'rss' || m === 'news_sitemap' || m === 'google_news_feed') return 'auto';
+  if (m === 'sitemap' || m === 'section_scrape' || m === 'api') return 'semi';
+  return 'manual';
+}
+var GL_GRUPO_OP = [
+  { key: 'viable',    label: '🟢 Alta prioridad · técnicamente viable' },
+  { key: 'cuidado',   label: '🟡 Alta prioridad · requiere cuidado / manual' },
+  { key: 'dato_duro', label: '📊 Fuentes de datos duras' },
+  { key: 'editorial', label: '🎯 Editorial / opinión' },
+  { key: 'futura',    label: '🔵 Futura / circuito propio' }
+];
+var GL_TIPO_LABEL = { medio: 'medio', dato_duro: 'dato duro', analista: 'analista', newsletter: 'newsletter', social: 'social', interno: 'interno' };
+var GL_SRC_ESTADO = {
+  activo:    { l: 'Activo',    c: 'badge-ok' },
+  revisar:   { l: 'Revisar',   c: 'badge-warn' },
+  manual:    { l: 'Manual',    c: 'badge-muted' },
+  bloqueado: { l: 'Bloqueado', c: 'badge-muted' }
+};
+
+window.glAbrirUrl = function (url) {
+  var safe = _glSafeUrl(url);
+  if (!safe) return toast('Sin URL para abrir', 'err');
+  window.open(safe, '_blank', 'noopener');
+};
+
+function _glSrcRow(s) {
+  var metodoCls = _glMetodoClass(s.metodo);
+  var metodoLbl = GL_METODO_LABEL[s.metodo] || s.metodo;
+  var prioBadge = s.prioridad === 'alta' ? 'badge-gold' : (s.prioridad === 'media-alta' ? 'badge-warn' : 'badge-muted');
+  var est = GL_SRC_ESTADO[s.estado] || GL_SRC_ESTADO.revisar;
+  var estStyle = s.estado === 'bloqueado' ? ' style="color:var(--danger);border-color:rgba(255,123,123,.3);"' : '';
+  var idArg = _glJsArg(s.id);
+  var chips = [];
+  chips.push('<span class="gl-chip-stat">' + escHtml(GL_TIPO_LABEL[s.tipo] || s.tipo) + '</span>');
+  chips.push('<span class="gl-chip-stat" title="confiabilidad de la fuente">conf ' + (s.confiabilidad || '—') + '/5</span>');
+  chips.push('<span class="gl-chip-stat" title="dificultad técnica de extracción">dific ' + (s.dificultadTecnica || '—') + '/5</span>');
+  if (s.captura0B && s.captura0B !== 'no') chips.push('<span class="gl-chip-stat" title="candidata para captura en Fase 0B">0B: ' + escHtml(s.captura0B) + '</span>');
+  chips.push('<span class="gl-chip-stat" title="última revisión">rev ' + escHtml(s.ultimaRevision || '—') + '</span>');
+  chips.push('<span class="gl-chip-stat" style="' + (s.verificado ? 'color:var(--ok);' : 'opacity:.6;') + '">' + (s.verificado ? '✓ verificado' : 'sin verificar') + '</span>');
+  var secBtn = _glSafeUrl(s.seccionUrl) ? '<button class="btn btn-ghost btn-sm" onclick="glAbrirUrl(' + _glJsArg(s.seccionUrl) + ')">🔗 Sección</button>' : '';
+  var feedBtn = (s.feeds && s.feeds.length && _glSafeUrl(s.feeds[0].url))
+    ? '<button class="btn btn-ghost btn-sm" onclick="glAbrirUrl(' + _glJsArg(s.feeds[0].url) + ')" title="' + escHtml(s.feeds[0].url) + '">🗺 ' + escHtml(s.feeds[0].tipo || 'feed') + '</button>'
+    : '';
+  return '<div class="gl-src-row">' +
+    '<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;">' +
+      '<div style="min-width:0;">' +
+        '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">' +
+          '<strong style="font-size:.92rem;">' + escHtml(s.nombre) + '</strong>' +
+          (s.prioridad ? '<span class="badge ' + prioBadge + '">' + escHtml(s.prioridad) + '</span>' : '') +
+          '<span class="gl-metodo ' + metodoCls + '">' + escHtml(metodoLbl) + '</span>' +
+          '<span class="badge ' + est.c + '"' + estStyle + '>' + est.l + '</span>' +
+        '</div>' +
+        '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:7px;">' + chips.join('') + '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">' +
+        (s.captura0B === 'titulares' ? '<button class="btn btn-ghost btn-sm" onclick="glProbarFuente(' + idArg + ')" title="Prueba real vía backend 0B (lee el feed declarado, sin scraping de notas)">🧪 Probar</button>' : '') +
+        '<button class="btn btn-ghost btn-sm" onclick="glToggleSrcDetail(' + idArg + ')">🔎 Ver detalle</button>' +
+        secBtn + feedBtn +
+      '</div>' +
+    '</div>' +
+    (s.notas ? '<div style="font-size:.68rem;color:var(--muted);margin-top:7px;opacity:.9;">' + escHtml(s.notas) + '</div>' : '') +
+    '<div id="gl-probe-' + escHtml(s.id) + '" style="display:none;margin-top:7px;border-top:1px dashed var(--border);padding-top:7px;"></div>' +
+    '<div class="gl-hist-detail" id="gl-src-detail-' + escHtml(s.id) + '" style="display:none;"></div>' +
+  '</div>';
+}
+
+function _glSrcDetail(s) {
+  var rows = [];
+  rows.push('<b>Tipo:</b> ' + escHtml(GL_TIPO_LABEL[s.tipo] || s.tipo) + ' · <b>Nivel extracción:</b> ' + (s.nivel || '—') + ' · <b>Frecuencia:</b> ' + escHtml(s.frecuencia || '—'));
+  rows.push('<b>Método:</b> ' + escHtml(GL_METODO_LABEL[s.metodo] || s.metodo) + ' · <b>HTTP:</b> ' + escHtml(s.httpStatus || '—') + ' · <b>Paywall:</b> ' + escHtml(s.paywall || '—') + ' · <b>Riesgo legal:</b> ' + escHtml(s.riesgoLegal || '—') + ' · <b>Cuerpo completo:</b> ' + (s.permiteCuerpoCompleto ? 'sí' : 'no'));
+  rows.push('<b>Captura 0B:</b> ' + escHtml(s.captura0B || '—') + ' · <b>Revisión manual:</b> ' + (s.requiereRevisionManual ? 'sí' : 'no') + ' · <b>Última revisión:</b> ' + escHtml(s.ultimaRevision || '—'));
+  if (s.urlBase) rows.push('<b>URL base:</b> ' + escHtml(s.urlBase));
+  if (s.temas && s.temas.length) rows.push('<b>Temas:</b> ' + escHtml(s.temas.join(', ')));
+  if (s.zonas && s.zonas.length) rows.push('<b>Zonas:</b> ' + escHtml(s.zonas.join(', ')));
+  if (s.feeds && s.feeds.length) {
+    rows.push('<b>Feeds / endpoints:</b><br>' + s.feeds.map(function (f) {
+      var safe = _glSafeUrl(f.url);
+      return '· ' + escHtml(f.tipo || 'feed') + ': ' + (safe ? '<a href="' + escHtml(safe) + '" target="_blank" rel="noopener" style="color:var(--blue);word-break:break-all;">' + escHtml(f.url) + '</a>' : escHtml(f.url));
+    }).join('<br>'));
+  } else {
+    rows.push('<b>Feeds / endpoints:</b> — (sin feed automatizable · método ' + escHtml(s.metodo) + ')');
+  }
+  if (s.proximaAccion) rows.push('<b style="color:var(--metro);">▶ Próxima acción (0B):</b> ' + escHtml(s.proximaAccion));
+  return rows.map(function (r) { return '<div style="margin-bottom:5px;">' + r + '</div>'; }).join('');
+}
+window.glToggleSrcDetail = function (id) {
+  var box = document.getElementById('gl-src-detail-' + id);
+  if (!box) return;
+  if (box.style.display === 'none' || !box.style.display) {
+    var s = null, src = window.GL_SOURCES || [];
+    for (var i = 0; i < src.length; i++) { if (src[i].id === id) { s = src[i]; break; } }
+    box.innerHTML = s ? _glSrcDetail(s) : 'Fuente no encontrada.';
+    box.style.display = '';
+  } else { box.style.display = 'none'; }
+};
+
+window.glLoadFuentes = function () {
+  var el = document.getElementById('gl-fuentes-list');
+  if (!el) return;
+  var src = window.GL_SOURCES;
+  if (!Array.isArray(src) || !src.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:.8rem;padding:10px 0;">Registro de fuentes no disponible (no cargó <code>gringosletter-sources.js</code>).</div>';
+    return;
+  }
+  var totalAuto = 0, totalManual = 0, totalVerif = 0, totalTit = 0;
+  src.forEach(function (s) {
+    var c = _glMetodoClass(s.metodo);
+    if (c === 'auto') totalAuto++;
+    if (c === 'manual') totalManual++;
+    if (s.verificado) totalVerif++;
+    if (s.captura0B === 'titulares') totalTit++;
+  });
+  var html = '<div style="font-size:.7rem;color:var(--muted);margin-bottom:8px;">' +
+    src.length + ' fuentes · ' + totalAuto + ' vía sitemap/feed · ' + totalManual + ' manual/PDF/email · ' +
+    totalVerif + ' verificadas en vivo · ' + totalTit + ' candidatas 0B (titulares)</div>';
+  var known = GL_GRUPO_OP.map(function (g) { return g.key; });
+  GL_GRUPO_OP.forEach(function (g) {
+    var rows = src.filter(function (s) { return s.grupoOperativo === g.key; });
+    if (!rows.length) return;
+    html += '<div class="gl-src-group-h">' + g.label + ' (' + rows.length + ')</div>' + rows.map(_glSrcRow).join('');
+  });
+  var sinGrupo = src.filter(function (s) { return known.indexOf(s.grupoOperativo) < 0; });
+  if (sinGrupo.length) html += '<div class="gl-src-group-h">Otras (' + sinGrupo.length + ')</div>' + sinGrupo.map(_glSrcRow).join('');
+  el.innerHTML = html;
+};
+
+/* ════════════ GRINGOSLETTER · RADAR (Fase 0B — captura de titulares vía backend) ════════════
+ * El front NO captura: llama al backend (wispy_bridge → gringosletter-radar.js). Si el backend 0B
+ * no está desplegado, degrada elegante (mensaje, no rompe). Sin scraping en el navegador. */
+var _GL_BACKOFF = 'El backend Fase 0B (wispy_bridge) todavía no está desplegado. La captura corre server-side; cuando se haga el rebuild del bridge con gringosletter-radar.js, esto se activa.';
+
+window.glProbarFuente = async function (id) {
+  var box = document.getElementById('gl-probe-' + id);
+  if (box) { box.style.display = ''; box.innerHTML = '<span style="color:var(--muted);font-size:.7rem;">Probando feed… (server-side)</span>'; }
+  var d = await apiFetch('/gringosletter/test-source', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sourceId: id }) });
+  if (!box) return;
+  if (!d || d.__error) {
+    box.innerHTML = '<span style="color:var(--warn);font-size:.7rem;">⚠ Backend 0B no disponible' + (d && d.__error ? ' (HTTP ' + d.__error + ')' : '') + '. ' + escHtml(_GL_BACKOFF) + '</span>';
+    return;
+  }
+  var col = d.status === 'ok' ? 'var(--ok)' : (d.status === 'bloqueado' ? 'var(--danger)' : 'var(--warn)');
+  var links = (d.sample || []).map(function (it) {
+    var safe = _glSafeUrl(it.url);
+    return '<div style="margin-top:3px;">· ' + (safe ? '<a href="' + escHtml(safe) + '" target="_blank" rel="noopener" style="color:var(--blue);">' : '<span>') + escHtml(it.title || it.url) + (safe ? '</a>' : '</span>') + (it.relevante ? ' <span class="gl-chip-stat" style="color:var(--ok);">inmo</span>' : '') + '</div>';
+  }).join('') || '<div style="color:var(--muted);font-size:.7rem;">sin links</div>';
+  box.innerHTML = '<div style="font-size:.7rem;margin-bottom:3px;"><b style="color:' + col + ';">' + escHtml(d.status) + '</b> · ' + (d.count || 0) + ' en feed · ' + (d.relevantes || 0) + ' inmobiliarios · probado ' + escHtml((d.testedAt || '').slice(0, 16).replace('T', ' ')) + '</div>' + links;
+};
+
+function _glRadarRow(it) {
+  var src = (window.GL_SOURCES || []).filter(function (s) { return s.id === it.sourceId; })[0];
+  var fuente = src ? src.nombre : it.sourceId;
+  var idA = _glJsArg(it.id);
+  var sc = (it.relevanceScore != null) ? it.relevanceScore : 0;
+  var scoreColor = sc >= 6 ? 'var(--ok)' : (sc >= 3 ? 'var(--gold)' : 'var(--muted)');
+  var tags = (it.zones || []).concat(it.topics || []).slice(0, 6).map(function (t) { return '<span class="gl-chip-stat">' + escHtml(t) + '</span>'; }).join(' ');
+  var estBadge = (it.editorialStatus && it.editorialStatus !== 'Nuevo') ? '<span class="badge badge-gold" style="margin-right:4px;">' + escHtml(it.editorialStatus) + '</span>' : '';
+  var safe = _glSafeUrl(it.url);
+  return '<div class="gl-src-row">' +
+    '<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap;">' +
+      '<div style="min-width:0;flex:1;">' +
+        (safe ? '<a href="' + escHtml(safe) + '" target="_blank" rel="noopener" style="font-size:.86rem;font-weight:600;color:var(--text);">' + escHtml(it.title) + '</a>' : '<strong style="font-size:.86rem;">' + escHtml(it.title) + '</strong>') +
+        '<div style="font-size:.66rem;color:var(--muted);margin-top:3px;">' + escHtml(fuente) + (it.publishedAt ? ' · ' + escHtml(String(it.publishedAt).slice(0, 10)) : '') + ' · ' + escHtml(it.extractionMethod || '') + '</div>' +
+      '</div>' +
+      '<span class="gl-chip-stat" style="color:' + scoreColor + ';font-weight:700;">score ' + sc + '</span>' +
+    '</div>' +
+    (tags ? '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;">' + tags + '</div>' : '') +
+    '<div class="gl-hist-actions">' + estBadge +
+      '<button class="btn btn-ghost btn-sm" onclick="glItemStatus(' + idA + ',\'Relevante\')">⭐ Relevante</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="glItemStatus(' + idA + ',\'Para newsletter\')">📰 Newsletter</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="glItemStatus(' + idA + ',\'Para Instagram\')">📸 Instagram</button>' +
+      '<button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="glItemStatus(' + idA + ',\'Descartado\')">🗑 Descartar</button>' +
+    '</div>' +
+  '</div>';
+}
+
+window.glLoadRadar = async function () {
+  var el = document.getElementById('gl-radar-list');
+  if (!el) return;
+  el.innerHTML = '<div class="skeleton skeleton-block" style="height:60px;"></div>';
+  var d = await apiFetch('/gringosletter/captured?limit=80');
+  if (!d || d.__error) {
+    el.innerHTML = '<div style="color:var(--warn);font-size:.78rem;padding:10px 0;line-height:1.6;">⚠ Radar no disponible. ' + escHtml(_GL_BACKOFF) + '</div>';
+    return;
+  }
+  var items = d.items || [];
+  if (!items.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:.8rem;padding:10px 0;">Sin titulares capturados todavía. Tocá <b>“Capturar titulares ahora”</b>.</div>';
+    return;
+  }
+  items.sort(function (a, b) { return ((b.relevanceScore || 0) - (a.relevanceScore || 0)) || ((b.publishedAt || '') < (a.publishedAt || '') ? -1 : 1); });
+  el.innerHTML = '<div style="font-size:.7rem;color:var(--muted);margin-bottom:8px;">' + d.total + ' titulares capturados · orden por score de relevancia</div>' + items.map(_glRadarRow).join('');
+};
+
+window.glCapturar = async function () {
+  var btn = document.getElementById('gl-capturar-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Capturando…'; }
+  toast('Capturando titulares (server-side)…', 'ok');
+  var d = await apiFetch('/gringosletter/capture-headlines', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+  if (btn) { btn.disabled = false; btn.textContent = '📡 Capturar titulares ahora'; }
+  if (!d || d.__error) return toast('Captura no disponible: backend 0B sin desplegar', 'err');
+  toast('Captura: +' + (d.added || 0) + ' nuevos · ' + (d.duplicates || 0) + ' duplicados', 'ok');
+  window.glLoadRadar();
+};
+
+window.glItemStatus = async function (id, status) {
+  var d = await apiFetch('/gringosletter/item-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, status: status }) });
+  if (!d || d.__error) return toast('No se pudo actualizar (backend 0B no disponible)', 'err');
+  toast('Marcado: ' + status, 'ok');
+  window.glLoadRadar();
 };

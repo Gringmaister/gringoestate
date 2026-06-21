@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/pixel.css?v=s96" />
+  <link rel="stylesheet" href="css/pixel.css?v=s99" />
 </head>
 <body>
 
@@ -89,6 +89,12 @@
             <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
           </span>
           <span>OPERACIONES <small class="nav-sub">Cierre · Firmas · Honorarios</small></span>
+        </button>
+        <button class="nav-btn" onclick="nav('gringosletter')" id="nav-gringosletter" aria-label="GRINGOSLETTER — Mercado Inmobiliario, Newsletter">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </span>
+          <span>GRINGOSLETTER <small class="nav-sub">Mercado · Newsletter</small></span>
         </button>
       </div>
     </div>
@@ -809,6 +815,26 @@
         </div>
       </div>
 
+      <!-- EVOLUCIÓN MENSUAL -->
+      <div class="card" style="margin-bottom:14px;" role="region" aria-label="Evolución financiera histórica AMBBI">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">Evolución mensual</h2>
+            <div class="card-sub" id="hist-period">histórico de cierres · todos los meses</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadAmbbiHistorico()" aria-label="Actualizar histórico AMBBI">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.31-6.49"/></svg>
+          </button>
+        </div>
+        <div class="chart-head" style="margin-bottom:6px;">
+          <span class="chart-title">Ocupación mensual (%)</span>
+        </div>
+        <div class="chart-stage" style="height:160px;margin-bottom:16px;">
+          <canvas id="chart-ambbi-monthly-ocup" aria-label="Ocupación mensual histórica AMBBI"></canvas>
+        </div>
+        <div id="ambbi-hist-metrics"></div>
+      </div>
+
       <div class="sub-tabs" id="ambbi-op-tabs">
         <button class="sub-tab active" onclick="ambiTab('tareas')">Tareas</button>
         <button class="sub-tab" onclick="ambiTab('huespedes')">Huéspedes</button>
@@ -1245,16 +1271,20 @@
         <div class="card">
           <div class="card-head">
             <div><div class="card-title">Philips Hue</div><div class="card-sub" id="hue-sub">Cargando estado…</div></div>
+            <div id="hue-toolbar" style="display:none;align-items:center;gap:6px;">
+              <button class="btn btn-ghost btn-sm" onclick="hueAllOn()">💡 Prender todo</button>
+              <button class="btn btn-ghost btn-sm" onclick="hueAllOff()">⏻ Apagar todo</button>
+              <label class="hue-allcolor-lbl" title="Color para todas las luces">🎨<input type="color" class="hue-color hue-allcolor" value="#ffd9a0" onchange="setHueAllColor(this.value)"></label>
+            </div>
           </div>
+          <div id="hue-scenes" class="hue-scenes" style="display:none;"></div>
+          <div id="hue-groups" class="hue-groups" style="display:none;"></div>
           <div id="hue-lights" class="docker-grid"></div>
           <div id="hue-setup" class="placeholder-block" style="display:none;">
             <div class="ph-icon">💡</div>
             <h3>Conectar Philips Hue</h3>
-            <p style="font-size:.82rem;margin-top:4px;">Configurá
-              <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:6px;">HUE_BRIDGE_IP</code> y
-              <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:6px;">HUE_USERNAME</code>
-              en <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:6px;">wispy-stack/.env</code> y rebuild del bridge.
-            </p>
+            <p style="font-size:.82rem;margin-top:4px;max-width:440px;">Vinculá tu cuenta Philips Hue (Remote API). Te lleva al login de Philips y volvés acá automáticamente.</p>
+            <a class="btn btn-ghost btn-sm" style="margin-top:12px;text-decoration:none;" href="https://bridge.gringo.estate/api/smart-home/hue/connect">Conectar con Philips Hue →</a>
           </div>
         </div>
         <div class="grid-3">
@@ -1352,6 +1382,237 @@
       </div>
     </div>
 
+    <!-- ════════════════ GRINGOSLETTER ════════════════ -->
+    <div class="view" id="view-gringosletter">
+      <style>
+        #view-gringosletter .gl-ind-card { border:1px solid var(--border); border-radius:12px; padding:10px 12px; background:rgba(255,255,255,.018); }
+        #view-gringosletter .gl-ind-label { font-size:.65rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+        #view-gringosletter .gl-noticia-item { border:1px solid var(--border); border-radius:10px; padding:9px 12px; background:rgba(255,255,255,.015); }
+        #view-gringosletter .gl-noticia-head { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+        #view-gringosletter .form-label { display:block; font-size:.65rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+        #view-gringosletter .badge { padding:3px 9px; border-radius:999px; font-size:.66rem; font-weight:700; letter-spacing:.08em; }
+        #view-gringosletter .gl-tag { display:inline-flex; align-items:center; gap:4px; font-size:.7rem; border:1px solid var(--border); border-radius:999px; padding:3px 10px; cursor:pointer; color:var(--muted); user-select:none; transition:border-color .12s,color .12s,background .12s; }
+        #view-gringosletter .gl-tag:hover { border-color:rgba(212,166,64,.4); color:var(--text); }
+        #view-gringosletter .gl-tag.active { background:rgba(212,166,64,.14); border-color:rgba(212,166,64,.42); color:var(--gold); }
+        #view-gringosletter .gl-frozen { border:1px solid rgba(126,200,227,.4); background:rgba(126,200,227,.07); border-radius:10px; padding:9px 13px; font-size:.76rem; color:var(--metro); margin-bottom:12px; line-height:1.5; }
+        #view-gringosletter .gl-hist-row { border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:9px; background:rgba(255,255,255,.014); }
+        #view-gringosletter .gl-hist-row:hover { border-color:rgba(212,166,64,.25); }
+        #view-gringosletter .gl-hist-actions { display:flex; flex-wrap:wrap; gap:5px; margin-top:9px; }
+        #view-gringosletter .gl-chip-stat { font-size:.62rem; border:1px solid var(--border); border-radius:7px; padding:2px 7px; color:var(--muted); white-space:nowrap; }
+        #view-gringosletter .gl-hist-detail { border-top:1px dashed var(--border); margin-top:10px; padding-top:10px; font-size:.74rem; color:var(--muted); line-height:1.55; }
+        #view-gringosletter .gl-hist-detail b { color:var(--text); }
+        #view-gringosletter.gl-frozen-mode #gl-indicadores-grid,
+        #view-gringosletter.gl-frozen-mode #gl-noticias-list,
+        #view-gringosletter.gl-frozen-mode #gl-perspectiva,
+        #view-gringosletter.gl-frozen-mode #gl-tags-selected,
+        #view-gringosletter.gl-frozen-mode #gl-tags-suggested,
+        #view-gringosletter.gl-frozen-mode #gl-tag-custom { opacity:.5; pointer-events:none; }
+        #view-gringosletter .gl-src-row { border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:9px; background:rgba(255,255,255,.014); }
+        #view-gringosletter .gl-src-row:hover { border-color:rgba(126,200,227,.25); }
+        #view-gringosletter .gl-src-group-h { font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:14px 0 8px; }
+        #view-gringosletter .gl-metodo { font-size:.62rem; font-weight:700; letter-spacing:.05em; border-radius:7px; padding:2px 8px; }
+        #view-gringosletter .gl-metodo.auto { background:rgba(77,222,149,.12); color:var(--ok); border:1px solid rgba(77,222,149,.25); }
+        #view-gringosletter .gl-metodo.semi { background:rgba(255,187,85,.12); color:var(--warn); border:1px solid rgba(255,187,85,.25); }
+        #view-gringosletter .gl-metodo.manual { background:rgba(255,255,255,.05); color:var(--muted); border:1px solid var(--border); }
+      </style>
+
+      <div class="section-head">
+        <h1>GRINGOSLETTER</h1>
+        <span class="badge badge-gold">Mercado Inmobiliario</span>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="glNuevaEdicion()">+ Nueva edición</button>
+      </div>
+
+      <div class="sub-tabs" id="gl-tabs" style="margin-bottom:14px;">
+        <button class="sub-tab active" onclick="glTab('redactar')">✍️ Redactar</button>
+        <button class="sub-tab" onclick="glTab('historial')">📁 Historial</button>
+        <button class="sub-tab" onclick="glTab('fuentes')">📡 Fuentes</button>
+        <button class="sub-tab" onclick="glTab('radar')">🛰️ Radar</button>
+      </div>
+
+      <!-- TAB: REDACTAR -->
+      <div id="gl-tab-redactar">
+
+        <!-- ENCABEZADO -->
+        <div class="card" style="margin-bottom:12px;">
+          <div class="card-head">
+            <h2 class="card-title">📧 Encabezado</h2>
+            <select class="input" id="gl-estado" onchange="glSetEstado(this.value)" title="Estado editorial" style="width:auto;font-size:.75rem;padding:5px 8px;">
+              <option value="borrador">Borrador</option>
+              <option value="revision">En revisión</option>
+            </select>
+          </div>
+          <div id="gl-frozen-banner" class="gl-frozen" style="display:none;"></div>
+          <div style="display:grid;grid-template-columns:100px 1fr 160px;gap:10px;align-items:end;margin-bottom:8px;">
+            <div>
+              <label class="form-label" for="gl-edicion">Edición #</label>
+              <input class="input" id="gl-edicion" type="number" min="1" style="padding:6px 8px;font-size:.85rem;">
+            </div>
+            <div>
+              <label class="form-label" for="gl-asunto">Asunto</label>
+              <input class="input" id="gl-asunto" placeholder="ej: Mercado Inmobiliario CABA · Junio 2026" style="padding:6px 8px;font-size:.85rem;">
+            </div>
+            <div>
+              <label class="form-label" for="gl-audiencia">Audiencia</label>
+              <select class="input" id="gl-audiencia" style="padding:6px 8px;font-size:.85rem;">
+                <option value="interno">Interno (Franco)</option>
+                <option value="equipo">Equipo</option>
+                <option value="beta">Beta / círculo chico</option>
+                <option value="publico">Público</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:160px 1fr;gap:10px;align-items:end;">
+            <div>
+              <label class="form-label" for="gl-fecha">Fecha</label>
+              <input class="input" id="gl-fecha" type="date" style="padding:6px 8px;font-size:.85rem;">
+            </div>
+            <div>
+              <label class="form-label" for="gl-destinatarios">Destinatario(s) <span style="font-weight:400;text-transform:none;letter-spacing:0;">(separados por coma)</span></label>
+              <input class="input" id="gl-destinatarios" placeholder="email@ejemplo.com, otro@ejemplo.com" style="padding:6px 8px;font-size:.85rem;">
+            </div>
+          </div>
+        </div>
+
+        <!-- INDICADORES DE MERCADO -->
+        <div class="card" style="margin-bottom:12px;">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">📊 Indicadores de Mercado</h2>
+              <div class="card-sub">completá los valores de esta semana</div>
+            </div>
+          </div>
+          <div id="gl-indicadores-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:8px;"></div>
+        </div>
+
+        <!-- NOTICIAS DEL SECTOR -->
+        <div class="card" style="margin-bottom:12px;">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">📰 Noticias del Sector</h2>
+              <div class="card-sub">titulares curados para esta edición</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="glAgregarNoticia()">+ Noticia</button>
+          </div>
+          <div id="gl-noticias-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+          <div id="gl-noticia-form" style="display:none;border-top:1px solid var(--border);padding-top:10px;margin-top:10px;">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <input class="input" id="gl-n-titulo" placeholder="Titular de la noticia" style="font-size:.82rem;padding:6px 8px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <input class="input" id="gl-n-url" placeholder="URL (opcional)" style="font-size:.82rem;padding:6px 8px;">
+                <input class="input" id="gl-n-fuente" placeholder="Fuente (ej: Reporte Inmobiliario)" style="font-size:.82rem;padding:6px 8px;">
+              </div>
+              <textarea class="input" id="gl-n-resumen" placeholder="Resumen breve (opcional)…" style="font-size:.82rem;padding:6px 8px;min-height:54px;resize:vertical;"></textarea>
+              <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button class="btn btn-ghost btn-sm" onclick="glCancelarNoticia()">Cancelar</button>
+                <button class="btn btn-gold btn-sm" id="gl-n-confirm" onclick="glConfirmarNoticia()">Agregar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PERSPECTIVA -->
+        <div class="card" style="margin-bottom:14px;">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">✍️ Perspectiva</h2>
+              <div class="card-sub">análisis y visión de mercado de Franco</div>
+            </div>
+          </div>
+          <textarea class="input" id="gl-perspectiva" placeholder="Escribí tu visión del mercado para esta edición…&#10;&#10;Ej: Los precios en Palermo siguen mostrando una resistencia notable…" style="min-height:130px;resize:vertical;font-size:.84rem;line-height:1.65;"></textarea>
+        </div>
+
+        <!-- TAGS -->
+        <div class="card" style="margin-bottom:14px;">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">🏷️ Tags</h2>
+              <div class="card-sub">temas y zonas — sirven para buscar y reutilizar ediciones después</div>
+            </div>
+          </div>
+          <div id="gl-tags-selected" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
+          <div id="gl-tags-suggested" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
+          <div style="display:flex;gap:6px;">
+            <input class="input" id="gl-tag-custom" placeholder="Agregar tag propio…" onkeydown="if(event.key==='Enter'){event.preventDefault();glAddCustomTag();}" style="flex:1;font-size:.8rem;padding:6px 8px;">
+            <button class="btn btn-ghost btn-sm" onclick="glAddCustomTag()">+ Tag</button>
+          </div>
+        </div>
+
+        <!-- ACCIONES -->
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:28px;flex-wrap:wrap;">
+          <button class="btn btn-ghost" onclick="glSaveDraft()">💾 Guardar borrador</button>
+          <button class="btn btn-ghost" onclick="glPreview()">👁 Vista previa</button>
+          <button class="btn btn-ghost" onclick="glExportHtmlDraft()">⬇ HTML</button>
+          <button class="btn btn-ghost" onclick="glExportTextoDraft()">⬇ Texto</button>
+          <button class="btn btn-gold" onclick="glEnviar()">📤 Enviar newsletter</button>
+        </div>
+      </div><!-- /gl-tab-redactar -->
+
+      <!-- TAB: HISTORIAL -->
+      <div id="gl-tab-historial" style="display:none;">
+        <div class="card">
+          <div class="card-head">
+            <div><h2 class="card-title">📁 Historial · Memoria editorial</h2><div class="card-sub">cada edición guarda su snapshot de mercado — datos, noticias y lectura del momento</div></div>
+            <button class="btn btn-ghost btn-sm" onclick="glLoadHistory()">↻</button>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+            <input class="input" id="gl-hist-search" placeholder="🔎 Buscar por asunto, tag, fecha o texto…" oninput="glLoadHistory()" style="flex:1;min-width:170px;font-size:.8rem;padding:6px 10px;">
+            <select class="input" id="gl-hist-estado" onchange="glLoadHistory()" style="width:auto;font-size:.8rem;padding:6px 8px;">
+              <option value="">Todos los estados</option>
+              <option value="borrador">Borrador</option>
+              <option value="revision">En revisión</option>
+              <option value="enviado">Enviado</option>
+              <option value="archivado">Archivado</option>
+            </select>
+            <select class="input" id="gl-hist-tag" onchange="glLoadHistory()" style="width:auto;font-size:.8rem;padding:6px 8px;">
+              <option value="">Todos los tags</option>
+            </select>
+          </div>
+          <div id="gl-historial-list"><div class="skeleton skeleton-block" style="height:60px;"></div></div>
+        </div>
+      </div><!-- /gl-tab-historial -->
+
+      <!-- TAB: FUENTES (Fase 0A — Mapa de Fuentes + Estrategia de Extracción) -->
+      <div id="gl-tab-fuentes" style="display:none;">
+        <div class="card" style="margin-bottom:12px;border-color:rgba(126,200,227,.3);">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title" style="color:var(--metro);">📡 Mapa de Fuentes · Fase 0A</h2>
+              <div class="card-sub">registro + diagnóstico técnico por fuente — <b>esto NO captura ni scrapea notas</b>; la captura es Fase 0B (backend)</div>
+            </div>
+          </div>
+          <div style="font-size:.72rem;color:var(--muted);line-height:1.6;">
+            <b style="color:var(--text);">Niveles de extracción:</b>
+            <span class="gl-chip-stat" style="margin:0 2px;">1 · sitemap/RSS</span>
+            <span class="gl-chip-stat" style="margin:0 2px;">2 · sección</span>
+            <span class="gl-chip-stat" style="margin:0 2px;">3 · nota individual</span>
+            <span class="gl-chip-stat" style="margin:0 2px;">4 · manual/API/PDF</span>
+            <br>
+            <b style="color:var(--text);">Legal:</b> de medios guardamos solo título, fuente, link, fecha, <b>resumen propio</b>, números y "por qué importa" — nunca cuerpo completo.
+            <span style="display:block;margin-top:5px;">✓ <b>verificado</b> = robots.txt + sección chequeados en vivo (2026-06-21). Sin tilde = documentado del mapa, a confirmar en 0B.</span>
+          </div>
+        </div>
+        <div id="gl-fuentes-list"><div class="skeleton skeleton-block" style="height:80px;"></div></div>
+      </div><!-- /gl-tab-fuentes -->
+
+      <!-- TAB: RADAR CAPTURADO (Fase 0B — titulares capturados vía backend) -->
+      <div id="gl-tab-radar" style="display:none;">
+        <div class="card" style="margin-bottom:12px;border-color:rgba(212,166,64,.3);">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title" style="color:var(--gold);">🛰️ Radar Capturado · Fase 0B</h2>
+              <div class="card-sub">titulares inmobiliarios capturados (solo título/link/fecha/snippet) — <b>sin cuerpo de notas</b></div>
+            </div>
+            <button class="btn btn-gold btn-sm" id="gl-capturar-btn" onclick="glCapturar()">📡 Capturar titulares ahora</button>
+          </div>
+          <div style="font-size:.7rem;color:var(--muted);line-height:1.55;">
+            La captura corre <b>server-side</b> en el bridge (lee feeds/sitemaps declarados, filtra por tema inmobiliario, deduplica y puntúa).
+            El navegador no scrapea. Si el backend 0B no está desplegado, este bloque lo avisa sin romper.
+          </div>
+        </div>
+        <div id="gl-radar-list"><div class="skeleton skeleton-block" style="height:60px;"></div></div>
+      </div><!-- /gl-tab-radar -->
+
+    </div><!-- /view-gringosletter -->
   </main>
 </div>
 
@@ -1792,13 +2053,29 @@
   <div class="modal" id="modal-tool-body"><!-- poblado por openToolForm() --></div>
 </div>
 
+<!-- Modal: Gringosletter Vista Previa -->
+<div class="modal-overlay hidden" id="modal-gl-preview">
+  <div class="modal" style="max-width:660px;max-height:84vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3 style="font-family:'Bebas Neue',sans-serif;letter-spacing:.1em;">Vista previa del newsletter</h3>
+      <button class="btn btn-ghost btn-sm" onclick="hideModal('modal-gl-preview')">✕ Cerrar</button>
+    </div>
+    <div id="gl-preview-body" style="border:1px solid var(--border);border-radius:10px;overflow:hidden;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;border-top:1px solid var(--border);padding-top:10px;">
+      <button class="btn btn-ghost btn-sm" onclick="glCopyHtml()">📋 Copiar HTML</button>
+      <button class="btn btn-gold btn-sm" onclick="glEnviar()">📤 Enviar ahora</button>
+    </div>
+  </div>
+</div>
 <!-- Toast -->
 <div id="toast"></div>
 
 <!-- Scripts -->
 <!-- S45: ?v= cache-buster — subir la versión en cada deploy con cambios de JS/CSS
      (el HTML revalida siempre en Netlify; el query nuevo fuerza al browser a bajar el asset fresco) -->
-<script src="js/api.js?v=s96"></script>
-<script src="js/app.js?v=s96"></script>
+<script src="js/api.js?v=s99"></script>
+<script src="js/gringosletter-sources.js?v=s106"></script>
+<script src="js/app.js?v=s106"></script>
+<script src="js/panel-auth.js?v=s105i"></script>
 </body>
 </html>
