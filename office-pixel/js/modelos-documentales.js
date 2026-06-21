@@ -1,4 +1,4 @@
-/* S106B — Modelos Documentales (biblioteca de borradores operativos) · front-only.
+/* S106B/C — Modelos Documentales (biblioteca de borradores operativos) · front-only.
  * Patrón espejo de contrato.js: funciones puras (previewText/faltantes) testeables por node,
  * window.ModelosDoc para el panel, localStorage opcional. SIN fetch/bridge/Notion/PDF/WhatsApp.
  *
@@ -6,6 +6,10 @@
  * no dice "listo para firmar", no hardcodea ley/artículos como verdad cerrada. Los modelos de
  * venta pesados (boleto/cesión/escritura) salen ESQUELÉTICOS: estructura para preparar info
  * para abogado/escribanía/gestor, no contrato final.
+ *
+ * S106C — hardening: DNI/CUIT transversal, campos operativos ampliados (canon/plazo/destino/
+ * garantía/desistimiento/forma de pago/escritura/comisión/publicación), inventario guiado por
+ * categorías, boleto-esqueleto con advertencia reforzada. Operador neutral (sin default fijo).
  */
 (function () {
   'use strict';
@@ -24,14 +28,16 @@
 '  Verificar la normativa vigente aplicable. No reemplaza asesoramiento profesional.\n' +
 '================================================================================';
 
-  // Hint del operador — NEUTRAL, editable, sin marca hardcodeada.
-  var OPERADOR_HINT = 'Gringo · AMBBI · Metropolitan · Franco Garbini · otro';
+  // Hint del operador — NEUTRAL, editable, sin marca hardcodeada como default obligatorio.
+  var OPERADOR_HINT = 'Baigun · Gringo · AMBBI · Metropolitan · Franco Garbini · otro';
+  var CARACTER_OPTS = ['propietario', 'apoderado', 'administrador', 'usufructuario', 'otro'];
 
   // helpers de placeholder
   function F(d, k, ph) { return (d && d[k] != null && String(d[k]).trim() !== '') ? String(d[k]).trim() : '[COMPLETAR ' + ph + ']'; }
   function money(d, kMonto, phMonto) { return F(d, 'moneda', 'MONEDA') + ' ' + F(d, kMonto, phMonto); }
   function opLine(d) { return 'Operador / intermediario interviniente: ' + F(d, 'operador', 'OPERADOR (' + OPERADOR_HINT + ')') + '.'; }
-  function juris(d) { return F(d, 'jurisdiccion', 'JURISDICCIÓN'); }
+  // Parte con identificación fiscal (DNI/CUIT transversal — S106C)
+  function parte(d, kN, kDni, phN) { return F(d, kN, phN) + ' (DNI/CUIT ' + F(d, kDni, 'DNI/CUIT') + ')'; }
 
   // Campos reutilizables
   var C_OP = { k: 'operador', label: 'Operador / inmobiliaria', type: 'text', hint: OPERADOR_HINT };
@@ -52,188 +58,267 @@
     { id: 'reserva-alquiler', grupo: 'Alquiler', titulo: 'Reserva / seña de alquiler',
       uso: 'Reserva ad referéndum del propietario antes del contrato.',
       campos: [ C_OP, { k: 'inmueble', label: 'Inmueble (dirección)', req: true },
-        { k: 'locador', label: 'Locador / propietario' }, { k: 'locatario', label: 'Reservante / locatario', req: true },
+        { k: 'locatario', label: 'Reservante / locatario', req: true }, { k: 'locatarioDni', label: 'DNI/CUIT del reservante' },
+        { k: 'locador', label: 'Locador / propietario' }, { k: 'locadorDni', label: 'DNI/CUIT del locador' },
         C_MON, { k: 'monto', label: 'Monto de la reserva', req: true },
-        { k: 'plazoAcept', label: 'Plazo de aceptación', ph: 'p. ej. 5 días' },
-        { k: 'imputacion', label: 'Se imputa a', ph: 'depósito / primer mes' }, C_FECHA ],
+        { k: 'canon', label: 'Canon mensual pretendido' }, { k: 'plazoLoc', label: 'Plazo de locación pretendido', ph: 'p. ej. 36 meses' },
+        { k: 'destino', label: 'Destino', type: 'select', opts: ['vivienda', 'comercial', 'oficina', 'otro'] },
+        { k: 'garantia', label: 'Garantía propuesta', ph: 'propietaria / recibos / caución' },
+        { k: 'plazoAcept', label: 'Plazo de aceptación', ph: 'p. ej. 5 días' }, { k: 'vigencia', label: 'Vigencia de la oferta' },
+        { k: 'imputacion', label: 'Se imputa a', ph: 'depósito / primer mes' },
+        { k: 'desistimiento', label: 'Desistimiento del reservante', ph: 'efecto si el reservante desiste' },
+        { k: 'condiciones', label: 'Condiciones particulares', type: 'textarea' }, C_FECHA ],
       cuerpo: function (d) { return (
 'RESERVA / SEÑA DE ALQUILER (ad referéndum del propietario)\n\n' +
 'Fecha: ' + F(d, 'fecha', 'FECHA') + '.  ' + opLine(d) + '\n\n' +
-'1) El/la reservante ' + F(d, 'locatario', 'RESERVANTE') + ' entrega en concepto de reserva la suma de ' +
-  money(d, 'monto', 'MONTO') + ' por el inmueble sito en ' + F(d, 'inmueble', 'INMUEBLE') + ',\n' +
-'   ofrecido en locación por ' + F(d, 'locador', 'LOCADOR / PROPIETARIO') + '.\n' +
-'2) La presente reserva queda sujeta a la ACEPTACIÓN del propietario dentro de ' + F(d, 'plazoAcept', 'PLAZO') + '.\n' +
-'3) Aceptada, el monto se imputa a ' + F(d, 'imputacion', 'IMPUTACIÓN (depósito/1er mes)') + ' y las partes\n' +
-'   suscribirán el contrato de locación con la documentación y garantías correspondientes.\n' +
-'4) No aceptada en el plazo, la reserva se restituye al reservante sin penalidad.\n' +
-'5) Condiciones particulares: ' + F(d, 'condiciones', 'CONDICIONES (si las hay)') + '.\n\n' +
+'1) El/la reservante ' + parte(d, 'locatario', 'locatarioDni', 'RESERVANTE') + ' entrega en concepto de\n' +
+'   reserva la suma de ' + money(d, 'monto', 'MONTO') + ' por el inmueble sito en ' + F(d, 'inmueble', 'INMUEBLE') + ',\n' +
+'   ofrecido en locación por ' + parte(d, 'locador', 'locadorDni', 'LOCADOR / PROPIETARIO') + '.\n' +
+'2) Condiciones pretendidas de la locación: canon mensual ' + F(d, 'canon', 'CANON') + ', plazo ' + F(d, 'plazoLoc', 'PLAZO') +
+   ', destino ' + F(d, 'destino', 'DESTINO') + ', garantía propuesta ' + F(d, 'garantia', 'GARANTÍA') + '.\n' +
+'3) La presente queda sujeta a la ACEPTACIÓN del propietario dentro de ' + F(d, 'plazoAcept', 'PLAZO DE ACEPTACIÓN') +
+   '. Vigencia de la oferta: ' + F(d, 'vigencia', 'VIGENCIA') + '.\n' +
+'4) ACEPTADA: el monto se imputa a ' + F(d, 'imputacion', 'IMPUTACIÓN (depósito/1er mes)') + ' y las partes suscribirán el\n' +
+'   contrato de locación con la documentación y garantías correspondientes.\n' +
+'5) RECHAZADA o no respondida en el plazo: la reserva se restituye al reservante sin penalidad.\n' +
+'6) Desistimiento del reservante: ' + F(d, 'desistimiento', 'EFECTO (a acordar con asesoramiento)') + '.\n' +
+'7) Condiciones particulares: ' + F(d, 'condiciones', 'CONDICIONES (si las hay)') + '.\n\n' +
 'Firmas:  Reservante ____________________    Recibido por (operador) ____________________'); },
-      checklist: ['DNI/CUIT del reservante', 'Datos del propietario', 'Comprobante de la reserva', 'Condiciones de aceptación por escrito'],
+      checklist: ['DNI/CUIT del reservante', 'Datos del propietario', 'Canon/plazo/destino pretendidos', 'Garantía propuesta', 'Efecto del desistimiento por escrito', 'Comprobante de la reserva'],
       anexos: ['Comprobante de pago', 'Datos de contacto de las partes'] },
 
     { id: 'acta-llaves', grupo: 'Alquiler', titulo: 'Acta de entrega de llaves',
       uso: 'Constancia de entrega/recepción de llaves y accesos.',
-      campos: [ { k: 'inmueble', label: 'Inmueble', req: true }, { k: 'entrega', label: 'Entrega (nombre)', req: true },
-        { k: 'recibe', label: 'Recibe (nombre)', req: true }, { k: 'juegos', label: 'Juegos de llaves', ph: 'cantidad' },
-        { k: 'accesos', label: 'Otros accesos', ph: 'tags, control, portón' },
-        { k: 'medidores', label: 'Lecturas de medidores', ph: 'luz/gas/agua' }, C_FECHA ],
+      campos: [ { k: 'inmueble', label: 'Inmueble', req: true },
+        { k: 'entrega', label: 'Entrega (nombre)', req: true }, { k: 'entregaDni', label: 'DNI/CUIT de quien entrega' },
+        { k: 'recibe', label: 'Recibe (nombre)', req: true }, { k: 'recibeDni', label: 'DNI/CUIT de quien recibe' },
+        { k: 'refContrato', label: 'Referencia al contrato / reserva', ph: 'contrato de fecha…' },
+        { k: 'juegos', label: 'Juegos de llaves', ph: 'cantidad' },
+        { k: 'accesos', label: 'Accesos digitales / QR / claves / controles', ph: 'tags, control, portón, app' },
+        { k: 'medLuz', label: 'Medidor luz (nº + lectura)' }, { k: 'medGas', label: 'Medidor gas (nº + lectura)' },
+        { k: 'medAgua', label: 'Medidor agua (nº + lectura)' },
+        { k: 'observaciones', label: 'Observaciones de estado', type: 'textarea' }, C_FECHA, { k: 'hora', label: 'Hora' } ],
       cuerpo: function (d) { return (
 'ACTA DE ENTREGA DE LLAVES\n\n' +
-'En ' + F(d, 'fecha', 'FECHA') + ', respecto del inmueble ' + F(d, 'inmueble', 'INMUEBLE') + '.\n\n' +
-F(d, 'entrega', 'QUIEN ENTREGA') + ' hace entrega a ' + F(d, 'recibe', 'QUIEN RECIBE') + ' de:\n' +
+'En ' + F(d, 'fecha', 'FECHA') + ' ' + F(d, 'hora', 'HORA') + ', respecto del inmueble ' + F(d, 'inmueble', 'INMUEBLE') + '.\n' +
+'Referencia: ' + F(d, 'refContrato', 'CONTRATO / RESERVA') + '.\n\n' +
+parte(d, 'entrega', 'entregaDni', 'QUIEN ENTREGA') + ' hace entrega a ' + parte(d, 'recibe', 'recibeDni', 'QUIEN RECIBE') + ' de:\n' +
 '  - Juegos de llaves: ' + F(d, 'juegos', 'CANTIDAD') + '\n' +
-'  - Otros accesos (tags / control / portón): ' + F(d, 'accesos', 'DETALLE') + '\n' +
-'  - Lecturas de medidores al momento: ' + F(d, 'medidores', 'LUZ/GAS/AGUA') + '\n\n' +
+'  - Accesos digitales / QR / claves / controles: ' + F(d, 'accesos', 'DETALLE') + '\n' +
+'  - Medidor luz: ' + F(d, 'medLuz', 'Nº + LECTURA') + '\n' +
+'  - Medidor gas: ' + F(d, 'medGas', 'Nº + LECTURA') + '\n' +
+'  - Medidor agua: ' + F(d, 'medAgua', 'Nº + LECTURA') + '\n' +
+'  - Observaciones de estado: ' + F(d, 'observaciones', 'OBSERVACIONES') + '\n\n' +
 'Quien recibe declara recibir de conformidad los accesos detallados.\n\n' +
 'Entrega ____________________      Recibe ____________________'); },
-      checklist: ['Cantidad de juegos verificada', 'Accesos electrónicos probados', 'Lecturas de medidores registradas', 'Fotos de medidores'],
+      checklist: ['DNI de ambas partes', 'Referencia al contrato/reserva', 'Cantidad de juegos verificada', 'Accesos digitales probados', 'Nº y lectura de medidores', 'Fotos de medidores'],
       anexos: ['Fotos de llaves/medidores'] },
 
     { id: 'inventario', grupo: 'Alquiler', titulo: 'Inventario y estado del inmueble',
-      uso: 'Detalle de bienes y estado de conservación al inicio/fin.',
-      campos: [ { k: 'inmueble', label: 'Inmueble', req: true }, { k: 'partes', label: 'Partes presentes' },
-        { k: 'ambientes', label: 'Ambientes / ítems', type: 'textarea', ph: 'detalle por ambiente' },
+      uso: 'Estado guiado por categorías (pintura, pisos, muebles, artefactos, sanitarios…).',
+      campos: [ { k: 'inmueble', label: 'Inmueble', req: true }, { k: 'partes', label: 'Partes presentes' }, C_FECHA,
         { k: 'estado', label: 'Estado general', ph: 'bueno / a revisar' },
-        { k: 'observaciones', label: 'Observaciones', type: 'textarea' }, C_FECHA ],
+        { k: 'pintura', label: 'Pintura / paredes / cielorrasos', type: 'textarea' },
+        { k: 'pisos', label: 'Pisos / aberturas / vidrios', type: 'textarea' },
+        { k: 'muebles', label: 'Muebles', type: 'textarea' },
+        { k: 'artefactos', label: 'Artefactos / electrodomésticos', type: 'textarea' },
+        { k: 'sanitarios', label: 'Sanitarios / griferías', type: 'textarea' },
+        { k: 'cerraduras', label: 'Cerraduras / accesos', type: 'textarea' },
+        { k: 'instalaciones', label: 'Instalaciones (luz/gas/agua/clima)', type: 'textarea' },
+        { k: 'danos', label: 'Daños / preexistencias', type: 'textarea' },
+        { k: 'ambientes', label: 'Detalle libre por ambiente', type: 'textarea', ph: 'cocina, baño, living, dormitorios…' },
+        { k: 'fotosRef', label: 'Referencia de fotos', ph: 'nº/álbum del anexo fotográfico' },
+        { k: 'observaciones', label: 'Observaciones', type: 'textarea' } ],
       cuerpo: function (d) { return (
 'INVENTARIO Y ESTADO DEL INMUEBLE\n\n' +
-'Inmueble: ' + F(d, 'inmueble', 'INMUEBLE') + '.   Fecha: ' + F(d, 'fecha', 'FECHA') + '.\n' +
-'Partes presentes: ' + F(d, 'partes', 'PARTES') + '.\n\n' +
-'Detalle por ambiente / ítems:\n' + F(d, 'ambientes', 'DETALLE POR AMBIENTE (cocina, baño, living, dormitorios, artefactos…)') + '\n\n' +
-'Estado general de conservación: ' + F(d, 'estado', 'ESTADO') + '.\n' +
-'Observaciones: ' + F(d, 'observaciones', 'OBSERVACIONES') + '.\n\n' +
+'Inmueble: ' + F(d, 'inmueble', 'INMUEBLE') + '.   Fecha: ' + F(d, 'fecha', 'FECHA') + '.   Partes: ' + F(d, 'partes', 'PARTES') + '.\n' +
+'Estado general de conservación: ' + F(d, 'estado', 'ESTADO') + '.\n\n' +
+'POR CATEGORÍA (estado / cantidad / observaciones):\n' +
+'  - Pintura / paredes / cielorrasos: ' + F(d, 'pintura', 'DETALLE') + '\n' +
+'  - Pisos / aberturas / vidrios: ' + F(d, 'pisos', 'DETALLE') + '\n' +
+'  - Muebles: ' + F(d, 'muebles', 'DETALLE') + '\n' +
+'  - Artefactos / electrodomésticos: ' + F(d, 'artefactos', 'DETALLE') + '\n' +
+'  - Sanitarios / griferías: ' + F(d, 'sanitarios', 'DETALLE') + '\n' +
+'  - Cerraduras / accesos: ' + F(d, 'cerraduras', 'DETALLE') + '\n' +
+'  - Instalaciones (luz/gas/agua/clima): ' + F(d, 'instalaciones', 'DETALLE') + '\n' +
+'  - Daños / preexistencias: ' + F(d, 'danos', 'DETALLE') + '\n\n' +
+'Detalle libre por ambiente:\n' + F(d, 'ambientes', 'COCINA / BAÑO / LIVING / DORMITORIOS…') + '\n\n' +
+'Referencia fotográfica: ' + F(d, 'fotosRef', 'Nº/ÁLBUM') + '.   Observaciones: ' + F(d, 'observaciones', 'OBSERVACIONES') + '.\n\n' +
 'El locatario recibe en el estado descripto y se obliga a restituir en igual estado,\n' +
-'salvo el deterioro por uso normal. Forma parte como anexo el registro fotográfico.\n\n' +
+'salvo el deterioro por uso normal. El anexo fotográfico forma parte del presente.\n\n' +
 'Conformidad: Locador ____________________    Locatario ____________________'); },
-      checklist: ['Recorrida ambiente por ambiente', 'Artefactos y llaves de paso probados', 'Registro fotográfico', 'Firma de ambas partes'],
-      anexos: ['Anexo fotográfico', 'Lista de artefactos/muebles'] },
+      checklist: ['Recorrida por categoría e ítems', 'Daños/preexistencias registrados', 'Artefactos y llaves de paso probados', 'Registro fotográfico numerado', 'Firma de ambas partes'],
+      anexos: ['Anexo fotográfico numerado', 'Lista de artefactos/muebles'] },
 
     { id: 'recibo', grupo: 'Alquiler', titulo: 'Recibo de pago / depósito / reserva',
       uso: 'Recibo simple (alquiler o venta). Honorarios opcional.',
-      campos: [ C_OP, { k: 'recibiDe', label: 'Recibí de', req: true }, { k: 'concepto', label: 'Concepto', req: true, ph: 'depósito / reserva / mes' },
+      campos: [ C_OP, { k: 'recibiDe', label: 'Recibí de', req: true }, { k: 'recibiDeDni', label: 'DNI/CUIT de quien paga' },
+        { k: 'concepto', label: 'Concepto', req: true, ph: 'depósito / reserva / mes' },
         C_MON, { k: 'monto', label: 'Monto', req: true }, { k: 'inmueble', label: 'Inmueble (si aplica)' },
         { k: 'imputacion', label: 'Imputación' }, { k: 'medioPago', label: 'Medio de pago', ph: 'efectivo / transferencia' },
+        { k: 'nroRecibo', label: 'Nº de recibo / referencia' },
         { k: 'honorarios', label: 'Honorarios (opcional)', ph: 'solo si corresponde' }, C_FECHA ],
       cuerpo: function (d) { return (
-'RECIBO\n\n' +
+'RECIBO  Nº ' + F(d, 'nroRecibo', 'Nº/REF') + '\n\n' +
 'Fecha: ' + F(d, 'fecha', 'FECHA') + '.   ' + opLine(d) + '\n\n' +
-'Recibí de ' + F(d, 'recibiDe', 'QUIÉN PAGA') + ' la suma de ' + money(d, 'monto', 'MONTO') + '\n' +
+'Recibí de ' + parte(d, 'recibiDe', 'recibiDeDni', 'QUIÉN PAGA') + ' la suma de ' + money(d, 'monto', 'MONTO') + '\n' +
 'en concepto de ' + F(d, 'concepto', 'CONCEPTO') + '\n' +
 'respecto del inmueble ' + F(d, 'inmueble', 'INMUEBLE (si aplica)') + '.\n' +
 'Imputación: ' + F(d, 'imputacion', 'IMPUTACIÓN') + '.   Medio de pago: ' + F(d, 'medioPago', 'MEDIO') + '.\n' +
 (d && d.honorarios ? 'Honorarios / comisión: ' + d.honorarios + '.\n' : '') +
 '\nRecibí conforme ____________________'); },
-      checklist: ['Identidad de quien paga', 'Concepto e imputación claros', 'Comprobante del medio de pago'],
+      checklist: ['Identidad y DNI de quien paga', 'Concepto e imputación claros', 'Medio de pago y nº de recibo', 'Comprobante del pago'],
       anexos: ['Comprobante de transferencia (si aplica)'] },
 
     { id: 'autoriz-alquiler', grupo: 'Alquiler', titulo: 'Autorización para alquilar (no titular)',
       uso: 'Autorización del titular para gestionar/ofrecer en alquiler.',
-      campos: [ { k: 'titular', label: 'Titular / propietario', req: true }, C_OP,
-        { k: 'inmueble', label: 'Inmueble', req: true }, { k: 'alcance', label: 'Alcance', ph: 'ofrecer, mostrar, reservar' },
-        { k: 'vigencia', label: 'Vigencia' }, C_FECHA ],
+      campos: [ { k: 'titular', label: 'Titular / propietario', req: true }, { k: 'titularDni', label: 'DNI/CUIT del titular' },
+        { k: 'caracter', label: 'Carácter del firmante', type: 'select', opts: CARACTER_OPTS },
+        { k: 'contacto', label: 'Datos de contacto' }, C_OP,
+        { k: 'inmueble', label: 'Inmueble', req: true }, C_MON, { k: 'canon', label: 'Canon pretendido' },
+        { k: 'plazo', label: 'Plazo pretendido' },
+        { k: 'autorizPublicacion', label: 'Autoriza publicación', type: 'select', opts: ['sí', 'no'] },
+        { k: 'autorizFotos', label: 'Autoriza fotos/videos', type: 'select', opts: ['sí', 'no'] },
+        { k: 'alcance', label: 'Alcance del operador', ph: 'ofrecer, mostrar, reservar' }, { k: 'vigencia', label: 'Vigencia' },
+        { k: 'condComercial', label: 'Condiciones comerciales internas (opcional)', ph: 'no es cláusula del documento' }, C_FECHA ],
       cuerpo: function (d) { return (
 'AUTORIZACIÓN PARA GESTIONAR EL ALQUILER\n\n' +
-'En ' + F(d, 'fecha', 'FECHA') + '. ' + F(d, 'titular', 'TITULAR') + ', en su carácter de titular/propietario\n' +
-'del inmueble ' + F(d, 'inmueble', 'INMUEBLE') + ', autoriza a ' + F(d, 'operador', 'OPERADOR (' + OPERADOR_HINT + ')') + '\n' +
-'a gestionar su locación con el siguiente alcance: ' + F(d, 'alcance', 'ALCANCE') + '.\n' +
-'Vigencia de la autorización: ' + F(d, 'vigencia', 'VIGENCIA') + '.\n\n' +
-'La presente queda sujeta a la acreditación de la titularidad y de las facultades\n' +
-'para alquilar. No implica delegación de facultades no expresadas.\n\n' +
+'En ' + F(d, 'fecha', 'FECHA') + '. ' + parte(d, 'titular', 'titularDni', 'TITULAR') + ', en su carácter de ' +
+   F(d, 'caracter', 'CARÁCTER') + ' del inmueble ' + F(d, 'inmueble', 'INMUEBLE') + ',\n' +
+'autoriza a ' + F(d, 'operador', 'OPERADOR (' + OPERADOR_HINT + ')') + ' a gestionar su locación.\n' +
+'Contacto del titular: ' + F(d, 'contacto', 'CONTACTO') + '.\n' +
+'Condiciones pretendidas: canon ' + money(d, 'canon', 'CANON') + ', plazo ' + F(d, 'plazo', 'PLAZO') + '.\n' +
+'Alcance del operador: ' + F(d, 'alcance', 'ALCANCE') + '.   Vigencia: ' + F(d, 'vigencia', 'VIGENCIA') + '.\n' +
+'Autoriza publicación: ' + F(d, 'autorizPublicacion', 'SÍ/NO') + '.   Autoriza fotos/videos: ' + F(d, 'autorizFotos', 'SÍ/NO') + '.\n' +
+(d && d.condComercial ? '\n(Nota interna, no es cláusula del documento) Condiciones comerciales: ' + d.condComercial + '.\n' : '') +
+'\nLa presente queda sujeta a la acreditación de la titularidad y de las facultades para\n' +
+'alquilar. No implica delegación de facultades no expresadas.\n\n' +
 'Titular ____________________'); },
-      checklist: ['Acreditación de titularidad', 'DNI/CUIT del titular', 'Alcance y vigencia por escrito'],
+      checklist: ['Acreditación de titularidad', 'DNI/CUIT del titular', 'Carácter del firmante', 'Condiciones pretendidas', 'Autorización de publicación/fotos', 'Alcance y vigencia por escrito'],
       anexos: ['Copia de título / constancia de dominio'] },
 
     // ===== VENTA =====
     { id: 'reserva-compra', grupo: 'Venta', titulo: 'Reserva de compra',
       uso: 'Oferta de compra + reserva ad referéndum del vendedor.',
-      campos: [ C_OP, { k: 'comprador', label: 'Comprador / oferente', req: true }, { k: 'vendedor', label: 'Oferta dirigida a (vendedor)' },
+      campos: [ C_OP, { k: 'comprador', label: 'Comprador / oferente', req: true }, { k: 'compradorDni', label: 'DNI/CUIT del comprador' },
+        { k: 'vendedor', label: 'Oferta dirigida a (vendedor)' }, { k: 'vendedorDni', label: 'DNI/CUIT del vendedor (si se conoce)' },
         { k: 'inmueble', label: 'Inmueble', req: true }, C_MON, { k: 'precio', label: 'Precio ofertado', req: true },
-        { k: 'monto', label: 'Monto de la reserva', req: true }, { k: 'plazoAcept', label: 'Plazo de aceptación' },
-        { k: 'honorarios', label: 'Honorarios / comisión' }, { k: 'condiciones', label: 'Condiciones', type: 'textarea' }, C_FECHA ],
+        { k: 'monto', label: 'Monto de la reserva', req: true }, { k: 'formaPago', label: 'Forma de pago del precio', ph: 'contado / financiado' },
+        { k: 'plazoBoleto', label: 'Plazo a boleto' }, { k: 'plazoEscritura', label: 'Plazo a escritura' },
+        { k: 'escribania', label: 'Escribanía propuesta' }, { k: 'plazoAcept', label: 'Plazo de aceptación' },
+        { k: 'vigencia', label: 'Vigencia de la oferta' }, { k: 'desistimiento', label: 'Desistimiento del comprador' },
+        { k: 'honorarios', label: 'Honorarios / comisión' }, { k: 'aCargoDe', label: 'Comisión a cargo de' },
+        { k: 'condiciones', label: 'Condiciones', type: 'textarea' }, C_FECHA ],
       cuerpo: function (d) { return (
 'RESERVA DE COMPRA — OFERTA AD REFERÉNDUM DEL VENDEDOR\n\n' +
 'Fecha: ' + F(d, 'fecha', 'FECHA') + '.   ' + opLine(d) + '\n\n' +
-'1) ' + F(d, 'comprador', 'COMPRADOR/OFERENTE') + ' ofrece adquirir el inmueble ' + F(d, 'inmueble', 'INMUEBLE') + '\n' +
-'   por el precio de ' + money(d, 'precio', 'PRECIO') + ', dirigida a ' + F(d, 'vendedor', 'VENDEDOR') + '.\n' +
-'2) Entrega en concepto de reserva ' + money(d, 'monto', 'MONTO RESERVA') + ', ad referéndum de la aceptación del vendedor\n' +
-'   dentro de ' + F(d, 'plazoAcept', 'PLAZO') + '.\n' +
-'3) Aceptada, se imputa a la seña/precio y las partes instrumentarán boleto/cesión/escritura\n' +
-'   con intervención profesional. No aceptada, se restituye sin penalidad.\n' +
-'4) Honorarios / comisión: ' + F(d, 'honorarios', 'HONORARIOS') + '.\n' +
-'5) Condiciones: ' + F(d, 'condiciones', 'CONDICIONES') + '.\n\n' +
+'1) ' + parte(d, 'comprador', 'compradorDni', 'COMPRADOR/OFERENTE') + ' ofrece adquirir el inmueble\n' +
+'   ' + F(d, 'inmueble', 'INMUEBLE') + ' por ' + money(d, 'precio', 'PRECIO') + ', dirigida a ' +
+   parte(d, 'vendedor', 'vendedorDni', 'VENDEDOR') + '.\n' +
+'2) Forma de pago del precio: ' + F(d, 'formaPago', 'CONTADO/FINANCIADO') + '. Entrega en concepto de reserva ' +
+   money(d, 'monto', 'MONTO RESERVA') + '.\n' +
+'3) Plazos: aceptación dentro de ' + F(d, 'plazoAcept', 'PLAZO') + '; a boleto ' + F(d, 'plazoBoleto', 'PLAZO') +
+   '; a escritura ' + F(d, 'plazoEscritura', 'PLAZO') + '. Escribanía propuesta: ' + F(d, 'escribania', 'ESCRIBANÍA') + '.\n' +
+'   Vigencia de la oferta: ' + F(d, 'vigencia', 'VIGENCIA') + '.\n' +
+'4) ACEPTADA: se imputa a la seña/precio y las partes instrumentarán boleto/cesión/escritura con\n' +
+'   intervención profesional. RECHAZADA: se restituye sin penalidad.\n' +
+'5) Desistimiento del comprador: ' + F(d, 'desistimiento', 'EFECTO (a acordar con asesoramiento)') + '.\n' +
+'6) Honorarios / comisión: ' + F(d, 'honorarios', 'HONORARIOS') + ' (a cargo de ' + F(d, 'aCargoDe', 'A CARGO DE') + ').\n' +
+'7) Condiciones: ' + F(d, 'condiciones', 'CONDICIONES') + '.\n\n' +
 'Comprador ____________________    Recibido por (operador) ____________________'); },
-      checklist: ['DNI/CUIT del comprador', 'Datos del vendedor', 'Comprobante de la reserva', 'Condiciones de aceptación', 'Honorarios pactados'],
+      checklist: ['DNI/CUIT comprador (y vendedor si se conoce)', 'Forma de pago del precio', 'Plazos a boleto y escritura', 'Escribanía propuesta', 'Efecto del desistimiento', 'Honorarios y a cargo de quién'],
       anexos: ['Comprobante de pago', 'Detalle del inmueble'] },
 
     { id: 'autoriz-venta', grupo: 'Venta', titulo: 'Autorización de venta / comercialización',
       uso: 'Autorización del titular para comercializar en venta.',
-      campos: [ { k: 'titular', label: 'Titular / propietario', req: true }, C_OP, { k: 'inmueble', label: 'Inmueble', req: true },
-        C_MON, { k: 'precio', label: 'Precio pretendido' }, { k: 'exclusividad', label: 'Exclusividad', type: 'select', opts: ['no', 'sí'] },
-        { k: 'vigencia', label: 'Vigencia' }, { k: 'honorarios', label: 'Honorarios / comisión' }, C_FECHA ],
+      campos: [ { k: 'titular', label: 'Titular / propietario', req: true }, { k: 'titularDni', label: 'DNI/CUIT del titular' },
+        { k: 'caracter', label: 'Carácter del firmante', type: 'select', opts: CARACTER_OPTS }, C_OP,
+        { k: 'matricula', label: 'Matrícula del operador (opcional)' }, { k: 'inmueble', label: 'Inmueble', req: true },
+        C_MON, { k: 'precio', label: 'Precio pretendido' },
+        { k: 'exclusividad', label: 'Exclusividad', type: 'select', opts: ['no', 'sí'] }, { k: 'vigencia', label: 'Vigencia' },
+        { k: 'comisionPct', label: 'Comisión %' }, { k: 'comisionACargo', label: 'Comisión a cargo de' },
+        { k: 'autorizPublicacion', label: 'Autoriza publicación', type: 'select', opts: ['sí', 'no'] },
+        { k: 'autorizFotos', label: 'Autoriza fotos/videos', type: 'select', opts: ['sí', 'no'] },
+        { k: 'condiciones', label: 'Condiciones aceptables', type: 'textarea' }, C_FECHA ],
       cuerpo: function (d) { return (
 'AUTORIZACIÓN DE VENTA / COMERCIALIZACIÓN\n\n' +
-'En ' + F(d, 'fecha', 'FECHA') + '. ' + F(d, 'titular', 'TITULAR') + ', titular del inmueble ' + F(d, 'inmueble', 'INMUEBLE') + ',\n' +
-'autoriza a ' + F(d, 'operador', 'OPERADOR (' + OPERADOR_HINT + ')') + ' a comercializarlo en venta.\n' +
-'Precio pretendido: ' + money(d, 'precio', 'PRECIO') + '.\n' +
-'Exclusividad: ' + F(d, 'exclusividad', 'SÍ/NO') + '.   Vigencia: ' + F(d, 'vigencia', 'VIGENCIA') + '.\n' +
-'Honorarios / comisión pactada: ' + F(d, 'honorarios', 'HONORARIOS') + '.\n\n' +
+'En ' + F(d, 'fecha', 'FECHA') + '. ' + parte(d, 'titular', 'titularDni', 'TITULAR') + ', en carácter de ' +
+   F(d, 'caracter', 'CARÁCTER') + ' del inmueble ' + F(d, 'inmueble', 'INMUEBLE') + ',\n' +
+'autoriza a ' + F(d, 'operador', 'OPERADOR (' + OPERADOR_HINT + ')') + ' (matrícula ' + F(d, 'matricula', 'MATRÍCULA si corresponde') +
+   ') a comercializarlo en venta.\n' +
+'Precio pretendido: ' + money(d, 'precio', 'PRECIO') + '.   Exclusividad: ' + F(d, 'exclusividad', 'SÍ/NO') +
+   '.   Vigencia: ' + F(d, 'vigencia', 'VIGENCIA') + '.\n' +
+'Comisión: ' + F(d, 'comisionPct', '%') + ', a cargo de ' + F(d, 'comisionACargo', 'A CARGO DE') + '.\n' +
+'Autoriza publicación: ' + F(d, 'autorizPublicacion', 'SÍ/NO') + '.   Autoriza fotos/videos: ' + F(d, 'autorizFotos', 'SÍ/NO') + '.\n' +
+'Condiciones aceptables: ' + F(d, 'condiciones', 'CONDICIONES') + '.\n\n' +
 'Sujeta a la acreditación de titularidad y a la normativa aplicable a la intermediación.\n\n' +
 'Titular ____________________'); },
-      checklist: ['Acreditación de titularidad', 'Precio y honorarios por escrito', 'Exclusividad y vigencia definidas', 'Datos del inmueble'],
+      checklist: ['Acreditación de titularidad + DNI', 'Carácter del firmante', 'Comisión % y a cargo de quién', 'Matrícula del operador (si corresponde)', 'Autorización de publicación/fotos', 'Exclusividad y vigencia'],
       anexos: ['Copia de título / dominio', 'Fotos del inmueble'] },
 
     { id: 'recibo-reserva-venta', grupo: 'Venta', titulo: 'Recibo de reserva (venta)',
       uso: 'Recibo específico de la reserva de compra. Honorarios opcional.',
-      campos: [ C_OP, { k: 'recibiDe', label: 'Recibí de (comprador)', req: true }, { k: 'inmueble', label: 'Inmueble', req: true },
+      campos: [ C_OP, { k: 'recibiDe', label: 'Recibí de (comprador)', req: true }, { k: 'compradorDni', label: 'DNI/CUIT del comprador' },
+        { k: 'recibeDni', label: 'DNI/CUIT de quien recibe' }, { k: 'nroRecibo', label: 'Nº de recibo / referencia' },
+        { k: 'concepto', label: 'Concepto', ph: 'reserva de compra' }, { k: 'inmueble', label: 'Inmueble', req: true },
         C_MON, { k: 'monto', label: 'Monto', req: true }, { k: 'imputacion', label: 'Se imputa a', ph: 'seña / precio' },
-        { k: 'honorarios', label: 'Honorarios / comisión' }, C_FECHA ],
+        { k: 'medioPago', label: 'Medio de pago', ph: 'efectivo / transferencia' },
+        { k: 'honorarios', label: 'Honorarios / comisión' }, { k: 'observaciones', label: 'Observaciones', type: 'textarea' }, C_FECHA ],
       cuerpo: function (d) { return (
-'RECIBO DE RESERVA DE COMPRA\n\n' +
+'RECIBO DE RESERVA DE COMPRA  Nº ' + F(d, 'nroRecibo', 'Nº/REF') + '\n\n' +
 'Fecha: ' + F(d, 'fecha', 'FECHA') + '.   ' + opLine(d) + '\n\n' +
-'Recibí de ' + F(d, 'recibiDe', 'COMPRADOR') + ' la suma de ' + money(d, 'monto', 'MONTO') + '\n' +
-'en concepto de RESERVA DE COMPRA del inmueble ' + F(d, 'inmueble', 'INMUEBLE') + ',\n' +
+'Recibí de ' + parte(d, 'recibiDe', 'compradorDni', 'COMPRADOR') + ' la suma de ' + money(d, 'monto', 'MONTO') + '\n' +
+'en concepto de ' + F(d, 'concepto', 'RESERVA DE COMPRA') + ' del inmueble ' + F(d, 'inmueble', 'INMUEBLE') + ',\n' +
 'a imputarse a ' + F(d, 'imputacion', 'SEÑA/PRECIO') + ', ad referéndum de la aceptación del vendedor.\n' +
-'Honorarios / comisión: ' + F(d, 'honorarios', 'HONORARIOS') + '.\n\n' +
-'Recibí conforme (operador) ____________________'); },
-      checklist: ['Identidad del comprador', 'Imputación clara', 'Sujeción a aceptación del vendedor', 'Comprobante de pago'],
+'Medio de pago: ' + F(d, 'medioPago', 'MEDIO') + '.   Honorarios / comisión: ' + F(d, 'honorarios', 'HONORARIOS') + '.\n' +
+'Observaciones: ' + F(d, 'observaciones', 'OBSERVACIONES') + '.\n\n' +
+'Recibí conforme (operador, DNI/CUIT ' + F(d, 'recibeDni', 'DNI/CUIT') + ') ____________________'); },
+      checklist: ['Identidad y DNI del comprador', 'Medio de pago y nº de recibo', 'Imputación clara', 'Sujeción a aceptación del vendedor', 'Comprobante de pago'],
       anexos: ['Comprobante de pago'] },
 
     { id: 'checklist-boleto', grupo: 'Venta', titulo: 'Checklist boleto / cesión / escritura',
       uso: 'CHECKLIST de documentos y pasos (no es contrato).',
-      campos: [ { k: 'inmueble', label: 'Inmueble' }, { k: 'partes', label: 'Partes' }, { k: 'escribania', label: 'Escribanía interviniente' } ],
+      campos: [ { k: 'inmueble', label: 'Inmueble' }, { k: 'partes', label: 'Partes' }, { k: 'escribania', label: 'Escribanía interviniente' },
+        { k: 'ocupacion', label: 'Estado de ocupación', type: 'select', opts: ['libre', 'ocupado', 'alquilado', 'con ocupantes'] } ],
       cuerpo: function (d) { return (
 'CHECKLIST — BOLETO / CESIÓN / ESCRITURA  (preparación de información, NO es un contrato)\n\n' +
 'Inmueble: ' + F(d, 'inmueble', 'INMUEBLE') + '.   Partes: ' + F(d, 'partes', 'PARTES') + '.\n' +
-'Escribanía interviniente: ' + F(d, 'escribania', 'ESCRIBANÍA') + '.\n\n' +
-'TÍTULO Y DOMINIO\n  [ ] Título de propiedad / antecedentes\n  [ ] Informe de dominio actualizado\n  [ ] Informe de inhibiciones de los vendedores\n  [ ] Planos / mensura (si corresponde)\n' +
-'DEUDAS Y SERVICIOS\n  [ ] Libre deuda ABL / impuesto inmobiliario\n  [ ] Libre deuda de expensas (si PH) + reglamento\n  [ ] Servicios (aguas, gas, luz) al día\n' +
-'PARTES\n  [ ] DNI/CUIT comprador y vendedor\n  [ ] Estado civil / cónyuge / asentimiento conyugal\n  [ ] Poderes (si actúan por apoderado)\n' +
-'OPERACIÓN\n  [ ] Reserva / seña instrumentada\n  [ ] Forma y moneda de pago acordada\n  [ ] Fecha de posesión y de escritura\n  [ ] Distribución de gastos e impuestos de la operación\n' +
-'PROFESIONALES\n  [ ] Escribanía designada\n  [ ] Asesoramiento legal de las partes\n\n' +
+'Escribanía interviniente: ' + F(d, 'escribania', 'ESCRIBANÍA') + '.   Ocupación: ' + F(d, 'ocupacion', 'LIBRE/OCUPADO/ALQUILADO') + '.\n\n' +
+'TÍTULO Y DOMINIO\n  [ ] Título de propiedad / antecedentes\n  [ ] Informe de dominio actualizado\n  [ ] Hipotecas\n  [ ] Embargos\n  [ ] Inhibiciones de los vendedores\n  [ ] Certificado catastral (si corresponde)\n  [ ] Planos / mensura (si corresponde)\n' +
+'DEUDAS Y SERVICIOS\n  [ ] Libre deuda ABL / impuesto inmobiliario / tasas\n  [ ] Libre deuda de expensas (si PH) + reglamento\n  [ ] Libre deuda AySA (si corresponde)\n  [ ] Servicios (gas, luz, agua) al día\n' +
+'PARTES\n  [ ] DNI/CUIT comprador y vendedor\n  [ ] Estado civil / cónyuge / asentimiento conyugal\n  [ ] Documentación de representación / poder (si apoderado)\n' +
+'OPERACIÓN\n  [ ] Reserva / seña instrumentada\n  [ ] Forma y moneda de pago acordada\n  [ ] Fecha de posesión y entrega de llaves\n  [ ] Fecha de escritura\n  [ ] Distribución de gastos e impuestos de la operación\n' +
+'PROFESIONALES\n  [ ] Escribanía designada (datos)\n  [ ] Asesoramiento legal de las partes\n\n' +
 'Este checklist sirve para reunir la información para el/la profesional. NO sustituye el boleto/escritura.'); },
-      checklist: ['Título y dominio', 'Inhibiciones', 'Libre deuda ABL/expensas', 'Asentimiento conyugal', 'Escribanía designada'],
+      checklist: ['Título, dominio, hipotecas, embargos, inhibiciones', 'Ocupación del inmueble', 'Libre deuda ABL/expensas/AySA', 'Asentimiento conyugal / poderes', 'Escribanía designada'],
       anexos: ['Carpeta de documentación de la operación'] },
 
     { id: 'boleto-esqueleto', grupo: 'Venta', titulo: 'Borrador base de boleto / cesión (esqueleto)',
       uso: 'ESTRUCTURA con secciones y placeholders. NO es un boleto válido.',
-      campos: [ { k: 'inmueble', label: 'Inmueble' }, { k: 'vendedor', label: 'Vendedor' }, { k: 'comprador', label: 'Comprador' },
+      campos: [ { k: 'inmueble', label: 'Inmueble' }, { k: 'vendedor', label: 'Vendedor' }, { k: 'vendedorDni', label: 'DNI/CUIT vendedor' },
+        { k: 'comprador', label: 'Comprador' }, { k: 'compradorDni', label: 'DNI/CUIT comprador' },
         C_MON, { k: 'precio', label: 'Precio' }, { k: 'escribania', label: 'Escribanía' } ],
       cuerpo: function (d) { return (
 'BORRADOR BASE — BOLETO / CESIÓN  (ESQUELETO · estructura para escribanía/abogado)\n' +
-'>> Esto NO es un boleto ni una cesión válida. Es una estructura para ordenar la información.\n' +
-'>> El instrumento definitivo lo redacta y valida el/la profesional. No firmar como está.\n\n' +
-'1. PARTES — Vendedor: ' + F(d, 'vendedor', 'VENDEDOR') + ' · Comprador: ' + F(d, 'comprador', 'COMPRADOR') + '.\n' +
-'   [estado civil / cónyuge / personería — a completar y acreditar]\n' +
-'2. INMUEBLE — ' + F(d, 'inmueble', 'INMUEBLE') + '. [nomenclatura, superficie, antecedentes de dominio]\n' +
-'3. PRECIO Y FORMA DE PAGO — ' + money(d, 'precio', 'PRECIO') + '. [seña, saldo, moneda, lugar y fecha de pago]\n' +
-'4. SEÑA / POSESIÓN — [monto de seña, momento de la posesión]\n' +
-'5. PLAZOS — [plazo a escritura, condiciones suspensivas]\n' +
-'6. ESCRITURA — Escribanía: ' + F(d, 'escribania', 'ESCRIBANÍA') + '. [designación, fecha estimada]\n' +
-'7. GASTOS E IMPUESTOS — [distribución entre partes, sellos, honorarios]\n' +
-'8. CONDICIONES / DECLARACIONES — [libre de gravámenes, ocupación, deudas — a verificar]\n' +
-'9. FIRMAS — [se instrumenta con el/la profesional interviniente]\n\n' +
+'>> ESTE DOCUMENTO NO ES UN BOLETO NI UNA CESIÓN VÁLIDA. ES UNA GUÍA OPERATIVA PARA\n' +
+'>> PREPARAR INFORMACIÓN PARA ABOGADO / ESCRIBANÍA / GESTOR. No firmar como está.\n' +
+'>> El instrumento definitivo lo redacta y valida el/la profesional interviniente.\n\n' +
+'1. PARTES — Vendedor: ' + parte(d, 'vendedor', 'vendedorDni', 'VENDEDOR') + ' · Comprador: ' +
+   parte(d, 'comprador', 'compradorDni', 'COMPRADOR') + '.\n   [estado civil / cónyuge / personería — a completar y acreditar]\n' +
+'2. DECLARACIONES DEL VENDEDOR — [titularidad, libre disposición, inexistencia de litigios — a verificar]\n' +
+'3. INMUEBLE — ' + F(d, 'inmueble', 'INMUEBLE') + '. [nomenclatura, superficie, antecedentes de dominio]\n' +
+'4. ESTADO JURÍDICO DEL INMUEBLE — [dominio, reglamento PH, ocupación — a verificar]\n' +
+'5. GRAVÁMENES / DEUDAS — [hipotecas, embargos, inhibiciones, expensas, ABL — a verificar]\n' +
+'6. PRECIO Y FORMA DE PAGO — ' + money(d, 'precio', 'PRECIO') + '. [seña, saldo, moneda, lugar y fecha de pago]\n' +
+'7. POSESIÓN — [momento y condiciones de la entrega de la posesión]\n' +
+'8. PLAZOS / DOCUMENTACIÓN PENDIENTE — [plazo a escritura, condiciones suspensivas, docs a acompañar]\n' +
+'9. DOMICILIOS Y NOTIFICACIONES — [domicilios especiales de las partes]\n' +
+'10. ESCRIBANÍA / INTERVINIENTES — Escribanía: ' + F(d, 'escribania', 'ESCRIBANÍA') + '. [designación, gastos]\n' +
+'11. GASTOS E IMPUESTOS — [distribución entre partes, sellos, honorarios]\n' +
+'12. ANEXOS — [documentación de la operación]\n' +
+'13. FIRMAS — [se instrumenta con el/la profesional interviniente]\n\n' +
 'Completar cada sección con asesoramiento. Verificar normativa vigente aplicable.'); },
-      checklist: ['Personería y estado civil acreditados', 'Antecedentes de dominio', 'Forma de pago definida', 'Distribución de gastos', 'Escribanía designada', 'Revisión profesional OBLIGATORIA'],
+      checklist: ['Personería y estado civil acreditados', 'Declaraciones y estado jurídico verificados', 'Gravámenes/deudas relevados', 'Forma de pago y posesión definidas', 'Escribanía designada', 'Revisión profesional OBLIGATORIA'],
       anexos: ['Toda la carpeta de la operación'] },
 
     // ===== GENERAL =====
@@ -299,16 +384,18 @@ F(d, 'entrega', 'QUIEN ENTREGA') + ' hace entrega a ' + F(d, 'recibe', 'QUIEN RE
 
     { id: 'acta-recepcion-doc', grupo: 'General', titulo: 'Acta de entrega / recepción de documentación',
       uso: 'Constancia simple de qué documentación se entregó/recibió.',
-      campos: [ C_OP, { k: 'entrega', label: 'Entrega (nombre)', req: true }, { k: 'recibe', label: 'Recibe (nombre)', req: true },
+      campos: [ C_OP, { k: 'entrega', label: 'Entrega (nombre)', req: true }, { k: 'entregaDni', label: 'DNI/CUIT de quien entrega' },
+        { k: 'recibe', label: 'Recibe (nombre)', req: true }, { k: 'recibeDni', label: 'DNI/CUIT de quien recibe' },
         { k: 'detalle', label: 'Documentación', type: 'textarea', req: true, ph: 'listado de documentos' }, C_FECHA ],
       cuerpo: function (d) { return (
 'ACTA DE ENTREGA / RECEPCIÓN DE DOCUMENTACIÓN\n\n' +
 'En ' + F(d, 'fecha', 'FECHA') + '.   ' + opLine(d) + '\n\n' +
-F(d, 'entrega', 'QUIEN ENTREGA') + ' entrega a ' + F(d, 'recibe', 'QUIEN RECIBE') + ' la siguiente documentación:\n' +
+parte(d, 'entrega', 'entregaDni', 'QUIEN ENTREGA') + ' entrega a ' + parte(d, 'recibe', 'recibeDni', 'QUIEN RECIBE') + '\n' +
+'la siguiente documentación:\n' +
 F(d, 'detalle', 'LISTADO DE DOCUMENTOS') + '\n\n' +
 'Quien recibe declara recibirla de conformidad, sin que ello implique validación de su contenido.\n\n' +
 'Entrega ____________________      Recibe ____________________'); },
-      checklist: ['Detalle de documentos listado', 'Copias/originales aclarado', 'Firma de ambas partes'],
+      checklist: ['DNI de ambas partes', 'Detalle de documentos listado', 'Copias/originales aclarado', 'Firma de ambas partes'],
       anexos: ['Copia del listado'] }
   ];
 
